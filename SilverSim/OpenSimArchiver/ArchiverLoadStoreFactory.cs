@@ -1,6 +1,7 @@
 ﻿// SilverSim is distributed under the terms of the
 // GNU Affero General Public License v3
 
+using Nini.Config;
 using SilverSim.Main.Common;
 
 namespace SilverSim.OpenSimArchiver
@@ -12,7 +13,7 @@ namespace SilverSim.OpenSimArchiver
         {
 
         }
-        public IPlugin Initialize(ConfigurationLoader loader, Nini.Config.IConfig ownSection)
+        public IPlugin Initialize(ConfigurationLoader loader, IConfig ownSection)
         {
             return new ArchiverLoadStore();
         }
