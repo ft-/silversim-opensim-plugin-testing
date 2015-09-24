@@ -14,6 +14,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading;
+using System.Timers;
 using ThreadedClasses;
 
 namespace SilverSim.Backend.OpenSim.Neighbor.Neighbor
@@ -25,6 +26,7 @@ namespace SilverSim.Backend.OpenSim.Neighbor.Neighbor
         static OpenSimNeighbor m_NeighborHandler = null;
         static object m_NeighborHandlerInitLock = new object();
         bool m_ShutdownRequestThread = false;
+        System.Timers.Timer m_Timer = new System.Timers.Timer(3600000);
 
         BlockingQueue<UUID> m_NeighborNotifyRequestQueue = new BlockingQueue<UUID>();
 
@@ -46,11 +48,23 @@ namespace SilverSim.Backend.OpenSim.Neighbor.Neighbor
         public void Startup(ConfigurationLoader loader)
         {
             new Thread(RequestThread).Start();
+            m_Timer.Elapsed += UpdateTimer;
+            m_Timer.Start();
         }
 
         public void Shutdown()
         {
             m_ShutdownRequestThread = true;
+            m_Timer.Stop();
+            m_Timer.Elapsed -= UpdateTimer;
+        }
+
+        void UpdateTimer(object sender, ElapsedEventArgs e)
+        {
+            foreach(UUID regionID in m_NeighborLists.Keys)
+            {
+                m_NeighborNotifyRequestQueue.Enqueue(regionID);
+            }
         }
 
         void RequestThread()
