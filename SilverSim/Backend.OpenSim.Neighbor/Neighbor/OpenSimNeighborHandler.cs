@@ -15,17 +15,17 @@ using System.Collections.Generic;
 using System.IO;
 using System.Net;
 
-namespace SilverSim.BackendHandlers.OpenSim.Simulation.Neighbor
+namespace SilverSim.Backend.OpenSim.Neighbor.Neighbor
 {
     public class OpenSimNeighborHandler : IPlugin
     {
         protected static readonly ILog m_Log = LogManager.GetLogger("OPENSIM NEIGHBOR HANDLER");
         private BaseHttpServer m_HttpServer;
-        public List<NeighborServiceInterface> m_NeighborServices = new List<NeighborServiceInterface>();
+        OpenSimNeighbor m_NeighborHandler;
 
-        public OpenSimNeighborHandler()
+        public OpenSimNeighborHandler(OpenSimNeighbor neighborHandler)
         {
-
+            m_NeighborHandler = neighborHandler;
         }
 
         public void Startup(ConfigurationLoader loader)
@@ -33,15 +33,6 @@ namespace SilverSim.BackendHandlers.OpenSim.Simulation.Neighbor
             m_Log.Info("Initializing handler for /region");
             m_HttpServer = loader.HttpServer;
             m_HttpServer.StartsWithUriHandlers.Add("/region", RegionPostHandler);
-
-            List<NeighborServiceInterface> neighborservices = loader.GetServicesByValue<NeighborServiceInterface>();
-            foreach(NeighborServiceInterface service in neighborservices)
-            {
-                if(service.ServiceType == NeighborServiceInterface.ServiceTypeEnum.Local)
-                {
-                    m_NeighborServices.Add(service);
-                }
-            }
         }
 
         private void GetRegionParams(string uri, out UUID regionID)
@@ -159,44 +150,24 @@ namespace SilverSim.BackendHandlers.OpenSim.Simulation.Neighbor
                 return;
             }
 
-            RegionInfo toRegion = scene.RegionData;
-
-            foreach(NeighborServiceInterface service in m_NeighborServices)
+            m = new Map();
+            try
             {
-                try
-                {
-                    service.notifyNeighborStatus(fromRegion, toRegion);
-                }
-                catch
-                {
-                    m_Log.WarnFormat("Failed to notify local neighbor (from {0} (ID {1}) to {2} (ID {3})",
-                        fromRegion.Name, fromRegion.ID,
-                        toRegion.Name, toRegion.ID);
-                }
+                m_NeighborHandler.notifyRemoteNeighborStatus(fromRegion, scene.ID);
+                m.Add("success", true);
+            }
+            catch
+            {
+                m_Log.WarnFormat("Failed to notify local neighbor (from {0} (ID {1}) to {2} (ID {3})",
+                    fromRegion.Name, fromRegion.ID,
+                    scene.Name, scene.ID);
+                m.Add("success", false);
             }
 
-            m = new Map();
-            m.Add("success", false);
             resp = req.BeginResponse();
             resp.ContentType = "application/json";
             JSON.Serialize(m, resp.GetOutputStream());
             resp.Close();
         }
-
-        #region Service Factory
-        [PluginName("OpenSimNeighborHandler")]
-        public class OpenSimNeighborHandlerFactory : IPluginFactory
-        {
-            public OpenSimNeighborHandlerFactory()
-            {
-
-            }
-
-            public IPlugin Initialize(ConfigurationLoader loader, IConfig ownSection)
-            {
-                return new OpenSimNeighborHandler();
-            }
-        }
-        #endregion
     }
 }

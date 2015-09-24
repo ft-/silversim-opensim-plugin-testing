@@ -2,6 +2,6 @@
 // GNU Affero General Public License v3
 using System.Reflection;
 
-[assembly: AssemblyTitle("OpenSim Simulation Backend Handlers")]
+[assembly: AssemblyTitle("OpenSim Neighbor Backend")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]

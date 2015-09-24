@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<Project frameworkVersion="v4_0" name="SilverSim.BackendHandlers.OpenSim.Simulation" path="SilverSim/BackendHandlers.OpenSim.Simulation" type="Library">
+<Project frameworkVersion="v4_0" name="SilverSim.Backend.OpenSim.Neighbor" path="SilverSim/Backend.OpenSim.Neighbor" type="Library">
 	<Configuration name="Release">
 		<Options>
 			<OutputPath>../../bin/plugins/</OutputPath>
@@ -21,9 +21,6 @@
 	<Reference name="SilverSim.ServiceInterfaces" localCopy="false"/>
 	<Reference name="SilverSim.Main.Common" localCopy="false"/>
 	<Reference name="SilverSim.Scene.Management" localCopy="false"/>
-	<Reference name="SilverSim.LL.Messages" localCopy="false"/>
-	<Reference name="SilverSim.LL.Core" localCopy="false"/>
-	<Reference name="SilverSim.BackendConnectors.Robust" localCopy="false"/>
 	<Reference name="Nini" path="../../bin/" localCopy="false"/>
 	<Reference name="ThreadedClasses" path="../../bin/" localCopy="false"/>
 	<Files>
