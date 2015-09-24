@@ -1,6 +1,7 @@
 ﻿// SilverSim is distributed under the terms of the
 // GNU Affero General Public License v3
 
+using Nini.Config;
 using SilverSim.Main.Common;
 using SilverSim.Scene.Management.Scene;
 using SilverSim.Scene.Types.Scene;
@@ -12,6 +13,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using ThreadedClasses;
 
 namespace SilverSim.Backend.OpenSim.Neighbor.Neighbor
@@ -43,6 +45,7 @@ namespace SilverSim.Backend.OpenSim.Neighbor.Neighbor
 
         public void Startup(ConfigurationLoader loader)
         {
+            new Thread(RequestThread).Start();
         }
 
         public void Shutdown()
@@ -52,6 +55,7 @@ namespace SilverSim.Backend.OpenSim.Neighbor.Neighbor
 
         void RequestThread()
         {
+            Thread.CurrentThread.Name = "OpenSim Neighbor Notify Thread";
             while (!m_ShutdownRequestThread)
             {
                 UUID localRegionID;
@@ -165,6 +169,19 @@ namespace SilverSim.Backend.OpenSim.Neighbor.Neighbor
             /* we got a valid region match, so we can actually consider it a neighbor */
             m_NeighborLists[toRegionID].Add(fromRegion);
             scene.NotifyNeighborOnline(fromRegion);
+        }
+    }
+
+    [PluginName("OpenSimNeighbor")]
+    class OpenSimNeighborFactory : IPluginFactory
+    {
+        public OpenSimNeighborFactory()
+        {
+
+        }
+        public IPlugin Initialize(ConfigurationLoader loader, IConfig ownSection)
+        {
+            return new OpenSimNeighbor();
         }
     }
 }
