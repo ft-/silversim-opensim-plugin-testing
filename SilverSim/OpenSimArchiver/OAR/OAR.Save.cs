@@ -2,6 +2,7 @@
 // GNU Affero General Public License v3
 
 using SilverSim.LL.Messages.LayerData;
+using SilverSim.Main.Common.CmdIO;
 using SilverSim.Main.Common.Tar;
 using SilverSim.Scene.Types.Object;
 using SilverSim.Scene.Types.Scene;
@@ -30,7 +31,8 @@ namespace SilverSim.OpenSimArchiver.OAR
         public static void Save(
             SceneInterface scene,
             SaveOptions options,
-            Stream outputFile)
+            Stream outputFile,
+            TTY console_io = null)
         {
             using (GZipStream gzip = new GZipStream(outputFile, CompressionMode.Compress))
             {
@@ -49,22 +51,13 @@ namespace SilverSim.OpenSimArchiver.OAR
 
                 foreach (ObjectGroup sog in scene.Objects)
                 {
-                    if (sog.IsTemporary)
+                    if (sog.IsTemporary || sog.IsAttached)
                     {
-                        /* skip temporary */
+                        /* skip temporary or attached */
                         continue;
                     }
-                    using (MemoryStream ms = new MemoryStream())
-                    {
-                        using (XmlTextWriter objectwriter = new XmlTextWriter(ms, UTF8NoBOM))
-                        {
-                            sog.ToXml(objectwriter, xmloptions | XmlSerializationOptions.WriteXml2);
-                            AssetData data = new AssetData();
-                            data.Data = ms.GetBuffer();
-                            data.Type = AssetType.Object;
-                            objectAssets.Add(sog.Name + "_" + sog.GlobalPosition.X_String + "-" + sog.GlobalPosition.Y_String + "-" + sog.GlobalPosition.Z_String + "__" + sog.ID + ".xml", data);
-                        }
-                    }
+                    AssetData data = sog.Asset(xmloptions | XmlSerializationOptions.WriteXml2);
+                    objectAssets.Add(sog.Name + "_" + sog.GlobalPosition.X_String + "-" + sog.GlobalPosition.Y_String + "-" + sog.GlobalPosition.Z_String + "__" + sog.ID + ".xml", data);
                 }
 
                 if (saveAssets)
@@ -77,7 +70,7 @@ namespace SilverSim.OpenSimArchiver.OAR
                     {
                         foreach (UUID id in objdata.References)
                         {
-                            if (!assetIDs.Contains(id))
+                            if (id != UUID.Zero && !assetIDs.Contains(id))
                             {
                                 assetIDs.Add(id);
                             }
@@ -86,8 +79,14 @@ namespace SilverSim.OpenSimArchiver.OAR
 
                     foreach (ParcelInfo pinfo in scene.Parcels)
                     {
-                        assetIDs.Add(pinfo.MediaID);
-                        assetIDs.Add(pinfo.SnapshotID);
+                        if (pinfo.MediaID != UUID.Zero)
+                        {
+                            assetIDs.Add(pinfo.MediaID);
+                        }
+                        if (pinfo.SnapshotID != UUID.Zero)
+                        {
+                            assetIDs.Add(pinfo.SnapshotID);
+                        }
                     }
 
                     int assetidx = 0;
@@ -103,12 +102,22 @@ namespace SilverSim.OpenSimArchiver.OAR
                             continue;
                         }
                         writer.WriteAsset(data);
-                        foreach (UUID refid in data.References)
+                        try
                         {
-                            if (!assetIDs.Contains(refid))
+                            foreach (UUID refid in data.References)
                             {
-                                assetIDs.Add(refid);
+                                if (!assetIDs.Contains(refid))
+                                {
+                                    assetIDs.Add(refid);
+                                }
                             }
+                        }
+                        catch
+#if DEBUG
+                            (Exception e)
+#endif
+                        {
+                            console_io.WriteFormatted("Failed to parse asset {0}", assetID);
                         }
                     }
                 }
