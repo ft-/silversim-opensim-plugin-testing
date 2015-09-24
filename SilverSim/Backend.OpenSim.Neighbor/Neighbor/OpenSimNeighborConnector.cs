@@ -2,10 +2,7 @@
 // GNU Affero General Public License v3
 
 using log4net;
-using Nini.Config;
-using SilverSim.Main.Common;
 using SilverSim.Main.Common.HttpClient;
-using SilverSim.ServiceInterfaces.Neighbor;
 using SilverSim.StructuredData.JSON;
 using SilverSim.Types;
 using SilverSim.Types.Grid;
