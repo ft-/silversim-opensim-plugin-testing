@@ -20,7 +20,7 @@ namespace SilverSim.Backend.OpenSim.Neighbor.Neighbor
     {
         RwLockedDictionary<UUID, NeighborList> m_NeighborLists = new RwLockedDictionary<UUID, NeighborList>();
         object m_NeighborListAddLock = new object();
-        static OpenSimNeighbor m_NeighborHandler = null;
+        static OpenSimNeighborHandler m_NeighborHandler = null;
         static object m_NeighborHandlerInitLock = new object();
         bool m_ShutdownRequestThread = false;
         System.Timers.Timer m_Timer = new System.Timers.Timer(3600000);
@@ -37,7 +37,7 @@ namespace SilverSim.Backend.OpenSim.Neighbor.Neighbor
             {
                 if (null == m_NeighborHandler)
                 {
-                    loader.AddPlugin("OpenSimNeighborHandler", m_NeighborHandler = new OpenSimNeighbor());
+                    loader.AddPlugin("OpenSimNeighborHandler", m_NeighborHandler = new OpenSimNeighborHandler(this));
                 }
             }
         }
