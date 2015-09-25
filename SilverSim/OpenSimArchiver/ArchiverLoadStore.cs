@@ -35,6 +35,7 @@ namespace SilverSim.OpenSimArchiver
             CommandRegistry.LoadCommands.Add("osassets", LoadAssetsCommand);
         }
 
+        #region Load Assets
         public void LoadAssetsCommand(List<string> args, TTY io, UUID limitedToScene)
         {
             if(args[0] == "help")
@@ -126,7 +127,9 @@ namespace SilverSim.OpenSimArchiver
 
             }
         }
+        #endregion
 
+        #region Save OAR
         public void SaveOarCommand(List<string> args, TTY io, UUID limitedToScene)
         {
             if (args[0] == "help")
@@ -204,7 +207,9 @@ namespace SilverSim.OpenSimArchiver
                 s.Close();
             }
         }
+        #endregion
 
+        #region Load OAR
         public void LoadOarCommand(List<string> args, TTY io, UUID limitedToScene)
         {
             if (args[0] == "help")
@@ -323,5 +328,6 @@ namespace SilverSim.OpenSimArchiver
 
             }
         }
+        #endregion
     }
 }
