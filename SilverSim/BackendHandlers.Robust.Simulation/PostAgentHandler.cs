@@ -566,10 +566,15 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
                     if (agentPost.Circuit.IsChild && !sceneAgent.IsInScene(scene))
                     {
                         /* already got an agent here */
+                        DoAgentResponse(req, "Failed to create agent due to duplicate agent id", false);
+                        m_Log.WarnFormat("Failed to create agent due to duplicate agent id. {0} != {1}", sceneAgent.Owner.ToString(), agentPost.Account.Principal.ToString());
+                        return;
                     }
                     else if (!agentPost.Circuit.IsChild && !sceneAgent.IsInScene(scene))
                     {
                         /* child becomes root */
+                        DoAgentResponse(req, "Teleport destination not yet implemented", false);
+                        return;
                     }
                 }
                 else if (sceneAgent.Owner.ID == agentPost.Account.Principal.ID)
@@ -635,7 +640,7 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
 
             agent.TeleportFlags = agentPost.Destination.TeleportFlags;
             agent.Appearance = agentPost.Appearance;
-            agent.GlobalPosition = new Vector3(128, 128, 23);
+            scene.DetermineInitialAgentLocation(agent, agentPost.Destination.TeleportFlags, agentPost.Destination.Location, agentPost.Destination.LookAt);
 
             LLUDPServer udpServer = (LLUDPServer)scene.UDPServer;
 
