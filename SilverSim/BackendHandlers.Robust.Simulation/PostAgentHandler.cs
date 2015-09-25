@@ -639,7 +639,7 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
 
             LLUDPServer udpServer = (LLUDPServer)scene.UDPServer;
 
-            Circuit circuit = new Circuit(
+            AgentCircuit circuit = new AgentCircuit(
                 agent,
                 udpServer,
                 agentPost.Circuit.CircuitCode,
