@@ -640,7 +640,15 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
 
             agent.TeleportFlags = agentPost.Destination.TeleportFlags;
             agent.Appearance = agentPost.Appearance;
-            scene.DetermineInitialAgentLocation(agent, agentPost.Destination.TeleportFlags, agentPost.Destination.Location, agentPost.Destination.LookAt);
+            try
+            {
+                scene.DetermineInitialAgentLocation(agent, agentPost.Destination.TeleportFlags, agentPost.Destination.Location, agentPost.Destination.LookAt);
+            }
+            catch(Exception e)
+            {
+                DoAgentResponse(req, e.Message, false);
+                return;
+            }
 
             LLUDPServer udpServer = (LLUDPServer)scene.UDPServer;
 
