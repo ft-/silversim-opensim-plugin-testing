@@ -150,6 +150,10 @@ namespace SilverSim.Backend.OpenSim.Neighbor.Neighbor
             m = new Map();
             try
             {
+                if(fromRegion.ServerURI == scene.RegionData.ServerURI)
+                {
+                    fromRegion.ProtocolVariant = RegionInfo.ProtocolVariantId.Local;
+                }
                 m_NeighborHandler.notifyRemoteNeighborStatus(fromRegion, scene.ID);
                 m.Add("success", true);
             }
