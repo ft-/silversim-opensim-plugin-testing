@@ -4,6 +4,7 @@
 using SilverSim.BackendConnectors.Robust.Common;
 using SilverSim.Main.Common.HttpClient;
 using SilverSim.Scene.Types.Agent;
+using SilverSim.ServiceInterfaces.Grid;
 using SilverSim.StructuredData.Agent;
 using SilverSim.Types;
 using SilverSim.Types.Account;
@@ -47,6 +48,13 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
 
         }
 
+        public GridType GridType
+        {
+            get
+            {
+                return new GridType("opensim-robust");
+            }
+        }
         public void Cancel()
         {
         }
