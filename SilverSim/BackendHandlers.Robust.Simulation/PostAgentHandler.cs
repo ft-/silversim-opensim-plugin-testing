@@ -1042,7 +1042,7 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
             {
                 ChildAgentPositionUpdate childAgentPosition = new ChildAgentPositionUpdate();
 
-                childAgentPosition.RegionHandle = UInt64.Parse(param["region_handle"].ToString());
+                childAgentPosition.RegionLocation.RegionHandle = UInt64.Parse(param["region_handle"].ToString());
                 childAgentPosition.ViewerCircuitCode = param["circuit_code"].AsUInt;
                 childAgentPosition.AgentID = param["agent_uuid"].AsUUID;
                 childAgentPosition.SessionID = param["session_uuid"].AsUUID;
@@ -1057,7 +1057,7 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
                 /* Far and Throttles are extra in opensim so we have to cope with these on sending */
 
                 SceneInterface scene;
-                if (Scene.Management.Scene.SceneManager.Scenes.TryGetValue(childAgentPosition.RegionHandle, out scene))
+                if (Scene.Management.Scene.SceneManager.Scenes.TryGetValue(childAgentPosition.RegionLocation.RegionHandle, out scene))
                 {
                     IAgent agent;
                     HttpResponse res;
