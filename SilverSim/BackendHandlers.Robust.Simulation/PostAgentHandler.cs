@@ -3,6 +3,7 @@
 
 using log4net;
 using Nini.Config;
+using SilverSim.BackendConnectors.OpenSim.Teleport;
 using SilverSim.BackendConnectors.Robust.Asset;
 using SilverSim.BackendConnectors.Robust.GridUser;
 using SilverSim.BackendConnectors.Robust.IM;
@@ -624,6 +625,7 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
             serviceList.Add(gridUserService);
             serviceList.Add(gridService);
             serviceList.Add(offlineIMService);
+            serviceList.Add(new OpenSimTeleportProtocol());
             List<GridType> supportedGridTypes = new List<GridType>();
             supportedGridTypes.Add(new GridType("opensim-robust"));
 
@@ -634,6 +636,9 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
                 agentPost.Account.Principal.HomeURI,
                 agentPost.Session.SessionID,
                 agentPost.Session.SecureSessionID,
+                agentPost.Session.ServiceSessionID,
+                agentPost.Client,
+                agentPost.Account,
                 serviceList,
                 supportedGridTypes);
             agent.ServiceURLs = agentPost.Account.ServiceURLs;
