@@ -5,6 +5,7 @@ using SilverSim.BackendConnectors.Robust.Common;
 using SilverSim.Main.Common.HttpClient;
 using SilverSim.Scene.Types.Agent;
 using SilverSim.ServiceInterfaces.Grid;
+using SilverSim.ServiceInterfaces.Teleport;
 using SilverSim.StructuredData.Agent;
 using SilverSim.Types;
 using SilverSim.Types.Account;
@@ -19,7 +20,7 @@ using System.Text;
 
 namespace SilverSim.BackendConnectors.OpenSim.Teleport
 {
-    public class OpenSimTeleportProtocol : IAgentTeleportServiceInterface
+    public class OpenSimTeleportProtocol : TeleportHandlerServiceInterface
     {
         private static Random m_RandomNumber = new Random();
         private static object m_RandomNumberLock = new object();
@@ -48,26 +49,27 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
 
         }
 
-        public GridType GridType
+        public override GridType GridType
         {
             get
             {
                 return new GridType("opensim-robust");
             }
         }
-        public void Cancel()
+
+        public override void Cancel()
         {
         }
 
-        public void CloseAgentOnRelease(UUID fromSceneID)
+        public override void CloseAgentOnRelease(UUID fromSceneID)
         {
         }
 
-        public void ReleaseAgent(UUID fromSceneID)
+        public override void ReleaseAgent(UUID fromSceneID)
         {
         }
 
-        public void EnableSimulator(UUID fromSceneID, IAgent agent, DestinationInfo destinationRegion)
+        public override void EnableSimulator(UUID fromSceneID, IAgent agent, DestinationInfo destinationRegion)
         {
             PostData agentPostData = new PostData();
             
@@ -140,6 +142,11 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
 
             /* this makes the viewer go for a login into a neighbor */
             agent.EnableSimulator(fromSceneID, agentPostData.Circuit.CircuitCode, agentPostData.Circuit.CapsPath, destinationRegion);
+        }
+
+        public override void DisableSimulator(UUID fromSceneID, IAgent agent, RegionInfo regionInfo)
+        {
+
         }
     }
 }
