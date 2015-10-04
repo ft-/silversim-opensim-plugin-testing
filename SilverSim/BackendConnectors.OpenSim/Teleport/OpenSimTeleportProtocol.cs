@@ -3,7 +3,10 @@
 
 using SilverSim.BackendConnectors.Robust.Common;
 using SilverSim.Main.Common.HttpClient;
+using SilverSim.Scene.Management.Scene;
 using SilverSim.Scene.Types.Agent;
+using SilverSim.Scene.Types.Neighbor;
+using SilverSim.Scene.Types.Scene;
 using SilverSim.ServiceInterfaces.Grid;
 using SilverSim.ServiceInterfaces.Teleport;
 using SilverSim.StructuredData.Agent;
@@ -53,7 +56,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
         {
             get
             {
-                return new GridType("opensim-robust");
+                return new GridType("opensim");
             }
         }
 
@@ -69,10 +72,22 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
         {
         }
 
+        public override void ReleaseAgent(UUID fromSceneID, IAgent agent, RegionInfo regionInfo)
+        {
+            string uri = regionInfo.ServerURI + "agent/" + agent.ID.ToString() + "/" + regionInfo.ID.ToString() + "/rekease";
+            HttpRequestHandler.DoRequest("DELETE", uri, null, string.Empty, string.Empty, false, TimeoutMs);
+            agent.ActiveChilds.Remove(regionInfo.ID);
+        }
+
         public override void EnableSimulator(UUID fromSceneID, IAgent agent, DestinationInfo destinationRegion)
         {
             PostData agentPostData = new PostData();
-            
+
+            AgentChildInfo childInfo = new AgentChildInfo();
+            childInfo.DestinationInfo = destinationRegion;
+            childInfo.TeleportService = this;
+            agent.ActiveChilds.Add(destinationRegion.ID, childInfo);
+
             agentPostData.Account = agent.UntrustedAccountInfo;
             
             agentPostData.Appearance = agent.Appearance;
@@ -135,18 +150,21 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
                     catch
                     {
                         /* connect failed */
+                        agent.ActiveChilds.Remove(destinationRegion.ID);
                         return;
                     }
                 }
             }
 
-            /* this makes the viewer go for a login into a neighbor */
+            /* this makes the viewer go for a login to a neighbor */
             agent.EnableSimulator(fromSceneID, agentPostData.Circuit.CircuitCode, agentPostData.Circuit.CapsPath, destinationRegion);
         }
 
         public override void DisableSimulator(UUID fromSceneID, IAgent agent, RegionInfo regionInfo)
         {
-
+            string uri = regionInfo.ServerURI + "agent/" + agent.ID.ToString() + "/" + regionInfo.ID.ToString() + "/?auth=" + agent.Session.SessionID.ToString();
+            HttpRequestHandler.DoRequest("DELETE", uri, null, string.Empty, string.Empty, false, TimeoutMs);
+            agent.ActiveChilds.Remove(regionInfo.ID);
         }
     }
 }
