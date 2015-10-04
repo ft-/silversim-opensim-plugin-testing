@@ -627,7 +627,7 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
             serviceList.Add(offlineIMService);
             serviceList.Add(new OpenSimTeleportProtocol());
 
-            LLAgent agent = new LLAgent(
+            ViewerAgent agent = new ViewerAgent(
                 agentPost.Account.Principal.ID,
                 agentPost.Account.Principal.FirstName,
                 agentPost.Account.Principal.LastName,
@@ -652,7 +652,7 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
                 return;
             }
 
-            LLUDPServer udpServer = (LLUDPServer)scene.UDPServer;
+            UDPCircuitsManager udpServer = (UDPCircuitsManager)scene.UDPServer;
 
             AgentCircuit circuit = new AgentCircuit(
                 agent,
