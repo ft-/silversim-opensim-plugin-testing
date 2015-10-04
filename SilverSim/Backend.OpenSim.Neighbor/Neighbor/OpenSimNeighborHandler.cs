@@ -51,6 +51,12 @@ namespace SilverSim.Backend.OpenSim.Neighbor.Neighbor
 
         public void RegionPostHandler(HttpRequest req)
         {
+            if (req.ContainsHeader("X-SecondLife-Shard"))
+            {
+                req.ErrorResponse(HttpStatusCode.MethodNotAllowed, "Request source not allowed");
+                return;
+            }
+
             UUID regionID;
             try
             {
