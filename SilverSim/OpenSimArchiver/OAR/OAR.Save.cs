@@ -1,7 +1,7 @@
 ﻿// SilverSim is distributed under the terms of the
 // GNU Affero General Public License v3
 
-using SilverSim.LL.Messages.LayerData;
+using SilverSim.Viewer.Messages.LayerData;
 using SilverSim.Main.Common.CmdIO;
 using SilverSim.Main.Common.Tar;
 using SilverSim.Scene.Types.Object;
