@@ -3,23 +3,17 @@
 
 using SilverSim.BackendConnectors.Robust.Common;
 using SilverSim.Main.Common.HttpClient;
-using SilverSim.Scene.Management.Scene;
 using SilverSim.Scene.Types.Agent;
 using SilverSim.Scene.Types.Neighbor;
-using SilverSim.Scene.Types.Scene;
 using SilverSim.ServiceInterfaces.Grid;
 using SilverSim.ServiceInterfaces.Teleport;
 using SilverSim.StructuredData.Agent;
 using SilverSim.Types;
-using SilverSim.Types.Account;
 using SilverSim.Types.Agent;
 using SilverSim.Types.Grid;
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
-using System.Linq;
-using System.Text;
 
 namespace SilverSim.BackendConnectors.OpenSim.Teleport
 {
