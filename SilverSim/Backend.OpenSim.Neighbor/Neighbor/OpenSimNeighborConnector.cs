@@ -2,7 +2,7 @@
 // GNU Affero General Public License v3
 
 using log4net;
-using SilverSim.Main.Common.HttpClient;
+using SilverSim.Http.Client;
 using SilverSim.StructuredData.JSON;
 using SilverSim.Types;
 using SilverSim.Types.Grid;

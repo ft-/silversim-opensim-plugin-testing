@@ -1,15 +1,12 @@
 ﻿// SilverSim is distributed under the terms of the
 // GNU Affero General Public License v3
 
-using SilverSim.Main.Common.HttpClient;
 using SilverSim.Main.Common.Rpc;
 using SilverSim.ServiceInterfaces.IM;
 using SilverSim.Types;
 using SilverSim.Types.IM;
 using SilverSim.Types.StructuredData.XMLRPC;
 using System;
-using System.Collections;
-using System.Collections.Generic;
 
 namespace SilverSim.BackendConnectors.Robust.IM
 {

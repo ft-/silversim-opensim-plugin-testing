@@ -2,7 +2,7 @@
 // GNU Affero General Public License v3
 
 using SilverSim.BackendConnectors.Robust.Common;
-using SilverSim.Main.Common.HttpClient;
+using SilverSim.Http.Client;
 using SilverSim.Scene.Types.Agent;
 using SilverSim.Scene.Types.Neighbor;
 using SilverSim.ServiceInterfaces.Grid;

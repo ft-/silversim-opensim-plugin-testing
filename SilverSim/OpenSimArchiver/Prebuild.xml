@@ -17,7 +17,8 @@
 	<Reference name="System.Core"/>
 	<Reference name="System.Xml"/>
 	<Reference name="SilverSim.Types" localCopy="false"/>
-  <Reference name="SilverSim.Viewer.Messages" localCopy="false"/>
+	<Reference name="SilverSim.Http" localCopy="false"/>
+	<Reference name="SilverSim.Viewer.Messages" localCopy="false"/>
 	<Reference name="SilverSim.Scene.Types" localCopy="false"/>
 	<Reference name="SilverSim.ServiceInterfaces" localCopy="false"/>
 	<Reference name="SilverSim.Main.Common" localCopy="false"/>

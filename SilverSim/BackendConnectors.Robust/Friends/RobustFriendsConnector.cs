@@ -5,7 +5,7 @@ using log4net;
 using Nini.Config;
 using SilverSim.BackendConnectors.Robust.Common;
 using SilverSim.Main.Common;
-using SilverSim.Main.Common.HttpClient;
+using SilverSim.Http.Client;
 using SilverSim.ServiceInterfaces.Friends;
 using SilverSim.Types;
 using SilverSim.Types.Friends;

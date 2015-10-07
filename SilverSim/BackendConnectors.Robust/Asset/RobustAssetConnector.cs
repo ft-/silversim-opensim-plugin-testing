@@ -3,8 +3,8 @@
 
 using log4net;
 using Nini.Config;
+using SilverSim.Http.Client;
 using SilverSim.Main.Common;
-using SilverSim.Main.Common.HttpClient;
 using SilverSim.ServiceInterfaces.Asset;
 using SilverSim.StructuredData.AssetXml;
 using SilverSim.Types;

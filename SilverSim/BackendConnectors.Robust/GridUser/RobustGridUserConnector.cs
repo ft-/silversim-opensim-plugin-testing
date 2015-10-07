@@ -4,8 +4,8 @@
 using log4net;
 using Nini.Config;
 using SilverSim.BackendConnectors.Robust.Common;
+using SilverSim.Http.Client;
 using SilverSim.Main.Common;
-using SilverSim.Main.Common.HttpClient;
 using SilverSim.ServiceInterfaces.GridUser;
 using SilverSim.Types;
 using SilverSim.Types.GridUser;

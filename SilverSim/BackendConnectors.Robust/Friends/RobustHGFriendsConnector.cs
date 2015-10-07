@@ -2,15 +2,12 @@
 // GNU Affero General Public License v3
 
 using SilverSim.BackendConnectors.Robust.Common;
+using SilverSim.Http.Client;
 using SilverSim.Main.Common;
-using SilverSim.Main.Common.HttpClient;
 using SilverSim.ServiceInterfaces.Friends;
 using SilverSim.Types;
 using SilverSim.Types.Friends;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace SilverSim.BackendConnectors.Robust.Friends
 {
