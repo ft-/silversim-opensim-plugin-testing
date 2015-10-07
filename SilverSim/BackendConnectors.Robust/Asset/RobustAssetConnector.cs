@@ -75,7 +75,7 @@ namespace SilverSim.BackendConnectors.Robust.Asset
         #endregion
 
         #region Exists methods
-        public override void exists(UUID key)
+        public override bool exists(UUID key)
         {
             try
             {
@@ -85,10 +85,11 @@ namespace SilverSim.BackendConnectors.Robust.Asset
             {
                 if (e.WebEventCode == (int)HttpStatusCode.NotFound)
                 {
-                    throw new AssetNotFound(key);
+                    return false;
                 }
                 throw;
             }
+            return true;
         }
 
         private static bool parseBoolean(XmlTextReader reader)

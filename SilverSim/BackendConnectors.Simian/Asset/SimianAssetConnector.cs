@@ -70,10 +70,18 @@ namespace SilverSim.BackendConnectors.Simian.Asset
         #endregion
 
         #region Exists methods
-        public override void exists(UUID key)
+        public override bool exists(UUID key)
         {
             /* using the metadata variant is always faster no need for transfering data */
-            AssetMetadata m = m_MetadataService[key];
+            try
+            {
+                AssetMetadata m = m_MetadataService[key];
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
         }
 
         public override Dictionary<UUID, bool> exists(List<UUID> assets)
