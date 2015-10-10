@@ -382,7 +382,7 @@ namespace SilverSim.BackendHandlers.Robust.Asset
                         /* DO NOT USE using here, it will close the underlying stream */
                         XmlTextWriter writer = new XmlTextWriter(res.GetOutputStream(), UTF8NoBOM);
                         writer.WriteStartElement("string");
-                        writer.WriteValue(data.ID);
+                        writer.WriteValue(data.ID.ToString());
                         writer.WriteEndElement();
                         writer.Flush();
                         res.Close();
@@ -401,7 +401,7 @@ namespace SilverSim.BackendHandlers.Robust.Asset
                 /* DO NOT USE using here, it will close the underlying stream */
                 XmlTextWriter writer = new XmlTextWriter(res.GetOutputStream(), UTF8NoBOM);
                 writer.WriteStartElement("string");
-                writer.WriteValue(data.ID);
+                writer.WriteValue(data.ID.ToString());
                 writer.WriteEndElement();
                 writer.Flush();
                 res.Close();
@@ -417,7 +417,7 @@ namespace SilverSim.BackendHandlers.Robust.Asset
                 /* DO NOT USE using here, it will close the underlying stream */
                 XmlTextWriter writer = new XmlTextWriter(res.GetOutputStream(), UTF8NoBOM);
                 writer.WriteStartElement("string");
-                writer.WriteValue(data.ID);
+                writer.WriteValue(data.ID.ToString());
                 writer.WriteEndElement();
                 writer.Flush();
                 res.Close();
