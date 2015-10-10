@@ -10,6 +10,7 @@ using SilverSim.BackendConnectors.Robust.IM;
 using SilverSim.BackendConnectors.Robust.Inventory;
 using SilverSim.BackendConnectors.Robust.Presence;
 using SilverSim.BackendConnectors.Robust.UserAgent;
+using SilverSim.Http.Client;
 using SilverSim.Main.Common;
 using SilverSim.Main.Common.HttpServer;
 using SilverSim.Scene.Management.Scene;
@@ -132,17 +133,22 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
                 uri = uri.TrimEnd('/') + "/helo/";
             }
 
+            Dictionary<string, string> headers = new Dictionary<string, string>();
             try
             {
-                WebRequest req = HttpWebRequest.Create(uri);
-                using(WebResponse response = req.GetResponse())
+                using (Stream responseStream = HttpRequestHandler.DoStreamRequest("HEAD", uri, null, "", "", false, 20000, headers))
                 {
-                    if(response.Headers.Get("X-Handlers-Provided") == null)
+                    using (StreamReader reader = new StreamReader(responseStream))
                     {
-                        return "opensim-robust"; /* let us assume Robust API */
+                        string ign = reader.ReadToEnd();
                     }
-                    return response.Headers.Get("X-Handlers-Provided");
                 }
+
+                if (!headers.ContainsKey("X-Handlers-Provided"))
+                {
+                    return "opensim-robust"; /* let us assume Robust API */
+                }
+                return headers["X-Handlers-Provided"];
             }
             catch
             {
