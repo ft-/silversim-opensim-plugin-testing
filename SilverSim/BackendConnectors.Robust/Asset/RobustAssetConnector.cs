@@ -83,7 +83,7 @@ namespace SilverSim.BackendConnectors.Robust.Asset
             }
             catch(HttpException e)
             {
-                if (e.WebEventCode == (int)HttpStatusCode.NotFound)
+                if (e.GetHttpCode() == (int)HttpStatusCode.NotFound)
                 {
                     return false;
                 }
