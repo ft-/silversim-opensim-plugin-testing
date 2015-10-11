@@ -75,8 +75,11 @@ namespace SilverSim.BackendConnectors.Simian.Asset
             /* using the metadata variant is always faster no need for transfering data */
             try
             {
-                AssetMetadata m = m_MetadataService[key];
-                return true;
+                Dictionary<string, string> para = new Dictionary<string, string>();
+                para["RequestMethod"] = "xGetAssetMetadata";
+                para["ID"] = (string)key;
+                Map m = SimianGrid.PostToService(m_AssetURI, m_AssetCapability, para, TimeoutMs);
+                return m["Success"].AsBoolean;
             }
             catch
             {
