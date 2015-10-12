@@ -18,8 +18,6 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
     #region Service Implementation
     public class RobustInventoryConnector : InventoryServiceInterface, IPlugin
     {
-        private static readonly ILog m_Log = LogManager.GetLogger("ROBUST INVENTORY");
-
         private string m_InventoryURI;
         private RobustInventoryFolderConnector m_FolderService;
         private RobustInventoryItemConnector m_ItemService;

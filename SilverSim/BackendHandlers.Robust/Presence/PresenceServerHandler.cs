@@ -14,6 +14,7 @@ namespace SilverSim.BackendHandlers.Robust.Presence
     #region Service Implementation
     class RobustPresenceServerHandler : IPlugin
     {
+        //private static readonly ILog m_Log = LogManager.GetLogger("ROBUST PRESENCE HANDLER");
         public RobustPresenceServerHandler(string presenceServiceName)
         {
 
@@ -29,7 +30,6 @@ namespace SilverSim.BackendHandlers.Robust.Presence
     [PluginName("PresenceHandler")]
     public class RobustPresenceServerHandlerFactory : IPluginFactory
     {
-        private static readonly ILog m_Log = LogManager.GetLogger("ROBUST INVENTORY HANDLER");
         public RobustPresenceServerHandlerFactory()
         {
 
