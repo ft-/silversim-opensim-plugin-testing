@@ -577,7 +577,6 @@ namespace SilverSim.BackendHandlers.Robust.Asset
     [PluginName("AssetHandler")]
     public class RobustAssetHandlerFactory : IPluginFactory
     {
-        private static readonly ILog m_Log = LogManager.GetLogger("ROBUST ASSET HANDLER");
         public RobustAssetHandlerFactory()
         {
 
