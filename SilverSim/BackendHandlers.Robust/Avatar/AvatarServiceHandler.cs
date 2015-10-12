@@ -257,7 +257,6 @@ namespace SilverSim.BackendHandlers.Robust.Avatar
     [PluginName("AvatarHandler")]
     public class RobustAvatarHandlerFactory : IPluginFactory
     {
-        private static readonly ILog m_Log = LogManager.GetLogger("ROBUST AVATAR HANDLER");
         public RobustAvatarHandlerFactory()
         {
 

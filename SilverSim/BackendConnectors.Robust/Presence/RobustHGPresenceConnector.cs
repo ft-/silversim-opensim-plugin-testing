@@ -14,7 +14,6 @@ namespace SilverSim.BackendConnectors.Robust.Presence
     public class RobustHGPresenceConnector : PresenceServiceInterface
     {
         public int TimeoutMs { get; set; }
-        string m_PresenceUri;
         string m_HomeURI;
         RobustPresenceConnector m_LocalConnector;
 
@@ -23,12 +22,6 @@ namespace SilverSim.BackendConnectors.Robust.Presence
         {
             TimeoutMs = 20000;
             m_LocalConnector = new RobustPresenceConnector(uri, homeuri);
-            if (!uri.EndsWith("/"))
-            {
-                uri += "/";
-            }
-            uri += "presence";
-            m_PresenceUri = uri;
             m_HomeURI = homeuri;
         }
         #endregion

@@ -256,7 +256,6 @@ namespace SilverSim.BackendHandlers.Robust.UserAccounts
     [PluginName("UserAccountHandler")]
     public class RobustUserAccountServerHandlerFactory : IPluginFactory
     {
-        private static readonly ILog m_Log = LogManager.GetLogger("ROBUST USERACCOUNT HANDLER");
         public RobustUserAccountServerHandlerFactory()
         {
 

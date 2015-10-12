@@ -389,7 +389,6 @@ namespace SilverSim.BackendHandlers.Robust.GridUser
     [PluginName("GridUserHandler")]
     public class RobustGridUserHandlerFactory : IPluginFactory
     {
-        private static readonly ILog m_Log = LogManager.GetLogger("ROBUST GRIDUSER HANDLER");
         public RobustGridUserHandlerFactory()
         {
 

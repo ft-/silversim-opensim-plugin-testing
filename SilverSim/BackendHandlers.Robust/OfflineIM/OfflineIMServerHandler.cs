@@ -14,6 +14,7 @@ namespace SilverSim.BackendHandlers.Robust.OfflineIM
     #region Service Implementation
     class RobustOfflineIMServerHandler : IPlugin
     {
+        //private static readonly ILog m_Log = LogManager.GetLogger("ROBUST INVENTORY HANDLER");
         public RobustOfflineIMServerHandler(string offlineIMServiceName)
         {
 
@@ -29,7 +30,6 @@ namespace SilverSim.BackendHandlers.Robust.OfflineIM
     [PluginName("OfflineIMHandler")]
     public class RobustOfflineIMServerHandlerFactory : IPluginFactory
     {
-        private static readonly ILog m_Log = LogManager.GetLogger("ROBUST INVENTORY HANDLER");
         public RobustOfflineIMServerHandlerFactory()
         {
 

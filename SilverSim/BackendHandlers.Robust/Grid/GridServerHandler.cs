@@ -10,6 +10,7 @@ namespace SilverSim.BackendHandlers.Robust.Grid
     #region Service Implementation
     class RobustGridServerHandler : IPlugin
     {
+        //private static readonly ILog m_Log = LogManager.GetLogger("ROBUST GRID HANDLER");
         public RobustGridServerHandler(string gridServiceName)
         {
 
@@ -25,7 +26,6 @@ namespace SilverSim.BackendHandlers.Robust.Grid
     [PluginName("GridHandler")]
     public class RobustGridHandlerFactory : IPluginFactory
     {
-        private static readonly ILog m_Log = LogManager.GetLogger("ROBUST GRID HANDLER");
         public RobustGridHandlerFactory()
         {
 

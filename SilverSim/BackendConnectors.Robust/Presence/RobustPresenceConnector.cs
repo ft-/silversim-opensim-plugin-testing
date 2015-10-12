@@ -19,7 +19,6 @@ namespace SilverSim.BackendConnectors.Robust.Presence
     {
         public int TimeoutMs { get; set; }
         string m_PresenceUri;
-        string m_HomeURI;
 
         #region Constructor
         public RobustPresenceConnector(string uri, string homeuri)
@@ -31,7 +30,6 @@ namespace SilverSim.BackendConnectors.Robust.Presence
             }
             uri += "presence";
             m_PresenceUri = uri;
-            m_HomeURI = homeuri;
         }
 
         public void Startup(ConfigurationLoader loader)

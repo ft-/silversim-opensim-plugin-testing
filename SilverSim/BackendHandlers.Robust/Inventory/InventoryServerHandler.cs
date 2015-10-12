@@ -792,7 +792,6 @@ namespace SilverSim.BackendHandlers.Robust.Inventory
     [PluginName("InventoryHandler")]
     public class RobustInventoryServerHandlerFactory : IPluginFactory
     {
-        private static readonly ILog m_Log = LogManager.GetLogger("ROBUST INVENTORY HANDLER");
         public RobustInventoryServerHandlerFactory()
         {
 

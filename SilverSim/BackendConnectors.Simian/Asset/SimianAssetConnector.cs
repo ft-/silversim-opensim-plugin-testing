@@ -54,7 +54,7 @@ namespace SilverSim.BackendConnectors.Simian.Asset
             }
 
             m_AssetURI = uri;
-            m_DataService = new SimianAssetDataConnector(uri, m_AssetCapability);
+            m_DataService = new SimianAssetDataConnector(uri);
             m_MetadataService = new SimianAssetMetadataConnector(uri, m_AssetCapability);
             m_ReferencesService = new DefaultAssetReferencesService(this);
             m_MetadataService.TimeoutMs = m_TimeoutMs;
@@ -172,8 +172,6 @@ namespace SilverSim.BackendConnectors.Simian.Asset
         #endregion
 
         #region Store asset method
-        static Encoding UTF8NoBOM = new UTF8Encoding(false);
-
         public override void Store(AssetData asset)
         {
             if((asset.Temporary && !m_EnableTempStorage) ||

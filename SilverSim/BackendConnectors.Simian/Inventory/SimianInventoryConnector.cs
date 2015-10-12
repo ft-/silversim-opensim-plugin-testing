@@ -17,8 +17,6 @@ namespace SilverSim.BackendConnectors.Simian.Inventory
     #region Service Implementation
     public class SimianInventoryConnector : InventoryServiceInterface, IPlugin
     {
-        private static readonly ILog m_Log = LogManager.GetLogger("SIMIAN INVENTORY");
-
         private string m_InventoryURI;
         private SimianInventoryFolderConnector m_FolderService;
         private SimianInventoryItemConnector m_ItemService;

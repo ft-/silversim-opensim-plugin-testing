@@ -10,6 +10,7 @@ namespace SilverSim.BackendHandlers.Robust.Friends
     #region Service Implementation
     class RobustFriendsServerHandler : IPlugin
     {
+        //private static readonly ILog m_Log = LogManager.GetLogger("ROBUST FRIENDS HANDLER");
         public RobustFriendsServerHandler(string friends)
         {
 
@@ -25,7 +26,6 @@ namespace SilverSim.BackendHandlers.Robust.Friends
     [PluginName("FriendsHandler")]
     public class RobustFriendsHandlerFactory : IPluginFactory
     {
-        private static readonly ILog m_Log = LogManager.GetLogger("ROBUST FRIENDS HANDLER");
         public RobustFriendsHandlerFactory()
         {
 
