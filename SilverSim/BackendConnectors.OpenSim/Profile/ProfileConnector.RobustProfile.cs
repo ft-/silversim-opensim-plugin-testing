@@ -87,7 +87,6 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
 
             public void Delete(UUID id)
             {
-                Dictionary<UUID, string> data = new Dictionary<UUID, string>();
                 Map m = new Map();
                 m["ClassifiedId"] = id;
                 RPC.DoJson20RpcRequest(m_Uri, "classified_delete", (string)UUID.Random, m, m_Connector.TimeoutMs);
@@ -173,7 +172,6 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
 
             public void Delete(UUID id)
             {
-                Dictionary<UUID, string> data = new Dictionary<UUID, string>();
                 Map m = new Map();
                 m["pickId"] = id;
                 RPC.DoJson20RpcRequest(m_Uri, "picks_delete", (string)UUID.Random, m, m_Connector.TimeoutMs);

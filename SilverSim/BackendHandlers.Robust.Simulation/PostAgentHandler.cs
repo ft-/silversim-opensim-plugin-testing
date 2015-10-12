@@ -140,7 +140,7 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
                 {
                     using (StreamReader reader = new StreamReader(responseStream))
                     {
-                        string ign = reader.ReadToEnd();
+                        reader.ReadToEnd();
                     }
                 }
 

@@ -193,7 +193,6 @@ namespace SilverSim.BackendHandlers.Robust.Asset
 
                 byte[] header = UTF8NoBOM.GetBytes(assetbase_header);
                 byte[] footer = UTF8NoBOM.GetBytes(assetbase_footer);
-                int base64_codegroups = (data.Data.Length + 2) / 3;
 
                 HttpResponse res = req.BeginResponse();
                 res.ContentType = "text/xml";

@@ -52,12 +52,12 @@ namespace SilverSim.BackendConnectors.Robust.UserAgent
 
             List<UUID> friendsOnline = new List<UUID>();
 
-            foreach(string key in hash.Keys)
+            foreach(string key in res.Keys)
             {
-                if(key.StartsWith("friend_") && hash[key] != null)
+                if(key.StartsWith("friend_") && res[key] != null)
                 {
                     UUID friend;
-                    if(UUID.TryParse(hash[key].ToString(), out friend))
+                    if(UUID.TryParse(res[key].ToString(), out friend))
                     {
                         friendsOnline.Add(friend);
                     }
@@ -151,9 +151,9 @@ namespace SilverSim.BackendConnectors.Robust.UserAgent
 
             Map res = DoXmlRpcWithHashResponse("locate_user", hash);
 
-            if(hash.ContainsKey("URL"))
+            if(res.ContainsKey("URL"))
             {
-                return hash["URL"].ToString();
+                return res["URL"].ToString();
             }
 
             throw new KeyNotFoundException();
@@ -167,9 +167,9 @@ namespace SilverSim.BackendConnectors.Robust.UserAgent
 
             Map res = DoXmlRpcWithHashResponse("get_uui", hash);
 
-            if (hash.ContainsKey("UUI"))
+            if (res.ContainsKey("UUI"))
             {
-                return new UUI(hash["UUI"].ToString());
+                return new UUI(res["UUI"].ToString());
             }
 
             throw new KeyNotFoundException();
