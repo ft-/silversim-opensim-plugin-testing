@@ -338,7 +338,6 @@ namespace SilverSim.OpenSimArchiver.OAR
 
             static RegionInfo LoadArchiveXmlVersion1(XmlTextReader reader, List<RegionInfo> regionInfos)
             {
-                Date creationDate = new Date();
                 for (; ; )
                 {
                     if (!reader.Read())
@@ -356,7 +355,7 @@ namespace SilverSim.OpenSimArchiver.OAR
                                     {
                                         throw new OARFormatException();
                                     }
-                                    creationDate = LoadArchiveXmlVersion1_CreationInfo(reader);
+                                    LoadArchiveXmlVersion1_CreationInfo(reader);
                                     break;
 
                                 case "regions":
