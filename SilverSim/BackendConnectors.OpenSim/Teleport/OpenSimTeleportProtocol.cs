@@ -8,6 +8,7 @@ using SilverSim.Scene.Types.Neighbor;
 using SilverSim.ServiceInterfaces.Grid;
 using SilverSim.ServiceInterfaces.Teleport;
 using SilverSim.StructuredData.Agent;
+using SilverSim.StructuredData.JSON;
 using SilverSim.Types;
 using SilverSim.Types.Agent;
 using SilverSim.Types.Grid;
@@ -109,7 +110,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
             Map result;
             try
             {
-                result = OpenSimResponse.Deserialize(HttpRequestHandler.DoStreamRequest("POST", agentURL, null, "application/json", uncompressed_postdata.Length, delegate(Stream ws)
+                result = (Map)JSON.Deserialize(HttpRequestHandler.DoStreamRequest("POST", agentURL, null, "application/json", uncompressed_postdata.Length, delegate(Stream ws)
                 {
                     ws.Write(uncompressed_postdata, 0, uncompressed_postdata.Length);
                 }, true, TimeoutMs));
@@ -127,7 +128,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
                             compressed_postdata = ms.GetBuffer();
                         }
                     }
-                    result = OpenSimResponse.Deserialize(HttpRequestHandler.DoStreamRequest("POST", agentURL, null, "application/x-gzip", compressed_postdata.Length, delegate(Stream ws)
+                    result = (Map)JSON.Deserialize(HttpRequestHandler.DoStreamRequest("POST", agentURL, null, "application/x-gzip", compressed_postdata.Length, delegate(Stream ws)
                     {
                         ws.Write(compressed_postdata, 0, compressed_postdata.Length);
                     }, false, TimeoutMs));
@@ -136,7 +137,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
                 {
                     try
                     {
-                        result = OpenSimResponse.Deserialize(HttpRequestHandler.DoStreamRequest("POST", agentURL, null, "application/json", uncompressed_postdata.Length, delegate(Stream ws)
+                        result = (Map)JSON.Deserialize(HttpRequestHandler.DoStreamRequest("POST", agentURL, null, "application/json", uncompressed_postdata.Length, delegate(Stream ws)
                         {
                             ws.Write(uncompressed_postdata, 0, uncompressed_postdata.Length);
                         }, false, TimeoutMs));
@@ -148,6 +149,28 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
                         return;
                     }
                 }
+            }
+
+            if (result.ContainsKey("success"))
+            {
+                if (!result["success"].AsBoolean)
+                {
+                    /* not authorized */
+                    return;
+                }
+            }
+            else if (result.ContainsKey("reason"))
+            {
+                if (result["reason"].ToString() != "authorized")
+                {
+                    /* not authorized */
+                    return;
+                }
+            }
+            else
+            {
+                /* not authorized */
+                return;
             }
 
             /* this makes the viewer go for a login to a neighbor */
