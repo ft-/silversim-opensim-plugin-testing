@@ -38,7 +38,7 @@ namespace SilverSim.OpenSimArchiver.IAR
             }
             foreach (string pathcomp in frompath.Substring(1).Split('/'))
             {
-                List<InventoryFolder> childfolders = inventoryService.Folder.getFolders(principal.ID, parentFolder);
+                List<InventoryFolder> childfolders = inventoryService.Folder.GetFolders(principal.ID, parentFolder);
                 int idx;
                 for (idx = 0; idx < childfolders.Count; ++idx)
                 {

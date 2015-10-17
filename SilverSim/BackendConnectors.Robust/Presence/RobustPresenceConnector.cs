@@ -183,7 +183,7 @@ namespace SilverSim.BackendConnectors.Robust.Presence
             }
         }
 
-        public override void logoutRegion(UUID regionID)
+        public override void LogoutRegion(UUID regionID)
         {
             Dictionary<string, string> post = new Dictionary<string, string>();
             post["RegionID"] = (string)regionID;

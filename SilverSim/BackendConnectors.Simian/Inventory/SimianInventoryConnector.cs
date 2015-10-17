@@ -91,7 +91,7 @@ namespace SilverSim.BackendConnectors.Simian.Inventory
             }
         }
 
-        public override List<InventoryItem> getActiveGestures(UUID PrincipalID)
+        public override List<InventoryItem> GetActiveGestures(UUID PrincipalID)
         {
             List<InventoryItem> item = new List<InventoryItem>();
             Dictionary<string, string> post = new Dictionary<string, string>();
@@ -114,7 +114,7 @@ namespace SilverSim.BackendConnectors.Simian.Inventory
                     }
                 }
             }
-            throw new InventoryInaccessible();
+            throw new InventoryInaccessibleException();
         }
         #endregion
 

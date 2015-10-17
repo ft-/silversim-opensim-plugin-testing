@@ -39,7 +39,7 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
                 Map map = OpenSimResponse.Deserialize(HttpRequestHandler.DoStreamPostRequest(m_InventoryURI, null, post, false, TimeoutMs));
                 if (!(map["item"] is Map))
                 {
-                    throw new InventoryInaccessible();
+                    throw new InventoryInaccessibleException();
                 }
 
                 return RobustInventoryConnector.ItemFromMap((Map)map["item"], m_GroupsService);
@@ -57,7 +57,7 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
                 Map map = OpenSimResponse.Deserialize(HttpRequestHandler.DoStreamPostRequest(m_InventoryURI, null, post, false, TimeoutMs));
                 if (!(map["item"] is Map))
                 {
-                    throw new InventoryInaccessible();
+                    throw new InventoryInaccessibleException();
                 }
 
                 return RobustInventoryConnector.ItemFromMap((Map)map["item"], m_GroupsService);
@@ -172,7 +172,7 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
             Map map = OpenSimResponse.Deserialize(HttpRequestHandler.DoStreamPostRequest(m_InventoryURI, null, post, false, TimeoutMs));
             if(!((AString)map["RESULT"]))
             {
-                throw new InventoryItemNotStored(item.ID);
+                throw new InventoryItemNotStoredException(item.ID);
             }
         }
 
@@ -183,7 +183,7 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
             Map map = OpenSimResponse.Deserialize(HttpRequestHandler.DoStreamPostRequest(m_InventoryURI, null, post, false, TimeoutMs));
             if (!((AString)map["RESULT"]))
             {
-                throw new InventoryItemNotStored(item.ID);
+                throw new InventoryItemNotStoredException(item.ID);
             }
         }
 
@@ -196,7 +196,7 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
             Map map = OpenSimResponse.Deserialize(HttpRequestHandler.DoStreamPostRequest(m_InventoryURI, null, post, false, TimeoutMs));
             if (!((AString)map["RESULT"]))
             {
-                throw new InventoryItemNotFound(ID);
+                throw new InventoryItemNotFoundException(ID);
             }
         }
 
@@ -210,7 +210,7 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
             Map map = OpenSimResponse.Deserialize(HttpRequestHandler.DoStreamPostRequest(m_InventoryURI, null, post, false, TimeoutMs));
             if (!((AString)map["RESULT"]))
             {
-                throw new InventoryItemNotFound(ID);
+                throw new InventoryItemNotFoundException(ID);
             }
         }
     }

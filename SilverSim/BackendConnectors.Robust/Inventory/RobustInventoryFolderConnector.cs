@@ -47,11 +47,11 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
                 Map map = OpenSimResponse.Deserialize(HttpRequestHandler.DoStreamPostRequest(m_InventoryURI, null, post, false, TimeoutMs));
                 if (!map.ContainsKey("folder"))
                 {
-                    throw new InventoryInaccessible();
+                    throw new InventoryInaccessibleException();
                 }
                 else if (!(map["folder"] is Map))
                 {
-                    throw new InventoryInaccessible();
+                    throw new InventoryInaccessibleException();
                 }
 
                 return RobustInventoryConnector.FolderFromMap((Map)map["folder"]);
@@ -69,11 +69,11 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
                 Map map = OpenSimResponse.Deserialize(HttpRequestHandler.DoStreamPostRequest(m_InventoryURI, null, post, false, TimeoutMs));
                 if (!map.ContainsKey("folder"))
                 {
-                    throw new InventoryInaccessible();
+                    throw new InventoryInaccessibleException();
                 }
                 else if (!(map["folder"] is Map))
                 {
-                    throw new InventoryInaccessible();
+                    throw new InventoryInaccessibleException();
                 }
 
                 return RobustInventoryConnector.FolderFromMap((Map)map["folder"]);
@@ -98,14 +98,14 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
                 Map map = OpenSimResponse.Deserialize(HttpRequestHandler.DoStreamPostRequest(m_InventoryURI, null, post, false, TimeoutMs));
                 if (!(map["folder"] is Map))
                 {
-                    throw new InventoryInaccessible();
+                    throw new InventoryInaccessibleException();
                 }
 
                 return RobustInventoryConnector.FolderFromMap((Map)map["folder"]);
             }
         }
 
-        public override List<InventoryFolder> getFolders(UUID PrincipalID, UUID key)
+        public override List<InventoryFolder> GetFolders(UUID PrincipalID, UUID key)
         {
             Dictionary<string, string> post = new Dictionary<string, string>();
             post["PRINCIPAL"] = (string)PrincipalID;
@@ -114,7 +114,7 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
             Map map = OpenSimResponse.Deserialize(HttpRequestHandler.DoStreamPostRequest(m_InventoryURI, null, post, false, TimeoutMs));
             if (!(map["FOLDERS"] is Map))
             {
-                throw new InventoryInaccessible();
+                throw new InventoryInaccessibleException();
             }
 
             List<InventoryFolder> items = new List<InventoryFolder>();
@@ -128,7 +128,7 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
             return items;
         }
 
-        public override List<InventoryItem> getItems(UUID PrincipalID, UUID key)
+        public override List<InventoryItem> GetItems(UUID PrincipalID, UUID key)
         {
             Dictionary<string, string> post = new Dictionary<string, string>();
             post["PRINCIPAL"] = (string)PrincipalID;
@@ -137,7 +137,7 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
             Map map = OpenSimResponse.Deserialize(HttpRequestHandler.DoStreamPostRequest(m_InventoryURI, null, post, false, TimeoutMs));
             if (!(map["ITEMS"] is Map))
             {
-                throw new InventoryInaccessible();
+                throw new InventoryInaccessibleException();
             }
 
             List<InventoryItem> items = new List<InventoryItem>();
@@ -173,7 +173,7 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
             Map map = OpenSimResponse.Deserialize(HttpRequestHandler.DoStreamPostRequest(m_InventoryURI, null, post, false, TimeoutMs));
             if (!((AString)map["RESULT"]))
             {
-                throw new InventoryFolderNotStored(folder.ID);
+                throw new InventoryFolderNotStoredException(folder.ID);
             }
         }
         public override void Update(InventoryFolder folder)
@@ -183,7 +183,7 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
             Map map = OpenSimResponse.Deserialize(HttpRequestHandler.DoStreamPostRequest(m_InventoryURI, null, post, false, TimeoutMs));
             if (!((AString)map["RESULT"]))
             {
-                throw new InventoryFolderNotStored(folder.ID);
+                throw new InventoryFolderNotStoredException(folder.ID);
             }
         }
 
@@ -197,7 +197,7 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
             Map map = OpenSimResponse.Deserialize(HttpRequestHandler.DoStreamPostRequest(m_InventoryURI, null, post, false, TimeoutMs));
             if (!((AString)map["RESULT"]))
             {
-                throw new InventoryFolderNotStored(folderID);
+                throw new InventoryFolderNotStoredException(folderID);
             }
         }
 
@@ -219,7 +219,7 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
             Map map = OpenSimResponse.Deserialize(HttpRequestHandler.DoStreamPostRequest(m_InventoryURI, null, post, false, TimeoutMs));
             if (!((AString)map["RESULT"]))
             {
-                throw new InventoryFolderNotStored(folderID);
+                throw new InventoryFolderNotStoredException(folderID);
             }
         }
 
@@ -231,7 +231,7 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
             Map map = OpenSimResponse.Deserialize(HttpRequestHandler.DoStreamPostRequest(m_InventoryURI, null, post, false, TimeoutMs));
             if (!((AString)map["RESULT"]))
             {
-                throw new InventoryFolderNotStored(folderID);
+                throw new InventoryFolderNotStoredException(folderID);
             }
         }
 
@@ -244,7 +244,7 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
             Map map = OpenSimResponse.Deserialize(HttpRequestHandler.DoStreamPostRequest(m_InventoryURI, null, post, false, TimeoutMs));
             if (!((AString)map["RESULT"]))
             {
-                throw new InventoryFolderNotStored(folderID);
+                throw new InventoryFolderNotStoredException(folderID);
             }
         }
         #endregion

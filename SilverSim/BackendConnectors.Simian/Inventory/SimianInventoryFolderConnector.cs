@@ -33,7 +33,7 @@ namespace SilverSim.BackendConnectors.Simian.Inventory
         {
             get
             {
-                List<InventoryFolder> folders = getFolders(PrincipalID, key);
+                List<InventoryFolder> folders = GetFolders(PrincipalID, key);
                 foreach(InventoryFolder folder in folders)
                 {
                     if(folder.ID.Equals(key))
@@ -41,7 +41,7 @@ namespace SilverSim.BackendConnectors.Simian.Inventory
                         return folder;
                     }
                 }
-                throw new InventoryInaccessible();
+                throw new InventoryInaccessibleException();
             }
         }
 
@@ -79,11 +79,11 @@ namespace SilverSim.BackendConnectors.Simian.Inventory
                     Map m = (Map)((AnArray)res["Items"])[0];
                     return SimianInventoryConnector.FolderFromMap(m);
                 }
-                throw new InventoryInaccessible();
+                throw new InventoryInaccessibleException();
             }
         }
 
-        public override List<InventoryFolder> getFolders(UUID PrincipalID, UUID key)
+        public override List<InventoryFolder> GetFolders(UUID PrincipalID, UUID key)
         {
             List<InventoryFolder> folders = new List<InventoryFolder>();
             Dictionary<string, string> post = new Dictionary<string, string>();
@@ -110,10 +110,10 @@ namespace SilverSim.BackendConnectors.Simian.Inventory
                 }
                 return folders;
             }
-            throw new InventoryInaccessible();
+            throw new InventoryInaccessibleException();
         }
 
-        public override List<InventoryItem> getItems(UUID PrincipalID, UUID key)
+        public override List<InventoryItem> GetItems(UUID PrincipalID, UUID key)
         {
             List<InventoryItem> items = new List<InventoryItem>();
             Dictionary<string, string> post = new Dictionary<string, string>();
@@ -140,7 +140,7 @@ namespace SilverSim.BackendConnectors.Simian.Inventory
                 }
                 return items;
             }
-            throw new InventoryInaccessible();
+            throw new InventoryInaccessibleException();
         }
 
         #endregion
@@ -160,7 +160,7 @@ namespace SilverSim.BackendConnectors.Simian.Inventory
             Map m = SimianGrid.PostToService(m_InventoryURI, m_SimCapability, post, TimeoutMs);
             if (!m["Success"].AsBoolean)
             {
-                throw new InventoryFolderNotStored(folder.ID);
+                throw new InventoryFolderNotStoredException(folder.ID);
             }
         }
         public override void Update(InventoryFolder folder)
@@ -193,7 +193,7 @@ namespace SilverSim.BackendConnectors.Simian.Inventory
             Map m = SimianGrid.PostToService(m_InventoryURI, m_SimCapability, post, TimeoutMs);
             if(!m["Success"].AsBoolean)
             {
-                throw new InventoryFolderNotStored(folderID);
+                throw new InventoryFolderNotStoredException(folderID);
             }
         }
 
@@ -212,7 +212,7 @@ namespace SilverSim.BackendConnectors.Simian.Inventory
             Map m = SimianGrid.PostToService(m_InventoryURI, m_SimCapability, post, TimeoutMs);
             if(!m["Success"].AsBoolean)
             {
-                throw new InventoryFolderNotStored(folderID);
+                throw new InventoryFolderNotStoredException(folderID);
             }
         }
         #endregion

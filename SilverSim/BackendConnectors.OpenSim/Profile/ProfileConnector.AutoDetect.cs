@@ -32,12 +32,12 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
                 m_Robust = new RobustClassifiedsConnector(connector, url);
             }
 
-            public Dictionary<UUID, string> getClassifieds(UUI user)
+            public Dictionary<UUID, string> GetClassifieds(UUI user)
             {
                 Dictionary<UUID, string> res;
                 try
                 {
-                    res = m_OpenSim.getClassifieds(user);
+                    res = m_OpenSim.GetClassifieds(user);
                     m_Connector.m_Classifieds = m_OpenSim;
                     return res;
                 }
@@ -52,7 +52,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
                 }
                 try
                 {
-                    res = m_Robust.getClassifieds(user);
+                    res = m_Robust.GetClassifieds(user);
                     m_Connector.m_Classifieds = m_Robust;
                     return res;
                 }
@@ -192,12 +192,12 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
                 m_Robust = new RobustPicksConnector(connector, url);
             }
 
-            public Dictionary<UUID, string> getPicks(UUI user)
+            public Dictionary<UUID, string> GetPicks(UUI user)
             {
                 Dictionary<UUID, string> res;
                 try
                 {
-                    res = m_OpenSim.getPicks(user);
+                    res = m_OpenSim.GetPicks(user);
                     m_Connector.m_Picks = m_OpenSim;
                     return res;
                 }
@@ -212,7 +212,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
                 }
                 try
                 {
-                    res = m_Robust.getPicks(user);
+                    res = m_Robust.GetPicks(user);
                     m_Connector.m_Picks = m_Robust;
                     return res;
                 }

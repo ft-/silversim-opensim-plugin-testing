@@ -43,7 +43,7 @@ namespace SilverSim.BackendConnectors.Robust.IM
                              .Select(x => Convert.ToByte(hex.Substring(x, 2), 16))
                              .ToArray();
         }
-        public override void storeOfflineIM(GridInstantMessage im)
+        public override void StoreOfflineIM(GridInstantMessage im)
         {
             Dictionary<string, string> post = new Dictionary<string, string>();
             post["BinaryBucket"] = BitConverter.ToString(im.BinaryBucket).Replace("-", string.Empty);
@@ -77,7 +77,7 @@ namespace SilverSim.BackendConnectors.Robust.IM
             }
         }
 
-        public override List<GridInstantMessage> getOfflineIMs(UUID principalID)
+        public override List<GridInstantMessage> GetOfflineIMs(UUID principalID)
         {
             Dictionary<string, string> post = new Dictionary<string, string>();
             post["PrincipalID"] = (string)principalID;
@@ -120,7 +120,7 @@ namespace SilverSim.BackendConnectors.Robust.IM
             return ims;
         }
 
-        public override void deleteOfflineIM(ulong offlineImID)
+        public override void DeleteOfflineIM(ulong offlineImID)
         {
 
         }

@@ -21,7 +21,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
                 m_Uri = uri;
             }
 
-            public Dictionary<UUID, string> getClassifieds(UUI user)
+            public Dictionary<UUID, string> GetClassifieds(UUI user)
             {
                 Dictionary<UUID, string> data = new Dictionary<UUID, string>();
                 Map m = new Map();
@@ -104,7 +104,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
                 m_Connector = connector;
             }
 
-            public Dictionary<UUID, string> getPicks(UUI user)
+            public Dictionary<UUID, string> GetPicks(UUI user)
             {
                 Dictionary<UUID, string> data = new Dictionary<UUID, string>();
                 Map m = new Map();

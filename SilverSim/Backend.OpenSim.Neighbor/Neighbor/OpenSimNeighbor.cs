@@ -128,7 +128,7 @@ namespace SilverSim.Backend.OpenSim.Neighbor.Neighbor
             }
         }
 
-        public override void notifyNeighborStatus(RegionInfo fromRegion)
+        public override void NotifyNeighborStatus(RegionInfo fromRegion)
         {
             if(SceneManager.Scenes.ContainsKey(fromRegion.ID))
             {

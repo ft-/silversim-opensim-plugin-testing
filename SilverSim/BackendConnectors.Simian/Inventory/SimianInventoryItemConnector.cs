@@ -64,7 +64,7 @@ namespace SilverSim.BackendConnectors.Simian.Inventory
                         }
                     }
                 }
-                throw new InventoryItemNotFound(key);
+                throw new InventoryItemNotFoundException(key);
             }
         }
         #endregion
@@ -109,7 +109,7 @@ namespace SilverSim.BackendConnectors.Simian.Inventory
             Map m = SimianGrid.PostToService(m_InventoryURI, m_InventoryCapability, post, TimeoutMs);
             if (!m["Success"].AsBoolean)
             {
-                throw new InventoryItemNotStored(item.ID);
+                throw new InventoryItemNotStoredException(item.ID);
             }
 
             if(item.AssetType == AssetType.Gesture)
@@ -188,7 +188,7 @@ namespace SilverSim.BackendConnectors.Simian.Inventory
             Map m = SimianGrid.PostToService(m_InventoryURI, m_InventoryCapability, post, TimeoutMs);
             if(!m["Success"].AsBoolean)
             {
-                throw new InventoryItemNotFound(ID);
+                throw new InventoryItemNotFoundException(ID);
             }
         }
 
@@ -202,7 +202,7 @@ namespace SilverSim.BackendConnectors.Simian.Inventory
             Map m = SimianGrid.PostToService(m_InventoryURI, m_InventoryCapability, post, TimeoutMs);
             if(!m["Success"].AsBoolean)
             {
-                throw new InventoryItemNotStored(ID);
+                throw new InventoryItemNotStoredException(ID);
             }
         }
     }

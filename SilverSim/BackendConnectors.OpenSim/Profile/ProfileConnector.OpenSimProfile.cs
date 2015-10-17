@@ -62,7 +62,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
             {
             }
 
-            public Dictionary<UUID, string> getClassifieds(UUI user)
+            public Dictionary<UUID, string> GetClassifieds(UUI user)
             {
                 Map map = new Map();
                 map.Add("uuid", user.ID);
@@ -141,7 +141,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
 
             }
 
-            public Dictionary<UUID, string> getPicks(UUI user)
+            public Dictionary<UUID, string> GetPicks(UUI user)
             {
                 Map map = new Map();
                 map.Add("uuid", user.ID);

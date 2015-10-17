@@ -91,7 +91,7 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
             }
         }
 
-        public override void checkInventory(UUID PrincipalID)
+        public override void CheckInventory(UUID PrincipalID)
         {
             Dictionary<string, string> post = new Dictionary<string, string>();
             post["PRINCIPAL"] = (string)PrincipalID;
@@ -99,11 +99,11 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
             Map map = OpenSimResponse.Deserialize(HttpRequestHandler.DoStreamPostRequest(m_InventoryURI, null, post, false, TimeoutMs));
             if (!((AString)map["RESULT"]))
             {
-                throw new InventoryInaccessible();
+                throw new InventoryInaccessibleException();
             }
         }
 
-        public override List<InventoryItem> getActiveGestures(UUID PrincipalID)
+        public override List<InventoryItem> GetActiveGestures(UUID PrincipalID)
         {
             Dictionary<string, string> post = new Dictionary<string,string>();
             post["PRINCIPAL"] = (string)PrincipalID;
@@ -111,7 +111,7 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
             Map map = OpenSimResponse.Deserialize(HttpRequestHandler.DoStreamPostRequest(m_InventoryURI, null, post, false, TimeoutMs));
             if (!(map["ITEMS"] is Map))
             {
-                throw new InventoryInaccessible();
+                throw new InventoryInaccessibleException();
             }
 
             List<InventoryItem> items = new List<InventoryItem>();

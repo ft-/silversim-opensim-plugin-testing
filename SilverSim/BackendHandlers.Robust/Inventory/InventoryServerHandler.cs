@@ -292,7 +292,7 @@ namespace SilverSim.BackendHandlers.Robust.Inventory
             UUID principalID = reqdata.GetUUID("PRINCIPAL");
             try
             {
-                m_InventoryService.checkInventory(principalID);
+                m_InventoryService.CheckInventory(principalID);
             }
             catch
             {
@@ -307,7 +307,7 @@ namespace SilverSim.BackendHandlers.Robust.Inventory
             List<InventoryFolder> folders;
             try
             {
-                folders = m_InventoryService.Folder.getInventorySkeleton(principalID);
+                folders = m_InventoryService.Folder.GetInventorySkeleton(principalID);
             }
             catch
             {
@@ -446,7 +446,7 @@ namespace SilverSim.BackendHandlers.Robust.Inventory
             List<InventoryItem> folderitems;
             try
             {
-                folderitems = m_InventoryService.Folder.getItems(principalID, folderID);
+                folderitems = m_InventoryService.Folder.GetItems(principalID, folderID);
             }
             catch
             {
@@ -762,7 +762,7 @@ namespace SilverSim.BackendHandlers.Robust.Inventory
             List<InventoryItem> gestures;
             try
             {
-                gestures = m_InventoryService.getActiveGestures(principalID);
+                gestures = m_InventoryService.GetActiveGestures(principalID);
             }
             catch
             {
