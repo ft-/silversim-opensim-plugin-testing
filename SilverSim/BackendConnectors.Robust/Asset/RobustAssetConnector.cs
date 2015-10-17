@@ -232,7 +232,7 @@ namespace SilverSim.BackendConnectors.Robust.Asset
                 {
                     if (e.GetHttpCode() == (int)HttpStatusCode.NotFound)
                     {
-                        throw new AssetNotFound(key);
+                        throw new AssetNotFoundException(key);
                     }
                     throw;
                 }
@@ -400,7 +400,7 @@ namespace SilverSim.BackendConnectors.Robust.Asset
             }
             catch
             {
-                throw new AssetNotFound(id);
+                throw new AssetNotFoundException(id);
             }
         }
         #endregion

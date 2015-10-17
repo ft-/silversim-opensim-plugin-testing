@@ -31,7 +31,7 @@ namespace SilverSim.BackendConnectors.Simian.Asset
                 }
                 catch
                 {
-                    throw new AssetNotFound(key);
+                    throw new AssetNotFoundException(key);
                 }
             }
         }

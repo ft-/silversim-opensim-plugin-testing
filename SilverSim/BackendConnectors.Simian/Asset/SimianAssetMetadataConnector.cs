@@ -35,7 +35,7 @@ namespace SilverSim.BackendConnectors.Simian.Asset
                 Map m = SimianGrid.PostToService(m_AssetURI, m_AssetCapability, para, TimeoutMs);
                 if(!m["Success"].AsBoolean)
                 {
-                    throw new AssetNotFound(key);
+                    throw new AssetNotFoundException(key);
                 }
                 AssetMetadata data = new AssetMetadata();
                 data.ID = key;

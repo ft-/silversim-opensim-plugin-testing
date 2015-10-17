@@ -98,7 +98,7 @@ namespace SilverSim.BackendConnectors.Simian.Asset
                     exists(assetid);
                     res[assetid] = true;
                 }
-                catch(AssetNotFound)
+                catch (AssetNotFoundException)
                 {
                     res[assetid] = false;
                 }
@@ -119,7 +119,7 @@ namespace SilverSim.BackendConnectors.Simian.Asset
                 Map m = SimianGrid.PostToService(m_AssetURI, m_AssetCapability, para, TimeoutMs);
                 if (!m["Success"].AsBoolean)
                 {
-                    throw new AssetNotFound(key);
+                    throw new AssetNotFoundException(key);
                 }
                 AssetData data = new AssetData();
                 data.ID = key;
@@ -193,7 +193,7 @@ namespace SilverSim.BackendConnectors.Simian.Asset
             Map m = SimianGrid.PostToService(m_AssetURI, m_AssetCapability, para, m_EnableCompression, TimeoutMs);
             if (!m["Success"].AsBoolean)
             {
-                throw new AssetStoreFailed(asset.ID);
+                throw new AssetStoreFailedException(asset.ID);
             }
         }
         #endregion
@@ -208,7 +208,7 @@ namespace SilverSim.BackendConnectors.Simian.Asset
             Map m = SimianGrid.PostToService(m_AssetURI, m_AssetCapability, para, TimeoutMs);
             if (!m["Success"].AsBoolean)
             {
-                throw new AssetNotFound(id);
+                throw new AssetNotFoundException(id);
             }
         }
         #endregion
