@@ -112,11 +112,7 @@ namespace SilverSim.OpenSimArchiver.IAR
                     {
                         /* Load asset */
                         AssetData ad = reader.LoadAsset(header, principal);
-                        try
-                        {
-                            assetService.exists(ad.ID);
-                        }
-                        catch
+                        if(!assetService.Exists(ad.ID))
                         {
                             assetService.Store(ad);
                         }

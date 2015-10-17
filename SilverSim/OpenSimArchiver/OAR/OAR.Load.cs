@@ -168,11 +168,7 @@ namespace SilverSim.OpenSimArchiver.OAR
                         {
                             /* Load asset */
                             AssetData ad = reader.LoadAsset(header, scene.Owner);
-                            try
-                            {
-                                scene.AssetService.exists(ad.ID);
-                            }
-                            catch
+                            if(!scene.AssetService.Exists(ad.ID))
                             {
                                 scene.AssetService.Store(ad);
                             }

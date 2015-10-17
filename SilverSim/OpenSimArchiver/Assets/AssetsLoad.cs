@@ -44,7 +44,7 @@ namespace SilverSim.OpenSimArchiver.Assets
                         AssetData ad = reader.LoadAsset(header, owner);
                         try
                         {
-                            assetService.exists(ad.ID);
+                            assetService.Exists(ad.ID);
                         }
                         catch
                         {

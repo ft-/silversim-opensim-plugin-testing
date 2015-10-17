@@ -516,8 +516,8 @@ namespace SilverSim.BackendHandlers.Robust.Asset
             Dictionary<UUID, bool> asset1;
             if (m_TemporaryAssetService != null)
             {
-                asset1 = m_TemporaryAssetService.exists(ids);
-                foreach (KeyValuePair<UUID, bool> kvp in m_PersistentAssetService.exists(ids))
+                asset1 = m_TemporaryAssetService.Exists(ids);
+                foreach (KeyValuePair<UUID, bool> kvp in m_PersistentAssetService.Exists(ids))
                 {
                     if (kvp.Value)
                     {
@@ -527,10 +527,10 @@ namespace SilverSim.BackendHandlers.Robust.Asset
             }
             else
             {
-                asset1 = m_PersistentAssetService.exists(ids);
+                asset1 = m_PersistentAssetService.Exists(ids);
             }
 
-            foreach (KeyValuePair<UUID, bool> kvp in m_ResourceAssetService.exists(ids))
+            foreach (KeyValuePair<UUID, bool> kvp in m_ResourceAssetService.Exists(ids))
             {
                 if (kvp.Value)
                 {
