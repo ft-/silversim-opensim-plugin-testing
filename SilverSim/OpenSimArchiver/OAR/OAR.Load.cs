@@ -206,7 +206,7 @@ namespace SilverSim.OpenSimArchiver.OAR
                             List<ObjectGroup> sogs;
                             try
                             {
-                                sogs = ObjectXML.fromXml(reader, scene.Owner);
+                                sogs = ObjectXML.FromXml(reader, scene.Owner);
                             }
                             catch(Exception e)
                             {
