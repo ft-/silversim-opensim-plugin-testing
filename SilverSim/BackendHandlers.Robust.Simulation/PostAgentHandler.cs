@@ -65,7 +65,7 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
         private List<IProtocolExtender> m_PacketHandlerPlugins = new List<IProtocolExtender>();
         private List<AuthorizationServiceInterface> m_AuthorizationServices;
 
-        private class GridParameterMap : ICloneable
+        sealed class GridParameterMap : ICloneable
         {
             public string HomeURI;
             public string AssetServerURI;
@@ -136,7 +136,7 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
             Dictionary<string, string> headers = new Dictionary<string, string>();
             try
             {
-                using (Stream responseStream = HttpRequestHandler.DoStreamRequest("HEAD", uri, null, "", "", false, 20000, headers))
+                using (Stream responseStream = HttpRequestHandler.DoStreamRequest("HEAD", uri, null, string.Empty, string.Empty, false, 20000, headers))
                 {
                     using (StreamReader reader = new StreamReader(responseStream))
                     {
@@ -201,27 +201,27 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
                         m_Log.WarnFormat("Skipping section {0} for invalid URI in HomeURI {1}", section.Name, map.HomeURI);
                         continue;
                     }
-                    else if (map.GridUserServerURI != "" && !Uri.IsWellFormedUriString(map.GridUserServerURI, UriKind.Absolute))
+                    else if (map.GridUserServerURI.Length != 0 && !Uri.IsWellFormedUriString(map.GridUserServerURI, UriKind.Absolute))
                     {
                         m_Log.WarnFormat("Skipping section {0} for invalid URI in GridUserServerURI {1}", section.Name, map.GridUserServerURI);
                         continue;
                     }
-                    else if (map.GatekeeperURI != "" && !Uri.IsWellFormedUriString(map.GatekeeperURI, UriKind.Absolute))
+                    else if (map.GatekeeperURI.Length != 0 && !Uri.IsWellFormedUriString(map.GatekeeperURI, UriKind.Absolute))
                     {
                         m_Log.WarnFormat("Skipping section {0} for invalid URI in GatekeeperURI {1}", section.Name, map.GatekeeperURI);
                         continue;
                     }
-                    else if (map.PresenceServerURI != "" && !Uri.IsWellFormedUriString(map.PresenceServerURI, UriKind.Absolute))
+                    else if (map.PresenceServerURI.Length != 0 && !Uri.IsWellFormedUriString(map.PresenceServerURI, UriKind.Absolute))
                     {
                         m_Log.WarnFormat("Skipping section {0} for invalid URI in PresenceServerURI {1}", section.Name, map.PresenceServerURI);
                         continue;
                     }
-                    else if (map.AvatarServerURI != "" && !Uri.IsWellFormedUriString(map.AvatarServerURI, UriKind.Absolute))
+                    else if (map.AvatarServerURI.Length != 0 && !Uri.IsWellFormedUriString(map.AvatarServerURI, UriKind.Absolute))
                     {
                         m_Log.WarnFormat("Skipping section {0} for invalid URI in AvatarServerURI {1}", section.Name, map.AvatarServerURI);
                         continue;
                     }
-                    else if(map.OfflineIMServerURI != "" && !Uri.IsWellFormedUriString(map.OfflineIMServerURI, UriKind.Absolute))
+                    else if(map.OfflineIMServerURI.Length != 0 && !Uri.IsWellFormedUriString(map.OfflineIMServerURI, UriKind.Absolute))
                     {
                         m_Log.WarnFormat("Skipping section {0} for invalid URI in OfflineIMServerURI {1}", section.Name, map.OfflineIMServerURI);
                         continue;
@@ -239,7 +239,7 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
 
                     if(section.Contains("ValidFor"))
                     {
-                        string[] sims = section.GetString("ValidFor", "").Split(new char[]{','}, StringSplitOptions.RemoveEmptyEntries);
+                        string[] sims = section.GetString("ValidFor", string.Empty).Split(new char[]{','}, StringSplitOptions.RemoveEmptyEntries);
                         if(sims.Length != 0)
                         {
                             foreach(string sim in sims)
@@ -295,7 +295,7 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
         {
             agentID = UUID.Zero;
             regionID = UUID.Zero;
-            action = "";
+            action = string.Empty;
 
             uri = uri.Trim(new char[] { '/' });
             string[] parts = uri.Split('/');
@@ -340,17 +340,20 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
         public void DoAgentResponse(HttpRequest req, string reason, bool success)
         {
             string success_str = success ? "true" : "false";
-            string caller = req.CallerIP.ToString();
+            string caller = req.CallerIP;
             string fmt = "{" + string.Format("\"reason\":\"{0}\",\"success\":{1},\"your_ip\":\"{2}\"",
                 reason,
                 success_str,
                 caller) + "}";
-            HttpResponse res = req.BeginResponse();
-            res.ContentType = "application/json";
-            Stream o = res.GetOutputStream();
-            byte[] b = Encoding.UTF8.GetBytes(fmt);
-            o.Write(b, 0, b.Length);
-            res.Close();
+            using (HttpResponse res = req.BeginResponse())
+            {
+                res.ContentType = "application/json";
+                using (Stream o = res.GetOutputStream())
+                {
+                    byte[] b = Encoding.UTF8.GetBytes(fmt);
+                    o.Write(b, 0, b.Length);
+                }
+            }
         }
 
         protected virtual void CheckScenePerms(UUID sceneID)
@@ -378,8 +381,7 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
             }
             else
             {
-                HttpResponse res = req.BeginResponse(HttpStatusCode.MethodNotAllowed, "Method not allowed");
-                res.Close();
+                req.ErrorResponse(HttpStatusCode.MethodNotAllowed, "Method not allowed");
             }
         }
 
@@ -387,7 +389,6 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
         {
             UUID agentID;
             UUID regionID;
-            HttpResponse res;
             string action;
             try
             {
@@ -396,38 +397,44 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
             catch (Exception e)
             {
                 m_Log.InfoFormat("Invalid parameters for agent message {0}", req.RawUrl);
-                res = req.BeginResponse(HttpStatusCode.NotFound, e.Message);
-                res.Close();
+                req.ErrorResponse(HttpStatusCode.NotFound, e.Message);
                 return;
             }
 
-            Stream httpBody = req.Body;
-            if (req.ContentType == "application/x-gzip")
+            using (Stream httpBody = req.Body)
             {
-                httpBody = new GZipStream(httpBody, CompressionMode.Decompress);
+                if (req.ContentType == "application/x-gzip")
+                {
+                    using(Stream gzHttpBody = new GZipStream(httpBody, CompressionMode.Decompress))
+                    {
+                        AgentPostHandler_POST(req, gzHttpBody, agentID, regionID, action);
+                    }
+                }
+                else if (req.ContentType == "application/json")
+                {
+                    AgentPostHandler_POST(req, httpBody, agentID, regionID, action);
+                }
+                else
+                {
+                    m_Log.InfoFormat("Invalid content for agent message {0}: {1}", req.RawUrl, req.ContentType);
+                    req.ErrorResponse(HttpStatusCode.BadRequest, "Invalid content for agent message");
+                    return;
+                }
             }
-            else if (req.ContentType == "application/json")
-            {
+        }
 
-            }
-            else
-            {
-                m_Log.InfoFormat("Invalid content for agent message {0}: {1}", req.RawUrl, req.ContentType);
-                res = req.BeginResponse(HttpStatusCode.BadRequest, "Invalid content for agent message");
-                res.Close();
-                return;
-            }
-
+        void AgentPostHandler_POST(HttpRequest req, Stream httpBody, UUID agentID, UUID regionID, string action)
+        {
             PostData agentPost;
+
             try
             {
                 agentPost = PostData.Deserialize(httpBody);
             }
             catch (Exception e)
             {
-                m_Log.InfoFormat("Deserialization error for agent message {0}: {1}: {2}\n{3}", req.RawUrl, e.GetType().FullName, e.Message, e.StackTrace.ToString());
-                res = req.BeginResponse(HttpStatusCode.BadRequest, e.Message);
-                res.Close();
+                m_Log.InfoFormat("Deserialization error for agent message {0}: {1}: {2}\n{3}", req.RawUrl, e.GetType().FullName, e.Message, e.StackTrace);
+                req.ErrorResponse(HttpStatusCode.BadRequest, e.Message);
                 return;
             }
 
@@ -435,8 +442,7 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
             if (!Scene.Management.Scene.SceneManager.Scenes.TryGetValue(agentPost.Destination.ID, out scene))
             {
                 m_Log.InfoFormat("No destination for agent {0}", req.RawUrl);
-                res = req.BeginResponse(HttpStatusCode.NotFound, "Not Found");
-                res.Close();
+                req.ErrorResponse(HttpStatusCode.NotFound, "Not Found");
                 return;
             }
 
@@ -447,8 +453,7 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
             catch
             {
                 m_Log.InfoFormat("No destination for agent {0}", req.RawUrl);
-                res = req.BeginResponse(HttpStatusCode.NotFound, "Not Found");
-                res.Close();
+                req.ErrorResponse(HttpStatusCode.NotFound, "Not Found");
                 return;
             }
 
@@ -751,29 +756,35 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
             catch (Exception e)
             {
                 m_Log.InfoFormat("Invalid parameters for agent message {0}", req.RawUrl);
-                HttpResponse res = req.BeginResponse(HttpStatusCode.NotFound, e.Message);
-                res.Close();
+                req.ErrorResponse(HttpStatusCode.NotFound, e.Message);
                 return;
             }
 
             /* this is the rather nasty HTTP variant of the UDP AgentPosition messaging */
-            Stream httpBody = req.Body;
-            if (req.ContentType == "application/x-gzip")
+            using (Stream httpBody = req.Body)
             {
-                httpBody = new GZipStream(httpBody, CompressionMode.Decompress);
+                if (req.ContentType == "application/x-gzip")
+                {
+                    using(Stream gzHttpBody = new GZipStream(httpBody, CompressionMode.Decompress))
+                    {
+                        AgentPostHandler_PUT_Inner(req, gzHttpBody, agentID, regionID, action);
+                    }
+                }
+                else if (req.ContentType == "application/json")
+                {
+                    AgentPostHandler_PUT_Inner(req, httpBody, agentID, regionID, action);
+                }
+                else
+                {
+                    m_Log.InfoFormat("Invalid content for agent message {0}: {1}", req.RawUrl, req.ContentType);
+                    req.ErrorResponse(HttpStatusCode.UnsupportedMediaType, "Invalid content for agent message");
+                    return;
+                }
             }
-            else if (req.ContentType == "application/json")
-            {
-
-            }
-            else
-            {
-                m_Log.InfoFormat("Invalid content for agent message {0}: {1}", req.RawUrl, req.ContentType);
-                HttpResponse res = req.BeginResponse(HttpStatusCode.UnsupportedMediaType, "Invalid content for agent message");
-                res.Close();
-                return;
-            }
-
+        }
+         
+        void AgentPostHandler_PUT_Inner(HttpRequest req, Stream httpBody, UUID agentID, UUID regionID, string action)
+        {
             IValue json;
 
             try
@@ -782,9 +793,8 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
             }
             catch (Exception e)
             {
-                m_Log.InfoFormat("Deserialization error for agent message {0}\n{1}", req.RawUrl, e.StackTrace.ToString());
-                HttpResponse res = req.BeginResponse(HttpStatusCode.BadRequest, e.Message);
-                res.Close();
+                m_Log.InfoFormat("Deserialization error for agent message {0}\n{1}", req.RawUrl, e.StackTrace);
+                req.ErrorResponse(HttpStatusCode.BadRequest, e.Message);
                 return;
             }
 
@@ -826,30 +836,36 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
                 childAgentData.AgentAccess = (byte)param["agent_access"].AsUInt;
                 childAgentData.ActiveGroupID = param["active_group_id"].AsUUID;
 
-                if (param.ContainsKey("groups") && param["groups"] is AnArray)
+                if (param.ContainsKey("groups"))
                 {
-                    AnArray groups = (AnArray)param["groups"];
-                    foreach (IValue val in groups)
+                    AnArray groups = param["groups"] as AnArray;
+                    if (groups != null)
                     {
-                        Map group = (Map)val;
-                        ChildAgentUpdate.GroupDataEntry g = new ChildAgentUpdate.GroupDataEntry();
-                        g.AcceptNotices = group["accept_notices"].AsBoolean;
-                        g.GroupPowers = (GroupPowers)UInt64.Parse(group["group_powers"].ToString());
-                        g.GroupID = group["group_id"].AsUUID;
-                        childAgentData.GroupData.Add(g);
+                        foreach (IValue gval in groups)
+                        {
+                            Map group = (Map)gval;
+                            ChildAgentUpdate.GroupDataEntry g = new ChildAgentUpdate.GroupDataEntry();
+                            g.AcceptNotices = group["accept_notices"].AsBoolean;
+                            g.GroupPowers = (GroupPowers)UInt64.Parse(group["group_powers"].ToString());
+                            g.GroupID = group["group_id"].AsUUID;
+                            childAgentData.GroupData.Add(g);
+                        }
                     }
                 }
 
-                if (param.ContainsKey("animations") && param["animations"] is AnArray)
+                if (param.ContainsKey("animations"))
                 {
-                    AnArray anims = (AnArray)param["animations"];
-                    foreach (IValue val in anims)
+                    AnArray anims = param["animations"] as AnArray;
+                    if (anims != null)
                     {
-                        Map anim = (Map)val;
-                        ChildAgentUpdate.AnimationDataEntry a = new ChildAgentUpdate.AnimationDataEntry();
-                        a.Animation = anim["animation"].AsUUID;
-                        a.ObjectID = anim["object_id"].AsUUID;
-                        childAgentData.AnimationData.Add(a);
+                        foreach (IValue aval in anims)
+                        {
+                            Map anim = (Map)aval;
+                            ChildAgentUpdate.AnimationDataEntry a = new ChildAgentUpdate.AnimationDataEntry();
+                            a.Animation = anim["animation"].AsUUID;
+                            a.ObjectID = anim["object_id"].AsUUID;
+                            childAgentData.AnimationData.Add(a);
+                        }
                     }
                 }
                 /*
@@ -1015,35 +1031,34 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
                 if (Scene.Management.Scene.SceneManager.Scenes.TryGetValue(childAgentData.RegionLocation.RegionHandle, out scene))
                 {
                     IAgent agent;
-                    HttpResponse res;
+                    
                     try
                     {
                         agent = scene.Agents[childAgentData.AgentID];
                     }
                     catch
                     {
-                        res = req.BeginResponse(HttpStatusCode.BadRequest, "Unknown message type");
-                        res.Close();
+                        req.ErrorResponse(HttpStatusCode.BadRequest, "Unknown message type");
                         return;
                     }
 
                     try
                     {
                         agent.HandleMessage(childAgentData);
-                        res = req.BeginResponse();
-                        res.Close();
+                        using(HttpResponse res = req.BeginResponse())
+                        {
+
+                        }
                     }
                     catch
                     {
-                        res = req.BeginResponse(HttpStatusCode.BadRequest, "Unknown message type");
-                        res.Close();
+                        req.ErrorResponse(HttpStatusCode.BadRequest, "Unknown message type");
                         return;
                     }
                 }
                 else
                 {
-                    HttpResponse res = req.BeginResponse(HttpStatusCode.UnsupportedMediaType, "Unknown message type");
-                    res.Close();
+                    req.ErrorResponse(HttpStatusCode.UnsupportedMediaType, "Unknown message type");
                 }
             }
             else if (msgType == "AgentPosition")
@@ -1068,41 +1083,38 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
                 if (Scene.Management.Scene.SceneManager.Scenes.TryGetValue(childAgentPosition.RegionLocation.RegionHandle, out scene))
                 {
                     IAgent agent;
-                    HttpResponse res;
                     try
                     {
                         agent = scene.Agents[childAgentPosition.AgentID];
                     }
                     catch
                     {
-                        res = req.BeginResponse(HttpStatusCode.BadRequest, "Unknown message type");
-                        res.Close();
+                        req.ErrorResponse(HttpStatusCode.BadRequest, "Unknown message type");
                         return;
                     }
 
                     try
                     {
                         agent.HandleMessage(childAgentPosition);
-                        res = req.BeginResponse();
-                        res.Close();
+                        using(HttpResponse res = req.BeginResponse())
+                        {
+
+                        }
                     }
                     catch
                     {
-                        res = req.BeginResponse(HttpStatusCode.BadRequest, "Unknown message type");
-                        res.Close();
+                        req.ErrorResponse(HttpStatusCode.BadRequest, "Unknown message type");
                         return;
                     }
                 }
                 else
                 {
-                    HttpResponse res = req.BeginResponse(HttpStatusCode.BadRequest, "Unknown message type");
-                    res.Close();
+                    req.ErrorResponse(HttpStatusCode.BadRequest, "Unknown message type");
                 }
             }
             else
             {
-                HttpResponse res = req.BeginResponse(HttpStatusCode.BadRequest, "Unknown message type");
-                res.Close();
+                req.ErrorResponse(HttpStatusCode.BadRequest, "Unknown message type");
             }
         }
 
@@ -1111,7 +1123,6 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
             UUID agentID;
             UUID regionID;
             string action;
-            HttpResponse res;
             try
             {
                 GetAgentParams(req.RawUrl, out agentID, out regionID, out action);
@@ -1119,8 +1130,7 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
             catch (Exception e)
             {
                 m_Log.InfoFormat("Invalid parameters for agent message {0}", req.RawUrl);
-                res = req.BeginResponse(HttpStatusCode.NotFound, e.Message);
-                res.Close();
+                req.ErrorResponse(HttpStatusCode.NotFound, e.Message);
                 return;
             }
 
@@ -1179,8 +1189,10 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
                 /* let the disconnect be handled by Circuit */
                 agent.SendMessageAlways(new DisableSimulator(), scene.ID);
             }
-            res = req.BeginResponse(HttpStatusCode.OK, "OK");
-            res.Close();
+            using(HttpResponse res = req.BeginResponse(HttpStatusCode.OK, "OK"))
+            {
+
+            }
         }
 
         void AgentPostHandler_QUERYACCESS(HttpRequest req)
@@ -1188,7 +1200,6 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
             UUID agentID;
             UUID regionID;
             string action;
-            HttpResponse res;
             try
             {
                 GetAgentParams(req.RawUrl, out agentID, out regionID, out action);
@@ -1196,12 +1207,11 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
             catch (Exception e)
             {
                 m_Log.InfoFormat("Invalid parameters for agent message {0}", req.RawUrl);
-                res = req.BeginResponse(HttpStatusCode.NotFound, e.Message);
-                res.Close();
+                req.ErrorResponse(HttpStatusCode.NotFound, e.Message);
                 return;
             }
 
-            IValue json;
+            Map jsonreq;
             SceneInterface scene;
             try
             {
@@ -1215,23 +1225,23 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
 
             try
             {
-                json = JSON.Deserialize(req.Body);
+                jsonreq = JSON.Deserialize(req.Body) as Map;
             }
             catch (Exception e)
             {
-                m_Log.InfoFormat("Deserialization error for QUERYACCESS message {0}\n{1}", req.RawUrl, e.StackTrace.ToString());
+                m_Log.InfoFormat("Deserialization error for QUERYACCESS message {0}\n{1}", req.RawUrl, e.StackTrace);
                 req.ErrorResponse(HttpStatusCode.BadRequest, e.Message);
                 return;
             }
 
-            if (!(json is Map))
+            if (null == jsonreq)
             {
                 m_Log.InfoFormat("Deserialization error for QUERYACCESS message {0}", req.RawUrl);
                 req.ErrorResponse(HttpStatusCode.BadRequest, "Bad Request");
                 return;
             }
-            Map jsonreq = (Map)json;
-            string myVersion = "SIMULATION/0.1";
+
+            string myVersion = "SIMULATION/0.3";
             if (jsonreq.ContainsKey("my_version"))
             {
                 myVersion = jsonreq["my_version"].ToString();
@@ -1248,7 +1258,7 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
             Map response = new Map();
             Map _result = new Map();
             bool success = true;
-            string reason = "";
+            string reason = string.Empty;
             string[] myVersionSplit = myVersion.Split(new char[] { '.', '/' });
             if (myVersionSplit.Length < 3)
             {
@@ -1329,9 +1339,13 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
             /* CAUTION! never ever make version parameters a configuration parameter */
             _result.Add("version", PROTOCOL_VERSION);
             response.Add("_Result", _result);
-            res = req.BeginResponse(HttpStatusCode.OK, "OK");
-            JSON.Serialize(response, res.GetOutputStream());
-            res.Close();
+            using(HttpResponse res = req.BeginResponse(HttpStatusCode.OK, "OK"))
+            {
+                using(Stream s = res.GetOutputStream())
+                {
+                    JSON.Serialize(response, s);
+                }
+            }
         }
     }
     #endregion

@@ -57,7 +57,7 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
             }
             catch
             {
-                region_name = "";
+                region_name = string.Empty;
             }
             Map resdata = new Map();
             if (string.IsNullOrEmpty(region_name))
@@ -74,7 +74,7 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
                     {
                         resdata.Add("uuid", s.ID);
                         resdata.Add("handle", s.RegionData.Location.RegionHandle.ToString());
-                        resdata.Add("region_image", "");
+                        resdata.Add("region_image", string.Empty);
                         resdata.Add("external_name", s.RegionData.ServerURI + " " + s.RegionData.Name);
                         resdata.Add("result", true);
                     }
