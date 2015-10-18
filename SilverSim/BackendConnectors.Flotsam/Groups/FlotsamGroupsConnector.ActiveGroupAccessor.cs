@@ -7,7 +7,7 @@ namespace SilverSim.BackendConnectors.Flotsam.Groups
 {
     public partial class FlotsamGroupsConnector
     {
-        class ActiveGroupAccessor : FlotsamGroupsCommonConnector, IGroupSelectInterface
+        public sealed class ActiveGroupAccessor : FlotsamGroupsCommonConnector, IGroupSelectInterface
         {
             public ActiveGroupAccessor(string uri)
                 : base(uri)
@@ -20,13 +20,12 @@ namespace SilverSim.BackendConnectors.Flotsam.Groups
                 {
                     Map m = new Map();
                     m["AgentID"] = principal.ID;
-                    IValue iv = FlotsamXmlRpcGetCall(requestingAgent, "groups.getAgentActiveMembership", m);
-                    if(!(iv is Map))
+                    m = FlotsamXmlRpcGetCall(requestingAgent, "groups.getAgentActiveMembership", m) as Map;
+                    if(null == m)
                     {
                         throw new AccessFailedException();
                     }
 
-                    m = (Map)iv;
                     if(m.ContainsKey("error"))
                     {
                         if(m["error"].ToString() == "No Active Group Specified")
@@ -56,13 +55,12 @@ namespace SilverSim.BackendConnectors.Flotsam.Groups
                 {
                     Map m = new Map();
                     m["AgentID"] = principal.ID;
-                    IValue iv = FlotsamXmlRpcGetCall(requestingAgent, "groups.getAgentActiveMembership", m);
-                    if (!(iv is Map))
+                    m = FlotsamXmlRpcGetCall(requestingAgent, "groups.getAgentActiveMembership", m) as Map;
+                    if (m == null)
                     {
                         throw new AccessFailedException();
                     }
 
-                    m = (Map)iv;
                     if (m.ContainsKey("error"))
                     {
                         if (m["error"].ToString() == "No Active Group Specified")

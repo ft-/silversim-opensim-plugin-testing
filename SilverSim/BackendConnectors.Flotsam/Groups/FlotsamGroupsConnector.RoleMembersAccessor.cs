@@ -10,7 +10,7 @@ namespace SilverSim.BackendConnectors.Flotsam.Groups
 {
     public partial class FlotsamGroupsConnector
     {
-        class RoleMembersAccessor : FlotsamGroupsCommonConnector, IGroupRolemembersInterface
+        public sealed class RoleMembersAccessor : FlotsamGroupsCommonConnector, IGroupRolemembersInterface
         {
             public RoleMembersAccessor(string uri)
                 : base(uri)
@@ -24,14 +24,15 @@ namespace SilverSim.BackendConnectors.Flotsam.Groups
                     Map m = new Map();
                     m.Add("GroupID", group.ID);
                     m.Add("AgentID", principal.ID);
-                    IValue iv = FlotsamXmlRpcGetCall(requestingAgent, "groups.getAgentRoles", m);
-                    if (iv is AnArray)
+                    AnArray iv = FlotsamXmlRpcGetCall(requestingAgent, "groups.getAgentRoles", m) as AnArray;
+                    if(null != iv)
                     {
-                        foreach (IValue v in ((AnArray)iv))
+                        foreach (IValue v in iv)
                         {
-                            if (v is Map)
+                            m = v as Map;
+                            if (null != m)
                             {
-                                GroupRolemember gmem = v.ToGroupRolemember(group);
+                                GroupRolemember gmem = m.ToGroupRolemember(group);
                                 if(gmem.RoleID.Equals(roleID))
                                 {
                                     return gmem;
@@ -51,14 +52,15 @@ namespace SilverSim.BackendConnectors.Flotsam.Groups
                     List<GroupRolemembership> gmems = new List<GroupRolemembership>();
                     Map m = new Map();
                     m.Add("AgentID", principal.ID);
-                    IValue iv = FlotsamXmlRpcGetCall(requestingAgent, "groups.getAgentRoles", m);
-                    if (iv is AnArray)
+                    AnArray iv = FlotsamXmlRpcGetCall(requestingAgent, "groups.getAgentRoles", m) as AnArray;
+                    if(null != iv)
                     {
-                        foreach (IValue v in ((AnArray)iv))
+                        foreach (IValue v in iv)
                         {
-                            if (v is Map)
+                            Map data = v as Map;
+                            if(null != data)
                             {
-                                GroupRolemembership gmem = v.ToGroupRolemembership();
+                                GroupRolemembership gmem = data.ToGroupRolemembership();
                                 gmems.Add(gmem);
                             }
                         }
@@ -81,15 +83,16 @@ namespace SilverSim.BackendConnectors.Flotsam.Groups
                 {
                     Map m = new Map();
                     m.Add("GroupID", group.ID);
-                    IValue iv = FlotsamXmlRpcGetCall(requestingAgent, "groups.getGroupRoleMembers", m);
+                    AnArray iv = FlotsamXmlRpcGetCall(requestingAgent, "groups.getGroupRoleMembers", m) as AnArray;
                     List<GroupRolemember> rolemems = new List<GroupRolemember>();
                     if(iv is AnArray)
                     {
-                        foreach(IValue v in ((AnArray)iv))
+                        foreach(IValue v in iv)
                         {
-                            if(v is Map)
+                            m = v as Map;
+                            if(null != m)
                             {
-                                rolemems.Add(v.ToGroupRolemember(group));
+                                rolemems.Add(m.ToGroupRolemember(group));
                             }
                         }
                     }

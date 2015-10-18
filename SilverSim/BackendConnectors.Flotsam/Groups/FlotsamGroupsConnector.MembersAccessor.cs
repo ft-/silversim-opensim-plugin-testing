@@ -11,7 +11,7 @@ namespace SilverSim.BackendConnectors.Flotsam.Groups
 {
     public partial class FlotsamGroupsConnector
     {
-        class MembersAccessor : FlotsamGroupsCommonConnector, IGroupMembersInterface
+        public sealed class MembersAccessor : FlotsamGroupsCommonConnector, IGroupMembersInterface
         {
             public MembersAccessor(string uri)
                 : base(uri)
@@ -37,17 +37,18 @@ namespace SilverSim.BackendConnectors.Flotsam.Groups
                 {
                     Map m = new Map();
                     m.Add("GroupID", group.ID);
-                    IValue v = FlotsamXmlRpcGetCall(requestingAgent, "groups.getGroupMembers", m);
-                    if(!(v is AnArray))
+                    AnArray res = FlotsamXmlRpcGetCall(requestingAgent, "groups.getGroupMembers", m) as AnArray;
+                    if(null == res)
                     {
                         throw new AccessFailedException();
                     }
                     List<GroupMember> gmems = new List<GroupMember>();
-                    foreach(IValue iv in (AnArray)v)
+                    foreach (IValue iv in res)
                     {
-                        if(iv is Map)
+                        Map data = iv as Map;
+                        if (data != null)
                         {
-                            gmems.Add(iv.ToGroupMember(group));
+                            gmems.Add(data.ToGroupMember(group));
                         }
                     }
                     return gmems;
@@ -60,17 +61,18 @@ namespace SilverSim.BackendConnectors.Flotsam.Groups
                 {
                     Map m = new Map();
                     m.Add("AgentID", principal.ID);
-                    IValue v = FlotsamXmlRpcGetCall(requestingAgent, "groups.getAgentGroupMemberships", m);
-                    if (!(v is AnArray))
+                    AnArray v = FlotsamXmlRpcGetCall(requestingAgent, "groups.getAgentGroupMemberships", m) as AnArray;
+                    if(null == v)
                     {
                         throw new AccessFailedException();
                     }
                     List<GroupMember> gmems = new List<GroupMember>();
-                    foreach (IValue iv in (AnArray)v)
+                    foreach (IValue iv in v)
                     {
-                        if (iv is Map)
+                        Map data = iv as Map;
+                        if(null != data)
                         {
-                            gmems.Add(iv.ToGroupMember());
+                            gmems.Add(data.ToGroupMember());
                         }
                     }
                     return gmems;

@@ -10,7 +10,7 @@ namespace SilverSim.BackendConnectors.Flotsam.Groups
 {
     public partial class FlotsamGroupsConnector
     {
-        class InvitesAccessor : FlotsamGroupsCommonConnector, IGroupInvitesInterface
+        public sealed class InvitesAccessor : FlotsamGroupsCommonConnector, IGroupInvitesInterface
         {
             public InvitesAccessor(string uri)
                 : base(uri)
@@ -23,12 +23,11 @@ namespace SilverSim.BackendConnectors.Flotsam.Groups
                 {
                     Map m = new Map();
                     m.Add("InviteID", groupInviteID);
-                    IValue iv = FlotsamXmlRpcGetCall(requestingAgent, "groups.getAgentToGroupInvite", m);
-                    if(!(iv is Map))
+                    m = FlotsamXmlRpcGetCall(requestingAgent, "groups.getAgentToGroupInvite", m) as Map;
+                    if(null == m)
                     {
                         throw new AccessFailedException();
                     }
-                    m = (Map)iv;
 
                     GroupInvite inv = new GroupInvite();
                     inv.ID = groupInviteID;

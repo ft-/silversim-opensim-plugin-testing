@@ -10,7 +10,7 @@ namespace SilverSim.BackendConnectors.Flotsam.Groups
 {
     public partial class FlotsamGroupsConnector
     {
-        class MembershipsAccessor : FlotsamGroupsCommonConnector, IGroupMembershipsInterface
+        public sealed class MembershipsAccessor : FlotsamGroupsCommonConnector, IGroupMembershipsInterface
         {
             public MembershipsAccessor(string uri)
                 : base(uri)
@@ -25,12 +25,12 @@ namespace SilverSim.BackendConnectors.Flotsam.Groups
                     Map m = new Map();
                     m.Add("AgentID", principal.ID);
                     m.Add("GroupID", group.ID);
-                    IValue v = FlotsamXmlRpcGetCall(requestingAgent, "groups.getAgentGroupMembership", m);
-                    if (!(v is Map))
+                    m = FlotsamXmlRpcGetCall(requestingAgent, "groups.getAgentGroupMembership", m) as Map;
+                    if (null == m)
                     {
                         throw new AccessFailedException();
                     }
-                    return v.ToGroupMembership();
+                    return m.ToGroupMembership();
                 }
             }
 
@@ -40,17 +40,18 @@ namespace SilverSim.BackendConnectors.Flotsam.Groups
                 {
                     Map m = new Map();
                     m.Add("AgentID", principal.ID);
-                    IValue v = FlotsamXmlRpcGetCall(requestingAgent, "groups.getAgentGroupMemberships", m);
-                    if (!(v is AnArray))
+                    AnArray res = FlotsamXmlRpcGetCall(requestingAgent, "groups.getAgentGroupMemberships", m) as AnArray;
+                    if (null == res)
                     {
                         throw new AccessFailedException();
                     }
                     List<GroupMembership> gmems = new List<GroupMembership>();
-                    foreach (IValue iv in (AnArray)v)
+                    foreach (IValue iv in res)
                     {
-                        if (iv is Map)
+                        Map data = iv as Map;
+                        if (null != data)
                         {
-                            gmems.Add(iv.ToGroupMembership());
+                            gmems.Add(data.ToGroupMembership());
                         }
                     }
                     return gmems;

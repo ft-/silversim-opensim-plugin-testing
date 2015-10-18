@@ -5,12 +5,13 @@ using SilverSim.Types;
 using SilverSim.Types.Groups;
 using System;
 using System.Collections.Generic;
+using System.IO;
 
 namespace SilverSim.BackendConnectors.Flotsam.Groups
 {
     public partial class FlotsamGroupsConnector
     {
-        class NoticesAccessor : FlotsamGroupsCommonConnector, IGroupNoticesInterface
+        public sealed class NoticesAccessor : FlotsamGroupsCommonConnector, IGroupNoticesInterface
         {
             public NoticesAccessor(string uri)
                 : base(uri)
@@ -21,17 +22,18 @@ namespace SilverSim.BackendConnectors.Flotsam.Groups
             {
                 Map m = new Map();
                 m.Add("GroupID", group.ID);
-                IValue r = FlotsamXmlRpcGetCall(requestingAgent, "groups.getGroupNotices", m);
-                if(!(r is AnArray))
+                AnArray r = FlotsamXmlRpcGetCall(requestingAgent, "groups.getGroupNotices", m) as AnArray;
+                if(null == r)
                 {
                     throw new AccessFailedException();
                 }
                 List<GroupNotice> notices = new List<GroupNotice>();
-                foreach(IValue iv in (AnArray)r)
+                foreach(IValue iv in r)
                 {
-                    if(iv is Map)
+                    Map data = iv as Map;
+                    if(null != data)
                     {
-                        notices.Add(iv.ToGroupNotice());
+                        notices.Add(data.ToGroupNotice());
                     }
                 }
                 return notices;
@@ -43,7 +45,11 @@ namespace SilverSim.BackendConnectors.Flotsam.Groups
                 {
                     Map m = new Map();
                     m.Add("NoticeID", groupNoticeID);
-                    IValue r = FlotsamXmlRpcGetCall(requestingAgent, "groups.getGroupNotice", m);
+                    Map r = FlotsamXmlRpcGetCall(requestingAgent, "groups.getGroupNotice", m) as Map;
+                    if(null == r)
+                    {
+                        throw new InvalidDataException();
+                    }
                     return r.ToGroupNotice();
                 }
             }

@@ -8,6 +8,7 @@ using SilverSim.Types;
 using SilverSim.Types.StructuredData.XMLRPC;
 using System;
 using System.Collections.Generic;
+using System.IO;
 
 /*
  * RPC method names:
@@ -123,12 +124,12 @@ namespace SilverSim.BackendConnectors.Flotsam.Groups
                 XMLRPC.XmlRpcResponse res = RPC.DoXmlRpcRequest(m_Uri, req, TimeoutMs);
                 if (!(res.ReturnValue is Map))
                 {
-                    throw new Exception("Unexpected FlotsamGroups return value");
+                    throw new InvalidDataException("Unexpected FlotsamGroups return value");
                 }
                 Map p = (Map)res.ReturnValue;
                 if (!p.ContainsKey("success"))
                 {
-                    throw new Exception("Unexpected FlotsamGroups return value");
+                    throw new InvalidDataException("Unexpected FlotsamGroups return value");
                 }
 
                 if (p["success"].ToString().ToLower() != "true")
@@ -156,12 +157,12 @@ namespace SilverSim.BackendConnectors.Flotsam.Groups
                 structparam.Add("WriteKey", m_WriteKey);
                 req.Params.Add(structparam);
                 XMLRPC.XmlRpcResponse res = RPC.DoXmlRpcRequest(m_Uri, req, TimeoutMs);
-                if (res.ReturnValue is Map)
+                Map p = res.ReturnValue as Map;
+                if (null != p)
                 {
-                    Map p = (Map)res.ReturnValue;
                     if (p.ContainsKey("error"))
                     {
-                        throw new Exception("Unexpected FlotsamGroups return value");
+                        throw new InvalidDataException("Unexpected FlotsamGroups return value");
                     }
                 }
                 

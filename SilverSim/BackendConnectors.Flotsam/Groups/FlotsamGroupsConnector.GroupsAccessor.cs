@@ -5,12 +5,13 @@ using SilverSim.Types;
 using SilverSim.Types.Groups;
 using System;
 using System.Collections.Generic;
+using System.IO;
 
 namespace SilverSim.BackendConnectors.Flotsam.Groups
 {
     public partial class FlotsamGroupsConnector
     {
-        class GroupsAccessor : FlotsamGroupsCommonConnector, IGroupsInterface
+        public sealed class GroupsAccessor : FlotsamGroupsCommonConnector, IGroupsInterface
         {
             public GroupsAccessor(string uri)
                 : base(uri)
@@ -33,7 +34,12 @@ namespace SilverSim.BackendConnectors.Flotsam.Groups
                 m.Add("OwnerRoleID", group.OwnerRoleID);
                 m.Add("EveryonePowers", ((ulong)GroupPowers.DefaultEveryonePowers).ToString());
                 m.Add("OwnersPowers", ((ulong)GroupPowers.OwnerPowers).ToString());
-                return FlotsamXmlRpcCall(requestingAgent, "groups.createGroup", m).ToGroupInfo();
+                Map res = FlotsamXmlRpcCall(requestingAgent, "groups.createGroup", m) as Map;
+                if(null == res)
+                {
+                    throw new InvalidDataException();
+                }
+                return res.ToGroupInfo();
             }
 
             public GroupInfo Update(UUI requestingAgent, GroupInfo group)
@@ -47,7 +53,7 @@ namespace SilverSim.BackendConnectors.Flotsam.Groups
                 m.Add("ShowInList", group.IsShownInList ? 1 : 0);
                 m.Add("AllowPublish", group.IsAllowPublish ? 1 : 0);
                 m.Add("MaturePublish", group.IsMaturePublish ? 1 : 0);
-                FlotsamXmlRpcCall(requestingAgent, "groups.updateGroup", m).ToGroupInfo();
+                FlotsamXmlRpcCall(requestingAgent, "groups.updateGroup", m);
                 return this[requestingAgent, group.ID];
             }
 
@@ -62,7 +68,12 @@ namespace SilverSim.BackendConnectors.Flotsam.Groups
                 {
                     Map m = new Map();
                     m.Add("GroupID", groupID);
-                    return FlotsamXmlRpcGetCall(requestingAgent, "groups.getGroup", m).ToGroupInfo().ID;
+                    m = FlotsamXmlRpcGetCall(requestingAgent, "groups.getGroup", m) as Map;
+                    if(null == m)
+                    {
+                        throw new InvalidDataException();
+                    }
+                    return m.ToGroupInfo().ID;
                 }
             }
 
@@ -72,7 +83,12 @@ namespace SilverSim.BackendConnectors.Flotsam.Groups
                 {
                     Map m = new Map();
                     m.Add("GroupID", group.ID);
-                    return FlotsamXmlRpcGetCall(requestingAgent, "groups.getGroup", m).ToGroupInfo();
+                    m = FlotsamXmlRpcGetCall(requestingAgent, "groups.getGroup", m) as Map;
+                    if(null == m)
+                    {
+                        throw new InvalidDataException();
+                    }
+                    return m.ToGroupInfo();
                 }
             }
 
@@ -82,7 +98,12 @@ namespace SilverSim.BackendConnectors.Flotsam.Groups
                 {
                     Map m = new Map();
                     m.Add("Name", groupName);
-                    return FlotsamXmlRpcGetCall(requestingAgent, "groups.getGroup", m).ToGroupInfo();
+                    m = FlotsamXmlRpcGetCall(requestingAgent, "groups.getGroup", m) as Map;
+                    if(null == m)
+                    {
+                        throw new InvalidDataException();
+                    }
+                    return m.ToGroupInfo();
                 }
             }
 
@@ -95,9 +116,10 @@ namespace SilverSim.BackendConnectors.Flotsam.Groups
                 List<DirGroupInfo> groups = new List<DirGroupInfo>();
                 foreach(IValue iv in results)
                 {
-                    if (iv is Map)
+                    Map data = iv as Map;
+                    if (null != data)
                     {
-                        groups.Add(iv.ToDirGroupInfo());
+                        groups.Add(data.ToDirGroupInfo());
                     }
                 }
 

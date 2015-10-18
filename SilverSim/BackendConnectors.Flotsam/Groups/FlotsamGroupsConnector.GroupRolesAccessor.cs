@@ -9,7 +9,7 @@ namespace SilverSim.BackendConnectors.Flotsam.Groups
 {
     public partial class FlotsamGroupsConnector
     {
-        class GroupRolesAccessor : FlotsamGroupsCommonConnector, IGroupRolesInterface
+        public sealed class GroupRolesAccessor : FlotsamGroupsCommonConnector, IGroupRolesInterface
         {
             public GroupRolesAccessor(string uri)
                 : base(uri)
@@ -38,16 +38,17 @@ namespace SilverSim.BackendConnectors.Flotsam.Groups
                     List<GroupRole> roles = new List<GroupRole>();
                     Map m = new Map();
                     m.Add("GroupID", group.ID);
-                    IValue iv = FlotsamXmlRpcGetCall(requestingAgent, "groups.getGroupRoles", m);
-                    if(!(iv is AnArray))
+                    AnArray res = FlotsamXmlRpcGetCall(requestingAgent, "groups.getGroupRoles", m) as AnArray;
+                    if(null == res)
                     {
                         throw new AccessFailedException();
                     }
-                    foreach(IValue v in (AnArray)iv)
+                    foreach(IValue v in res)
                     {
-                        if(v is Map)
+                        Map data = v as Map;
+                        if(data != null)
                         {
-                            roles.Add(v.ToGroupRole(group));
+                            roles.Add(data.ToGroupRole(group));
                         }
                     }
                     return roles;
@@ -61,15 +62,16 @@ namespace SilverSim.BackendConnectors.Flotsam.Groups
                     Map m = new Map();
                     m.Add("GroupID", group.ID);
                     m.Add("AgentID", principal.ID); 
-                    IValue iv = FlotsamXmlRpcGetCall(requestingAgent, "groups.getAgentRoles", m);
+                    AnArray res = FlotsamXmlRpcGetCall(requestingAgent, "groups.getAgentRoles", m) as AnArray;
                     List<GroupRole> rolemems = new List<GroupRole>();
-                    if (iv is AnArray)
+                    if (null != res)
                     {
-                        foreach (IValue v in ((AnArray)iv))
+                        foreach (IValue v in res)
                         {
-                            if (v is Map)
+                            Map data = v as Map;
+                            if (null != data)
                             {
-                                rolemems.Add(v.ToGroupRole(group));
+                                rolemems.Add(data.ToGroupRole(group));
                             }
                         }
                     }

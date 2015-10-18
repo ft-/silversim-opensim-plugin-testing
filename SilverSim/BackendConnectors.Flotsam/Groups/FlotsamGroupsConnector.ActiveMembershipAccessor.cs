@@ -12,7 +12,7 @@ namespace SilverSim.BackendConnectors.Flotsam.Groups
 {
     public partial class FlotsamGroupsConnector
     {
-        public class ActiveGroupMembershipAccessor : FlotsamGroupsCommonConnector, IActiveGroupMembershipInterface
+        public sealed class ActiveGroupMembershipAccessor : FlotsamGroupsCommonConnector, IActiveGroupMembershipInterface
         {
             public ActiveGroupMembershipAccessor(string uri)
                 : base(uri)
@@ -25,13 +25,12 @@ namespace SilverSim.BackendConnectors.Flotsam.Groups
                 {
                     Map m = new Map();
                     m["AgentID"] = principal.ID;
-                    IValue iv = FlotsamXmlRpcGetCall(requestingAgent, "groups.getAgentActiveMembership", m);
-                    if (!(iv is Map))
+                    m = FlotsamXmlRpcGetCall(requestingAgent, "groups.getAgentActiveMembership", m) as Map;
+                    if (m == null)
                     {
                         throw new AccessFailedException();
                     }
 
-                    m = (Map)iv;
                     GroupActiveMembership gam = new GroupActiveMembership();
                     gam.Group = UGI.Unknown;
                     gam.SelectedRoleID = UUID.Zero;

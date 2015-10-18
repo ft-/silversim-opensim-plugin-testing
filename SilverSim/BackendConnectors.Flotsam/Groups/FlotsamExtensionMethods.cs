@@ -9,9 +9,8 @@ namespace SilverSim.BackendConnectors.Flotsam.Groups
 {
     public static class FlotsamExtensionMethods
     {
-        public static GroupInfo ToGroupInfo(this IValue iv)
+        public static GroupInfo ToGroupInfo(this Map m)
         {
-            Map m = (Map)iv;
             GroupInfo gi = new GroupInfo();
             gi.ID.ID = m["GroupID"].AsUUID;
             gi.ID.GroupName = m["Name"].ToString();
@@ -27,9 +26,8 @@ namespace SilverSim.BackendConnectors.Flotsam.Groups
             return gi;
         }
 
-        public static DirGroupInfo ToDirGroupInfo(this IValue iv)
+        public static DirGroupInfo ToDirGroupInfo(this Map m)
         {
-            Map m = (Map)iv;
             DirGroupInfo gi = new DirGroupInfo();
             gi.MemberCount = m["Members"].AsInt;
             gi.ID.GroupName = m["Name"].ToString();
@@ -37,9 +35,8 @@ namespace SilverSim.BackendConnectors.Flotsam.Groups
             return gi;
         }
 
-        public static GroupMember ToGroupMember(this IValue iv, UGI group)
+        public static GroupMember ToGroupMember(this Map m, UGI group)
         {
-            Map m = (Map)iv;
             GroupMember gmem = new GroupMember();
             gmem.IsListInProfile = Convert.ToBoolean(m["ListInProfile"].ToString());
             gmem.Contribution = m["Contribution"].AsInt;
@@ -50,9 +47,8 @@ namespace SilverSim.BackendConnectors.Flotsam.Groups
             return gmem;
         }
 
-        public static GroupMember ToGroupMember(this IValue iv)
+        public static GroupMember ToGroupMember(this Map m)
         {
-            Map m = (Map)iv;
             GroupMember gmem = new GroupMember();
             gmem.IsListInProfile = Convert.ToBoolean(m["ListInProfile"].ToString());
             gmem.Contribution = m["Contribution"].AsInt;
@@ -64,9 +60,8 @@ namespace SilverSim.BackendConnectors.Flotsam.Groups
             return gmem;
         }
 
-        public static GroupMembership ToGroupMembership(this IValue iv)
+        public static GroupMembership ToGroupMembership(this Map m)
         {
-            Map m = (Map)iv;
             GroupMembership gmem = new GroupMembership();
             gmem.ListInProfile = Convert.ToBoolean(m["ListInProfile"].ToString());
             gmem.Contribution = m["Contribution"].AsInt;
@@ -79,9 +74,8 @@ namespace SilverSim.BackendConnectors.Flotsam.Groups
             return gmem;
         }
 
-        public static GroupRolemember ToGroupRolemember(this IValue iv, UGI group)
+        public static GroupRolemember ToGroupRolemember(this Map m, UGI group)
         {
-            Map m = (Map)iv;
             GroupRolemember gmem = new GroupRolemember();
             gmem.RoleID = m["RoleID"].AsUUID;
             gmem.Principal.ID = m["AgentID"].AsUUID;
@@ -89,9 +83,8 @@ namespace SilverSim.BackendConnectors.Flotsam.Groups
             return gmem;
         }
 
-        public static GroupRolemembership ToGroupRolemembership(this IValue iv, UGI group)
+        public static GroupRolemembership ToGroupRolemembership(this Map m, UGI group)
         {
-            Map m = (Map)iv;
             GroupRolemembership gmem = new GroupRolemembership();
             gmem.RoleID = m["RoleID"].AsUUID;
             gmem.Principal.ID = m["AgentID"].AsUUID;
@@ -100,9 +93,8 @@ namespace SilverSim.BackendConnectors.Flotsam.Groups
             return gmem;
         }
 
-        public static GroupRolemembership ToGroupRolemembership(this IValue iv)
+        public static GroupRolemembership ToGroupRolemembership(this Map m)
         {
-            Map m = (Map)iv;
             GroupRolemembership gmem = new GroupRolemembership();
             gmem.RoleID = m["RoleID"].AsUUID;
             gmem.Principal.ID = m["AgentID"].AsUUID;
@@ -111,9 +103,8 @@ namespace SilverSim.BackendConnectors.Flotsam.Groups
             return gmem;
         }
 
-        public static GroupRole ToGroupRole(this IValue iv, UGI group)
+        public static GroupRole ToGroupRole(this Map m, UGI group)
         {
-            Map m = (Map)iv;
             GroupRole role = new GroupRole();
             role.Group = group;
             role.ID = m["RoleID"].AsUUID;
@@ -125,9 +116,8 @@ namespace SilverSim.BackendConnectors.Flotsam.Groups
             return role;
         }
 
-        public static GroupNotice ToGroupNotice(this IValue iv)
+        public static GroupNotice ToGroupNotice(this Map m)
         {
-            Map m = (Map)iv;
             GroupNotice notice = new GroupNotice();
             notice.Group.ID = m["GroupID"].AsUUID;
             notice.ID = m["NoticeID"].AsUUID;
