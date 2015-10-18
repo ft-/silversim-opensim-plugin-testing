@@ -10,10 +10,11 @@ using SilverSim.ServiceInterfaces.Friends;
 using SilverSim.Types;
 using SilverSim.Types.Friends;
 using System.Collections.Generic;
+using System.IO;
 
 namespace SilverSim.BackendConnectors.Robust.Friends
 {
-    class RobustFriendsConnector : FriendsServiceInterface, IPlugin
+    public sealed class RobustFriendsConnector : FriendsServiceInterface, IPlugin
     {
         string m_Uri;
         public int TimeoutMs = 20000;
@@ -28,7 +29,7 @@ namespace SilverSim.BackendConnectors.Robust.Friends
             m_Uri = uri;
         }
 
-        private void checkResult(Map map)
+        private void CheckResult(Map map)
         {
             if (!map.ContainsKey("Result"))
             {
@@ -65,7 +66,11 @@ namespace SilverSim.BackendConnectors.Robust.Friends
                 post["METHOD"] = "getfriends_string";
                 post["PRINCIPALID"] = (string)user.ID;
 
-                Map res = OpenSimResponse.Deserialize(HttpRequestHandler.DoStreamPostRequest(m_Uri, null, post, false, TimeoutMs));
+                Map res;
+                using(Stream s = HttpRequestHandler.DoStreamPostRequest(m_Uri, null, post, false, TimeoutMs))
+                {
+                    res = OpenSimResponse.Deserialize(s);
+                }
                 foreach(KeyValuePair<string, IValue> kvp in res)
                 {
                     if(kvp.Key.StartsWith("friend"))
@@ -113,7 +118,10 @@ namespace SilverSim.BackendConnectors.Robust.Friends
             }
             post["MyFlags"] = fi.UserGivenFlags.ToString();
 
-            checkResult(OpenSimResponse.Deserialize(HttpRequestHandler.DoStreamPostRequest(m_Uri, null, post, false, TimeoutMs)));
+            using(Stream s = HttpRequestHandler.DoStreamPostRequest(m_Uri, null, post, false, TimeoutMs))
+            {
+                CheckResult(OpenSimResponse.Deserialize(s));
+            }
         }
 
         public override void Delete(FriendInfo fi)
@@ -127,7 +135,10 @@ namespace SilverSim.BackendConnectors.Robust.Friends
                 post["FRIEND"] += ";" + fi.Secret;
             }
 
-            checkResult(OpenSimResponse.Deserialize(HttpRequestHandler.DoStreamPostRequest(m_Uri, null, post, false, TimeoutMs)));
+            using (Stream s = HttpRequestHandler.DoStreamPostRequest(m_Uri, null, post, false, TimeoutMs))
+            {
+                CheckResult(OpenSimResponse.Deserialize(s));
+            }
         }
 
         public void Startup(ConfigurationLoader loader)

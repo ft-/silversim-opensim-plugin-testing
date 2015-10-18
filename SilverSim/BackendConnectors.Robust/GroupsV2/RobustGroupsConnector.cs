@@ -9,6 +9,7 @@ using SilverSim.ServiceInterfaces.Groups;
 using SilverSim.Types;
 using SilverSim.Types.Account;
 using System.Collections.Generic;
+using System.IO;
 
 namespace SilverSim.BackendConnectors.Robust.GroupsV2
 {
@@ -24,7 +25,7 @@ namespace SilverSim.BackendConnectors.Robust.GroupsV2
         NoticesAccessor m_Notices;
         ActiveGroupMembershipAccesor m_ActiveGroupMembership;
         UserAccountServiceInterface m_UserAccountService;
-        string m_UserAccountServiceName = "";
+        string m_UserAccountServiceName = string.Empty;
         int m_TimeoutMs = 20000;
 
         public int TimeoutMs
@@ -64,8 +65,6 @@ namespace SilverSim.BackendConnectors.Robust.GroupsV2
                 return agent.ToString();
             }
         }
-
-        public delegate string GetGroupsAgentIDDelegate(UUI agent);
 
         public RobustGroupsConnector(string uri, string serviceUri, string userAccountServiceName)
         {
@@ -168,7 +167,11 @@ namespace SilverSim.BackendConnectors.Robust.GroupsV2
 
         internal static void BooleanResponseRequest(string uri, Dictionary<string, string> post, bool compressed, int timeoutms)
         {
-            Map m = OpenSimResponse.Deserialize(HttpRequestHandler.DoStreamPostRequest(uri, null, post, compressed, timeoutms));
+            Map m;
+            using(Stream s = HttpRequestHandler.DoStreamPostRequest(uri, null, post, compressed, timeoutms))
+            {
+                m = OpenSimResponse.Deserialize(s);
+            }
             if(!m.ContainsKey("RESULT"))
             {
                 throw new AccessFailedException();

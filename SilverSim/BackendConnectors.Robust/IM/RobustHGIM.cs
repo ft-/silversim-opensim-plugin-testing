@@ -171,8 +171,8 @@ namespace SilverSim.BackendConnectors.Robust.IM
         public IPlugin Initialize(ConfigurationLoader loader, IConfig ownConfig)
         {
             List<string> avatarNameServiceNames = new List<string>();
-            string avatarNameServices = ownConfig.GetString("AvatarNameServices", "");
-            string presenceServiceName = ownConfig.GetString("PresenceService", "");
+            string avatarNameServices = ownConfig.GetString("AvatarNameServices", string.Empty);
+            string presenceServiceName = ownConfig.GetString("PresenceService", string.Empty);
             foreach(string p in avatarNameServices.Split(','))
             {
                 avatarNameServiceNames.Add(p.Trim());

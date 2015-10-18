@@ -8,6 +8,7 @@ using SilverSim.ServiceInterfaces.Inventory;
 using SilverSim.Types;
 using SilverSim.Types.Inventory;
 using System.Collections.Generic;
+using System.IO;
 using System.Net;
 using System.Web;
 
@@ -27,23 +28,29 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
         }
 
         #region Private duplicate (keeps InventoryFolderConnector from having a circular reference)
-        InventoryFolder GetFolder(UUID PrincipalID, UUID key)
+        InventoryFolder GetFolder(UUID principalID, UUID key)
         {
             Dictionary<string, string> post = new Dictionary<string, string>();
-            post["PRINCIPAL"] = (string)PrincipalID;
+            post["PRINCIPAL"] = (string)principalID;
             post["ID"] = (string)key;
             post["METHOD"] = "GETFOLDER";
-            Map map = OpenSimResponse.Deserialize(HttpRequestHandler.DoStreamPostRequest(m_InventoryURI, null, post, false, TimeoutMs));
+            Map map;
+            using(Stream s = HttpRequestHandler.DoStreamPostRequest(m_InventoryURI, null, post, false, TimeoutMs))
+            {
+                map = OpenSimResponse.Deserialize(s);
+            }
             if (!map.ContainsKey("folder"))
             {
                 throw new InventoryInaccessibleException();
             }
-            else if (!(map["folder"] is Map))
+
+            Map foldermap = map["folder"] as Map;
+            if (null == foldermap)
             {
                 throw new InventoryInaccessibleException();
             }
 
-            return RobustInventoryConnector.FolderFromMap((Map)map["folder"]);
+            return RobustInventoryConnector.FolderFromMap(foldermap);
         }
         #endregion
 
@@ -56,7 +63,11 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
                 post["PRINCIPAL"] = (string)principalID;
                 post["FOLDER"] = (string)folderID;
                 post["METHOD"] = "GETFOLDERCONTENT";
-                Map map = OpenSimResponse.Deserialize(HttpRequestHandler.DoStreamPostRequest(m_InventoryURI, null, post, false, TimeoutMs));
+                Map map;
+                using(Stream s = HttpRequestHandler.DoStreamPostRequest(m_InventoryURI, null, post, false, TimeoutMs))
+                {
+                    map = OpenSimResponse.Deserialize(s);
+                }
 
                 folderContent.Owner.ID = principalID;
                 folderContent.FolderID = folderID;
@@ -71,23 +82,33 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
                     folderContent.Version = folder.Version;
                 }
 
-                if (map.ContainsKey("FOLDERS") && map["FOLDERS"] is Map)
+                if (map.ContainsKey("FOLDERS"))
                 {
-                    foreach (KeyValuePair<string, IValue> i in (Map)map["FOLDERS"])
+                    Map foldersmap = map["FOLDERS"] as Map;
+                    if(null != foldersmap)
                     {
-                        if (i.Value is Map)
+                        foreach (KeyValuePair<string, IValue> ifolder in foldersmap)
                         {
-                            folderContent.Folders.Add(RobustInventoryConnector.FolderFromMap((Map)i.Value));
+                            Map folderdata = ifolder.Value as Map;
+                            if (null != folderdata)
+                            {
+                                folderContent.Folders.Add(RobustInventoryConnector.FolderFromMap(folderdata));
+                            }
                         }
                     }
                 }
-                if(map.ContainsKey("ITEMS") && map["ITEMS"] is Map)
+                if(map.ContainsKey("ITEMS"))
                 {
-                    foreach (KeyValuePair<string, IValue> i in (Map)map["ITEMS"])
+                    Map itemsmap = map["ITEMS"] as Map;
+                    if (null != itemsmap)
                     {
-                        if (i.Value is Map)
+                        foreach (KeyValuePair<string, IValue> i in itemsmap)
                         {
-                            folderContent.Items.Add(RobustInventoryConnector.ItemFromMap((Map)i.Value, m_GroupsService));
+                            Map itemdata = i.Value as Map;
+                            if (null != itemdata)
+                            {
+                                folderContent.Items.Add(RobustInventoryConnector.ItemFromMap(itemdata, m_GroupsService));
+                            }
                         }
                     }
                 }
@@ -118,7 +139,10 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
                 Map map;
                 try
                 {
-                    map = OpenSimResponse.Deserialize(HttpRequestHandler.DoStreamPostRequest(m_InventoryURI, null, post, false, TimeoutMs));
+                    using (Stream s = HttpRequestHandler.DoStreamPostRequest(m_InventoryURI, null, post, false, TimeoutMs))
+                    {
+                        map = OpenSimResponse.Deserialize(s);
+                    }
                 }
                 catch(HttpRequestHandler.BadHttpResponseException)
                 {
@@ -142,33 +166,42 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
 
                 foreach(KeyValuePair<string, IValue> kvp in map)
                 {
-                    if(kvp.Key.StartsWith("F_") && kvp.Value is Map)
+                    Map fc = kvp.Value as Map;
+                    if(kvp.Key.StartsWith("F_") && null != fc)
                     {
-                        Map fc = (Map)kvp.Value;
-
                         InventoryFolderContent folderContent = new InventoryFolderContent();
                         folderContent.Owner.ID = fc["OWNER"].AsUUID;
                         folderContent.FolderID = fc["FID"].AsUUID;
                         folderContent.Version = fc["VERSION"].AsInt;
 
-                        if (map.ContainsKey("FOLDERS") && map["FOLDERS"] is Map)
+                        if (map.ContainsKey("FOLDERS"))
                         {
-                            foreach (KeyValuePair<string, IValue> i in (Map)map["FOLDERS"])
+                            Map foldersmap = map["FOLDERS"] as Map;
+                            if(null != foldersmap)
                             {
-                                if (i.Value is Map)
+                                foreach (KeyValuePair<string, IValue> ifolder in foldersmap)
                                 {
-                                    folderContent.Folders.Add(RobustInventoryConnector.FolderFromMap((Map)i.Value));
+                                    Map folderdata = ifolder.Value as Map;
+                                    if (null != folderdata)
+                                    {
+                                        folderContent.Folders.Add(RobustInventoryConnector.FolderFromMap(folderdata));
+                                    }
                                 }
                             }
                         }
 
-                        if (map.ContainsKey("ITEMS") && map["ITEMS"] is Map)
+                        if (map.ContainsKey("ITEMS"))
                         {
-                            foreach (KeyValuePair<string, IValue> i in (Map)map["ITEMS"])
+                            Map itemsmap = map["ITEMS"] as Map;
+                            if(null != itemsmap)
                             {
-                                if (i.Value is Map)
+                                foreach (KeyValuePair<string, IValue> i in itemsmap)
                                 {
-                                    folderContent.Items.Add(RobustInventoryConnector.ItemFromMap((Map)i.Value, m_GroupsService));
+                                    Map itemdata = i.Value as Map;
+                                    if (null != itemdata)
+                                    {
+                                        folderContent.Items.Add(RobustInventoryConnector.ItemFromMap(itemdata, m_GroupsService));
+                                    }
                                 }
                             }
                         }

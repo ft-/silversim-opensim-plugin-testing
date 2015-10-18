@@ -110,10 +110,13 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
             Map result;
             try
             {
-                result = (Map)JSON.Deserialize(HttpRequestHandler.DoStreamRequest("POST", agentURL, null, "application/json", uncompressed_postdata.Length, delegate(Stream ws)
+                using(Stream o = HttpRequestHandler.DoStreamRequest("POST", agentURL, null, "application/json", uncompressed_postdata.Length, delegate(Stream ws)
                 {
                     ws.Write(uncompressed_postdata, 0, uncompressed_postdata.Length);
-                }, true, TimeoutMs));
+                }, true, TimeoutMs))
+                {
+                    result = (Map)JSON.Deserialize(o);
+                }
             }
             catch
             {
@@ -128,19 +131,25 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
                             compressed_postdata = ms.GetBuffer();
                         }
                     }
-                    result = (Map)JSON.Deserialize(HttpRequestHandler.DoStreamRequest("POST", agentURL, null, "application/x-gzip", compressed_postdata.Length, delegate(Stream ws)
+                    using(Stream o = HttpRequestHandler.DoStreamRequest("POST", agentURL, null, "application/x-gzip", compressed_postdata.Length, delegate(Stream ws)
                     {
                         ws.Write(compressed_postdata, 0, compressed_postdata.Length);
-                    }, false, TimeoutMs));
+                    }, false, TimeoutMs))
+                    {
+                        result = (Map)JSON.Deserialize(o);
+                    }
                 }
                 catch
                 {
                     try
                     {
-                        result = (Map)JSON.Deserialize(HttpRequestHandler.DoStreamRequest("POST", agentURL, null, "application/json", uncompressed_postdata.Length, delegate(Stream ws)
+                        using(Stream o = HttpRequestHandler.DoStreamRequest("POST", agentURL, null, "application/json", uncompressed_postdata.Length, delegate(Stream ws)
                         {
                             ws.Write(uncompressed_postdata, 0, uncompressed_postdata.Length);
-                        }, false, TimeoutMs));
+                        }, false, TimeoutMs))
+                        {
+                            result = (Map)JSON.Deserialize(o);
+                        }
                     }
                     catch
                     {

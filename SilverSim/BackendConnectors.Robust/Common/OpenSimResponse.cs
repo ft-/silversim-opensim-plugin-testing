@@ -10,11 +10,12 @@ namespace SilverSim.BackendConnectors.Robust.Common
 {
     public static class OpenSimResponse
     {
-        public class InvalidOpenSimResponseSerialization : Exception
+        [Serializable]
+        public class InvalidOpenSimResponseSerializationException : Exception
         {
             public string Path;
 
-            public InvalidOpenSimResponseSerialization(string path)
+            public InvalidOpenSimResponseSerializationException(string path)
             {
 
             }
@@ -28,7 +29,7 @@ namespace SilverSim.BackendConnectors.Robust.Common
             }
         }
 
-        private static AString parseValue(XmlTextReader reader)
+        private static AString ParseValue(XmlTextReader reader)
         {
             AString astring = new AString();
             string tagname = reader.Name;
@@ -36,13 +37,13 @@ namespace SilverSim.BackendConnectors.Robust.Common
             {
                 if(!reader.Read())
                 {
-                    throw new InvalidOpenSimResponseSerialization("/" + tagname);
+                    throw new InvalidOpenSimResponseSerializationException("/" + tagname);
                 }
 
                 switch(reader.NodeType)
                 {
                     case XmlNodeType.Element:
-                        throw new InvalidOpenSimResponseSerialization("/" + tagname);
+                        throw new InvalidOpenSimResponseSerializationException("/" + tagname);
 
                     case XmlNodeType.Text:
                         return new AString(reader.ReadContentAsString());
@@ -50,14 +51,14 @@ namespace SilverSim.BackendConnectors.Robust.Common
                     case XmlNodeType.EndElement:
                         if(reader.Name != tagname)
                         {
-                            throw new InvalidOpenSimResponseSerialization("/" + tagname);
+                            throw new InvalidOpenSimResponseSerializationException("/" + tagname);
                         }
                         return astring;
                 }
             }
         }
 
-        private static Map parseMap(XmlTextReader reader)
+        private static Map ParseMap(XmlTextReader reader)
         {
             string tagname = reader.Name;
             Map map = new Map();
@@ -65,7 +66,7 @@ namespace SilverSim.BackendConnectors.Robust.Common
             {
                 if (!reader.Read())
                 {
-                    throw new InvalidOpenSimResponseSerialization("/" + tagname);
+                    throw new InvalidOpenSimResponseSerializationException("/" + tagname);
                 }
 
                 switch(reader.NodeType)
@@ -81,9 +82,9 @@ namespace SilverSim.BackendConnectors.Robust.Common
                             {
                                 try
                                 {
-                                    map[reader.Name] = parseMap(reader);
+                                    map[reader.Name] = ParseMap(reader);
                                 }
-                                catch(InvalidOpenSimResponseSerialization e)
+                                catch(InvalidOpenSimResponseSerializationException e)
                                 {
                                     e.Path = "/" + tagname + e.Path;
                                     throw;
@@ -98,9 +99,9 @@ namespace SilverSim.BackendConnectors.Robust.Common
                         {
                             try
                             {
-                                map[reader.Name] = parseValue(reader);
+                                map[reader.Name] = ParseValue(reader);
                             }
-                            catch (InvalidOpenSimResponseSerialization e)
+                            catch (InvalidOpenSimResponseSerializationException e)
                             {
                                 e.Path = "/" + tagname + e.Path;
                                 throw;
@@ -111,7 +112,7 @@ namespace SilverSim.BackendConnectors.Robust.Common
                     case XmlNodeType.EndElement:
                         if (reader.Name != tagname)
                         {
-                            throw new InvalidOpenSimResponseSerialization("/" + tagname);
+                            throw new InvalidOpenSimResponseSerializationException("/" + tagname);
                         }
 
                         return map;
@@ -127,14 +128,14 @@ namespace SilverSim.BackendConnectors.Robust.Common
                 {
                     if(!reader.Read())
                     {
-                        throw new InvalidOpenSimResponseSerialization("/");
+                        throw new InvalidOpenSimResponseSerializationException("/");
                     }
 
                     if(reader.NodeType == XmlNodeType.Element)
                     {
                         if(reader.Name != "ServerResponse")
                         {
-                            throw new InvalidOpenSimResponseSerialization("/");
+                            throw new InvalidOpenSimResponseSerializationException("/");
                         }
                         else if(reader.IsEmptyElement)
                         {
@@ -144,9 +145,9 @@ namespace SilverSim.BackendConnectors.Robust.Common
                         {
                             try
                             {
-                                return parseMap(reader);
+                                return ParseMap(reader);
                             }
-                            catch (InvalidOpenSimResponseSerialization e)
+                            catch (InvalidOpenSimResponseSerializationException e)
                             {
                                 e.Path = "/ServerResponse" + e.Path;
                                 throw;

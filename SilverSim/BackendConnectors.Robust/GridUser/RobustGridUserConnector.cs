@@ -11,11 +11,12 @@ using SilverSim.Types;
 using SilverSim.Types.GridUser;
 using System;
 using System.Collections.Generic;
+using System.IO;
 
 namespace SilverSim.BackendConnectors.Robust.GridUser
 {
     #region Service Implementation
-    public class RobustGridUserConnector : GridUserServiceInterface, IPlugin
+    public sealed class RobustGridUserConnector : GridUserServiceInterface, IPlugin
     {
         public int TimeoutMs { get; set; }
         string m_GridUserURI;
@@ -39,7 +40,7 @@ namespace SilverSim.BackendConnectors.Robust.GridUser
         }
         #endregion
 
-        private GridUserInfo fromResult(Map map)
+        private GridUserInfo FromResult(Map map)
         {
             GridUserInfo info = new GridUserInfo();
             info.User = new UUI(map["UserID"].ToString());
@@ -64,16 +65,21 @@ namespace SilverSim.BackendConnectors.Robust.GridUser
             Dictionary<string, string> post = new Dictionary<string, string>();
             post["UserID"] = userID;
             post["METHOD"] = "getgriduserinfo";
-            Map map = OpenSimResponse.Deserialize(HttpRequestHandler.DoStreamPostRequest(m_GridUserURI, null, post, false, TimeoutMs));
+            Map map;
+            using(Stream s = HttpRequestHandler.DoStreamPostRequest(m_GridUserURI, null, post, false, TimeoutMs))
+            {
+                map = OpenSimResponse.Deserialize(s);
+            }
             if (!map.ContainsKey("result"))
             {
                 throw new GridUserNotFoundException();
             }
-            if (!(map["result"] is Map))
+            Map resultmap = map["result"] as Map;
+            if (null == resultmap)
             {
                 throw new GridUserNotFoundException();
             }
-            return fromResult((Map)map["result"]);
+            return FromResult(resultmap);
         }
 
         public override GridUserInfo this[UUID userID]
@@ -91,7 +97,7 @@ namespace SilverSim.BackendConnectors.Robust.GridUser
             }
         }
 
-        private void checkResult(Map map)
+        private void CheckResult(Map map)
         {
             if (!map.ContainsKey("result"))
             {
@@ -113,7 +119,10 @@ namespace SilverSim.BackendConnectors.Robust.GridUser
             Dictionary<string, string> post = new Dictionary<string, string>();
             post["UserID"] = (string)userID;
             post["METHOD"] = "loggedin";
-            checkResult(OpenSimResponse.Deserialize(HttpRequestHandler.DoStreamPostRequest(m_GridUserURI, null, post, false, TimeoutMs)));
+            using(Stream s = HttpRequestHandler.DoStreamPostRequest(m_GridUserURI, null, post, false, TimeoutMs))
+            {
+                CheckResult(OpenSimResponse.Deserialize(s));
+            }
         }
 
         public override void LoggedOut(UUI userID, UUID lastRegionID, Vector3 lastPosition, Vector3 lastLookAt)
@@ -124,7 +133,10 @@ namespace SilverSim.BackendConnectors.Robust.GridUser
             post["Position"] = lastPosition.ToString();
             post["LookAt"] = lastLookAt.ToString();
             post["METHOD"] = "loggedout";
-            checkResult(OpenSimResponse.Deserialize(HttpRequestHandler.DoStreamPostRequest(m_GridUserURI, null, post, false, TimeoutMs)));
+            using (Stream s = HttpRequestHandler.DoStreamPostRequest(m_GridUserURI, null, post, false, TimeoutMs))
+            {
+                CheckResult(OpenSimResponse.Deserialize(s));
+            }
         }
 
         public override void SetHome(UUI userID, UUID homeRegionID, Vector3 homePosition, Vector3 homeLookAt)
@@ -135,7 +147,10 @@ namespace SilverSim.BackendConnectors.Robust.GridUser
             post["Position"] = homePosition.ToString();
             post["LookAt"] = homeLookAt.ToString();
             post["METHOD"] = "sethome";
-            checkResult(OpenSimResponse.Deserialize(HttpRequestHandler.DoStreamPostRequest(m_GridUserURI, null, post, false, TimeoutMs)));
+            using (Stream s = HttpRequestHandler.DoStreamPostRequest(m_GridUserURI, null, post, false, TimeoutMs))
+            {
+                CheckResult(OpenSimResponse.Deserialize(s));
+            }
         }
 
         public override void SetPosition(UUI userID, UUID lastRegionID, Vector3 lastPosition, Vector3 lastLookAt)
@@ -146,14 +161,17 @@ namespace SilverSim.BackendConnectors.Robust.GridUser
             post["Position"] = lastPosition.ToString();
             post["LookAt"] = lastLookAt.ToString();
             post["METHOD"] = "setposition";
-            checkResult(OpenSimResponse.Deserialize(HttpRequestHandler.DoStreamPostRequest(m_GridUserURI, null, post, false, TimeoutMs)));
+            using (Stream s = HttpRequestHandler.DoStreamPostRequest(m_GridUserURI, null, post, false, TimeoutMs))
+            {
+                CheckResult(OpenSimResponse.Deserialize(s));
+            }
         }
     }
     #endregion
 
     #region Factory
     [PluginName("GridUser")]
-    public class RobustGridUserConnectorFactory : IPluginFactory
+    public sealed class RobustGridUserConnectorFactory : IPluginFactory
     {
         private static readonly ILog m_Log = LogManager.GetLogger("ROBUST GRIDUSER CONNECTOR");
         public RobustGridUserConnectorFactory()

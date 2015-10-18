@@ -7,18 +7,19 @@ using SilverSim.Types;
 using SilverSim.Types.Groups;
 using System;
 using System.Collections.Generic;
+using System.IO;
 
 namespace SilverSim.BackendConnectors.Robust.GroupsV2
 {
     public partial class RobustGroupsConnector
     {
-        class MembersAccessor : IGroupMembersInterface
+        public sealed class MembersAccessor : IGroupMembersInterface
         {
             public int TimeoutMs = 20000;
             string m_Uri;
-            GetGroupsAgentIDDelegate m_GetGroupsAgentID;
+            Func<UUI, string> m_GetGroupsAgentID;
 
-            public MembersAccessor(string uri, GetGroupsAgentIDDelegate getGroupsAgentID)
+            public MembersAccessor(string uri, Func<UUI, string> getGroupsAgentID)
             {
                 m_Uri = uri;
                 m_GetGroupsAgentID = getGroupsAgentID;
@@ -33,7 +34,11 @@ namespace SilverSim.BackendConnectors.Robust.GroupsV2
                     post["GroupID"] = (string)group.ID;
                     post["RequestingAgentID"] = m_GetGroupsAgentID(requestingAgent);
                     post["METHOD"] = "GETMEMBERSHIP";
-                    Map m = OpenSimResponse.Deserialize(HttpRequestHandler.DoStreamPostRequest(m_Uri, null, post, false, TimeoutMs));
+                    Map m;
+                    using(Stream s = HttpRequestHandler.DoStreamPostRequest(m_Uri, null, post, false, TimeoutMs))
+                    {
+                        m = OpenSimResponse.Deserialize(s);
+                    }
                     if (!m.ContainsKey("RESULT"))
                     {
                         throw new AccessFailedException();
@@ -57,7 +62,11 @@ namespace SilverSim.BackendConnectors.Robust.GroupsV2
                     post["GroupID"] = (string)group.ID;
                     post["RequestingAgentID"] = m_GetGroupsAgentID(requestingAgent);
                     post["METHOD"] = "GETGROUPMEMBERS";
-                    Map m = OpenSimResponse.Deserialize(HttpRequestHandler.DoStreamPostRequest(m_Uri, null, post, false, TimeoutMs));
+                    Map m;
+                    using(Stream s = HttpRequestHandler.DoStreamPostRequest(m_Uri, null, post, false, TimeoutMs))
+                    {
+                        m = OpenSimResponse.Deserialize(s);
+                    }
                     if (!m.ContainsKey("RESULT"))
                     {
                         throw new AccessFailedException();
@@ -85,7 +94,11 @@ namespace SilverSim.BackendConnectors.Robust.GroupsV2
                     post["ALL"] = "true";
                     post["RequestingAgentID"] = m_GetGroupsAgentID(requestingAgent);
                     post["METHOD"] = "GETMEMBERSHIP";
-                    Map m = OpenSimResponse.Deserialize(HttpRequestHandler.DoStreamPostRequest(m_Uri, null, post, false, TimeoutMs));
+                    Map m;
+                    using(Stream s = HttpRequestHandler.DoStreamPostRequest(m_Uri, null, post, false, TimeoutMs))
+                    {
+                        m = OpenSimResponse.Deserialize(s);
+                    }
                     if (!m.ContainsKey("RESULT"))
                     {
                         throw new AccessFailedException();
@@ -115,7 +128,11 @@ namespace SilverSim.BackendConnectors.Robust.GroupsV2
                 post["RequestingAgentID"] = m_GetGroupsAgentID(requestingAgent);
                 post["AccessToken"] = accessToken;
                 post["METHOD"] = "ADDAGENTTOGROUP";
-                Map m = OpenSimResponse.Deserialize(HttpRequestHandler.DoStreamPostRequest(m_Uri, null, post, false, TimeoutMs));
+                Map m;
+                using(Stream s = HttpRequestHandler.DoStreamPostRequest(m_Uri, null, post, false, TimeoutMs))
+                {
+                    m = OpenSimResponse.Deserialize(s);
+                }
                 if (!m.ContainsKey("RESULT"))
                 {
                     throw new AccessFailedException();
@@ -133,7 +150,7 @@ namespace SilverSim.BackendConnectors.Robust.GroupsV2
 
             public void SetContribution(UUI requestingAgent, UGI group, UUI principal, int contribution)
             {
-                throw new NotImplementedException();
+                throw new NotSupportedException();
             }
 
             public void Update(UUI requestingAgent, UGI group, UUI principal, bool acceptNotices, bool listInProfile)

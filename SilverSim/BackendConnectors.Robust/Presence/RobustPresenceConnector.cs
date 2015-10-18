@@ -11,6 +11,7 @@ using SilverSim.Types;
 using SilverSim.Types.Presence;
 using System;
 using System.Collections.Generic;
+using System.IO;
 
 namespace SilverSim.BackendConnectors.Robust.Presence
 {
@@ -48,12 +49,17 @@ namespace SilverSim.BackendConnectors.Robust.Presence
                 post["VERSIONMAX"] = "0";
                 post["METHOD"] = "getagents";
 
-                Map map = OpenSimResponse.Deserialize(HttpRequestHandler.DoStreamPostRequest(m_PresenceUri, null, post, false, TimeoutMs));
-                if (!(map["result"] is Map))
+                Map map;
+                using(Stream s = HttpRequestHandler.DoStreamPostRequest(m_PresenceUri, null, post, false, TimeoutMs))
+                {
+                    map = OpenSimResponse.Deserialize(s);
+                }
+
+                Map m = map["result"] as Map;
+                if (null == m)
                 {
                     throw new PresenceNotFoundException();
                 }
-                Map m = (Map)(map["result"]);
                 foreach (IValue iv in m.Values)
                 {
                     PresenceInfo p = new PresenceInfo();
@@ -76,13 +82,17 @@ namespace SilverSim.BackendConnectors.Robust.Presence
                 post["VERSIONMAX"] = "0";
                 post["METHOD"] = "getagent";
 
-                Map map = OpenSimResponse.Deserialize(HttpRequestHandler.DoStreamPostRequest(m_PresenceUri, null, post, false, TimeoutMs));
-                if(!(map["result"] is Map))
+                Map map;
+                using(Stream s = HttpRequestHandler.DoStreamPostRequest(m_PresenceUri, null, post, false, TimeoutMs))
+                {
+                    map = OpenSimResponse.Deserialize(s);
+                }
+                Map m = map["result"] as Map;
+                if(null == m)
                 {
                     throw new PresenceNotFoundException();
                 }
                 PresenceInfo p = new PresenceInfo();
-                Map m = (Map)(map["result"]);
                 p.RegionID = m["RegionID"].ToString();
                 p.UserID.ID = m["UserID"].ToString();
                 p.SessionID = sessionID;
@@ -98,7 +108,11 @@ namespace SilverSim.BackendConnectors.Robust.Presence
                     post["SessionID"] = (string)sessionID;
                     post["METHOD"] = "logout";
 
-                    Map map = OpenSimResponse.Deserialize(HttpRequestHandler.DoStreamPostRequest(m_PresenceUri, null, post, false, TimeoutMs));
+                    Map map;
+                    using(Stream s = HttpRequestHandler.DoStreamPostRequest(m_PresenceUri, null, post, false, TimeoutMs))
+                    {
+                        map = OpenSimResponse.Deserialize(s);
+                    }
                     if (!map.ContainsKey("result"))
                     {
                         throw new PresenceUpdateFailedException();
@@ -127,7 +141,11 @@ namespace SilverSim.BackendConnectors.Robust.Presence
                     post["SessionID"] = (string)sessionID;
                     post["METHOD"] = "logout";
 
-                    Map map = OpenSimResponse.Deserialize(HttpRequestHandler.DoStreamPostRequest(m_PresenceUri, null, post, false, TimeoutMs));
+                    Map map;
+                    using(Stream s = HttpRequestHandler.DoStreamPostRequest(m_PresenceUri, null, post, false, TimeoutMs))
+                    {
+                        map = OpenSimResponse.Deserialize(s);
+                    }
                     if (!map.ContainsKey("result"))
                     {
                         throw new PresenceUpdateFailedException();
@@ -147,7 +165,11 @@ namespace SilverSim.BackendConnectors.Robust.Presence
                     post["SecureSessionID"] = (string)value.SecureSessionID;
                     post["METHOD"] = "login";
 
-                    Map map = OpenSimResponse.Deserialize(HttpRequestHandler.DoStreamPostRequest(m_PresenceUri, null, post, false, TimeoutMs));
+                    Map map;
+                    using(Stream s = HttpRequestHandler.DoStreamPostRequest(m_PresenceUri, null, post, false, TimeoutMs))
+                    {
+                        map = OpenSimResponse.Deserialize(s);
+                    }
                     if (!map.ContainsKey("result"))
                     {
                         throw new PresenceUpdateFailedException();
@@ -166,7 +188,11 @@ namespace SilverSim.BackendConnectors.Robust.Presence
                     post["SessionID"] = (string)value.SessionID;
                     post["RegionID"] = (string)value.RegionID;
 
-                    Map map = OpenSimResponse.Deserialize(HttpRequestHandler.DoStreamPostRequest(m_PresenceUri, null, post, false, TimeoutMs));
+                    Map map;
+                    using(Stream s = HttpRequestHandler.DoStreamPostRequest(m_PresenceUri, null, post, false, TimeoutMs))
+                    {
+                        map = OpenSimResponse.Deserialize(s);
+                    }
                     if (!map.ContainsKey("result"))
                     {
                         throw new PresenceUpdateFailedException();
@@ -189,7 +215,11 @@ namespace SilverSim.BackendConnectors.Robust.Presence
             post["RegionID"] = (string)regionID;
             post["METHOD"] = "logoutregion";
 
-            Map map = OpenSimResponse.Deserialize(HttpRequestHandler.DoStreamPostRequest(m_PresenceUri, null, post, false, TimeoutMs));
+            Map map;
+            using(Stream s = HttpRequestHandler.DoStreamPostRequest(m_PresenceUri, null, post, false, TimeoutMs))
+            {
+                map = OpenSimResponse.Deserialize(s);
+            }
             if (!map.ContainsKey("result"))
             {
                 throw new PresenceLogoutRegionFailedException();

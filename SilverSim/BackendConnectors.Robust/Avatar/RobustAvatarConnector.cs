@@ -10,17 +10,19 @@ using SilverSim.ServiceInterfaces.Avatar;
 using SilverSim.Types;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Web;
 using System.Xml;
 
 namespace SilverSim.BackendConnectors.Robust.Avatar
 {
     #region Service implementation
-    class RobustAvatarConnector : AvatarServiceInterface, IPlugin
+    public sealed class RobustAvatarConnector : AvatarServiceInterface, IPlugin
     {
-        public class AvatarInaccessible : Exception
+        [Serializable]
+        public class AvatarInaccessibleException : Exception
         {
-            public AvatarInaccessible()
+            public AvatarInaccessibleException()
             {
 
             }
@@ -55,10 +57,14 @@ namespace SilverSim.BackendConnectors.Robust.Avatar
                 post["METHOD"] = "getavatar";
                 post["VERSIONMIN"] = "0";
                 post["VERSIONMAX"] = "0";
-                Map map = OpenSimResponse.Deserialize(HttpRequestHandler.DoStreamPostRequest(m_AvatarURI, null, post, false, TimeoutMs));
+                Map map;
+                using(Stream s = HttpRequestHandler.DoStreamPostRequest(m_AvatarURI, null, post, false, TimeoutMs))
+                {
+                    map = OpenSimResponse.Deserialize(s);
+                }
                 if(!(map["result"] is Map))
                 {
-                    throw new AvatarInaccessible();
+                    throw new AvatarInaccessibleException();
                 }
                 Map result = (Map)map["result"];
                 if(result.Count == 0)
@@ -69,7 +75,7 @@ namespace SilverSim.BackendConnectors.Robust.Avatar
                 foreach(KeyValuePair<string, IValue> kvp in result)
                 {
                     string key = XmlConvert.DecodeName(kvp.Key);
-                    data[key.Replace("_", " ")] = kvp.Value.AsString.ToString();
+                    data[key.Replace('_', ' ')] = kvp.Value.AsString.ToString();
                 }
                 return data;
             }
@@ -85,7 +91,7 @@ namespace SilverSim.BackendConnectors.Robust.Avatar
                     post["METHOD"] = "setavatar";
                     foreach (KeyValuePair<string, string> kvp in value)
                     {
-                        string key = kvp.Key.Replace(" ", "_");
+                        string key = kvp.Key.Replace(' ', '_');
                         post[key] = kvp.Value;
                     }
                 }
@@ -93,7 +99,11 @@ namespace SilverSim.BackendConnectors.Robust.Avatar
                 {
                     post["METHOD"] = "resetavatar";
                 }
-                Map map = OpenSimResponse.Deserialize(HttpRequestHandler.DoStreamPostRequest(m_AvatarURI, null, post, false, TimeoutMs));
+                Map map;
+                using(Stream s = HttpRequestHandler.DoStreamPostRequest(m_AvatarURI, null, post, false, TimeoutMs))
+                {
+                    map = OpenSimResponse.Deserialize(s);
+                }
                 if(!map.ContainsKey("result"))
                 {
                     throw new AvatarUpdateFailedException();
@@ -129,7 +139,7 @@ namespace SilverSim.BackendConnectors.Robust.Avatar
             {
                 if(value == null || itemKeys == null)
                 {
-                    throw new ArgumentNullException();
+                    throw new ArgumentNullException("value");
                 }
                 if(itemKeys.Count != value.Count)
                 {
@@ -151,7 +161,11 @@ namespace SilverSim.BackendConnectors.Robust.Avatar
                 }
                 outStr += "&VERSIONMIN=0&VERSIONMAX=0";
 
-                Map map = OpenSimResponse.Deserialize(HttpRequestHandler.DoStreamRequest("POST", m_AvatarURI, null, "application/x-www-form-urlencoded", outStr, false, TimeoutMs));
+                Map map;
+                using(Stream s = HttpRequestHandler.DoStreamRequest("POST", m_AvatarURI, null, "application/x-www-form-urlencoded", outStr, false, TimeoutMs))
+                {
+                    map = OpenSimResponse.Deserialize(s);
+                }
                 if (!map.ContainsKey("result"))
                 {
                     throw new AvatarUpdateFailedException();
@@ -179,7 +193,11 @@ namespace SilverSim.BackendConnectors.Robust.Avatar
                 post["Values[]"] = value;
                 post["VERSIONMIN"] = "0";
                 post["VERSIONMAX"] = "0";
-                Map map = OpenSimResponse.Deserialize(HttpRequestHandler.DoStreamPostRequest(m_AvatarURI, null, post, false, TimeoutMs));
+                Map map;
+                using(Stream s = HttpRequestHandler.DoStreamPostRequest(m_AvatarURI, null, post, false, TimeoutMs))
+                {
+                    map = OpenSimResponse.Deserialize(s);
+                }
                 if (!map.ContainsKey("result"))
                 {
                     throw new AvatarUpdateFailedException();
@@ -199,11 +217,15 @@ namespace SilverSim.BackendConnectors.Robust.Avatar
             uint index = 0;
             foreach (string name in nameList)
             {
-                post[String.Format("Names[]?{0}", index++)] = name.Replace(" ", "_");
+                post[String.Format("Names[]?{0}", index++)] = name.Replace(' ', '_');
             }
             post["VERSIONMIN"] = "0";
             post["VERSIONMAX"] = "0";
-            Map map = OpenSimResponse.Deserialize(HttpRequestHandler.DoStreamPostRequest(m_AvatarURI, null, post, false, TimeoutMs));
+            Map map;
+            using(Stream s = HttpRequestHandler.DoStreamPostRequest(m_AvatarURI, null, post, false, TimeoutMs))
+            {
+                map = OpenSimResponse.Deserialize(s);
+            }
             if (!map.ContainsKey("result"))
             {
                 throw new AvatarUpdateFailedException();
@@ -219,10 +241,14 @@ namespace SilverSim.BackendConnectors.Robust.Avatar
             Dictionary<string, string> post = new Dictionary<string, string>();
             post["UserID"] = (string)avatarID;
             post["METHOD"] = "removeitems";
-            post["Names[]"] = name.Replace(" ", "_");
+            post["Names[]"] = name.Replace(' ', '_');
             post["VERSIONMIN"] = "0";
             post["VERSIONMAX"] = "0";
-            Map map = OpenSimResponse.Deserialize(HttpRequestHandler.DoStreamPostRequest(m_AvatarURI, null, post, false, TimeoutMs));
+            Map map;
+            using(Stream s = HttpRequestHandler.DoStreamPostRequest(m_AvatarURI, null, post, false, TimeoutMs))
+            {
+                map = OpenSimResponse.Deserialize(s);
+            }
             if (!map.ContainsKey("result"))
             {
                 throw new AvatarUpdateFailedException();
@@ -237,7 +263,7 @@ namespace SilverSim.BackendConnectors.Robust.Avatar
 
     #region Factory
     [PluginName("Avatar")]
-    public class RobustAvatarConnectorFactory : IPluginFactory
+    public sealed class RobustAvatarConnectorFactory : IPluginFactory
     {
         private static readonly ILog m_Log = LogManager.GetLogger("ROBUST AVATAR CONNECTOR");
         public RobustAvatarConnectorFactory()

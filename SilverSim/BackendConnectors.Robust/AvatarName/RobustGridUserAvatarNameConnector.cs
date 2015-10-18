@@ -9,11 +9,12 @@ using SilverSim.Main.Common;
 using SilverSim.ServiceInterfaces.AvatarName;
 using SilverSim.Types;
 using System.Collections.Generic;
+using System.IO;
 
 namespace SilverSim.BackendConnectors.Robust.AvatarName
 {
     #region Service Implementation
-    class RobustGridUserAvatarNameConnector : AvatarNameServiceInterface, IPlugin
+    public sealed class RobustGridUserAvatarNameConnector : AvatarNameServiceInterface, IPlugin
     {
         public int TimeoutMs { get; set; }
         string m_GridUserURI;
@@ -37,7 +38,7 @@ namespace SilverSim.BackendConnectors.Robust.AvatarName
         }
         #endregion
 
-        private UUI fromResult(Map map)
+        private UUI FromResult(Map map)
         {
             UUI uui = new UUI(map["UserID"].ToString());
             uui.IsAuthoritative = null != uui.HomeURI;
@@ -64,7 +65,11 @@ namespace SilverSim.BackendConnectors.Robust.AvatarName
                 Dictionary<string, string> post = new Dictionary<string, string>();
                 post["UserID"] = (string)userID;
                 post["METHOD"] = "getgriduserinfo";
-                Map map = OpenSimResponse.Deserialize(HttpRequestHandler.DoStreamPostRequest(m_GridUserURI, null, post, false, TimeoutMs));
+                Map map;
+                using(Stream s = HttpRequestHandler.DoStreamPostRequest(m_GridUserURI, null, post, false, TimeoutMs))
+                {
+                    map = OpenSimResponse.Deserialize(s);
+                }
                 if (!map.ContainsKey("result"))
                 {
                     throw new KeyNotFoundException();
@@ -73,7 +78,7 @@ namespace SilverSim.BackendConnectors.Robust.AvatarName
                 {
                     throw new KeyNotFoundException();
                 }
-                return fromResult((Map)map["result"]);
+                return FromResult((Map)map["result"]);
             }
             set
             {
@@ -85,7 +90,7 @@ namespace SilverSim.BackendConnectors.Robust.AvatarName
 
     #region Factory
     [PluginName("GridUserAvatarNames")]
-    public class RobustGridUserAvatarNameConnectorFactory : IPluginFactory
+    public sealed class RobustGridUserAvatarNameConnectorFactory : IPluginFactory
     {
         private static readonly ILog m_Log = LogManager.GetLogger("ROBUST GRIDUSER AVATAR NAME CONNECTOR");
         public RobustGridUserAvatarNameConnectorFactory()

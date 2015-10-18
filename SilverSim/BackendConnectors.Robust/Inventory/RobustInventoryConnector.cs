@@ -12,6 +12,7 @@ using SilverSim.Types;
 using SilverSim.Types.Asset;
 using SilverSim.Types.Inventory;
 using System.Collections.Generic;
+using System.IO;
 
 namespace SilverSim.BackendConnectors.Robust.Inventory
 {
@@ -91,35 +92,45 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
             }
         }
 
-        public override void CheckInventory(UUID PrincipalID)
+        public override void CheckInventory(UUID principalID)
         {
             Dictionary<string, string> post = new Dictionary<string, string>();
-            post["PRINCIPAL"] = (string)PrincipalID;
+            post["PRINCIPAL"] = (string)principalID;
             post["METHOD"] = "CREATEUSERINVENTORY";
-            Map map = OpenSimResponse.Deserialize(HttpRequestHandler.DoStreamPostRequest(m_InventoryURI, null, post, false, TimeoutMs));
+            Map map;
+            using(Stream s = HttpRequestHandler.DoStreamPostRequest(m_InventoryURI, null, post, false, TimeoutMs))
+            {
+                map = OpenSimResponse.Deserialize(s);
+            }
             if (!((AString)map["RESULT"]))
             {
                 throw new InventoryInaccessibleException();
             }
         }
 
-        public override List<InventoryItem> GetActiveGestures(UUID PrincipalID)
+        public override List<InventoryItem> GetActiveGestures(UUID principalID)
         {
             Dictionary<string, string> post = new Dictionary<string,string>();
-            post["PRINCIPAL"] = (string)PrincipalID;
+            post["PRINCIPAL"] = (string)principalID;
             post["METHOD"] = "GETACTIVEGESTURES";
-            Map map = OpenSimResponse.Deserialize(HttpRequestHandler.DoStreamPostRequest(m_InventoryURI, null, post, false, TimeoutMs));
-            if (!(map["ITEMS"] is Map))
+            Map map;
+            using(Stream s = HttpRequestHandler.DoStreamPostRequest(m_InventoryURI, null, post, false, TimeoutMs))
+            {
+                map = OpenSimResponse.Deserialize(s);
+            }
+            Map itemmap = map["ITEMS"] as Map;
+            if (null == itemmap)
             {
                 throw new InventoryInaccessibleException();
             }
 
             List<InventoryItem> items = new List<InventoryItem>();
-            foreach(KeyValuePair<string, IValue> i in (Map)map["ITEMS"])
+            foreach(KeyValuePair<string, IValue> i in itemmap)
             {
-                if(i.Value is Map)
+                Map itemdata = i.Value as Map;
+                if(null != itemdata)
                 {
-                    items.Add(ItemFromMap((Map)i.Value, m_GroupsService));
+                    items.Add(ItemFromMap(itemdata, m_GroupsService));
                 }
             }
             return items;
@@ -146,13 +157,14 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
             item.AssetType = (AssetType)map["AssetType"].AsInt;
             item.Permissions.Base = (InventoryPermissionsMask)map["BasePermissions"].AsUInt;
             item.CreationDate = Date.UnixTimeToDateTime(map["CreationDate"].AsULong);
-            if (map["CreatorData"].AsString.ToString() == "")
+            string creatorData = map["CreatorData"].AsString.ToString();
+            if (creatorData.Length == 0)
             {
                 item.Creator.ID = map["CreatorId"].AsUUID;
             }
             else
             {
-                item.Creator = new UUI(map["CreatorId"].AsUUID, map["CreatorData"].AsString.ToString());
+                item.Creator = new UUI(map["CreatorId"].AsUUID, creatorData);
             }
             item.Permissions.Current = (InventoryPermissionsMask)map["CurrentPermissions"].AsUInt;
             item.Description = map["Description"].AsString.ToString();

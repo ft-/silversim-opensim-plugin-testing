@@ -10,11 +10,12 @@ using SilverSim.ServiceInterfaces.AvatarName;
 using SilverSim.Types;
 using System;
 using System.Collections.Generic;
+using System.IO;
 
 namespace SilverSim.BackendConnectors.Robust.AvatarName
 {
     #region Service Implementation
-    class RobustAccountAvatarNameConnector : AvatarNameServiceInterface, IPlugin
+    public sealed class RobustAccountAvatarNameConnector : AvatarNameServiceInterface, IPlugin
     {
         string m_UserAccountURI;
         string m_HomeURI;
@@ -50,7 +51,11 @@ namespace SilverSim.BackendConnectors.Robust.AvatarName
                 post["LastName"] = lastName;
                 post["SCOPEID"] = (string)m_ScopeID;
                 post["METHOD"] = "getaccount";
-                Map map = OpenSimResponse.Deserialize(HttpRequestHandler.DoStreamPostRequest(m_UserAccountURI, null, post, false, TimeoutMs));
+                Map map;
+                using(Stream s = HttpRequestHandler.DoStreamPostRequest(m_UserAccountURI, null, post, false, TimeoutMs))
+                {
+                    map = OpenSimResponse.Deserialize(s);
+                }
                 if (!(map["result"] is Map))
                 {
                     throw new KeyNotFoundException();
@@ -75,7 +80,11 @@ namespace SilverSim.BackendConnectors.Robust.AvatarName
             post["query"] = string.Join(" ", names);
             post["ScopeID"] = (string)m_ScopeID;
             post["METHOD"] = "getaccounts";
-            Map map = OpenSimResponse.Deserialize(HttpRequestHandler.DoStreamPostRequest(m_UserAccountURI, null, post, false, TimeoutMs));
+            Map map;
+            using(Stream s = HttpRequestHandler.DoStreamPostRequest(m_UserAccountURI, null, post, false, TimeoutMs))
+            {
+                map = OpenSimResponse.Deserialize(s);
+            }
 
             List<UUI> results = new List<UUI>();
 
@@ -109,13 +118,17 @@ namespace SilverSim.BackendConnectors.Robust.AvatarName
                 post["UserID"] = (string)accountID;
                 post["SCOPEID"] = (string)m_ScopeID;
                 post["METHOD"] = "getaccount";
-                Map map = OpenSimResponse.Deserialize(HttpRequestHandler.DoStreamPostRequest(m_UserAccountURI, null, post, false, TimeoutMs));
-                if (!(map["result"] is Map))
+                Map map;
+                using(Stream s = HttpRequestHandler.DoStreamPostRequest(m_UserAccountURI, null, post, false, TimeoutMs))
+                {
+                    map = OpenSimResponse.Deserialize(s);
+                }
+                Map m = map["result"] as Map;
+                if (m == null)
                 {
                     throw new KeyNotFoundException();
                 }
 
-                Map m = (Map)(map["result"]);
                 UUI nd = new UUI();
                 nd.FirstName = m["FirstName"].ToString();
                 nd.LastName = m["LastName"].ToString();
@@ -134,7 +147,7 @@ namespace SilverSim.BackendConnectors.Robust.AvatarName
 
     #region Factory
     [PluginName("UserAccountAvatarNames")]
-    public class RobustAccountAvatarNameConnectorFactory : IPluginFactory
+    public sealed class RobustAccountAvatarNameConnectorFactory : IPluginFactory
     {
         private static readonly ILog m_Log = LogManager.GetLogger("ROBUST ACCOUNT AVATAR NAME CONNECTOR");
         public RobustAccountAvatarNameConnectorFactory()

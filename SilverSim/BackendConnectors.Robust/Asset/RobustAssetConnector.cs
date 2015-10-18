@@ -23,9 +23,10 @@ namespace SilverSim.BackendConnectors.Robust.Asset
     #region Service Implementation
     public class RobustAssetConnector : AssetServiceInterface, IPlugin
     {
-        public class RobustAssetProtocolError : Exception
+        [Serializable]
+        public class RobustAssetProtocolErrorException : Exception
         {
-            public RobustAssetProtocolError(string msg) : base(msg) {}
+            public RobustAssetProtocolErrorException(string msg) : base(msg) {}
         }
 
         private static int MAX_ASSET_BASE64_CONVERSION_SIZE = 9 * 1024; /* must be an integral multiple of 3 */
@@ -46,9 +47,9 @@ namespace SilverSim.BackendConnectors.Robust.Asset
         private RobustAssetMetadataConnector m_MetadataService;
         private DefaultAssetReferencesService m_ReferencesService;
         private RobustAssetDataConnector m_DataService;
-        private bool m_EnableCompression = false;
-        private bool m_EnableLocalStorage = false;
-        private bool m_EnableTempStorage = false;
+        private bool m_EnableCompression;
+        private bool m_EnableLocalStorage;
+        private bool m_EnableTempStorage;
 
         #region Constructor
         public RobustAssetConnector(string uri, bool enableCompression = false, bool enableLocalStorage = false, bool enableTempStorage = false)
@@ -92,21 +93,21 @@ namespace SilverSim.BackendConnectors.Robust.Asset
             return true;
         }
 
-        private static bool parseBoolean(XmlTextReader reader)
+        static bool ParseBoolean(XmlTextReader reader)
         {
-            while(true)
+            while (true)
             {
-                if(!reader.Read())
+                if (!reader.Read())
                 {
-                    throw new Exception();
+                    throw new InvalidDataException();
                 }
 
-                switch(reader.NodeType)
+                switch (reader.NodeType)
                 {
                     case XmlNodeType.Element:
-                        if(reader.Name != "boolean")
+                        if (reader.Name != "boolean")
                         {
-                            throw new Exception();
+                            throw new InvalidDataException();
                         }
                         break;
 
@@ -114,18 +115,19 @@ namespace SilverSim.BackendConnectors.Robust.Asset
                         return reader.ReadContentAsBoolean();
 
                     case XmlNodeType.EndElement:
-                        throw new Exception();
+                        throw new InvalidDataException();
                 }
             }
         }
-        private static List<bool> parseArrayOfBoolean(XmlTextReader reader)
+
+        static List<bool> ParseArrayOfBoolean(XmlTextReader reader)
         {
             List<bool> result = new List<bool>();
             while(true)
             {
                 if(!reader.Read())
                 {
-                    throw new Exception();
+                    throw new InvalidDataException();
                 }
 
                 switch(reader.NodeType)
@@ -133,38 +135,38 @@ namespace SilverSim.BackendConnectors.Robust.Asset
                     case XmlNodeType.Element:
                         if(reader.Name != "boolean")
                         {
-                            throw new Exception();
+                            throw new InvalidDataException();
                         }
-                        result.Add(parseBoolean(reader));
+                        result.Add(ParseBoolean(reader));
                         break;
 
                     case XmlNodeType.EndElement:
                         if(reader.Name != "ArrayOfBoolean")
                         {
-                            throw new Exception();
+                            throw new InvalidDataException();
                         }
                         return result;
                 }
             }
         }
 
-        public static List<bool> parseAssetsExistResponse(XmlTextReader reader)
+        static List<bool> ParseAssetsExistResponse(XmlTextReader reader)
         {
             while(true)
             {
                 if(!reader.Read())
                 {
-                    throw new Exception();
+                    throw new InvalidDataException();
                 }
 
                 if(reader.NodeType == XmlNodeType.Element)
                 {
                     if(reader.Name != "ArrayOfBoolean")
                     {
-                        throw new Exception();
+                        throw new InvalidDataException();
                     }
 
-                    return parseArrayOfBoolean(reader);
+                    return ParseArrayOfBoolean(reader);
                 }
             }
         }
@@ -180,10 +182,31 @@ namespace SilverSim.BackendConnectors.Robust.Asset
             }
             xmlreq += "</ArrayOfString>";
 
-            Stream xmlres;
+            
             try
             {
-                xmlres = HttpRequestHandler.DoStreamRequest("POST", m_AssetURI + "get_assets_exist", null, "text/xml", xmlreq, false, TimeoutMs);
+                using (Stream xmlres = HttpRequestHandler.DoStreamRequest("POST", m_AssetURI + "get_assets_exist", null, "text/xml", xmlreq, false, TimeoutMs))
+                {
+                    try
+                    {
+                        using (XmlTextReader xmlreader = new XmlTextReader(xmlres))
+                        {
+                            List<bool> response = ParseAssetsExistResponse(xmlreader);
+                            if (response.Count != assets.Count)
+                            {
+                                throw new RobustAssetProtocolErrorException("Invalid response for get_assets_exist received");
+                            }
+                            for (int i = 0; i < assets.Count; ++i)
+                            {
+                                res.Add(assets[i], response[i]);
+                            }
+                        }
+                    }
+                    catch
+                    {
+                        throw new RobustAssetProtocolErrorException("Invalid response for get_assets_exist received");
+                    }
+                }
             }
             catch
             {
@@ -193,27 +216,6 @@ namespace SilverSim.BackendConnectors.Robust.Asset
                 }
                 return res;
             }
-
-            try
-            {
-                using(XmlTextReader xmlreader = new XmlTextReader(xmlres))
-                {
-                    List<bool> response = parseAssetsExistResponse(xmlreader);
-                    if (response.Count != assets.Count)
-                    {
-                        throw new RobustAssetProtocolError("Invalid response for get_assets_exist received");
-                    }
-                    for(int i = 0; i < assets.Count; ++i)
-                    {
-                        res.Add(assets[i], response[i]);
-                    }
-                }
-            }
-            catch
-            {
-                throw new RobustAssetProtocolError("Invalid response for get_assets_exist received");
-            }
-
             return res;
         }
         #endregion
@@ -223,10 +225,12 @@ namespace SilverSim.BackendConnectors.Robust.Asset
         {
             get
             {
-                Stream stream;
                 try
                 {
-                    stream = HttpRequestHandler.DoStreamGetRequest(m_AssetURI + "assets/" + key.ToString(), null, TimeoutMs);
+                    using (Stream stream = HttpRequestHandler.DoStreamGetRequest(m_AssetURI + "assets/" + key.ToString(), null, TimeoutMs))
+                    {
+                        return AssetXml.parseAssetData(stream);
+                    }
                 }
                 catch(HttpException e)
                 {
@@ -236,7 +240,6 @@ namespace SilverSim.BackendConnectors.Robust.Asset
                     }
                     throw;
                 }
-                return AssetXml.parseAssetData(stream);
             }
         }
         #endregion
@@ -283,7 +286,7 @@ namespace SilverSim.BackendConnectors.Robust.Asset
                 return;
             }
             string assetbase_header = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<AssetBase>";
-            string flags = "";
+            string flags = string.Empty;
             if(asset.Data.Length != 0)
             {
                 assetbase_header += "<Data>";
@@ -300,7 +303,7 @@ namespace SilverSim.BackendConnectors.Robust.Asset
 
             if (0 != (asset.Flags & AssetFlags.Rewritable))
             {
-                if(flags != string.Empty)
+                if(flags.Length != 0)
                 {
                     flags += ",";
                 }
@@ -309,14 +312,14 @@ namespace SilverSim.BackendConnectors.Robust.Asset
 
             if (0 != (asset.Flags & AssetFlags.Collectable))
             {
-                if (flags != string.Empty)
+                if (flags.Length != 0)
                 {
                     flags += ",";
                 }
                 flags += "Collectable";
             }
 
-            if(flags == "")
+            if(flags.Length == 0)
             {
                 flags = "Normal";
             }
@@ -396,7 +399,7 @@ namespace SilverSim.BackendConnectors.Robust.Asset
         {
             try
             {
-                HttpRequestHandler.DoRequest("DELETE", m_AssetURI + "/" + id.ToString(), null, "", null, false, TimeoutMs);
+                HttpRequestHandler.DoRequest("DELETE", m_AssetURI + "/" + id.ToString(), null, string.Empty, null, false, TimeoutMs);
             }
             catch
             {

@@ -5,21 +5,23 @@ using SilverSim.BackendConnectors.Robust.Common;
 using SilverSim.Http.Client;
 using SilverSim.Types;
 using SilverSim.Types.Groups;
+using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 
 namespace SilverSim.BackendConnectors.Robust.GroupsV2
 {
     public partial class RobustGroupsConnector
     {
-        class RoleMembersAccessor : IGroupRolemembersInterface
+        public sealed class RoleMembersAccessor : IGroupRolemembersInterface
         {
             public int TimeoutMs = 20000;
             string m_Uri;
             IGroupMembershipsInterface m_MembershipsAccessor;
-            GetGroupsAgentIDDelegate m_GetGroupsAgentID;
+            Func<UUI, string> m_GetGroupsAgentID;
 
-            public RoleMembersAccessor(string uri, IGroupMembershipsInterface membershipsAccessor, GetGroupsAgentIDDelegate getGroupsAgentID)
+            public RoleMembersAccessor(string uri, IGroupMembershipsInterface membershipsAccessor, Func<UUI, string> getGroupsAgentID)
             {
                 m_Uri = uri;
                 m_MembershipsAccessor = membershipsAccessor;
@@ -58,7 +60,11 @@ namespace SilverSim.BackendConnectors.Robust.GroupsV2
                     post["GroupID"] = (string)group.ID;
                     post["RequestingAgentID"] = m_GetGroupsAgentID(requestingAgent);
                     post["METHOD"] = "GETROLEMEMBERS";
-                    Map m = OpenSimResponse.Deserialize(HttpRequestHandler.DoStreamPostRequest(m_Uri, null, post, false, TimeoutMs));
+                    Map m;
+                    using(Stream s = HttpRequestHandler.DoStreamPostRequest(m_Uri, null, post, false, TimeoutMs))
+                    {
+                        m = OpenSimResponse.Deserialize(s);
+                    }
                     if (!m.ContainsKey("RESULT"))
                     {
                         throw new KeyNotFoundException();
@@ -68,8 +74,14 @@ namespace SilverSim.BackendConnectors.Robust.GroupsV2
                         throw new KeyNotFoundException();
                     }
 
+                    Map resultmap = m["RESULT"] as Map;
+                    if(null == resultmap)
+                    {
+                        throw new KeyNotFoundException();
+                    }
+
                     List<GroupRolemember> rolemembers = new List<GroupRolemember>();
-                    foreach (IValue iv in ((Map)m["RESULT"]).Values)
+                    foreach (IValue iv in resultmap.Values)
                     {
                         if (iv is Map)
                         {
@@ -90,7 +102,11 @@ namespace SilverSim.BackendConnectors.Robust.GroupsV2
                 post["GroupID"] = (string)group.ID;
                 post["RequestingAgentID"] = m_GetGroupsAgentID(requestingAgent);
                 post["METHOD"] = "GETAGENTROLES";
-                Map m = OpenSimResponse.Deserialize(HttpRequestHandler.DoStreamPostRequest(m_Uri, null, post, false, TimeoutMs));
+                Map m;
+                using(Stream s = HttpRequestHandler.DoStreamPostRequest(m_Uri, null, post, false, TimeoutMs))
+                {
+                    m = OpenSimResponse.Deserialize(s);
+                }
                 if (!m.ContainsKey("RESULT"))
                 {
                     throw new KeyNotFoundException();
@@ -100,12 +116,18 @@ namespace SilverSim.BackendConnectors.Robust.GroupsV2
                     throw new KeyNotFoundException();
                 }
 
-                List<GroupRolemembership> rolemembers = new List<GroupRolemembership>();
-                foreach (IValue iv in ((Map)m["RESULT"]).Values)
+                Map resultmap = m["RESULT"] as Map;
+                if(null == resultmap)
                 {
-                    if (iv is Map)
+                    throw new KeyNotFoundException();
+                }
+
+                List<GroupRolemembership> rolemembers = new List<GroupRolemembership>();
+                foreach (IValue iv in resultmap.Values)
+                {
+                    Map data = iv as Map;
+                    if (null != data)
                     {
-                        Map data = (Map)iv;
                         GroupRolemembership member = new GroupRolemembership();
                         member.RoleID = data["RoleID"].AsUUID;
                         member.Group = group;

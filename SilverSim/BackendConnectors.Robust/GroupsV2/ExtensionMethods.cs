@@ -132,7 +132,7 @@ namespace SilverSim.BackendConnectors.Robust.GroupsV2
             post["MembershipFee"] = group.MembershipFee.ToString();
             post["OpenEnrollment"] = group.IsOpenEnrollment.ToString();
             post["OwnerRoleID"] = group.OwnerRoleID.ToString();
-            post["ServiceLocation"] = group.ID.HomeURI != null ? group.ID.HomeURI.ToString() : "";
+            post["ServiceLocation"] = group.ID.HomeURI != null ? group.ID.HomeURI.ToString() : string.Empty;
             post["ShownInList"] = group.IsShownInList.ToString();
             post["MemberCount"] = group.MemberCount.ToString();
             post["RoleCount"] = group.RoleCount.ToString();
@@ -315,7 +315,7 @@ namespace SilverSim.BackendConnectors.Robust.GroupsV2
             return member;
         }
 
-        public static Dictionary<string, string> ToPost(this GroupRolemember m, RobustGroupsConnector.GetGroupsAgentIDDelegate getGroupsAgentID)
+        public static Dictionary<string, string> ToPost(this GroupRolemember m, Func<UUI, string> getGroupsAgentID)
         {
             Dictionary<string, string> post = new Dictionary<string,string>();
             post["RoleID"] = (string)m.RoleID;
@@ -341,15 +341,16 @@ namespace SilverSim.BackendConnectors.Robust.GroupsV2
                 notice.AttachmentItemID = m["AttachmentItemID"].AsUUID;
                 notice.AttachmentName = m["AttachmentName"].ToString();
                 notice.AttachmentType = (AssetType)m["AttachmentType"].AsInt;
-                if ("" != m["AttachmentOwnerID"].ToString())
+                string attachOwnerId = m["AttachmentOwnerID"].ToString();
+                if (0 != attachOwnerId.Length)
                 {
-                    notice.AttachmentOwner = new UUI(m["AttachmentOwnerID"].ToString());
+                    notice.AttachmentOwner = new UUI(attachOwnerId);
                 }
             }
             return notice;
         }
 
-        public static Dictionary<string, string> ToPost(this GroupNotice notice, RobustGroupsConnector.GetGroupsAgentIDDelegate getGroupsAgentID)
+        public static Dictionary<string, string> ToPost(this GroupNotice notice, Func<UUI, string> getGroupsAgentID)
         {
             Dictionary<string, string> post = new Dictionary<string, string>();
             post["NoticeID"] = (string)notice.ID;
@@ -368,7 +369,7 @@ namespace SilverSim.BackendConnectors.Robust.GroupsV2
                 }
                 else
                 {
-                    post["AttachmentOwnerID"] = "";
+                    post["AttachmentOwnerID"] = string.Empty;
                 }
             }
             return post;

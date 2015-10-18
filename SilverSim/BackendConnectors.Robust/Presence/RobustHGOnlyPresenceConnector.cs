@@ -64,7 +64,7 @@ namespace SilverSim.BackendConnectors.Robust.Presence
         {
             get
             {
-                throw new NotImplementedException();
+                throw new NotSupportedException();
             }
             set
             {

@@ -11,11 +11,12 @@ using SilverSim.Types;
 using SilverSim.Types.Account;
 using System;
 using System.Collections.Generic;
+using System.IO;
 
 namespace SilverSim.BackendConnectors.Robust.Account
 {
     #region Service Implementation
-    class RobustAccountConnector : UserAccountServiceInterface, IPlugin
+    public sealed class RobustAccountConnector : UserAccountServiceInterface, IPlugin
     {
         string m_UserAccountURI;
         public int TimeoutMs { get; set; }
@@ -46,12 +47,16 @@ namespace SilverSim.BackendConnectors.Robust.Account
                 post["UserID"] = (string)accountID;
                 post["SCOPEID"] = (string)scopeID;
                 post["METHOD"] = "getaccount";
-                Map map = OpenSimResponse.Deserialize(HttpRequestHandler.DoStreamPostRequest(m_UserAccountURI, null, post, false, TimeoutMs));
-                if (!(map["result"] is Map))
+                using (Stream s = HttpRequestHandler.DoStreamPostRequest(m_UserAccountURI, null, post, false, TimeoutMs))
                 {
-                    throw new UserAccountNotFoundException();
+                    Map map = OpenSimResponse.Deserialize(s);
+                    Map resultmap = map["result"] as Map;
+                    if (null == resultmap)
+                    {
+                        throw new UserAccountNotFoundException();
+                    }
+                    return DeserializeEntry(resultmap);
                 }
-                return DeserializeEntry((Map)(map["result"]));
             }
         }
 
@@ -63,12 +68,16 @@ namespace SilverSim.BackendConnectors.Robust.Account
                 post["Email"] = email;
                 post["SCOPEID"] = (string)scopeID;
                 post["METHOD"] = "getaccount";
-                Map map = OpenSimResponse.Deserialize(HttpRequestHandler.DoStreamPostRequest(m_UserAccountURI, null, post, false, TimeoutMs));
-                if (!(map["result"] is Map))
+                using (Stream s = HttpRequestHandler.DoStreamPostRequest(m_UserAccountURI, null, post, false, TimeoutMs))
                 {
-                    throw new UserAccountNotFoundException();
+                    Map map = OpenSimResponse.Deserialize(s);
+                    Map resultmap = map["result"] as Map;
+                    if (null == resultmap)
+                    {
+                        throw new UserAccountNotFoundException();
+                    }
+                    return DeserializeEntry(resultmap);
                 }
-                return DeserializeEntry((Map)(map["result"]));
             }
         }
 
@@ -81,12 +90,16 @@ namespace SilverSim.BackendConnectors.Robust.Account
                 post["LastName"] = lastName;
                 post["SCOPEID"] = (string)scopeID;
                 post["METHOD"] = "getaccount";
-                Map map = OpenSimResponse.Deserialize(HttpRequestHandler.DoStreamPostRequest(m_UserAccountURI, null, post, false, TimeoutMs));
-                if (!(map["result"] is Map))
+                using (Stream s = HttpRequestHandler.DoStreamPostRequest(m_UserAccountURI, null, post, false, TimeoutMs))
                 {
-                    throw new UserAccountNotFoundException();
+                    Map map = OpenSimResponse.Deserialize(s);
+                    Map resultmap = map["result"] as Map;
+                    if (null == resultmap)
+                    {
+                        throw new UserAccountNotFoundException();
+                    }
+                    return DeserializeEntry(resultmap);
                 }
-                return DeserializeEntry((Map)(map["result"]));
             }
         }
 
@@ -96,14 +109,20 @@ namespace SilverSim.BackendConnectors.Robust.Account
             post["query"] = query;
             post["SCOPEID"] = (string)scopeID;
             post["METHOD"] = "getaccounts";
-            Map map = OpenSimResponse.Deserialize(HttpRequestHandler.DoStreamPostRequest(m_UserAccountURI, null, post, false, TimeoutMs));
-            if (!(map["result"] is Map))
+            Map map;
+            
+            using(Stream s = HttpRequestHandler.DoStreamPostRequest(m_UserAccountURI, null, post, false, TimeoutMs))
+            {
+                map = OpenSimResponse.Deserialize(s);
+            }
+            Map resultmap = map["result"] as Map;
+            if (null == resultmap)
             {
                 throw new UserAccountNotFoundException();
             }
             List<UserAccount> res = new List<UserAccount>();
 
-            foreach(IValue i in ((Map)map["result"]).Values)
+            foreach (IValue i in resultmap.Values)
             {
                 Map m = (Map)i;
                 res.Add(DeserializeEntry(m));
@@ -124,7 +143,7 @@ namespace SilverSim.BackendConnectors.Robust.Account
             ua.UserLevel = int.Parse(m["UserLevel"].ToString());
             ua.UserFlags = int.Parse(m["UserFlags"].ToString());
             ua.IsLocalToGrid = true;
-            string serviceURLs = "";
+            string serviceURLs = string.Empty;
             if(m.ContainsKey("ServiceURLs"))
             {
                 serviceURLs = m["ServiceURLs"].ToString();
@@ -161,7 +180,7 @@ namespace SilverSim.BackendConnectors.Robust.Account
 
     #region Factory
     [PluginName("UserAccounts")]
-    public class RobustAccountConnectorFactory : IPluginFactory
+    public sealed class RobustAccountConnectorFactory : IPluginFactory
     {
         private static readonly ILog m_Log = LogManager.GetLogger("ROBUST ACCOUNT CONNECTOR");
         public RobustAccountConnectorFactory()

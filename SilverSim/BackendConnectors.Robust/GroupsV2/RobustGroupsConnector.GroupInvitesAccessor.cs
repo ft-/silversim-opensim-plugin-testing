@@ -5,19 +5,21 @@ using SilverSim.BackendConnectors.Robust.Common;
 using SilverSim.Http.Client;
 using SilverSim.Types;
 using SilverSim.Types.Groups;
+using System;
 using System.Collections.Generic;
+using System.IO;
 
 namespace SilverSim.BackendConnectors.Robust.GroupsV2
 {
     public partial class RobustGroupsConnector
     {
-        class InvitesAccessor : IGroupInvitesInterface
+        public sealed class InvitesAccessor : IGroupInvitesInterface
         {
             public int TimeoutMs = 20000;
             string m_Uri;
-            GetGroupsAgentIDDelegate m_GetGroupsAgentID;
+            Func<UUI, string> m_GetGroupsAgentID;
 
-            public InvitesAccessor(string uri, GetGroupsAgentIDDelegate getGroupsAgentID)
+            public InvitesAccessor(string uri, Func<UUI, string> getGroupsAgentID)
             {
                 m_Uri = uri;
                 m_GetGroupsAgentID = getGroupsAgentID;
@@ -33,7 +35,11 @@ namespace SilverSim.BackendConnectors.Robust.GroupsV2
                     post["OP"] = "GET";
                     post["METHOD"] = "INVITE";
 
-                    Map m = OpenSimResponse.Deserialize(HttpRequestHandler.DoStreamPostRequest(m_Uri, null, post, false, TimeoutMs));
+                    Map m;
+                    using(Stream s = HttpRequestHandler.DoStreamPostRequest(m_Uri, null, post, false, TimeoutMs))
+                    {
+                        m = OpenSimResponse.Deserialize(s);
+                    }
                     if (!m.ContainsKey("RESULT"))
                     {
                         throw new KeyNotFoundException();
@@ -44,6 +50,10 @@ namespace SilverSim.BackendConnectors.Robust.GroupsV2
                     }
 
                     Map resultMap = m["RESULT"] as Map;
+                    if(null == resultMap)
+                    {
+                        throw new KeyNotFoundException();
+                    }
                     GroupInvite gi = new GroupInvite();
                     gi.ID = resultMap["InviteID"].AsUUID;
                     gi.Group.ID = resultMap["GroupID"].AsUUID;

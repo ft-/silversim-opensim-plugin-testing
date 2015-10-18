@@ -8,12 +8,13 @@ using SilverSim.ServiceInterfaces.Inventory;
 using SilverSim.Types;
 using SilverSim.Types.Inventory;
 using System.Collections.Generic;
+using System.IO;
 using System.Net;
 using System.Web;
 
 namespace SilverSim.BackendConnectors.Robust.Inventory
 {
-    class RobustInventoryItemConnector : InventoryItemServiceInterface
+    public sealed class RobustInventoryItemConnector : InventoryItemServiceInterface
     {
         private string m_InventoryURI;
         public int TimeoutMs = 20000;
@@ -36,31 +37,41 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
                 Dictionary<string, string> post = new Dictionary<string, string>();
                 post["ID"] = (string)key;
                 post["METHOD"] = "GETITEM";
-                Map map = OpenSimResponse.Deserialize(HttpRequestHandler.DoStreamPostRequest(m_InventoryURI, null, post, false, TimeoutMs));
-                if (!(map["item"] is Map))
+                Map map;
+                using(Stream s = HttpRequestHandler.DoStreamPostRequest(m_InventoryURI, null, post, false, TimeoutMs))
+                {
+                    map = OpenSimResponse.Deserialize(s);
+                }
+                Map itemmap = map["item"] as Map;
+                if (null == itemmap)
                 {
                     throw new InventoryInaccessibleException();
                 }
 
-                return RobustInventoryConnector.ItemFromMap((Map)map["item"], m_GroupsService);
+                return RobustInventoryConnector.ItemFromMap(itemmap, m_GroupsService);
             }
         }
 
-        public override InventoryItem this[UUID PrincipalID, UUID key]
+        public override InventoryItem this[UUID principalID, UUID key]
         {
             get
             {
                 Dictionary<string, string> post = new Dictionary<string, string>();
-                post["PRINCIPAL"] = (string)PrincipalID;
+                post["PRINCIPAL"] = (string)principalID;
                 post["ID"] = (string)key;
                 post["METHOD"] = "GETITEM";
-                Map map = OpenSimResponse.Deserialize(HttpRequestHandler.DoStreamPostRequest(m_InventoryURI, null, post, false, TimeoutMs));
-                if (!(map["item"] is Map))
+                Map map;
+                using(Stream s = HttpRequestHandler.DoStreamPostRequest(m_InventoryURI, null, post, false, TimeoutMs))
+                {
+                    map = OpenSimResponse.Deserialize(s);
+                }
+                Map itemmap = map["item"] as Map;
+                if (null == itemmap)
                 {
                     throw new InventoryInaccessibleException();
                 }
 
-                return RobustInventoryConnector.ItemFromMap((Map)map["item"], m_GroupsService);
+                return RobustInventoryConnector.ItemFromMap(itemmap, m_GroupsService);
             }
         }
 
@@ -88,7 +99,10 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
 
                 try
                 {
-                    map = OpenSimResponse.Deserialize(HttpRequestHandler.DoStreamPostRequest(m_InventoryURI, null, post, false, TimeoutMs));
+                    using(Stream s = HttpRequestHandler.DoStreamPostRequest(m_InventoryURI, null, post, false, TimeoutMs))
+                    {
+                        map = OpenSimResponse.Deserialize(s);
+                    }
                 }
                 catch (HttpRequestHandler.BadHttpResponseException)
                 {
@@ -115,9 +129,10 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
                     if(kvp.Key.StartsWith("item_"))
                     {
                         anyResponse = true;
-                        if(kvp.Value is Map)
+                        Map itemmap = kvp.Value as Map;
+                        if(null != itemmap)
                         {
-                            items.Add(RobustInventoryConnector.ItemFromMap((Map)kvp.Value, m_GroupsService));
+                            items.Add(RobustInventoryConnector.ItemFromMap(itemmap, m_GroupsService));
                         }
                     }
                 }
@@ -169,7 +184,11 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
         {
             Dictionary<string, string> post = SerializeItem(item);
             post["METHOD"] = "ADDITEM";
-            Map map = OpenSimResponse.Deserialize(HttpRequestHandler.DoStreamPostRequest(m_InventoryURI, null, post, false, TimeoutMs));
+            Map map;
+            using(Stream s = HttpRequestHandler.DoStreamPostRequest(m_InventoryURI, null, post, false, TimeoutMs))
+            {
+                map = OpenSimResponse.Deserialize(s);
+            }
             if(!((AString)map["RESULT"]))
             {
                 throw new InventoryItemNotStoredException(item.ID);
@@ -180,37 +199,49 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
         {
             Dictionary<string, string> post = SerializeItem(item);
             post["METHOD"] = "UPDATEITEM";
-            Map map = OpenSimResponse.Deserialize(HttpRequestHandler.DoStreamPostRequest(m_InventoryURI, null, post, false, TimeoutMs));
+            Map map;
+            using(Stream s = HttpRequestHandler.DoStreamPostRequest(m_InventoryURI, null, post, false, TimeoutMs))
+            {
+                map = OpenSimResponse.Deserialize(s);
+            }
             if (!((AString)map["RESULT"]))
             {
                 throw new InventoryItemNotStoredException(item.ID);
             }
         }
 
-        public override void Delete(UUID PrincipalID, UUID ID)
+        public override void Delete(UUID principalID, UUID id)
         {
             Dictionary<string, string> post = new Dictionary<string, string>();
-            post["ITEMS[]"] = (string)ID;
-            post["PRINCIPAL"] = (string)PrincipalID;
+            post["ITEMS[]"] = (string)id;
+            post["PRINCIPAL"] = (string)principalID;
             post["METHOD"] = "DELETEITEMS";
-            Map map = OpenSimResponse.Deserialize(HttpRequestHandler.DoStreamPostRequest(m_InventoryURI, null, post, false, TimeoutMs));
+            Map map;
+            using(Stream s = HttpRequestHandler.DoStreamPostRequest(m_InventoryURI, null, post, false, TimeoutMs))
+            {
+                map = OpenSimResponse.Deserialize(s);
+            }
             if (!((AString)map["RESULT"]))
             {
-                throw new InventoryItemNotFoundException(ID);
+                throw new InventoryItemNotFoundException(id);
             }
         }
 
-        public override void Move(UUID PrincipalID, UUID ID, UUID newFolder)
+        public override void Move(UUID principalID, UUID id, UUID newFolder)
         {
             Dictionary<string, string> post = new Dictionary<string, string>();
-            post["IDLIST[]"] = (string)ID;
+            post["IDLIST[]"] = (string)id;
             post["DESTLIST[]"] = (string)newFolder;
-            post["PRINCIPAL"] = (string)PrincipalID;
+            post["PRINCIPAL"] = (string)principalID;
             post["METHOD"] = "MOVEITEMS";
-            Map map = OpenSimResponse.Deserialize(HttpRequestHandler.DoStreamPostRequest(m_InventoryURI, null, post, false, TimeoutMs));
+            Map map;
+            using(Stream s = HttpRequestHandler.DoStreamPostRequest(m_InventoryURI, null, post, false, TimeoutMs))
+            {
+                map = OpenSimResponse.Deserialize(s);
+            }
             if (!((AString)map["RESULT"]))
             {
-                throw new InventoryItemNotFoundException(ID);
+                throw new InventoryItemNotFoundException(id);
             }
         }
     }

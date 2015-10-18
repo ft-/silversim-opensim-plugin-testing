@@ -8,6 +8,7 @@ using SilverSim.ServiceInterfaces.Friends;
 using SilverSim.Types;
 using SilverSim.Types.Friends;
 using System.Collections.Generic;
+using System.IO;
 
 namespace SilverSim.BackendConnectors.Robust.Friends
 {
@@ -30,7 +31,7 @@ namespace SilverSim.BackendConnectors.Robust.Friends
             m_ServiceKey = serviceKey;
         }
 
-        private void checkResult(Map map)
+        private void CheckResult(Map map)
         {
             if (!map.ContainsKey("RESULT"))
             {
@@ -54,7 +55,11 @@ namespace SilverSim.BackendConnectors.Robust.Friends
                 post["KEY"] = m_ServiceKey;
                 post["SESSIONID"] = (string)m_SessionID;
 
-                Map res = OpenSimResponse.Deserialize(HttpRequestHandler.DoStreamPostRequest(m_Uri, null, post, false, TimeoutMs));
+                Map res;
+                using(Stream s = HttpRequestHandler.DoStreamPostRequest(m_Uri, null, post, false, TimeoutMs))
+                {
+                    res = OpenSimResponse.Deserialize(s);
+                }
                 if(res.ContainsKey("Value") && res["Value"] != null)
                 {
                     FriendInfo fi = new FriendInfo();
@@ -87,7 +92,11 @@ namespace SilverSim.BackendConnectors.Robust.Friends
             post["MyFlags"] = fi.UserGivenFlags.ToString();
             post["TheirFlags"] = fi.FriendGivenFlags.ToString();
 
-            checkResult(OpenSimResponse.Deserialize(HttpRequestHandler.DoStreamPostRequest(m_Uri, null, post, false, TimeoutMs)));
+
+            using(Stream s = HttpRequestHandler.DoStreamPostRequest(m_Uri, null, post, false, TimeoutMs))
+            {
+                CheckResult(OpenSimResponse.Deserialize(s));
+            }
         }
 
         public override void Delete(FriendInfo fi)
@@ -100,7 +109,10 @@ namespace SilverSim.BackendConnectors.Robust.Friends
             post["MyFlags"] = fi.UserGivenFlags.ToString();
             post["TheirFlags"] = fi.FriendGivenFlags.ToString();
 
-            checkResult(OpenSimResponse.Deserialize(HttpRequestHandler.DoStreamPostRequest(m_Uri, null, post, false, TimeoutMs)));
+            using(Stream s = HttpRequestHandler.DoStreamPostRequest(m_Uri, null, post, false, TimeoutMs))
+            {
+                CheckResult(OpenSimResponse.Deserialize(s));
+            }
         }
 
         public void Startup(ConfigurationLoader loader)

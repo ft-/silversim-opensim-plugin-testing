@@ -5,19 +5,21 @@ using SilverSim.BackendConnectors.Robust.Common;
 using SilverSim.Http.Client;
 using SilverSim.Types;
 using SilverSim.Types.Groups;
+using System;
 using System.Collections.Generic;
+using System.IO;
 
 namespace SilverSim.BackendConnectors.Robust.GroupsV2
 {
     public partial class RobustGroupsConnector
     {
-        class GroupRolesAccessor : IGroupRolesInterface
+        public sealed class GroupRolesAccessor : IGroupRolesInterface
         {
             public int TimeoutMs = 20000;
             string m_Uri;
-            GetGroupsAgentIDDelegate m_GetGroupsAgentID;
+            Func<UUI, string> m_GetGroupsAgentID;
 
-            public GroupRolesAccessor(string uri, GetGroupsAgentIDDelegate getGroupsAgentID)
+            public GroupRolesAccessor(string uri, Func<UUI, string> getGroupsAgentID)
             {
                 m_Uri = uri;
                 m_GetGroupsAgentID = getGroupsAgentID;
@@ -47,7 +49,11 @@ namespace SilverSim.BackendConnectors.Robust.GroupsV2
                     post["GroupID"] = (string)group.ID;
                     post["RequestingAgentID"] = m_GetGroupsAgentID(requestingAgent);
                     post["METHOD"] = "GETGROUPROLES";
-                    Map m = OpenSimResponse.Deserialize(HttpRequestHandler.DoStreamPostRequest(m_Uri, null, post, false, TimeoutMs));
+                    Map m;
+                    using(Stream s = HttpRequestHandler.DoStreamPostRequest(m_Uri, null, post, false, TimeoutMs))
+                    {
+                        m = OpenSimResponse.Deserialize(s);
+                    }
                     if (!m.ContainsKey("RESULT"))
                     {
                         return new List<GroupRole>();
@@ -57,8 +63,14 @@ namespace SilverSim.BackendConnectors.Robust.GroupsV2
                         return new List<GroupRole>();
                     }
 
+                    Map resultmap = m["RESULT"] as Map;
+                    if(null == resultmap)
+                    {
+                        return new List<GroupRole>();
+                    }
+
                     List<GroupRole> roles = new List<GroupRole>();
-                    foreach (IValue iv in ((Map)m["RESULT"]).Values)
+                    foreach (IValue iv in resultmap.Values)
                     {
                         if (iv is Map)
                         {
@@ -79,7 +91,11 @@ namespace SilverSim.BackendConnectors.Robust.GroupsV2
                     post["GroupID"] = (string)group.ID;
                     post["RequestingAgentID"] = m_GetGroupsAgentID(requestingAgent);
                     post["METHOD"] = "GETAGENTROLES";
-                    Map m = OpenSimResponse.Deserialize(HttpRequestHandler.DoStreamPostRequest(m_Uri, null, post, false, TimeoutMs));
+                    Map m;
+                    using(Stream s = HttpRequestHandler.DoStreamPostRequest(m_Uri, null, post, false, TimeoutMs))
+                    {
+                        m = OpenSimResponse.Deserialize(s);
+                    }
                     if (!m.ContainsKey("RESULT"))
                     {
                         return new List<GroupRole>();
@@ -89,8 +105,13 @@ namespace SilverSim.BackendConnectors.Robust.GroupsV2
                         return new List<GroupRole>();
                     }
 
+                    Map resultmap = m["RESULT"] as Map;
+                    if(null == resultmap)
+                    {
+                        return new List<GroupRole>();
+                    }
                     List<GroupRole> roles = new List<GroupRole>();
-                    foreach(IValue iv in ((Map)m["RESULT"]).Values)
+                    foreach(IValue iv in resultmap.Values)
                     {
                         if(iv is Map)
                         {

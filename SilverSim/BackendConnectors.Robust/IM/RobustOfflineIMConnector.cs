@@ -11,6 +11,7 @@ using SilverSim.Types;
 using SilverSim.Types.IM;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 
 namespace SilverSim.BackendConnectors.Robust.IM
@@ -66,7 +67,11 @@ namespace SilverSim.BackendConnectors.Robust.IM
             post["Timestamp"] = im.Timestamp.DateTimeToUnixTime().ToString();
             post["ToAgentID"] = (string)im.ToAgent.ID;
             post["METHOD"] = "STORE";
-            Map map = OpenSimResponse.Deserialize(HttpRequestHandler.DoStreamPostRequest(m_OfflineIMURI, null, post, false, TimeoutMs));
+            Map map;
+            using(Stream s = HttpRequestHandler.DoStreamPostRequest(m_OfflineIMURI, null, post, false, TimeoutMs))
+            {
+                map = OpenSimResponse.Deserialize(s);
+            }
             if (!map.ContainsKey("RESULT"))
             {
                 throw new IMOfflineStoreFailedException();
@@ -82,23 +87,28 @@ namespace SilverSim.BackendConnectors.Robust.IM
             Dictionary<string, string> post = new Dictionary<string, string>();
             post["PrincipalID"] = (string)principalID;
             post["METHOD"] = "GET";
-            Map map = OpenSimResponse.Deserialize(HttpRequestHandler.DoStreamPostRequest(m_OfflineIMURI, null, post, false, TimeoutMs));
+            Map map;
+            using(Stream s = HttpRequestHandler.DoStreamPostRequest(m_OfflineIMURI, null, post, false, TimeoutMs))
+            {
+                map = OpenSimResponse.Deserialize(s);
+            }
             if (!map.ContainsKey("RESULT"))
             {
                 throw new IMOfflineStoreFailedException();
             }
-            if (!(map["RESULT"] is Map) || map["RESULT"].ToString().ToLower() == "false")
+            Map resultmap = map["RESULT"] as Map;
+            if (null == resultmap || map["RESULT"].ToString().ToLower() == "false")
             {
                 throw new IMOfflineStoreFailedException(map.ContainsKey("REASON") ? map["REASON"].ToString() : "Unknown Error");
             }
             List<GridInstantMessage> ims = new List<GridInstantMessage>();
-            foreach(IValue v in ((Map)(map["RESULT"])).Values)
+            foreach(IValue v in resultmap.Values)
             {
-                if(!(v is Map))
+                Map m = v as Map;
+                if (null == m)
                 {
                     continue;
                 }
-                Map m = (Map)v;
 
                 GridInstantMessage im = new GridInstantMessage();
                 im.BinaryBucket = StringToByteArray(m["BinaryBucket"].ToString());

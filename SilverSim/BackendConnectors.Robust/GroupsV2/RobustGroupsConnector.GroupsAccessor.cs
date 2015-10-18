@@ -7,19 +7,20 @@ using SilverSim.Types;
 using SilverSim.Types.Groups;
 using System;
 using System.Collections.Generic;
+using System.IO;
 
 namespace SilverSim.BackendConnectors.Robust.GroupsV2
 {
     public partial class RobustGroupsConnector
     {
-        class GroupsAccessor : IGroupsInterface
+        public sealed class GroupsAccessor : IGroupsInterface
         {
             public int TimeoutMs = 20000;
             string m_GroupServiceURI;
             string m_Uri;
-            GetGroupsAgentIDDelegate m_GetGroupsAgentID;
+            Func<UUI, string> m_GetGroupsAgentID;
 
-            public GroupsAccessor(string uri, string serviceURI, GetGroupsAgentIDDelegate getGroupsAgentID)
+            public GroupsAccessor(string uri, string serviceURI, Func<UUI, string> getGroupsAgentID)
             {
                 m_Uri = uri;
                 m_GroupServiceURI = serviceURI;
@@ -33,7 +34,11 @@ namespace SilverSim.BackendConnectors.Robust.GroupsV2
                 post["RequestingAgentID"] = m_GetGroupsAgentID(requestingAgent);
                 post["OP"] = op;
                 post["METHOD"] = "PUTGROUP";
-                Map m = OpenSimResponse.Deserialize(HttpRequestHandler.DoStreamPostRequest(m_Uri, null, post, false, TimeoutMs));
+                Map m;
+                using (Stream s = HttpRequestHandler.DoStreamPostRequest(m_Uri, null, post, false, TimeoutMs))
+                {
+                    m = OpenSimResponse.Deserialize(s);
+                }
                 if (!m.ContainsKey("RESULT"))
                 {
                     throw new AccessFailedException();
@@ -58,7 +63,7 @@ namespace SilverSim.BackendConnectors.Robust.GroupsV2
 
             public void Delete(UUI requestingAgent, GroupInfo group)
             {
-                throw new NotImplementedException();
+                throw new NotSupportedException();
             }
 
             public UGI this[UUI requestingAgent, UUID groupID]
@@ -69,7 +74,11 @@ namespace SilverSim.BackendConnectors.Robust.GroupsV2
                     post["GroupID"] = (string)groupID;
                     post["RequestingAgentID"] = m_GetGroupsAgentID(requestingAgent);
                     post["METHOD"] = "GETGROUP";
-                    Map m = OpenSimResponse.Deserialize(HttpRequestHandler.DoStreamPostRequest(m_Uri, null, post, false, TimeoutMs));
+                    Map m;
+                    using(Stream s = HttpRequestHandler.DoStreamPostRequest(m_Uri, null, post, false, TimeoutMs))
+                    {
+                        m = OpenSimResponse.Deserialize(s);
+                    }
                     if (!m.ContainsKey("RESULT"))
                     {
                         throw new KeyNotFoundException();
@@ -91,7 +100,11 @@ namespace SilverSim.BackendConnectors.Robust.GroupsV2
                     post["GroupID"] = (string)group.ID;
                     post["RequestingAgentID"] = m_GetGroupsAgentID(requestingAgent);
                     post["METHOD"] = "GETGROUP";
-                    Map m = OpenSimResponse.Deserialize(HttpRequestHandler.DoStreamPostRequest(m_Uri, null, post, false, TimeoutMs));
+                    Map m;
+                    using(Stream s = HttpRequestHandler.DoStreamPostRequest(m_Uri, null, post, false, TimeoutMs))
+                    {
+                        m = OpenSimResponse.Deserialize(s);
+                    }
                     if (!m.ContainsKey("RESULT"))
                     {
                         throw new KeyNotFoundException();
@@ -113,7 +126,11 @@ namespace SilverSim.BackendConnectors.Robust.GroupsV2
                     post["Name"] = groupName;
                     post["RequestingAgentID"] = m_GetGroupsAgentID(requestingAgent);
                     post["METHOD"] = "GETGROUP";
-                    Map m = OpenSimResponse.Deserialize(HttpRequestHandler.DoStreamPostRequest(m_Uri, null, post, false, TimeoutMs));
+                    Map m;
+                    using(Stream s = HttpRequestHandler.DoStreamPostRequest(m_Uri, null, post, false, TimeoutMs))
+                    {
+                        m = OpenSimResponse.Deserialize(s);
+                    }
                     if (!m.ContainsKey("RESULT"))
                     {
                         throw new KeyNotFoundException();
@@ -133,7 +150,11 @@ namespace SilverSim.BackendConnectors.Robust.GroupsV2
                 post["Query"] = query;
                 post["RequestingAgentID"] = m_GetGroupsAgentID(requestingAgent);
                 post["METHOD"] = "FINDGROUPS";
-                Map m = OpenSimResponse.Deserialize(HttpRequestHandler.DoStreamPostRequest(m_Uri, null, post, false, TimeoutMs));
+                Map m;
+                using(Stream s = HttpRequestHandler.DoStreamPostRequest(m_Uri, null, post, false, TimeoutMs))
+                {
+                    m = OpenSimResponse.Deserialize(s);
+                }
                 if (!m.ContainsKey("RESULT"))
                 {
                     throw new KeyNotFoundException();

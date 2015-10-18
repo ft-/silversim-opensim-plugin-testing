@@ -118,7 +118,7 @@ namespace SilverSim.BackendConnectors.Robust.UserAgent
             {
                 if (res[key] != null)
                 {
-                    info.Add(key.ToString(), res[key].ToString());
+                    info.Add(key, res[key].ToString());
                 }
             }
 
@@ -136,7 +136,7 @@ namespace SilverSim.BackendConnectors.Robust.UserAgent
             {
                 if(key.StartsWith("SRV_") && res[key] != null)
                 {
-                    string serverType = key.ToString().Substring(4);
+                    string serverType = key.Substring(4);
                     serverUrls.Add(serverType, res[key].ToString());
                 }
             }

@@ -7,6 +7,7 @@ using SilverSim.Types.Profile;
 using SilverSim.Types.StructuredData.XMLRPC;
 using System;
 using System.Collections.Generic;
+using System.IO;
 
 namespace SilverSim.BackendConnectors.OpenSim.Profile
 {
@@ -29,14 +30,14 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
                 req.MethodName = methodName;
                 req.Params.Add(structparam);
                 XMLRPC.XmlRpcResponse res = RPC.DoXmlRpcRequest(m_Uri, req, m_Connector.TimeoutMs);
-                if (!(res.ReturnValue is Map))
+                Map p = res.ReturnValue as Map;
+                if (null == p)
                 {
-                    throw new Exception("Unexpected OpenSimProfile return value");
+                    throw new InvalidDataException("Unexpected OpenSimProfile return value");
                 }
-                Map p = (Map)res.ReturnValue;
                 if (!p.ContainsKey("success"))
                 {
-                    throw new Exception("Unexpected OpenSimProfile return value");
+                    throw new InvalidDataException("Unexpected OpenSimProfile return value");
                 }
 
                 if (p["success"].ToString().ToLower() != "true")
