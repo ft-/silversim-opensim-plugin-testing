@@ -226,14 +226,14 @@ namespace SilverSim.BackendConnectors.Robust.Presence
                     m_Log.FatalFormat("Missing 'HomeURI' in section {0}", ownSection.Name);
                 }
 
-                throw new ConfigurationLoader.ConfigurationError();
+                throw new ConfigurationLoader.ConfigurationErrorException();
             }
 
             string homeURI = ownSection.GetString("HomeURI");
             if(!Uri.IsWellFormedUriString(homeURI, UriKind.Absolute))
             {
                 m_Log.FatalFormat("Invalid 'HomeURI' in section {0}", ownSection.Name);
-                throw new ConfigurationLoader.ConfigurationError();
+                throw new ConfigurationLoader.ConfigurationErrorException();
             }
 
             return new RobustPresenceConnector(ownSection.GetString("URI"), homeURI);

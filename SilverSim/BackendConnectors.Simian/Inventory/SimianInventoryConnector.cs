@@ -430,7 +430,7 @@ namespace SilverSim.BackendConnectors.Simian.Inventory
             if (!ownSection.Contains("URI"))
             {
                 m_Log.FatalFormat("Missing 'URI' in section {0}", ownSection.Name);
-                throw new ConfigurationLoader.ConfigurationError();
+                throw new ConfigurationLoader.ConfigurationErrorException();
             }
             return new SimianInventoryConnector(ownSection.GetString("URI"), ownSection.GetString("SimCapability", (string)UUID.Zero));
         }

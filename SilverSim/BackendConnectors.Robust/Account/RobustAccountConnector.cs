@@ -174,7 +174,7 @@ namespace SilverSim.BackendConnectors.Robust.Account
             if (!ownSection.Contains("URI"))
             {
                 m_Log.FatalFormat("Missing 'URI' in section {0}", ownSection.Name);
-                throw new ConfigurationLoader.ConfigurationError();
+                throw new ConfigurationLoader.ConfigurationErrorException();
             }
             return new RobustAccountConnector(ownSection.GetString("URI"));
         }

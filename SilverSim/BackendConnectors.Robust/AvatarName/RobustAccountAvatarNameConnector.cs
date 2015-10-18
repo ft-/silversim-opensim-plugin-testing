@@ -147,12 +147,12 @@ namespace SilverSim.BackendConnectors.Robust.AvatarName
             if (!ownSection.Contains("URI"))
             {
                 m_Log.FatalFormat("Missing 'URI' in section {0}", ownSection.Name);
-                throw new ConfigurationLoader.ConfigurationError();
+                throw new ConfigurationLoader.ConfigurationErrorException();
             }
             if (!ownSection.Contains("HomeURI"))
             {
                 m_Log.FatalFormat("Missing 'HomeURI' in section {0}", ownSection.Name);
-                throw new ConfigurationLoader.ConfigurationError();
+                throw new ConfigurationLoader.ConfigurationErrorException();
             }
             return new RobustAccountAvatarNameConnector(ownSection.GetString("URI"), ownSection.GetString("HomeURI"), ownSection.GetString("ScopeID", (string)UUID.Zero));
         }
