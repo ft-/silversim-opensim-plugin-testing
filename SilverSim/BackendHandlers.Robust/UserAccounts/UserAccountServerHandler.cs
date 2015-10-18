@@ -27,7 +27,7 @@ namespace SilverSim.BackendHandlers.Robust.UserAccounts
                 writer.WriteAttributeString("type", "List");
                 writer.WriteNamedValue("FirstName", ua.Principal.FirstName);
                 writer.WriteNamedValue("LastName", ua.Principal.LastName);
-                writer.WriteNamedValue("Email", ""); /* keep empty for privacy */
+                writer.WriteNamedValue("Email", string.Empty); /* keep empty for privacy */
                 writer.WriteNamedValue("PrincipalID", ua.Principal.ID);
                 writer.WriteNamedValue("ScopeID", ua.ScopeID);
                 writer.WriteNamedValue("Created", ua.Created.DateTimeToUnixTime());
@@ -39,7 +39,7 @@ namespace SilverSim.BackendHandlers.Robust.UserAccounts
                 string str = string.Empty;
                 foreach(KeyValuePair<string, string> kvp in ua.ServiceURLs)
                 {
-                    str += kvp.Key + "*" + (string.IsNullOrEmpty(kvp.Value) ? "" : kvp.Value) + ";";
+                    str += kvp.Key + "*" + (string.IsNullOrEmpty(kvp.Value) ? string.Empty : kvp.Value) + ";";
                 }
                 writer.WriteNamedValue("ServiceURLs", str);
             }
@@ -47,11 +47,11 @@ namespace SilverSim.BackendHandlers.Robust.UserAccounts
         }
     }
 
-    class RobustUserAccountServerHandler : IPlugin
+    public sealed class RobustUserAccountServerHandler : IPlugin
     {
-        protected static readonly ILog m_Log = LogManager.GetLogger("ROBUST USERACCOUNT HANDLER");
+        private static readonly ILog m_Log = LogManager.GetLogger("ROBUST USERACCOUNT HANDLER");
         private BaseHttpServer m_HttpServer;
-        UserAccountServiceInterface m_UserAccountService = null;
+        UserAccountServiceInterface m_UserAccountService;
         string m_UserAccountServiceName;
         static Encoding UTF8NoBOM = new System.Text.UTF8Encoding(false);
 
@@ -240,7 +240,7 @@ namespace SilverSim.BackendHandlers.Robust.UserAccounts
                         int i = 0;
                         foreach (UserAccount ua in accounts)
                         {
-                            writer.WriteUserAccount("account" + i, ua);
+                            writer.WriteUserAccount("account" + i.ToString(), ua);
                             ++i;
                         }
                     }
@@ -254,7 +254,7 @@ namespace SilverSim.BackendHandlers.Robust.UserAccounts
 
     #region Factory
     [PluginName("UserAccountHandler")]
-    public class RobustUserAccountServerHandlerFactory : IPluginFactory
+    public sealed class RobustUserAccountServerHandlerFactory : IPluginFactory
     {
         public RobustUserAccountServerHandlerFactory()
         {

@@ -40,7 +40,7 @@ namespace SilverSim.BackendHandlers.Robust.Avatar
                         break;
 
                     default:
-                        resdata[key.ToString().Replace("_", " ")] = reqdata.GetString(key);
+                        resdata[key.Replace('_', ' ')] = reqdata.GetString(key);
                         break;
                 }
             }
@@ -50,11 +50,11 @@ namespace SilverSim.BackendHandlers.Robust.Avatar
     }
 
     #region Service Implementation
-    class RobustAvatarServerHandler : IPlugin
+    public class RobustAvatarServerHandler : IPlugin
     {
         protected static readonly ILog m_Log = LogManager.GetLogger("ROBUST AVATAR HANDLER");
         private BaseHttpServer m_HttpServer;
-        AvatarServiceInterface m_AvatarService = null;
+        AvatarServiceInterface m_AvatarService;
         string m_AvatarServiceName;
         private static Encoding UTF8NoBOM = new System.Text.UTF8Encoding(false);
 
@@ -73,16 +73,17 @@ namespace SilverSim.BackendHandlers.Robust.Avatar
 
         void SuccessResult(HttpRequest req)
         {
-            HttpResponse res = req.BeginResponse("text/xml");
-            using (XmlTextWriter writer = new XmlTextWriter(res.GetOutputStream(), UTF8NoBOM))
+            using (HttpResponse res = req.BeginResponse("text/xml"))
             {
-                writer.WriteStartElement("ServerResponse");
-                writer.WriteStartElement("result");
-                writer.WriteValue("Success");
-                writer.WriteEndElement();
-                writer.WriteEndElement();
+                using (XmlTextWriter writer = new XmlTextWriter(res.GetOutputStream(), UTF8NoBOM))
+                {
+                    writer.WriteStartElement("ServerResponse");
+                    writer.WriteStartElement("result");
+                    writer.WriteValue("Success");
+                    writer.WriteEndElement();
+                    writer.WriteEndElement();
+                }
             }
-            res.Close();
         }
 
         public void AvatarHandler(HttpRequest req)
@@ -147,16 +148,17 @@ namespace SilverSim.BackendHandlers.Robust.Avatar
             }
             catch(FailureResultException)
             {
-                HttpResponse res = req.BeginResponse("text/xml");
-                using(XmlTextWriter writer = new XmlTextWriter(res.GetOutputStream(), UTF8NoBOM))
+                using (HttpResponse res = req.BeginResponse("text/xml"))
                 {
-                    writer.WriteStartElement("ServerResponse");
-                    writer.WriteStartElement("result");
-                    writer.WriteValue("Failure");
-                    writer.WriteEndElement();
-                    writer.WriteEndElement();
+                    using (XmlTextWriter writer = new XmlTextWriter(res.GetOutputStream(), UTF8NoBOM))
+                    {
+                        writer.WriteStartElement("ServerResponse");
+                        writer.WriteStartElement("result");
+                        writer.WriteValue("Failure");
+                        writer.WriteEndElement();
+                        writer.WriteEndElement();
+                    }
                 }
-                res.Close();
             }
         }
 

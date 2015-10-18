@@ -8,7 +8,7 @@ using SilverSim.Main.Common;
 namespace SilverSim.BackendHandlers.Robust.Grid
 {
     #region Service Implementation
-    class RobustGridServerHandler : IPlugin
+    public sealed class RobustGridServerHandler : IPlugin
     {
         //private static readonly ILog m_Log = LogManager.GetLogger("ROBUST GRID HANDLER");
         public RobustGridServerHandler(string gridServiceName)
@@ -24,7 +24,7 @@ namespace SilverSim.BackendHandlers.Robust.Grid
 
     #region Factory
     [PluginName("GridHandler")]
-    public class RobustGridHandlerFactory : IPluginFactory
+    public sealed class RobustGridHandlerFactory : IPluginFactory
     {
         public RobustGridHandlerFactory()
         {

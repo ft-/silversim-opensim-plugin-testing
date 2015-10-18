@@ -9,6 +9,7 @@ using System.Text;
 
 namespace SilverSim.BackendHandlers.Robust
 {
+    [Serializable]
     public class FailureResultException : Exception
     {
         public FailureResultException()

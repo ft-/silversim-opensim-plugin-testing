@@ -8,7 +8,7 @@ using SilverSim.Main.Common;
 namespace SilverSim.BackendHandlers.Robust.Friends
 {
     #region Service Implementation
-    class RobustFriendsServerHandler : IPlugin
+    public sealed class RobustFriendsServerHandler : IPlugin
     {
         //private static readonly ILog m_Log = LogManager.GetLogger("ROBUST FRIENDS HANDLER");
         public RobustFriendsServerHandler(string friends)
@@ -24,7 +24,7 @@ namespace SilverSim.BackendHandlers.Robust.Friends
 
     #region Factory
     [PluginName("FriendsHandler")]
-    public class RobustFriendsHandlerFactory : IPluginFactory
+    public sealed class RobustFriendsHandlerFactory : IPluginFactory
     {
         public RobustFriendsHandlerFactory()
         {

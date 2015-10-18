@@ -12,7 +12,7 @@ using System.Text;
 namespace SilverSim.BackendHandlers.Robust.OfflineIM
 {
     #region Service Implementation
-    class RobustOfflineIMServerHandler : IPlugin
+    public sealed class RobustOfflineIMServerHandler : IPlugin
     {
         //private static readonly ILog m_Log = LogManager.GetLogger("ROBUST INVENTORY HANDLER");
         public RobustOfflineIMServerHandler(string offlineIMServiceName)
@@ -28,7 +28,7 @@ namespace SilverSim.BackendHandlers.Robust.OfflineIM
 
     #region Factory
     [PluginName("OfflineIMHandler")]
-    public class RobustOfflineIMServerHandlerFactory : IPluginFactory
+    public sealed class RobustOfflineIMServerHandlerFactory : IPluginFactory
     {
         public RobustOfflineIMServerHandlerFactory()
         {

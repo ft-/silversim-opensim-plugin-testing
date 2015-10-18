@@ -13,6 +13,7 @@ using SilverSim.Types.Account;
 using SilverSim.Types.GridUser;
 using SilverSim.Types.StructuredData.REST;
 using System.Collections.Generic;
+using System.IO;
 using System.Net;
 using System.Text;
 using System.Xml;
@@ -20,13 +21,13 @@ using System.Xml;
 namespace SilverSim.BackendHandlers.Robust.GridUser
 {
     #region Service Implementation
-    class RobustGridUserServerHandler : IPlugin
+    public sealed class RobustGridUserServerHandler : IPlugin
     {
-        protected static readonly ILog m_Log = LogManager.GetLogger("ROBUST GRIDUSER HANDLER");
+        private static readonly ILog m_Log = LogManager.GetLogger("ROBUST GRIDUSER HANDLER");
         private BaseHttpServer m_HttpServer;
-        GridUserServiceInterface m_GridUserService = null;
-        AvatarNameServiceInterface m_AvatarNameService = null;
-        UserAccountServiceInterface m_UserAccountService = null;
+        GridUserServiceInterface m_GridUserService;
+        AvatarNameServiceInterface m_AvatarNameService;
+        UserAccountServiceInterface m_UserAccountService;
         string m_GridUserServiceName;
         string m_UserAccountServiceName;
         string m_AvatarNameStorageName;
@@ -119,10 +120,14 @@ namespace SilverSim.BackendHandlers.Robust.GridUser
                 }
 
 
-                HttpResponse res = req.BeginResponse();
-                res.ContentType = "text/xml";
-                res.GetOutputStream(SuccessResult.Length).Write(SuccessResult, 0, SuccessResult.Length);
-                res.Close();
+                using (HttpResponse res = req.BeginResponse())
+                {
+                    res.ContentType = "text/xml";
+                    using (Stream s = res.GetOutputStream(SuccessResult.Length))
+                    {
+                        s.Write(SuccessResult, 0, SuccessResult.Length);
+                    }
+                }
             }
             catch(HttpResponse.ConnectionCloseException)
             {
@@ -130,14 +135,18 @@ namespace SilverSim.BackendHandlers.Robust.GridUser
             }
             catch
             {
-                HttpResponse res = req.BeginResponse();
-                res.ContentType = "text/xml";
-                res.GetOutputStream(FailureResult.Length).Write(FailureResult, 0, FailureResult.Length);
-                res.Close();
+                using (HttpResponse res = req.BeginResponse())
+                {
+                    res.ContentType = "text/xml";
+                    using (Stream s = res.GetOutputStream(FailureResult.Length))
+                    {
+                        s.Write(FailureResult, 0, FailureResult.Length);
+                    }
+                }
             }
         }
 
-        UUI findUser(string userID)
+        UUI FindUser(string userID)
         {
             UUI uui = new UUI(userID);
             try
@@ -158,7 +167,7 @@ namespace SilverSim.BackendHandlers.Robust.GridUser
 
         public void LoggedIn(Dictionary<string, object> req)
         {
-            m_GridUserService.LoggedIn(findUser(req["UserID"].ToString()));
+            m_GridUserService.LoggedIn(FindUser(req["UserID"].ToString()));
         }
 
         public void LoggedOut(Dictionary<string, object> req)
@@ -167,7 +176,7 @@ namespace SilverSim.BackendHandlers.Robust.GridUser
             Vector3 position = Vector3.Parse(req["Position"].ToString());
             Vector3 lookAt = Vector3.Parse(req["LookAt"].ToString());
 
-            m_GridUserService.LoggedOut(findUser(req["UserID"].ToString()), region, position, lookAt);
+            m_GridUserService.LoggedOut(FindUser(req["UserID"].ToString()), region, position, lookAt);
         }
 
         public void SetHome(Dictionary<string, object> req)
@@ -176,7 +185,7 @@ namespace SilverSim.BackendHandlers.Robust.GridUser
             Vector3 position = Vector3.Parse(req["Position"].ToString());
             Vector3 lookAt = Vector3.Parse(req["LookAt"].ToString());
 
-            m_GridUserService.SetHome(findUser(req["UserID"].ToString()), region, position, lookAt);
+            m_GridUserService.SetHome(FindUser(req["UserID"].ToString()), region, position, lookAt);
         }
 
         public void SetPosition(Dictionary<string, object> req)
@@ -185,7 +194,7 @@ namespace SilverSim.BackendHandlers.Robust.GridUser
             Vector3 position = Vector3.Parse(req["Position"].ToString());
             Vector3 lookAt = Vector3.Parse(req["LookAt"].ToString());
 
-            m_GridUserService.SetPosition(findUser(req["UserID"].ToString()), region, position, lookAt);
+            m_GridUserService.SetPosition(FindUser(req["UserID"].ToString()), region, position, lookAt);
         }
 
         #region getgriduserinfo
@@ -203,11 +212,6 @@ namespace SilverSim.BackendHandlers.Robust.GridUser
             w.WriteNamedValue("Login", ui.LastLogin.DateTimeToUnixTime());
             w.WriteNamedValue("Logout", ui.LastLogout.DateTimeToUnixTime());
             w.WriteEndElement();
-        }
-
-        void WriteXmlGridUserEntry(XmlTextWriter w, UserAccount ui, string outerTagName)
-        {
-            WriteXmlGridUserEntry(w, ui.Principal, outerTagName);
         }
 
         void WriteXmlGridUserEntry(XmlTextWriter w, UUI ui, string outerTagName)
@@ -228,37 +232,48 @@ namespace SilverSim.BackendHandlers.Robust.GridUser
 
         public UUI CheckGetUUI(Dictionary<string, object> req, HttpRequest httpreq)
         {
-            HttpResponse resp;
-            XmlTextWriter writer;
             try
             {
-                return findUser(req["UserID"].ToString());
+                return FindUser(req["UserID"].ToString());
             }
             catch
             {
                 /* check for avatarnames service */
+                UUI aui;
                 try
                 {
-                    UUI aui = m_AvatarNameService[new UUI(req["UserID"].ToString())];
-                    resp = httpreq.BeginResponse("text/xml");
-                    writer = new XmlTextWriter(resp.GetOutputStream(), UTF8NoBOM);
-                    writer.WriteStartElement("ServerResponse");
-                    WriteXmlGridUserEntry(writer, aui, "result");
-                    writer.WriteEndElement();
-                    writer.Flush();
-                    resp.Close();
+                    aui = m_AvatarNameService[new UUI(req["UserID"].ToString())];
                 }
                 catch
                 {
-                    resp = httpreq.BeginResponse("text/xml");
-                    writer = new XmlTextWriter(resp.GetOutputStream(), UTF8NoBOM);
-                    writer.WriteStartElement("ServerResponse");
-                    writer.WriteStartElement("result");
-                    writer.WriteValue("null");
-                    writer.WriteEndElement();
-                    writer.WriteEndElement();
-                    writer.Flush();
-                    resp.Close();
+                    aui = null;
+                }
+
+                if(null != aui)
+                {
+                    using(HttpResponse resp = httpreq.BeginResponse("text/xml"))
+                    {
+                        using (XmlTextWriter writer = new XmlTextWriter(resp.GetOutputStream(), UTF8NoBOM))
+                        {
+                            writer.WriteStartElement("ServerResponse");
+                            WriteXmlGridUserEntry(writer, aui, "result");
+                            writer.WriteEndElement();
+                        }
+                    }
+                }
+                else
+                {
+                    using (HttpResponse resp = httpreq.BeginResponse("text/xml"))
+                    {
+                        using (XmlTextWriter writer = new XmlTextWriter(resp.GetOutputStream(), UTF8NoBOM))
+                        {
+                            writer.WriteStartElement("ServerResponse");
+                            writer.WriteStartElement("result");
+                            writer.WriteValue("null");
+                            writer.WriteEndElement();
+                            writer.WriteEndElement();
+                        }
+                    }
                 }
             }
             return null;
@@ -315,71 +330,70 @@ namespace SilverSim.BackendHandlers.Robust.GridUser
 
         public void GetGridUserInfo(Dictionary<string, object> req, HttpRequest httpreq)
         {
-            HttpResponse resp;
-            XmlTextWriter writer;
             UUI uui = CheckGetUUI(req, httpreq);
             if(null == uui)
             {
                 return;
             }
 
-            resp = httpreq.BeginResponse("text/xml");
-            writer = new XmlTextWriter(resp.GetOutputStream(), UTF8NoBOM);
-            writer.WriteStartElement("ServerResponse");
-            WriteUserInfo(writer, uui, "result", true);
-            writer.WriteEndElement();
-            writer.Flush();
-            resp.Close();
+            using (HttpResponse resp = httpreq.BeginResponse("text/xml"))
+            {
+                using (XmlTextWriter writer = new XmlTextWriter(resp.GetOutputStream(), UTF8NoBOM))
+                {
+                    writer.WriteStartElement("ServerResponse");
+                    WriteUserInfo(writer, uui, "result", true);
+                    writer.WriteEndElement();
+                }
+            }
         }
 
         public void GetGridUserInfos(Dictionary<string, object> req, HttpRequest httpreq)
         {
-            HttpResponse resp;
             bool anyFound = false;
-            resp = httpreq.BeginResponse("text/xml");
-            XmlTextWriter writer = new XmlTextWriter(resp.GetOutputStream(), UTF8NoBOM);
+            using (HttpResponse resp = httpreq.BeginResponse("text/xml"))
             {
-                List<string> userIDs = (List<string>)req["AgentIDs"];
-
-                resp = httpreq.BeginResponse("text/xml");
-                writer.WriteStartElement("ServerResponse");
-                writer.WriteStartElement("result");
-                int index = 0;
-                foreach (string userID in userIDs)
+                using(XmlTextWriter writer = new XmlTextWriter(resp.GetOutputStream(), UTF8NoBOM))
                 {
-                    UUI uui;
+                    List<string> userIDs = (List<string>)req["AgentIDs"];
 
-                    try
+                    writer.WriteStartElement("ServerResponse");
+                    writer.WriteStartElement("result");
+                    int index = 0;
+                    foreach (string userID in userIDs)
                     {
-                        uui = findUser(userID);
-                    }
-                    catch
-                    {
+                        UUI uui;
+
                         try
                         {
-                            uui = m_AvatarNameService[new UUI(userID)];
+                            uui = FindUser(userID);
                         }
                         catch
                         {
-                            continue;
+                            try
+                            {
+                                uui = m_AvatarNameService[new UUI(userID)];
+                            }
+                            catch
+                            {
+                                continue;
+                            }
                         }
+
+                        bool found = WriteUserInfo(writer, uui, "griduser" + index.ToString(), false);
+                        if (found)
+                        {
+                            ++index;
+                        }
+                        anyFound = anyFound || found;
                     }
-                    
-                    bool found = WriteUserInfo(writer, uui, "griduser" + index, false);
-                    if(found)
+                    if (!anyFound)
                     {
-                        ++index;
+                        writer.WriteValue("null");
                     }
-                    anyFound = anyFound || found;
+                    writer.WriteEndElement();
+                    writer.WriteEndElement();
                 }
-                if(!anyFound)
-                {
-                    writer.WriteValue("null");
-                }
-                writer.WriteEndElement();
-                writer.WriteEndElement();
             }
-            writer.Flush();
         }
         #endregion
     }

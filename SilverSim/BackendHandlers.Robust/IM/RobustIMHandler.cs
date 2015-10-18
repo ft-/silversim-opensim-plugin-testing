@@ -14,7 +14,7 @@ using System.Threading;
 namespace SilverSim.BackendConnectors.Robust.IM
 {
     #region Service Implementation
-    class RobustIMHandler : IPlugin
+    public sealed class RobustIMHandler : IPlugin
     {
         bool m_DisallowOfflineIM;
         IMServiceInterface m_IMService;
@@ -96,7 +96,7 @@ namespace SilverSim.BackendConnectors.Robust.IM
 
     #region Factory
     [PluginName("IMHandler")]
-    public class RobustIMHandlerFactory : IPluginFactory
+    public sealed class RobustIMHandlerFactory : IPluginFactory
     {
         public RobustIMHandlerFactory()
         {

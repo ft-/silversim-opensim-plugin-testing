@@ -10,6 +10,7 @@ using SilverSim.Types;
 using SilverSim.Types.Asset;
 using SilverSim.Types.Inventory;
 using SilverSim.Types.StructuredData.REST;
+using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Text;
@@ -153,14 +154,13 @@ namespace SilverSim.BackendHandlers.Robust.Inventory
     #endregion
 
     #region Service Implementation
-    class RobustInventoryServerHandler : IPlugin
+    public class RobustInventoryServerHandler : IPlugin
     {
         protected static readonly ILog m_Log = LogManager.GetLogger("ROBUST INVENTORY HANDLER");
         private BaseHttpServer m_HttpServer;
         private InventoryServiceInterface m_InventoryService;
         string m_InventoryServiceName;
-        delegate void InventoryHandlerDelegate(HttpRequest httpreq, Dictionary<string, object> postVals);
-        Dictionary<string, InventoryHandlerDelegate> m_Handlers = new Dictionary<string,InventoryHandlerDelegate>();
+        Dictionary<string, Action<HttpRequest, Dictionary<string, object>>> m_Handlers = new Dictionary<string, Action<HttpRequest, Dictionary<string, object>>>();
 
         public RobustInventoryServerHandler(string inventoryServiceName)
         {
@@ -197,16 +197,17 @@ namespace SilverSim.BackendHandlers.Robust.Inventory
 
         void SuccessResult(HttpRequest httpreq)
         {
-            HttpResponse res = httpreq.BeginResponse("text/xml");
-            using (XmlTextWriter writer = new XmlTextWriter(res.GetOutputStream(), UTF8NoBOM))
+            using (HttpResponse res = httpreq.BeginResponse("text/xml"))
             {
-                writer.WriteStartElement("ServerResponse");
-                writer.WriteStartElement("RESULT");
-                writer.WriteValue(true);
-                writer.WriteEndElement();
-                writer.WriteEndElement();
+                using (XmlTextWriter writer = new XmlTextWriter(res.GetOutputStream(), UTF8NoBOM))
+                {
+                    writer.WriteStartElement("ServerResponse");
+                    writer.WriteStartElement("RESULT");
+                    writer.WriteValue(true);
+                    writer.WriteEndElement();
+                    writer.WriteEndElement();
+                }
             }
-            res.Close();
         }
 
         void InventoryHandler(HttpRequest httpreq)
@@ -240,7 +241,7 @@ namespace SilverSim.BackendHandlers.Robust.Inventory
                 return;
             }
 
-            InventoryHandlerDelegate del;
+            Action<HttpRequest, Dictionary<string, object>> del;
             try
             {
                 if (m_Handlers.TryGetValue(reqdata["METHOD"].ToString(), out del))
@@ -254,16 +255,17 @@ namespace SilverSim.BackendHandlers.Robust.Inventory
             }
             catch (FailureResultException)
             {
-                HttpResponse res = httpreq.BeginResponse("text/xml");
-                using (XmlTextWriter writer = new XmlTextWriter(res.GetOutputStream(), UTF8NoBOM))
+                using (HttpResponse res = httpreq.BeginResponse("text/xml"))
                 {
-                    writer.WriteStartElement("ServerResponse");
-                    writer.WriteStartElement("RESULT");
-                    writer.WriteValue(false);
-                    writer.WriteEndElement();
-                    writer.WriteEndElement();
+                    using (XmlTextWriter writer = new XmlTextWriter(res.GetOutputStream(), UTF8NoBOM))
+                    {
+                        writer.WriteStartElement("ServerResponse");
+                        writer.WriteStartElement("RESULT");
+                        writer.WriteValue(false);
+                        writer.WriteEndElement();
+                        writer.WriteEndElement();
+                    }
                 }
-                res.Close();
             }
             catch
             {
@@ -273,16 +275,17 @@ namespace SilverSim.BackendHandlers.Robust.Inventory
                 }
                 else
                 {
-                    HttpResponse res = httpreq.BeginResponse("text/xml");
-                    using (XmlTextWriter writer = new XmlTextWriter(res.GetOutputStream(), UTF8NoBOM))
+                    using (HttpResponse res = httpreq.BeginResponse("text/xml"))
                     {
-                        writer.WriteStartElement("ServerResponse");
-                        writer.WriteStartElement("RESULT");
-                        writer.WriteValue(false);
-                        writer.WriteEndElement();
-                        writer.WriteEndElement();
+                        using (XmlTextWriter writer = new XmlTextWriter(res.GetOutputStream(), UTF8NoBOM))
+                        {
+                            writer.WriteStartElement("ServerResponse");
+                            writer.WriteStartElement("RESULT");
+                            writer.WriteValue(false);
+                            writer.WriteEndElement();
+                            writer.WriteEndElement();
+                        }
                     }
-                    res.Close();
                 }
             }
         }
@@ -314,18 +317,19 @@ namespace SilverSim.BackendHandlers.Robust.Inventory
                 throw new FailureResultException();
             }
             int count = 0;
-            HttpResponse res = httpreq.BeginResponse("text/xml");
-            using(XmlTextWriter writer = new XmlTextWriter(res.GetOutputStream(), UTF8NoBOM))
+            using (HttpResponse res = httpreq.BeginResponse("text/xml"))
             {
-                writer.WriteStartElement("ServerResponse");
-                foreach(InventoryFolder folder in folders)
+                using (XmlTextWriter writer = new XmlTextWriter(res.GetOutputStream(), UTF8NoBOM))
                 {
-                    writer.WriteFolder("folder_" + count.ToString(), folder);
-                    ++count;
+                    writer.WriteStartElement("ServerResponse");
+                    foreach (InventoryFolder folder in folders)
+                    {
+                        writer.WriteFolder("folder_" + count.ToString(), folder);
+                        ++count;
+                    }
+                    writer.WriteEndElement();
                 }
-                writer.WriteEndElement();
             }
-            res.Close();
         }
 
         void GetRootFolder(HttpRequest httpreq, Dictionary<string, object> reqdata)
@@ -341,14 +345,15 @@ namespace SilverSim.BackendHandlers.Robust.Inventory
                 throw new FailureResultException();
             }
 
-            HttpResponse res = httpreq.BeginResponse("text/xml");
-            using(XmlTextWriter writer = new XmlTextWriter(res.GetOutputStream(), UTF8NoBOM))
+            using (HttpResponse res = httpreq.BeginResponse("text/xml"))
             {
-                writer.WriteStartElement("ServerResponse");
-                writer.WriteFolder("folder", folder);
-                writer.WriteEndElement();
+                using (XmlTextWriter writer = new XmlTextWriter(res.GetOutputStream(), UTF8NoBOM))
+                {
+                    writer.WriteStartElement("ServerResponse");
+                    writer.WriteFolder("folder", folder);
+                    writer.WriteEndElement();
+                }
             }
-            res.Close();
         }
 
         void GetFolderForType(HttpRequest httpreq, Dictionary<string, object> reqdata)
@@ -365,14 +370,15 @@ namespace SilverSim.BackendHandlers.Robust.Inventory
                 throw new FailureResultException();
             }
 
-            HttpResponse res = httpreq.BeginResponse("text/xml");
-            using(XmlTextWriter writer = new XmlTextWriter(res.GetOutputStream(), UTF8NoBOM))
+            using (HttpResponse res = httpreq.BeginResponse("text/xml"))
             {
-                writer.WriteStartElement("ServerResponse");
-                writer.WriteFolder("folder", folder);
-                writer.WriteEndElement();
+                using (XmlTextWriter writer = new XmlTextWriter(res.GetOutputStream(), UTF8NoBOM))
+                {
+                    writer.WriteStartElement("ServerResponse");
+                    writer.WriteFolder("folder", folder);
+                    writer.WriteEndElement();
+                }
             }
-            res.Close();
         }
 
         void GetFolderContent(HttpRequest httpreq, Dictionary<string, object> reqdata)
@@ -390,14 +396,15 @@ namespace SilverSim.BackendHandlers.Robust.Inventory
                 throw new FailureResultException();
             }
 
-            HttpResponse res = httpreq.BeginResponse("text/xml");
-            using (XmlTextWriter writer = new XmlTextWriter(res.GetOutputStream(), UTF8NoBOM))
+            using (HttpResponse res = httpreq.BeginResponse("text/xml"))
             {
-                writer.WriteStartElement("ServerResponse");
-                writer.WriteFolderContent(string.Empty, folder);
-                writer.WriteEndElement();
+                using (XmlTextWriter writer = new XmlTextWriter(res.GetOutputStream(), UTF8NoBOM))
+                {
+                    writer.WriteStartElement("ServerResponse");
+                    writer.WriteFolderContent(string.Empty, folder);
+                    writer.WriteEndElement();
+                }
             }
-            res.Close();
         }
 
         void GetMultipleFoldersContent(HttpRequest httpreq, Dictionary<string, object> reqdata)
@@ -425,17 +432,18 @@ namespace SilverSim.BackendHandlers.Robust.Inventory
                 throw new FailureResultException();
             }
 
-            HttpResponse res = httpreq.BeginResponse("text/xml");
-            using (XmlTextWriter writer = new XmlTextWriter(res.GetOutputStream(), UTF8NoBOM))
+            using (HttpResponse res = httpreq.BeginResponse("text/xml"))
             {
-                writer.WriteStartElement("ServerResponse");
-                foreach(InventoryFolderContent content in foldercontents)
+                using (XmlTextWriter writer = new XmlTextWriter(res.GetOutputStream(), UTF8NoBOM))
                 {
-                    writer.WriteFolderContent("F_" + content.FolderID, content, true);
+                    writer.WriteStartElement("ServerResponse");
+                    foreach (InventoryFolderContent content in foldercontents)
+                    {
+                        writer.WriteFolderContent("F_" + content.FolderID.ToString(), content, true);
+                    }
+                    writer.WriteEndElement();
                 }
-                writer.WriteEndElement();
             }
-            res.Close();
         }
 
         void GetFolderItems(HttpRequest httpreq, Dictionary<string, object> reqdata)
@@ -453,21 +461,22 @@ namespace SilverSim.BackendHandlers.Robust.Inventory
                 throw new FailureResultException();
             }
 
-            HttpResponse res = httpreq.BeginResponse("text/xml");
-            using (XmlTextWriter writer = new XmlTextWriter(res.GetOutputStream(), UTF8NoBOM))
+            using (HttpResponse res = httpreq.BeginResponse("text/xml"))
             {
-                writer.WriteStartElement("ServerResponse");
-                int count = 0;
-                writer.WriteStartElement("ITEMS");
-                foreach (InventoryItem item in folderitems)
+                using (XmlTextWriter writer = new XmlTextWriter(res.GetOutputStream(), UTF8NoBOM))
                 {
-                    writer.WriteItem("item_" + count.ToString(), item);
-                    ++count;
+                    writer.WriteStartElement("ServerResponse");
+                    int count = 0;
+                    writer.WriteStartElement("ITEMS");
+                    foreach (InventoryItem item in folderitems)
+                    {
+                        writer.WriteItem("item_" + count.ToString(), item);
+                        ++count;
+                    }
+                    writer.WriteEndElement();
+                    writer.WriteEndElement();
                 }
-                writer.WriteEndElement();
-                writer.WriteEndElement();
             }
-            res.Close();
         }
 
         void AddFolder(HttpRequest httpreq, Dictionary<string, object> reqdata)
@@ -660,14 +669,15 @@ namespace SilverSim.BackendHandlers.Robust.Inventory
                 }
             }
 
-            HttpResponse res = httpreq.BeginResponse("text/xml");
-            using (XmlTextWriter writer = new XmlTextWriter(res.GetOutputStream(), UTF8NoBOM))
+            using (HttpResponse res = httpreq.BeginResponse("text/xml"))
             {
-                writer.WriteStartElement("ServerResponse");
-                writer.WriteItem("item", item);
-                writer.WriteEndElement();
+                using (XmlTextWriter writer = new XmlTextWriter(res.GetOutputStream(), UTF8NoBOM))
+                {
+                    writer.WriteStartElement("ServerResponse");
+                    writer.WriteItem("item", item);
+                    writer.WriteEndElement();
+                }
             }
-            res.Close();
         }
 
         void GetMultipleItems(HttpRequest httpreq, Dictionary<string, object> reqdata)
@@ -693,29 +703,30 @@ namespace SilverSim.BackendHandlers.Robust.Inventory
                 keyeditems[i.ID] = i;
             }
 
-            HttpResponse res = httpreq.BeginResponse("text/xml");
-            int count = 0;
-            using (XmlTextWriter writer = new XmlTextWriter(res.GetOutputStream(), UTF8NoBOM))
+            using (HttpResponse res = httpreq.BeginResponse("text/xml"))
             {
-                writer.WriteStartElement("ServerResponse");
-                foreach(UUID uuid in uuids)
+                int count = 0;
+                using (XmlTextWriter writer = new XmlTextWriter(res.GetOutputStream(), UTF8NoBOM))
                 {
-                    InventoryItem item;
-                    if(keyeditems.TryGetValue(uuid, out item))
+                    writer.WriteStartElement("ServerResponse");
+                    foreach (UUID uuid in uuids)
                     {
-                        writer.WriteItem("item_" + count.ToString(), item);
+                        InventoryItem item;
+                        if (keyeditems.TryGetValue(uuid, out item))
+                        {
+                            writer.WriteItem("item_" + count.ToString(), item);
+                        }
+                        else
+                        {
+                            writer.WriteStartElement("item_" + count.ToString());
+                            writer.WriteValue("NULL");
+                            writer.WriteEndElement();
+                        }
+                        ++count;
                     }
-                    else
-                    {
-                        writer.WriteStartElement("item_" + count.ToString());
-                        writer.WriteValue("NULL");
-                        writer.WriteEndElement();
-                    }
-                    ++count;
+                    writer.WriteEndElement();
                 }
-                writer.WriteEndElement();
             }
-            res.Close();
         }
 
         void GetFolder(HttpRequest httpreq, Dictionary<string, object> reqdata)
@@ -746,14 +757,15 @@ namespace SilverSim.BackendHandlers.Robust.Inventory
                 }
             }
 
-            HttpResponse res = httpreq.BeginResponse("text/xml");
-            using (XmlTextWriter writer = new XmlTextWriter(res.GetOutputStream(), UTF8NoBOM))
+            using (HttpResponse res = httpreq.BeginResponse("text/xml"))
             {
-                writer.WriteStartElement("ServerResponse");
-                writer.WriteFolder("folder", folder);
-                writer.WriteEndElement();
+                using (XmlTextWriter writer = new XmlTextWriter(res.GetOutputStream(), UTF8NoBOM))
+                {
+                    writer.WriteStartElement("ServerResponse");
+                    writer.WriteFolder("folder", folder);
+                    writer.WriteEndElement();
+                }
             }
-            res.Close();
         }
 
         void GetActiveGestures(HttpRequest httpreq, Dictionary<string, object> reqdata)
@@ -769,19 +781,20 @@ namespace SilverSim.BackendHandlers.Robust.Inventory
                 throw new FailureResultException();
             }
 
-            HttpResponse res = httpreq.BeginResponse("text/xml");
-            int count = 0;
-            using (XmlTextWriter writer = new XmlTextWriter(res.GetOutputStream(), UTF8NoBOM))
+            using (HttpResponse res = httpreq.BeginResponse("text/xml"))
             {
-                writer.WriteStartElement("ServerResponse");
-                foreach (InventoryItem item in gestures)
+                int count = 0;
+                using (XmlTextWriter writer = new XmlTextWriter(res.GetOutputStream(), UTF8NoBOM))
                 {
-                    writer.WriteItem("item_" + count.ToString(), item);
-                    ++count;
+                    writer.WriteStartElement("ServerResponse");
+                    foreach (InventoryItem item in gestures)
+                    {
+                        writer.WriteItem("item_" + count.ToString(), item);
+                        ++count;
+                    }
+                    writer.WriteEndElement();
                 }
-                writer.WriteEndElement();
             }
-            res.Close();
         }
 
         static UTF8Encoding UTF8NoBOM = new UTF8Encoding(false);
@@ -790,7 +803,7 @@ namespace SilverSim.BackendHandlers.Robust.Inventory
 
     #region Factory
     [PluginName("InventoryHandler")]
-    public class RobustInventoryServerHandlerFactory : IPluginFactory
+    public sealed class RobustInventoryServerHandlerFactory : IPluginFactory
     {
         public RobustInventoryServerHandlerFactory()
         {

@@ -8,7 +8,7 @@ using SilverSim.Main.Common;
 namespace SilverSim.BackendHandlers.Robust.Groups
 {
     #region Service Implementation
-    class RobustGroupsServerHandler : IPlugin
+    public sealed class RobustGroupsServerHandler : IPlugin
     {
         //private static readonly ILog m_Log = LogManager.GetLogger("ROBUST GROUPS HANDLER");
         public RobustGroupsServerHandler(string groupsServiceName)
@@ -24,7 +24,7 @@ namespace SilverSim.BackendHandlers.Robust.Groups
 
     #region Factory
     [PluginName("GroupsHandler")]
-    public class RobustGroupsServerHandlerFactory : IPluginFactory
+    public sealed class RobustGroupsServerHandlerFactory : IPluginFactory
     {
         public RobustGroupsServerHandlerFactory()
         {

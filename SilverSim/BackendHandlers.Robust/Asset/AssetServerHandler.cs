@@ -19,13 +19,13 @@ using System.Xml;
 namespace SilverSim.BackendHandlers.Robust.Asset
 {
     #region Service Implementation
-    class RobustAssetServerHandler : IPlugin
+    public class RobustAssetServerHandler : IPlugin
     {
         protected static readonly ILog m_Log = LogManager.GetLogger("ROBUST ASSET HANDLER");
         private BaseHttpServer m_HttpServer;
-        AssetServiceInterface m_TemporaryAssetService = null;
-        AssetServiceInterface m_PersistentAssetService = null;
-        AssetServiceInterface m_ResourceAssetService = null;
+        AssetServiceInterface m_TemporaryAssetService;
+        AssetServiceInterface m_PersistentAssetService;
+        AssetServiceInterface m_ResourceAssetService;
         string m_TemporaryAssetServiceName;
         string m_PersistentAssetServiceName;
         bool m_EnableGet;
@@ -138,7 +138,7 @@ namespace SilverSim.BackendHandlers.Robust.Asset
                 }
 
                 string assetbase_header = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<AssetBase>";
-                string flags = "";
+                string flags = string.Empty;
                 if(data.Data.Length != 0)
                 {
                     assetbase_header += "<Data>";
@@ -155,7 +155,7 @@ namespace SilverSim.BackendHandlers.Robust.Asset
 
                 if (0 != (data.Flags & AssetFlags.Rewritable))
                 {
-                    if(flags != string.Empty)
+                    if(flags.Length != 0)
                     {
                         flags += ",";
                     }
@@ -164,14 +164,14 @@ namespace SilverSim.BackendHandlers.Robust.Asset
 
                 if (0 != (data.Flags & AssetFlags.Collectable))
                 {
-                    if (flags != string.Empty)
+                    if (flags.Length != 0)
                     {
                         flags += ",";
                     }
                     flags += "Collectable";
                 }
 
-                if(flags == "")
+                if(flags.Length == 0)
                 {
                     flags = "Normal";
                 }
@@ -194,27 +194,29 @@ namespace SilverSim.BackendHandlers.Robust.Asset
                 byte[] header = UTF8NoBOM.GetBytes(assetbase_header);
                 byte[] footer = UTF8NoBOM.GetBytes(assetbase_footer);
 
-                HttpResponse res = req.BeginResponse();
-                res.ContentType = "text/xml";
-                Stream st = res.GetOutputStream();
-                st.Write(header, 0, header.Length);
-                int pos = 0;
-                while (data.Data.Length - pos >= MAX_ASSET_BASE64_CONVERSION_SIZE)
+                using (HttpResponse res = req.BeginResponse())
                 {
-                    string b = Convert.ToBase64String(data.Data, pos, MAX_ASSET_BASE64_CONVERSION_SIZE);
-                    byte[] block = Encoding.UTF8.GetBytes(b);
-                    st.Write(block, 0, block.Length);
-                    pos += MAX_ASSET_BASE64_CONVERSION_SIZE;
+                    res.ContentType = "text/xml";
+                    using (Stream st = res.GetOutputStream())
+                    {
+                        st.Write(header, 0, header.Length);
+                        int pos = 0;
+                        while (data.Data.Length - pos >= MAX_ASSET_BASE64_CONVERSION_SIZE)
+                        {
+                            string b = Convert.ToBase64String(data.Data, pos, MAX_ASSET_BASE64_CONVERSION_SIZE);
+                            byte[] block = Encoding.UTF8.GetBytes(b);
+                            st.Write(block, 0, block.Length);
+                            pos += MAX_ASSET_BASE64_CONVERSION_SIZE;
+                        }
+                        if (data.Data.Length > pos)
+                        {
+                            string b = Convert.ToBase64String(data.Data, pos, data.Data.Length - pos);
+                            byte[] block = Encoding.UTF8.GetBytes(b);
+                            st.Write(block, 0, block.Length);
+                        }
+                        st.Write(footer, 0, footer.Length);
+                    }
                 }
-                if(data.Data.Length > pos)
-                {
-                    string b = Convert.ToBase64String(data.Data, pos, data.Data.Length - pos);
-                    byte[] block = Encoding.UTF8.GetBytes(b);
-                    st.Write(block, 0, block.Length);
-                }
-                st.Write(footer, 0, footer.Length);
-
-                res.Close();
             }
             else if(parts[2] == "metadata")
             {
@@ -244,7 +246,7 @@ namespace SilverSim.BackendHandlers.Robust.Asset
                 }
 
                 string assetbase_header = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<AssetMetadata>";
-                string flags = "";
+                string flags = string.Empty;
 
                 if (0 != (data.Flags & AssetFlags.Maptile))
                 {
@@ -253,7 +255,7 @@ namespace SilverSim.BackendHandlers.Robust.Asset
 
                 if (0 != (data.Flags & AssetFlags.Rewritable))
                 {
-                    if (flags != string.Empty)
+                    if (flags.Length != 0)
                     {
                         flags += ",";
                     }
@@ -262,14 +264,14 @@ namespace SilverSim.BackendHandlers.Robust.Asset
 
                 if (0 != (data.Flags & AssetFlags.Collectable))
                 {
-                    if (flags != string.Empty)
+                    if (flags.Length != 0)
                     {
                         flags += ",";
                     }
                     flags += "Collectable";
                 }
 
-                if (flags == "")
+                if (flags.Length == 0)
                 {
                     flags = "Normal";
                 }
@@ -285,13 +287,15 @@ namespace SilverSim.BackendHandlers.Robust.Asset
                 byte[] header = UTF8NoBOM.GetBytes(assetbase_header);
                 byte[] footer = UTF8NoBOM.GetBytes(assetbase_footer);
 
-                HttpResponse res = req.BeginResponse();
-                res.ContentType = "text/xml";
-                Stream st = res.GetOutputStream(header.Length + footer.Length);
-                st.Write(header, 0, header.Length);
-                st.Write(footer, 0, footer.Length);
-
-                res.Close();
+                using (HttpResponse res = req.BeginResponse())
+                {
+                    res.ContentType = "text/xml";
+                    using (Stream st = res.GetOutputStream(header.Length + footer.Length))
+                    {
+                        st.Write(header, 0, header.Length);
+                        st.Write(footer, 0, footer.Length);
+                    }
+                }
             }
             else if(parts[2] == "data")
             {
@@ -320,24 +324,27 @@ namespace SilverSim.BackendHandlers.Robust.Asset
                     }
                 }
 
-                HttpResponse res = req.BeginResponse();
-                res.ContentType = data.ContentType;
-                bool compressionEnabled = true;
-                switch(data.Type)
+                using (HttpResponse res = req.BeginResponse())
                 {
-                    case AssetType.Texture:
-                    case AssetType.Sound:
-                    case AssetType.ImageJPEG:
-                        /* these are well-compressed no need for further compression */
-                        compressionEnabled = false;
-                        break;
+                    res.ContentType = data.ContentType;
+                    bool compressionEnabled = true;
+                    switch (data.Type)
+                    {
+                        case AssetType.Texture:
+                        case AssetType.Sound:
+                        case AssetType.ImageJPEG:
+                            /* these are well-compressed no need for further compression */
+                            compressionEnabled = false;
+                            break;
 
-                    default:
-                        break;
+                        default:
+                            break;
+                    }
+                    using (Stream st = res.GetOutputStream(compressionEnabled))
+                    {
+                        st.Write(data.Data, 0, data.Data.Length);
+                    }
                 }
-                Stream st = res.GetOutputStream(compressionEnabled);
-                st.Write(data.Data, 0, data.Data.Length);
-                res.Close();
             }
             else
             {
@@ -347,14 +354,15 @@ namespace SilverSim.BackendHandlers.Robust.Asset
 
         public void DeleteAssetHandler(HttpRequest req)
         {
-            HttpResponse res = req.BeginResponse();
-            using (XmlTextWriter writer = new XmlTextWriter(res.GetOutputStream(), UTF8NoBOM))
+            using (HttpResponse res = req.BeginResponse())
             {
-                writer.WriteStartElement("boolean");
-                writer.WriteValue(false);
-                writer.WriteEndElement();
+                using (XmlTextWriter writer = new XmlTextWriter(res.GetOutputStream(), UTF8NoBOM))
+                {
+                    writer.WriteStartElement("boolean");
+                    writer.WriteValue(false);
+                    writer.WriteEndElement();
+                }
             }
-            res.Close();
         }
 
         public void PostAssetHandler(HttpRequest req)
@@ -377,14 +385,15 @@ namespace SilverSim.BackendHandlers.Robust.Asset
                     try
                     {
                         m_TemporaryAssetService.Store(data);
-                        HttpResponse res = req.BeginResponse();
-                        /* DO NOT USE using here, it will close the underlying stream */
-                        XmlTextWriter writer = new XmlTextWriter(res.GetOutputStream(), UTF8NoBOM);
-                        writer.WriteStartElement("string");
-                        writer.WriteValue(data.ID.ToString());
-                        writer.WriteEndElement();
-                        writer.Flush();
-                        res.Close();
+                        using (HttpResponse res = req.BeginResponse())
+                        {
+                            using (XmlTextWriter writer = new XmlTextWriter(res.GetOutputStream(), UTF8NoBOM))
+                            {
+                                writer.WriteStartElement("string");
+                                writer.WriteValue(data.ID.ToString());
+                                writer.WriteEndElement();
+                            }
+                        }
                     }
                     catch
                     {
@@ -396,14 +405,15 @@ namespace SilverSim.BackendHandlers.Robust.Asset
             try
             {
                 m_PersistentAssetService.Store(data);
-                HttpResponse res = req.BeginResponse();
-                /* DO NOT USE using here, it will close the underlying stream */
-                XmlTextWriter writer = new XmlTextWriter(res.GetOutputStream(), UTF8NoBOM);
-                writer.WriteStartElement("string");
-                writer.WriteValue(data.ID.ToString());
-                writer.WriteEndElement();
-                writer.Flush();
-                res.Close();
+                using (HttpResponse res = req.BeginResponse())
+                {
+                    using (XmlTextWriter writer = new XmlTextWriter(res.GetOutputStream(), UTF8NoBOM))
+                    {
+                        writer.WriteStartElement("string");
+                        writer.WriteValue(data.ID.ToString());
+                        writer.WriteEndElement();
+                    }
+                }
             }
             catch(HttpResponse.ConnectionCloseException)
             {
@@ -412,24 +422,25 @@ namespace SilverSim.BackendHandlers.Robust.Asset
             }
             catch(Exception)
             {
-                HttpResponse res = req.BeginResponse();
-                /* DO NOT USE using here, it will close the underlying stream */
-                XmlTextWriter writer = new XmlTextWriter(res.GetOutputStream(), UTF8NoBOM);
-                writer.WriteStartElement("string");
-                writer.WriteValue(data.ID.ToString());
-                writer.WriteEndElement();
-                writer.Flush();
-                res.Close();
+                using (HttpResponse res = req.BeginResponse())
+                {
+                    using (XmlTextWriter writer = new XmlTextWriter(res.GetOutputStream(), UTF8NoBOM))
+                    {
+                        writer.WriteStartElement("string");
+                        writer.WriteValue(data.ID.ToString());
+                        writer.WriteEndElement();
+                    }
+                }
             }
         }
 
-        private static UUID parseUUID(XmlTextReader reader)
+        private static UUID ParseUUID(XmlTextReader reader)
         {
             while (true)
             {
                 if (!reader.Read())
                 {
-                    throw new Exception();
+                    throw new InvalidDataException();
                 }
 
                 switch (reader.NodeType)
@@ -437,7 +448,7 @@ namespace SilverSim.BackendHandlers.Robust.Asset
                     case XmlNodeType.Element:
                         if (reader.Name != "string")
                         {
-                            throw new Exception();
+                            throw new InvalidDataException();
                         }
                         break;
 
@@ -445,11 +456,11 @@ namespace SilverSim.BackendHandlers.Robust.Asset
                         return new UUID(reader.ReadContentAsString());
 
                     case XmlNodeType.EndElement:
-                        throw new Exception();
+                        throw new InvalidDataException();
                 }
             }
         }
-        private static List<UUID> parseArrayOfUUIDs(XmlTextReader reader)
+        private static List<UUID> ParseArrayOfUUIDs(XmlTextReader reader)
         {
             List<UUID> result = new List<UUID>();
             bool haveroot = false;
@@ -457,7 +468,7 @@ namespace SilverSim.BackendHandlers.Robust.Asset
             {
                 if (!reader.Read())
                 {
-                    throw new Exception();
+                    throw new InvalidDataException();
                 }
 
                 switch (reader.NodeType)
@@ -467,15 +478,15 @@ namespace SilverSim.BackendHandlers.Robust.Asset
                         {
                             if (reader.Name != "string")
                             {
-                                throw new Exception("Invalid ArrayOfString");
+                                throw new InvalidDataException("Invalid ArrayOfString");
                             }
-                            result.Add(parseUUID(reader));
+                            result.Add(ParseUUID(reader));
                         }
                         else
                         {
                             if(reader.Name != "ArrayOfString")
                             {
-                                throw new Exception("Invalid ArrayOfString");
+                                throw new InvalidDataException("Invalid ArrayOfString");
                             }
                             haveroot = true;
                         }
@@ -484,7 +495,7 @@ namespace SilverSim.BackendHandlers.Robust.Asset
                     case XmlNodeType.EndElement:
                         if (reader.Name != "ArrayOfString" || !haveroot)
                         {
-                            throw new Exception("Invalid ArrayOfString");
+                            throw new InvalidDataException("Invalid ArrayOfString");
                         }
                         return result;
                 }
@@ -504,7 +515,7 @@ namespace SilverSim.BackendHandlers.Robust.Asset
             {
                 using (XmlTextReader reader = new XmlTextReader(req.Body))
                 {
-                    ids = parseArrayOfUUIDs(reader);
+                    ids = ParseArrayOfUUIDs(reader);
                 }
             }
             catch
@@ -538,36 +549,37 @@ namespace SilverSim.BackendHandlers.Robust.Asset
                 }
             }
 
-            HttpResponse res = req.BeginResponse();
-            res.ContentType = "text/xml";
-            using(XmlTextWriter writer = new XmlTextWriter(res.GetOutputStream(), UTF8NoBOM))
+            using (HttpResponse res = req.BeginResponse())
             {
-                writer.WriteStartElement("ArrayOfBoolean");
-                foreach(UUID id in ids)
+                res.ContentType = "text/xml";
+                using (XmlTextWriter writer = new XmlTextWriter(res.GetOutputStream(), UTF8NoBOM))
                 {
-                    bool found = false;
-                    try
+                    writer.WriteStartElement("ArrayOfBoolean");
+                    foreach (UUID id in ids)
                     {
-                        found = asset1[id];
-                    }
-                    catch
-                    {
+                        bool found = false;
+                        try
+                        {
+                            found = asset1[id];
+                        }
+                        catch
+                        {
 
-                    }
-                    writer.WriteStartElement("boolean");
-                    if (found)
-                    {
-                        writer.WriteValue("true");
-                    }
-                    else
-                    {
-                        writer.WriteValue("false");
+                        }
+                        writer.WriteStartElement("boolean");
+                        if (found)
+                        {
+                            writer.WriteValue("true");
+                        }
+                        else
+                        {
+                            writer.WriteValue("false");
+                        }
+                        writer.WriteEndElement();
                     }
                     writer.WriteEndElement();
                 }
-                writer.WriteEndElement();
             }
-            res.Close();
         }
     }
     #endregion
@@ -584,7 +596,7 @@ namespace SilverSim.BackendHandlers.Robust.Asset
         public IPlugin Initialize(ConfigurationLoader loader, IConfig ownSection)
         {
             return new RobustAssetServerHandler(ownSection.GetString("PersistentAssetService", "AssetService"),
-                ownSection.GetString("TemporaryAssetService", ""), 
+                ownSection.GetString("TemporaryAssetService", string.Empty), 
                 ownSection.GetBoolean("IsGetEnabled", true));
         }
     }
