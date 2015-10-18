@@ -15,7 +15,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 
-namespace SilverSim.OpenSimArchiver.OAR
+namespace SilverSim.OpenSimArchiver.RegionArchiver
 {
     public static partial class OAR
     {

@@ -164,18 +164,18 @@ namespace SilverSim.OpenSimArchiver
             }
 
             string filename = null;
-            OAR.OAR.SaveOptions options = OAR.OAR.SaveOptions.None;
+            RegionArchiver.OAR.SaveOptions options = RegionArchiver.OAR.SaveOptions.None;
 
             for (int argi = 2; argi < args.Count; ++argi)
             {
                 string arg = args[argi];
                 if (arg == "--noassets")
                 {
-                    options |= OAR.OAR.SaveOptions.NoAssets;
+                    options |= RegionArchiver.OAR.SaveOptions.NoAssets;
                 }
                 else if (arg == "--publish")
                 {
-                    options |= OAR.OAR.SaveOptions.Publish;
+                    options |= RegionArchiver.OAR.SaveOptions.Publish;
                 }
                 else
                 {
@@ -195,7 +195,7 @@ namespace SilverSim.OpenSimArchiver
             }
             try
             {
-                OAR.OAR.Save(scene, options, s);
+                RegionArchiver.OAR.Save(scene, options, s);
                 io.Write("OAR saved successfully.");
                 s.Close();
             }
@@ -241,22 +241,22 @@ namespace SilverSim.OpenSimArchiver
             }
 
             string filename = null;
-            OAR.OAR.LoadOptions options = OAR.OAR.LoadOptions.None;
+            RegionArchiver.OAR.LoadOptions options = RegionArchiver.OAR.LoadOptions.None;
 
             for (int argi = 2; argi < args.Count; ++argi)
             {
                 string arg = args[argi];
                 if (arg == "--skip-assets")
                 {
-                    options |= OAR.OAR.LoadOptions.NoAssets;
+                    options |= RegionArchiver.OAR.LoadOptions.NoAssets;
                 }
                 else if (arg == "--merge")
                 {
-                    options |= OAR.OAR.LoadOptions.Merge;
+                    options |= RegionArchiver.OAR.LoadOptions.Merge;
                 }
                 else if(arg == "--persist-uuids")
                 {
-                    options |= OAR.OAR.LoadOptions.PersistUuids;
+                    options |= RegionArchiver.OAR.LoadOptions.PersistUuids;
                 }
                 else
                 {
@@ -297,18 +297,18 @@ namespace SilverSim.OpenSimArchiver
             }
             try
             {
-                OAR.OAR.Load(scene, options, s);
+                RegionArchiver.OAR.Load(scene, options, s);
                 io.Write("OAR loaded successfully.");
             }
-            catch(OAR.OAR.OARLoadingTriedWithoutSelectedRegionException)
+            catch(RegionArchiver.OAR.OARLoadingTriedWithoutSelectedRegionException)
             {
                 io.Write("No region selected");
             }
-            catch (OAR.OAR.MultiRegionOARLoadingTriedOnRegionException)
+            catch (RegionArchiver.OAR.MultiRegionOARLoadingTriedOnRegionException)
             {
                 io.Write("Multi-Region OAR cannot be loaded with a selected region");
             }
-            catch (OAR.OAR.OARFormatException)
+            catch (RegionArchiver.OAR.OARFormatException)
             {
                 io.Write("OAR file is corrupt");
             }

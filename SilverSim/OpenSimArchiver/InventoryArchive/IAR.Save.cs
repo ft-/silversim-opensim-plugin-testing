@@ -10,7 +10,7 @@ using SilverSim.Types.Inventory;
 using System;
 using System.Collections.Generic;
 
-namespace SilverSim.OpenSimArchiver.IAR
+namespace SilverSim.OpenSimArchiver.InventoryArchiver
 {
     public static partial class IAR
     {

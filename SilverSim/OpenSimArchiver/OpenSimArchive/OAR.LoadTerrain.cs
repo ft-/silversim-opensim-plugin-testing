@@ -5,7 +5,7 @@ using SilverSim.Viewer.Messages.LayerData;
 using System.Collections.Generic;
 using System.IO;
 
-namespace SilverSim.OpenSimArchiver.OAR
+namespace SilverSim.OpenSimArchiver.RegionArchiver
 {
     public static partial class OAR
     {

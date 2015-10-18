@@ -4,7 +4,7 @@
 using System.IO;
 using System.Xml;
 
-namespace SilverSim.OpenSimArchiver.IAR
+namespace SilverSim.OpenSimArchiver.InventoryArchiver
 {
     public static partial class IAR
     {
