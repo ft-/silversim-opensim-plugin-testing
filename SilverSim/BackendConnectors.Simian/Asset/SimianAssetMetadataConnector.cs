@@ -10,7 +10,7 @@ using System.Collections.Generic;
 
 namespace SilverSim.BackendConnectors.Simian.Asset
 {
-    public class SimianAssetMetadataConnector : AssetMetadataServiceInterface
+    public sealed class SimianAssetMetadataConnector : AssetMetadataServiceInterface
     {
         public int TimeoutMs = 20000;
         private string m_AssetURI;

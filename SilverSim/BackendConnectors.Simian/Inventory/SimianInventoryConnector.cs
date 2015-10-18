@@ -15,7 +15,7 @@ using System.Collections.Generic;
 namespace SilverSim.BackendConnectors.Simian.Inventory
 {
     #region Service Implementation
-    public class SimianInventoryConnector : InventoryServiceInterface, IPlugin
+    public sealed class SimianInventoryConnector : InventoryServiceInterface, IPlugin
     {
         private string m_InventoryURI;
         private SimianInventoryFolderConnector m_FolderService;
@@ -91,12 +91,12 @@ namespace SilverSim.BackendConnectors.Simian.Inventory
             }
         }
 
-        public override List<InventoryItem> GetActiveGestures(UUID PrincipalID)
+        public override List<InventoryItem> GetActiveGestures(UUID principalID)
         {
             List<InventoryItem> item = new List<InventoryItem>();
             Dictionary<string, string> post = new Dictionary<string, string>();
             post["RequestMethod"] = "GetUser";
-            post["UserID"] = (string)PrincipalID;
+            post["UserID"] = (string)principalID;
 
             Map res = SimianGrid.PostToService(m_InventoryURI, m_InventoryCapability, post, TimeoutMs);
             if (res["Success"].AsBoolean && res.ContainsKey("Gestures") && res["Gestures"] is AnArray)
@@ -106,7 +106,7 @@ namespace SilverSim.BackendConnectors.Simian.Inventory
                 {
                     try
                     {
-                        item.Add(Item[PrincipalID, v.AsUUID]);
+                        item.Add(Item[principalID, v.AsUUID]);
                     }
                     catch
                     {
@@ -345,7 +345,8 @@ namespace SilverSim.BackendConnectors.Simian.Inventory
             item.AssetID = map["AssetID"].AsUUID;
             item.AssetType = AssetTypeFromContentType(map["ContentType"].ToString());
             item.CreationDate = Date.UnixTimeToDateTime(map["CreationDate"].AsULong);
-            if (map["CreatorData"].AsString.ToString() == "")
+            string creatorData = map["CreatorData"].AsString.ToString();
+            if (creatorData.Length == 0)
             {
                 item.Creator.ID = map["CreatorID"].AsUUID;
             }
@@ -417,7 +418,7 @@ namespace SilverSim.BackendConnectors.Simian.Inventory
 
     #region Factory
     [PluginName("Inventory")]
-    public class SimianInventoryConnectorFactory : IPluginFactory
+    public sealed class SimianInventoryConnectorFactory : IPluginFactory
     {
         private static readonly ILog m_Log = LogManager.GetLogger("SIMIAN INVENTORY CONNECTOR");
         public SimianInventoryConnectorFactory()

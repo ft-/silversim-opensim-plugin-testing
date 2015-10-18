@@ -10,7 +10,7 @@ using SilverSim.Types;
 
 namespace SilverSim.BackendConnectors.Simian
 {
-    public class SimianInventoryPlugin : ServicePluginHelo, IInventoryServicePlugin, IPlugin
+    public sealed class SimianInventoryPlugin : ServicePluginHelo, IInventoryServicePlugin, IPlugin
     {
         public SimianInventoryPlugin()
         {
@@ -36,7 +36,7 @@ namespace SilverSim.BackendConnectors.Simian
         }
     }
     [PluginName("InventoryPlugin")]
-    public class SimianInventoryPluginFactory : IPluginFactory
+    public sealed class SimianInventoryPluginFactory : IPluginFactory
     {
         public IPlugin Initialize(ConfigurationLoader loader, IConfig ownSection)
         {
@@ -44,7 +44,7 @@ namespace SilverSim.BackendConnectors.Simian
         }
     }
 
-    public class SimianAssetPlugin : ServicePluginHelo, IAssetServicePlugin, IPlugin
+    public sealed class SimianAssetPlugin : ServicePluginHelo, IAssetServicePlugin, IPlugin
     {
         public SimianAssetPlugin()
         {
@@ -71,7 +71,7 @@ namespace SilverSim.BackendConnectors.Simian
     }
 
     [PluginName("AssetPlugin")]
-    public class SimianAssetPluginFactory : IPluginFactory
+    public sealed class SimianAssetPluginFactory : IPluginFactory
     {
         public SimianAssetPluginFactory()
         {

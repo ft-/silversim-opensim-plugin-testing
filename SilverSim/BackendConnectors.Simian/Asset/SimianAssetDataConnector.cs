@@ -8,7 +8,7 @@ using System.IO;
 
 namespace SilverSim.BackendConnectors.Simian.Asset
 {
-    public class SimianAssetDataConnector : AssetDataServiceInterface
+    public sealed class SimianAssetDataConnector : AssetDataServiceInterface
     {
         public int TimeoutMs = 20000;
         private string m_AssetURI;

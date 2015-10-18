@@ -15,11 +15,12 @@ using System.Text;
 namespace SilverSim.BackendConnectors.Simian.Asset
 {
     #region Service Implementation
-    public class SimianAssetConnector : AssetServiceInterface, IPlugin
+    public sealed class SimianAssetConnector : AssetServiceInterface, IPlugin
     {
-        public class SimianAssetProtocolError : Exception
+        [Serializable]
+        public class SimianAssetProtocolErrorException : Exception
         {
-            public SimianAssetProtocolError(string msg) : base(msg) {}
+            public SimianAssetProtocolErrorException(string msg) : base(msg) {}
         }
 
         private int m_TimeoutMs = 20000;
@@ -39,9 +40,9 @@ namespace SilverSim.BackendConnectors.Simian.Asset
         private SimianAssetMetadataConnector m_MetadataService;
         private DefaultAssetReferencesService m_ReferencesService;
         private SimianAssetDataConnector m_DataService;
-        private bool m_EnableCompression = false;
-        private bool m_EnableLocalStorage = false;
-        private bool m_EnableTempStorage = false;
+        private bool m_EnableCompression;
+        private bool m_EnableLocalStorage;
+        private bool m_EnableTempStorage;
         private string m_AssetCapability = "00000000-0000-0000-0000-000000000000";
 
         #region Constructor
