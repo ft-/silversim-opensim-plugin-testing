@@ -57,7 +57,7 @@ namespace SilverSim.OpenSimArchiver.OAR
                         continue;
                     }
                     AssetData data = sog.Asset(xmloptions | XmlSerializationOptions.WriteXml2);
-                    objectAssets.Add(sog.Name + "_" + sog.GlobalPosition.X_String + "-" + sog.GlobalPosition.Y_String + "-" + sog.GlobalPosition.Z_String + "__" + sog.ID + ".xml", data);
+                    objectAssets.Add(sog.Name + "_" + sog.GlobalPosition.X_String + "-" + sog.GlobalPosition.Y_String + "-" + sog.GlobalPosition.Z_String + "__" + sog.ID.ToString() + ".xml", data);
                 }
 
                 if (saveAssets)
@@ -192,7 +192,7 @@ namespace SilverSim.OpenSimArchiver.OAR
                             xmlwriter.WriteEndElement();
                             xmlwriter.Flush();
 
-                            writer.WriteFile("landdata/" + pinfo.ID + ".xml", ms.GetBuffer());
+                            writer.WriteFile("landdata/" + pinfo.ID.ToString() + ".xml", ms.GetBuffer());
                         }
                     }
                 }

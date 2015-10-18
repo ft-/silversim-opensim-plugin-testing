@@ -17,7 +17,7 @@ using System.IO;
 namespace SilverSim.OpenSimArchiver
 {
     [Description("IAR/OAR Plugin")]
-    class ArchiverLoadStore : IPlugin
+    public sealed class ArchiverLoadStore : IPlugin
     {
         private static readonly ILog m_Log = LogManager.GetLogger("IAR/OAR ARCHIVER");
 
@@ -300,11 +300,11 @@ namespace SilverSim.OpenSimArchiver
                 OAR.OAR.Load(scene, options, s);
                 io.Write("OAR loaded successfully.");
             }
-            catch(OAR.OAR.OARLoadingTriedWithoutSelectedRegion)
+            catch(OAR.OAR.OARLoadingTriedWithoutSelectedRegionException)
             {
                 io.Write("No region selected");
             }
-            catch (OAR.OAR.MultiRegionOARLoadingTriedOnRegion)
+            catch (OAR.OAR.MultiRegionOARLoadingTriedOnRegionException)
             {
                 io.Write("Multi-Region OAR cannot be loaded with a selected region");
             }

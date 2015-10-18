@@ -20,6 +20,7 @@ namespace SilverSim.OpenSimArchiver.IAR
 {
     public static partial class IAR
     {
+        [Serializable]
         public class IARFormatException : Exception
         {
             public IARFormatException()
@@ -28,6 +29,7 @@ namespace SilverSim.OpenSimArchiver.IAR
             }
         }
 
+        [Serializable]
         public class InvalidInventoryPathException : Exception
         {
             public InvalidInventoryPathException()
@@ -87,7 +89,7 @@ namespace SilverSim.OpenSimArchiver.IAR
                 parentFolder = childfolders[idx].ID;
             }
 
-            inventoryPath[""] = parentFolder;
+            inventoryPath[string.Empty] = parentFolder;
 
             for(;;)
             {
@@ -140,7 +142,7 @@ namespace SilverSim.OpenSimArchiver.IAR
             path = path.Substring(0, path.LastIndexOf('/'));
             string[] pathcomps = path.Split('/');
             string finalpath = string.Empty;
-            UUID folderID = folders[""];
+            UUID folderID = folders[string.Empty];
 
 
             int pathidx = 0;
@@ -154,7 +156,7 @@ namespace SilverSim.OpenSimArchiver.IAR
 
             for(; pathidx < pathcomps.Length; ++pathidx)
             {
-                if(finalpath != "")
+                if(finalpath.Length != 0)
                 {
                     finalpath += "/";
                 }

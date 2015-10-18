@@ -19,26 +19,41 @@ namespace SilverSim.OpenSimArchiver.OAR
 {
     public static partial class OAR
     {
-        public class OARLoadingError : Exception
+        [Serializable]
+        public class OARLoadingErrorException : Exception
         {
-            public OARLoadingError(string message, Exception innerException)
+            public OARLoadingErrorException(string message, Exception innerException)
                 : base(message, innerException)
             {
 
             }
         }
 
-        public class OARLoadingTriedWithoutSelectedRegion : Exception
+        [Serializable]
+        public class OARLoadingTriedWithoutSelectedRegionException : Exception
         {
+            public OARLoadingTriedWithoutSelectedRegionException()
+            {
 
+            }
         }
 
-        public class MultiRegionOARLoadingTriedOnRegion : Exception
+        [Serializable]
+        public class MultiRegionOARLoadingTriedOnRegionException : Exception
         {
+            public MultiRegionOARLoadingTriedOnRegionException()
+            {
+
+            }
         }
 
+        [Serializable]
         public class OARFormatException : Exception
         {
+            public OARFormatException()
+            {
+
+            }
         }
 
         [Flags]
@@ -155,11 +170,11 @@ namespace SilverSim.OpenSimArchiver.OAR
                         }
                         if(regionInfos.Count != 0 && scene != null)
                         {
-                            throw new MultiRegionOARLoadingTriedOnRegion();
+                            throw new MultiRegionOARLoadingTriedOnRegionException();
                         }
                         else if(regionInfos.Count == 0 && scene == null)
                         {
-                            throw new OARLoadingTriedWithoutSelectedRegion();
+                            throw new OARLoadingTriedWithoutSelectedRegionException();
                         }
                     }
                     else if (header.FileName.StartsWith("assets/"))
@@ -210,7 +225,7 @@ namespace SilverSim.OpenSimArchiver.OAR
                             }
                             catch(Exception e)
                             {
-                                throw new OARLoadingError("Failed to load sog " + header.FileName, e);
+                                throw new OARLoadingErrorException("Failed to load sog " + header.FileName, e);
                             }
 
                             foreach (ObjectGroup sog in sogs)

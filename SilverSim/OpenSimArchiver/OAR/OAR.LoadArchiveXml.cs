@@ -10,14 +10,14 @@ namespace SilverSim.OpenSimArchiver.OAR
 {
     public static partial class OAR
     {
-        static class ArchiveXmlLoader
+        public static class ArchiveXmlLoader
         {
             public class RegionInfo
             {
                 public UUID ID = UUID.Zero;
                 public Date CreationDate = new Date();
                 public string Path = string.Empty;
-                public bool IsMegaregion = false;
+                public bool IsMegaregion;
                 public GridVector Location = new GridVector(0, 0);
                 public GridVector RegionSize = new GridVector(256, 256);
                 
