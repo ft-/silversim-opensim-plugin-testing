@@ -138,7 +138,7 @@ namespace SilverSim.BackendConnectors.Robust.Grid
             post["Token"] = string.Empty;
             post["SCOPEID"] = (string)UUID.Zero;
             post["VERSIONMIN"] = "0";
-            post["VERSIONMAX"] = "0";
+            post["VERSIONMAX"] = "1";
 
             using (Stream s = HttpRequestHandler.DoStreamPostRequest(m_GridURI, null, post, false, TimeoutMs))
             {
