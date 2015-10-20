@@ -56,7 +56,7 @@ namespace SilverSim.BackendConnectors.Robust.Avatar
                 post["UserID"] = (string)avatarID;
                 post["METHOD"] = "getavatar";
                 post["VERSIONMIN"] = "0";
-                post["VERSIONMAX"] = "0";
+                post["VERSIONMAX"] = "1";
                 Map map;
                 using(Stream s = HttpRequestHandler.DoStreamPostRequest(m_AvatarURI, null, post, false, TimeoutMs))
                 {
@@ -84,7 +84,7 @@ namespace SilverSim.BackendConnectors.Robust.Avatar
                 Dictionary<string, string> post = new Dictionary<string, string>();
                 post["UserID"] = (string)avatarID;
                 post["VERSIONMIN"] = "0";
-                post["VERSIONMAX"] = "0";
+                post["VERSIONMAX"] = "1";
 
                 if (value != null)
                 {
@@ -192,7 +192,7 @@ namespace SilverSim.BackendConnectors.Robust.Avatar
                 post["Names[]"] = itemKey;
                 post["Values[]"] = value;
                 post["VERSIONMIN"] = "0";
-                post["VERSIONMAX"] = "0";
+                post["VERSIONMAX"] = "1";
                 Map map;
                 using(Stream s = HttpRequestHandler.DoStreamPostRequest(m_AvatarURI, null, post, false, TimeoutMs))
                 {
@@ -220,7 +220,7 @@ namespace SilverSim.BackendConnectors.Robust.Avatar
                 post[String.Format("Names[]?{0}", index++)] = name.Replace(' ', '_');
             }
             post["VERSIONMIN"] = "0";
-            post["VERSIONMAX"] = "0";
+            post["VERSIONMAX"] = "1";
             Map map;
             using(Stream s = HttpRequestHandler.DoStreamPostRequest(m_AvatarURI, null, post, false, TimeoutMs))
             {
@@ -243,7 +243,7 @@ namespace SilverSim.BackendConnectors.Robust.Avatar
             post["METHOD"] = "removeitems";
             post["Names[]"] = name.Replace(' ', '_');
             post["VERSIONMIN"] = "0";
-            post["VERSIONMAX"] = "0";
+            post["VERSIONMAX"] = "1";
             Map map;
             using(Stream s = HttpRequestHandler.DoStreamPostRequest(m_AvatarURI, null, post, false, TimeoutMs))
             {
