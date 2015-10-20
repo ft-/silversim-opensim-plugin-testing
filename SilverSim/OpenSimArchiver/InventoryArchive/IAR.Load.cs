@@ -54,78 +54,78 @@ namespace SilverSim.OpenSimArchiver.InventoryArchiver
             Stream inputFile,
             string topath)
         {
-            TarArchiveReader reader;
+            using (GZipStream gzipStream = new GZipStream(inputFile, CompressionMode.Decompress))
             {
-                GZipStream gzipStream = new GZipStream(inputFile, CompressionMode.Decompress);
-                reader = new TarArchiveReader(gzipStream);
-            }
-
-            Dictionary<string, UUID> inventoryPath = new Dictionary<string, UUID>();
-
-            UUID parentFolder;
-            parentFolder = inventoryService.Folder[principal.ID, AssetType.RootFolder].ID;
-
-            if(!topath.StartsWith("/"))
-            {
-                throw new InvalidInventoryPathException();
-            }
-            foreach (string pathcomp in topath.Substring(1).Split('/'))
-            {
-                List<InventoryFolder> childfolders = inventoryService.Folder.GetFolders(principal.ID, parentFolder);
-                int idx;
-                for (idx = 0; idx < childfolders.Count; ++idx)
+                using (TarArchiveReader reader = new TarArchiveReader(gzipStream))
                 {
-                    if (pathcomp.ToLower() == childfolders[idx].Name.ToLower())
+                    Dictionary<string, UUID> inventoryPath = new Dictionary<string, UUID>();
+
+                    UUID parentFolder;
+                    parentFolder = inventoryService.Folder[principal.ID, AssetType.RootFolder].ID;
+
+                    if (!topath.StartsWith("/"))
                     {
-                        break;
+                        throw new InvalidInventoryPathException();
                     }
-                }
-
-                if (idx == childfolders.Count)
-                {
-                    throw new InvalidInventoryPathException();
-                }
-
-                parentFolder = childfolders[idx].ID;
-            }
-
-            inventoryPath[string.Empty] = parentFolder;
-
-            for(;;)
-            {
-                TarArchiveReader.Header header;
-                try
-                {
-                    header = reader.ReadHeader();
-                }
-                catch(TarArchiveReader.EndOfTarException)
-                {
-                    return;
-                }
-
-                if (header.FileType == TarFileType.File)
-                {
-                    if(header.FileName == "archive.xml")
+                    foreach (string pathcomp in topath.Substring(1).Split('/'))
                     {
-                        ArchiveXmlLoader.LoadArchiveXml(new ObjectXmlStreamFilter(reader));
-                    }
-
-                    if (header.FileName.StartsWith("assets/") && (options & LoadOptions.NoAssets) == 0)
-                    {
-                        /* Load asset */
-                        AssetData ad = reader.LoadAsset(header, principal);
-                        if(!assetService.Exists(ad.ID))
+                        List<InventoryFolder> childfolders = inventoryService.Folder.GetFolders(principal.ID, parentFolder);
+                        int idx;
+                        for (idx = 0; idx < childfolders.Count; ++idx)
                         {
-                            assetService.Store(ad);
+                            if (pathcomp.ToLower() == childfolders[idx].Name.ToLower())
+                            {
+                                break;
+                            }
                         }
+
+                        if (idx == childfolders.Count)
+                        {
+                            throw new InvalidInventoryPathException();
+                        }
+
+                        parentFolder = childfolders[idx].ID;
                     }
 
-                    if (header.FileName.StartsWith("inventory/"))
+                    inventoryPath[string.Empty] = parentFolder;
+
+                    for (; ; )
                     {
-                        /* Load inventory */
-                        InventoryItem item = LoadInventoryItem(reader, principal, nameService);
-                        item.ParentFolderID = GetPath(principal, inventoryService, inventoryPath, header.FileName, options);
-                        inventoryService.Item.Add(item);
+                        TarArchiveReader.Header header;
+                        try
+                        {
+                            header = reader.ReadHeader();
+                        }
+                        catch (TarArchiveReader.EndOfTarException)
+                        {
+                            return;
+                        }
+
+                        if (header.FileType == TarFileType.File)
+                        {
+                            if (header.FileName == "archive.xml")
+                            {
+                                ArchiveXmlLoader.LoadArchiveXml(new ObjectXmlStreamFilter(reader));
+                            }
+
+                            if (header.FileName.StartsWith("assets/") && (options & LoadOptions.NoAssets) == 0)
+                            {
+                                /* Load asset */
+                                AssetData ad = reader.LoadAsset(header, principal);
+                                if (!assetService.Exists(ad.ID))
+                                {
+                                    assetService.Store(ad);
+                                }
+                            }
+
+                            if (header.FileName.StartsWith("inventory/"))
+                            {
+                                /* Load inventory */
+                                InventoryItem item = LoadInventoryItem(reader, principal, nameService);
+                                item.ParentFolderID = GetPath(principal, inventoryService, inventoryPath, header.FileName, options);
+                                inventoryService.Item.Add(item);
+                            }
+                        }
                     }
                 }
             }

@@ -121,170 +121,170 @@ namespace SilverSim.OpenSimArchiver.RegionArchiver
             LoadOptions options,
             Stream inputFile)
         {
-            TarArchiveReader reader;
+            using (GZipStream gzipStream = new GZipStream(inputFile, CompressionMode.Decompress))
             {
-                GZipStream gzipStream = new GZipStream(inputFile, CompressionMode.Decompress);
-                reader = new TarArchiveReader(gzipStream);
-            }
-
-            GridVector baseLoc = new GridVector(0, 0);
-            if (scene != null)
-            {
-                baseLoc = scene.RegionData.Location;
-            }
-
-            GridVector regionSize = new GridVector(256, 256);
-            Dictionary<string, ArchiveXmlLoader.RegionInfo> regionMapping = new Dictionary<string, ArchiveXmlLoader.RegionInfo>();
-            List<ArchiveXmlLoader.RegionInfo> regionInfos = new List<ArchiveXmlLoader.RegionInfo>();
-            bool parcelsCleared = false;
-            List<ObjectGroup> load_sogs = new List<ObjectGroup>();
-
-            for (; ; )
-            {
-                TarArchiveReader.Header header;
-                try
+                using (TarArchiveReader reader = new TarArchiveReader(gzipStream))
                 {
-                    header = reader.ReadHeader();
-                }
-                catch (TarArchiveReader.EndOfTarException)
-                {
-                    if((options & LoadOptions.Merge) == 0 && scene != null)
+                    GridVector baseLoc = new GridVector(0, 0);
+                    if (scene != null)
                     {
-                        scene.ClearObjects();
+                        baseLoc = scene.RegionData.Location;
                     }
 
-                    AddObjects(scene, load_sogs, options);
-                    return;
-                }
+                    GridVector regionSize = new GridVector(256, 256);
+                    Dictionary<string, ArchiveXmlLoader.RegionInfo> regionMapping = new Dictionary<string, ArchiveXmlLoader.RegionInfo>();
+                    List<ArchiveXmlLoader.RegionInfo> regionInfos = new List<ArchiveXmlLoader.RegionInfo>();
+                    bool parcelsCleared = false;
+                    List<ObjectGroup> load_sogs = new List<ObjectGroup>();
 
-                if (header.FileType == TarFileType.File)
-                {
-                    if(header.FileName == "archive.xml")
+                    for (; ; )
                     {
-                        ArchiveXmlLoader.RegionInfo rinfo = ArchiveXmlLoader.LoadArchiveXml(new ObjectXmlStreamFilter(reader), regionInfos);
-
-                        regionSize = rinfo.RegionSize;
-                        foreach (ArchiveXmlLoader.RegionInfo reginfo in regionInfos)
+                        TarArchiveReader.Header header;
+                        try
                         {
-                            regionMapping.Add(reginfo.Path, reginfo);
+                            header = reader.ReadHeader();
                         }
-                        if(regionInfos.Count != 0 && scene != null)
-                        {
-                            throw new MultiRegionOARLoadingTriedOnRegionException();
-                        }
-                        else if(regionInfos.Count == 0 && scene == null)
-                        {
-                            throw new OARLoadingTriedWithoutSelectedRegionException();
-                        }
-                    }
-                    else if (header.FileName.StartsWith("assets/"))
-                    {
-                        if ((options & LoadOptions.NoAssets) == 0)
-                        {
-                            /* Load asset */
-                            AssetData ad = reader.LoadAsset(header, scene.Owner);
-                            if(!scene.AssetService.Exists(ad.ID))
-                            {
-                                scene.AssetService.Store(ad);
-                            }
-                        }
-                    }
-                    else
-                    {
-                        if (header.FileName.StartsWith("regions/"))
+                        catch (TarArchiveReader.EndOfTarException)
                         {
                             if ((options & LoadOptions.Merge) == 0 && scene != null)
                             {
                                 scene.ClearObjects();
                             }
 
-                            if (scene != null)
-                            {
-                                AddObjects(scene, load_sogs, options);
-                            }
-
-                            string[] pcomps = header.FileName.Split(new char[] { '/' }, 3);
-                            if (pcomps.Length < 3)
-                            {
-                                throw new OARFormatException();
-                            }
-                            string regionname = pcomps[1];
-                            header.FileName = pcomps[2];
-                            regionSize = regionMapping[regionname].RegionSize;
-                            scene = SceneManager.Scenes[regionMapping[regionname].ID];
-                            parcelsCleared = false;
+                            AddObjects(scene, load_sogs, options);
+                            return;
                         }
 
-                        if (header.FileName.StartsWith("objects/"))
+                        if (header.FileType == TarFileType.File)
                         {
-                            /* Load objects */
-                            List<ObjectGroup> sogs;
-                            try
+                            if (header.FileName == "archive.xml")
                             {
-                                sogs = ObjectXML.FromXml(reader, scene.Owner);
-                            }
-                            catch(Exception e)
-                            {
-                                throw new OARLoadingErrorException("Failed to load sog " + header.FileName, e);
-                            }
+                                ArchiveXmlLoader.RegionInfo rinfo = ArchiveXmlLoader.LoadArchiveXml(new ObjectXmlStreamFilter(reader), regionInfos);
 
-                            foreach (ObjectGroup sog in sogs)
-                            {
-                                if (sog.Owner.ID == UUID.Zero)
+                                regionSize = rinfo.RegionSize;
+                                foreach (ArchiveXmlLoader.RegionInfo reginfo in regionInfos)
                                 {
-                                    sog.Owner = scene.Owner;
+                                    regionMapping.Add(reginfo.Path, reginfo);
+                                }
+                                if (regionInfos.Count != 0 && scene != null)
+                                {
+                                    throw new MultiRegionOARLoadingTriedOnRegionException();
+                                }
+                                else if (regionInfos.Count == 0 && scene == null)
+                                {
+                                    throw new OARLoadingTriedWithoutSelectedRegionException();
                                 }
                             }
-                            load_sogs.AddRange(sogs);
-                        }
-                        else if (header.FileName.StartsWith("terrains/"))
-                        {
-                            /* Load terrains */
-                            if ((options & LoadOptions.Merge) == 0)
+                            else if (header.FileName.StartsWith("assets/"))
                             {
-                                scene.Terrain.AllPatches = TerrainLoader.LoadStream(reader, (int)regionSize.X, (int)regionSize.Y);
+                                if ((options & LoadOptions.NoAssets) == 0)
+                                {
+                                    /* Load asset */
+                                    AssetData ad = reader.LoadAsset(header, scene.Owner);
+                                    if (!scene.AssetService.Exists(ad.ID))
+                                    {
+                                        scene.AssetService.Store(ad);
+                                    }
+                                }
                             }
-                        }
-                        else if (header.FileName.StartsWith("landdata/"))
-                        {
-                            /* Load landdata */
-                            if ((options & LoadOptions.Merge) == 0)
+                            else
                             {
-                                if (!parcelsCleared)
+                                if (header.FileName.StartsWith("regions/"))
                                 {
-                                    scene.ClearParcels();
-                                    parcelsCleared = true;
+                                    if ((options & LoadOptions.Merge) == 0 && scene != null)
+                                    {
+                                        scene.ClearObjects();
+                                    }
+
+                                    if (scene != null)
+                                    {
+                                        AddObjects(scene, load_sogs, options);
+                                    }
+
+                                    string[] pcomps = header.FileName.Split(new char[] { '/' }, 3);
+                                    if (pcomps.Length < 3)
+                                    {
+                                        throw new OARFormatException();
+                                    }
+                                    string regionname = pcomps[1];
+                                    header.FileName = pcomps[2];
+                                    regionSize = regionMapping[regionname].RegionSize;
+                                    scene = SceneManager.Scenes[regionMapping[regionname].ID];
+                                    parcelsCleared = false;
                                 }
-                                ParcelInfo pinfo = ParcelLoader.LoadParcel(new ObjectXmlStreamFilter(reader), regionSize);
-                                if (pinfo.Owner.ID == UUID.Zero)
+
+                                if (header.FileName.StartsWith("objects/"))
                                 {
-                                    pinfo.Owner = scene.Owner;
-                                }
-                                if((options & LoadOptions.PersistUuids) == LoadOptions.PersistUuids)
-                                {
+                                    /* Load objects */
+                                    List<ObjectGroup> sogs;
                                     try
                                     {
-                                        ParcelInfo check = scene.Parcels[pinfo.ID];
-                                        pinfo.ID = UUID.Random;
+                                        sogs = ObjectXML.FromXml(reader, scene.Owner);
                                     }
-                                    catch
+                                    catch (Exception e)
                                     {
+                                        throw new OARLoadingErrorException("Failed to load sog " + header.FileName, e);
+                                    }
 
+                                    foreach (ObjectGroup sog in sogs)
+                                    {
+                                        if (sog.Owner.ID == UUID.Zero)
+                                        {
+                                            sog.Owner = scene.Owner;
+                                        }
+                                    }
+                                    load_sogs.AddRange(sogs);
+                                }
+                                else if (header.FileName.StartsWith("terrains/"))
+                                {
+                                    /* Load terrains */
+                                    if ((options & LoadOptions.Merge) == 0)
+                                    {
+                                        scene.Terrain.AllPatches = TerrainLoader.LoadStream(reader, (int)regionSize.X, (int)regionSize.Y);
                                     }
                                 }
-                                else
+                                else if (header.FileName.StartsWith("landdata/"))
                                 {
-                                    pinfo.ID = UUID.Random;
+                                    /* Load landdata */
+                                    if ((options & LoadOptions.Merge) == 0)
+                                    {
+                                        if (!parcelsCleared)
+                                        {
+                                            scene.ClearParcels();
+                                            parcelsCleared = true;
+                                        }
+                                        ParcelInfo pinfo = ParcelLoader.LoadParcel(new ObjectXmlStreamFilter(reader), regionSize);
+                                        if (pinfo.Owner.ID == UUID.Zero)
+                                        {
+                                            pinfo.Owner = scene.Owner;
+                                        }
+                                        if ((options & LoadOptions.PersistUuids) == LoadOptions.PersistUuids)
+                                        {
+                                            try
+                                            {
+                                                ParcelInfo check = scene.Parcels[pinfo.ID];
+                                                pinfo.ID = UUID.Random;
+                                            }
+                                            catch
+                                            {
+
+                                            }
+                                        }
+                                        else
+                                        {
+                                            pinfo.ID = UUID.Random;
+                                        }
+                                        scene.AddParcel(pinfo);
+                                    }
                                 }
-                                scene.AddParcel(pinfo);
-                            }
-                        }
-                        else if (header.FileName.StartsWith("settings/"))
-                        {
-                            /* Load settings */
-                            if ((options & LoadOptions.Merge) == 0)
-                            {
-                                RegionSettingsLoader.LoadRegionSettings(new ObjectXmlStreamFilter(reader), scene);
+                                else if (header.FileName.StartsWith("settings/"))
+                                {
+                                    /* Load settings */
+                                    if ((options & LoadOptions.Merge) == 0)
+                                    {
+                                        RegionSettingsLoader.LoadRegionSettings(new ObjectXmlStreamFilter(reader), scene);
+                                    }
+                                }
                             }
                         }
                     }
