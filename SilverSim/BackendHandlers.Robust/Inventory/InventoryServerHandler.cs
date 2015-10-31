@@ -227,7 +227,7 @@ namespace SilverSim.BackendHandlers.Robust.Inventory
             Dictionary<string, object> reqdata;
             try
             {
-                reqdata = REST.parseREST(httpreq.Body);
+                reqdata = REST.ParseREST(httpreq.Body);
             }
             catch
             {

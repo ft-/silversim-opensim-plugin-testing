@@ -3,7 +3,7 @@
 
 using SilverSim.Http.Client;
 using SilverSim.ServiceInterfaces.Asset;
-using SilverSim.StructuredData.AssetXml;
+using SilverSim.Types.StructuredData.AssetXml;
 using SilverSim.Types;
 using SilverSim.Types.Asset;
 using System.IO;
@@ -32,7 +32,7 @@ namespace SilverSim.BackendConnectors.Robust.Asset
                 {
                     using(Stream stream = HttpRequestHandler.DoStreamGetRequest(m_AssetURI + "assets/" + key.ToString() + "/metadata", null, TimeoutMs))
                     {
-                        return AssetXml.parseAssetMetadata(stream);
+                        return AssetXml.ParseAssetMetadata(stream);
                     }
                 }
                 catch(HttpException)

@@ -96,7 +96,7 @@ namespace SilverSim.BackendHandlers.Robust.UserAccounts
             Dictionary<string, object> data;
             try
             {
-                data = REST.parseREST(req.Body);
+                data = REST.ParseREST(req.Body);
             }
             catch
             {

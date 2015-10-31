@@ -5,7 +5,7 @@ using SilverSim.Main.Common;
 using SilverSim.Main.Common.Rpc;
 using SilverSim.ServiceInterfaces.Groups;
 using SilverSim.Types;
-using SilverSim.Types.StructuredData.XMLRPC;
+using SilverSim.Types.StructuredData.XmlRpc;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -113,7 +113,7 @@ namespace SilverSim.BackendConnectors.Flotsam.Groups
 
             protected IValue FlotsamXmlRpcCall(UUI requestingAgent, string methodName, Map structparam)
             {
-                XMLRPC.XmlRpcRequest req = new XMLRPC.XmlRpcRequest();
+                XmlRpc.XmlRpcRequest req = new XmlRpc.XmlRpcRequest();
                 req.MethodName = methodName;
                 structparam.Add("RequestingAgentID", requestingAgent.ID);
                 structparam.Add("RequestingAgentUserService", requestingAgent.HomeURI);
@@ -121,7 +121,7 @@ namespace SilverSim.BackendConnectors.Flotsam.Groups
                 structparam.Add("ReadKey", m_ReadKey);
                 structparam.Add("WriteKey", m_WriteKey);
                 req.Params.Add(structparam);
-                XMLRPC.XmlRpcResponse res = RPC.DoXmlRpcRequest(m_Uri, req, TimeoutMs);
+                XmlRpc.XmlRpcResponse res = RPC.DoXmlRpcRequest(m_Uri, req, TimeoutMs);
                 if (!(res.ReturnValue is Map))
                 {
                     throw new InvalidDataException("Unexpected FlotsamGroups return value");
@@ -148,7 +148,7 @@ namespace SilverSim.BackendConnectors.Flotsam.Groups
 
             protected IValue FlotsamXmlRpcGetCall(UUI requestingAgent, string methodName, Map structparam)
             {
-                XMLRPC.XmlRpcRequest req = new XMLRPC.XmlRpcRequest();
+                XmlRpc.XmlRpcRequest req = new XmlRpc.XmlRpcRequest();
                 req.MethodName = methodName;
                 structparam.Add("RequestingAgentID", requestingAgent.ID);
                 structparam.Add("RequestingAgentUserService", requestingAgent.HomeURI);
@@ -156,7 +156,7 @@ namespace SilverSim.BackendConnectors.Flotsam.Groups
                 structparam.Add("ReadKey", m_ReadKey);
                 structparam.Add("WriteKey", m_WriteKey);
                 req.Params.Add(structparam);
-                XMLRPC.XmlRpcResponse res = RPC.DoXmlRpcRequest(m_Uri, req, TimeoutMs);
+                XmlRpc.XmlRpcResponse res = RPC.DoXmlRpcRequest(m_Uri, req, TimeoutMs);
                 Map p = res.ReturnValue as Map;
                 if (null != p)
                 {

@@ -6,7 +6,7 @@ using SilverSim.Main.Common;
 using SilverSim.Main.Common.HttpServer;
 using SilverSim.Scene.Management.Scene;
 using SilverSim.Scene.Types.Scene;
-using SilverSim.StructuredData.JSON;
+using SilverSim.Types.StructuredData.Json;
 using SilverSim.Types;
 using SilverSim.Types.Grid;
 using System.IO;
@@ -84,10 +84,10 @@ namespace SilverSim.Backend.OpenSim.Neighbor.Neighbor
                 return;
             }
 
-            IValue v;
+            Map m;
             try
             {
-                v = JSON.Deserialize(req.Body);
+                m = Json.Deserialize(req.Body) as Map;
             }
             catch
             {
@@ -95,13 +95,12 @@ namespace SilverSim.Backend.OpenSim.Neighbor.Neighbor
                 return;
             }
 
-            if (!(v is Map))
+            if (null == m)
             {
                 req.ErrorResponse(HttpStatusCode.BadRequest, "Bad Request");
                 return;
             }
 
-            Map m = (Map)v;
             if (!m.ContainsKey("destination_handle"))
             {
                 req.ErrorResponse(HttpStatusCode.BadRequest, "Bad Request");
@@ -148,7 +147,7 @@ namespace SilverSim.Backend.OpenSim.Neighbor.Neighbor
                 m.Add("success", false);
                 resp = req.BeginResponse();
                 resp.ContentType = "application/json";
-                JSON.Serialize(m, resp.GetOutputStream());
+                Json.Serialize(m, resp.GetOutputStream());
                 resp.Close();
                 return;
             }
@@ -173,7 +172,7 @@ namespace SilverSim.Backend.OpenSim.Neighbor.Neighbor
 
             resp = req.BeginResponse();
             resp.ContentType = "application/json";
-            JSON.Serialize(m, resp.GetOutputStream());
+            Json.Serialize(m, resp.GetOutputStream());
             resp.Close();
         }
     }

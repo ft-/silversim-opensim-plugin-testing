@@ -5,7 +5,7 @@ using SilverSim.Main.Common.Rpc;
 using SilverSim.ServiceInterfaces.IM;
 using SilverSim.Types;
 using SilverSim.Types.IM;
-using SilverSim.Types.StructuredData.XMLRPC;
+using SilverSim.Types.StructuredData.XmlRpc;
 using System;
 
 namespace SilverSim.BackendConnectors.Robust.IM
@@ -24,7 +24,7 @@ namespace SilverSim.BackendConnectors.Robust.IM
 
         public override void Send(GridInstantMessage im)
         {
-            XMLRPC.XmlRpcRequest req = new XMLRPC.XmlRpcRequest();
+            XmlRpc.XmlRpcRequest req = new XmlRpc.XmlRpcRequest();
             
             Map p = new Map();
             if (im.IsFromGroup)
@@ -58,12 +58,12 @@ namespace SilverSim.BackendConnectors.Robust.IM
             req.MethodName = "grid_instant_message";
             req.Params.Add(p);
 
-            XMLRPC.XmlRpcResponse res;
+            XmlRpc.XmlRpcResponse res;
             try
             {
                 res = RPC.DoXmlRpcRequest(m_IMUri, req, TimeoutMs);
             }
-            catch(XMLRPC.XmlRpcFaultException)
+            catch (XmlRpc.XmlRpcFaultException)
             {
                 throw new IMSendFailedException();
             }

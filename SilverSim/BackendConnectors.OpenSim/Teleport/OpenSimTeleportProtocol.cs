@@ -7,8 +7,8 @@ using SilverSim.Scene.Types.Agent;
 using SilverSim.Scene.Types.Neighbor;
 using SilverSim.ServiceInterfaces.Grid;
 using SilverSim.ServiceInterfaces.Teleport;
-using SilverSim.StructuredData.Agent;
-using SilverSim.StructuredData.JSON;
+using SilverSim.Types.StructuredData.Agent;
+using SilverSim.Types.StructuredData.Json;
 using SilverSim.Types;
 using SilverSim.Types.Agent;
 using SilverSim.Types.Grid;
@@ -115,7 +115,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
                     ws.Write(uncompressed_postdata, 0, uncompressed_postdata.Length);
                 }, true, TimeoutMs))
                 {
-                    result = (Map)JSON.Deserialize(o);
+                    result = (Map)Json.Deserialize(o);
                 }
             }
             catch
@@ -136,7 +136,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
                         ws.Write(compressed_postdata, 0, compressed_postdata.Length);
                     }, false, TimeoutMs))
                     {
-                        result = (Map)JSON.Deserialize(o);
+                        result = (Map)Json.Deserialize(o);
                     }
                 }
                 catch
@@ -148,7 +148,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
                             ws.Write(uncompressed_postdata, 0, uncompressed_postdata.Length);
                         }, false, TimeoutMs))
                         {
-                            result = (Map)JSON.Deserialize(o);
+                            result = (Map)Json.Deserialize(o);
                         }
                     }
                     catch

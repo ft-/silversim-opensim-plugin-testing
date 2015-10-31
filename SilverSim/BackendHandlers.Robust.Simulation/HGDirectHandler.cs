@@ -6,7 +6,7 @@ using SilverSim.Main.Common;
 using SilverSim.Main.Common.HttpServer;
 using SilverSim.Scene.Types.Scene;
 using SilverSim.Types;
-using SilverSim.Types.StructuredData.XMLRPC;
+using SilverSim.Types.StructuredData.XmlRpc;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -48,7 +48,7 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
             }
         }
 
-        XMLRPC.XmlRpcResponse LinkRegion(XMLRPC.XmlRpcRequest req)
+        XmlRpc.XmlRpcResponse LinkRegion(XmlRpc.XmlRpcRequest req)
         {
             string region_name = string.Empty;
             try
@@ -88,12 +88,12 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
             {
                 resdata.Add("result", false);
             }
-            XMLRPC.XmlRpcResponse res = new XMLRPC.XmlRpcResponse();
+            XmlRpc.XmlRpcResponse res = new XmlRpc.XmlRpcResponse();
             res.ReturnValue = resdata;
             return res;
         }
 
-        XMLRPC.XmlRpcResponse GetRegion(XMLRPC.XmlRpcRequest req)
+        XmlRpc.XmlRpcResponse GetRegion(XmlRpc.XmlRpcRequest req)
         {
             UUID region_uuid = (((Map)req.Params[0])["region_uuid"]).AsUUID;
             Map resdata = new Map();
@@ -123,7 +123,7 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
             {
                 resdata.Add("result", false);
             }
-            XMLRPC.XmlRpcResponse res = new XMLRPC.XmlRpcResponse();
+            XmlRpc.XmlRpcResponse res = new XmlRpc.XmlRpcResponse();
             res.ReturnValue = resdata;
             return res;
         }

@@ -4,7 +4,7 @@
 using SilverSim.Main.Common.Rpc;
 using SilverSim.ServiceInterfaces.UserAgents;
 using SilverSim.Types;
-using SilverSim.Types.StructuredData.XMLRPC;
+using SilverSim.Types.StructuredData.XmlRpc;
 using System;
 using System.Collections.Generic;
 
@@ -177,9 +177,9 @@ namespace SilverSim.BackendConnectors.Robust.UserAgent
 
         void DoXmlRpcWithBoolResponse(string method, Map reqparams)
         {
-            XMLRPC.XmlRpcRequest req = new XMLRPC.XmlRpcRequest(method);
+            XmlRpc.XmlRpcRequest req = new XmlRpc.XmlRpcRequest(method);
             req.Params.Add(reqparams);
-            XMLRPC.XmlRpcResponse res = RPC.DoXmlRpcRequest(m_Uri, req, TimeoutMs);
+            XmlRpc.XmlRpcResponse res = RPC.DoXmlRpcRequest(m_Uri, req, TimeoutMs);
 
             Map hash = (Map)res.ReturnValue;
             if(hash == null)
@@ -204,9 +204,9 @@ namespace SilverSim.BackendConnectors.Robust.UserAgent
 
         Map DoXmlRpcWithHashResponse(string method, Map reqparams)
         {
-            XMLRPC.XmlRpcRequest req = new XMLRPC.XmlRpcRequest(method);
+            XmlRpc.XmlRpcRequest req = new XmlRpc.XmlRpcRequest(method);
             req.Params.Add(reqparams);
-            XMLRPC.XmlRpcResponse res = RPC.DoXmlRpcRequest(m_Uri, req, TimeoutMs);
+            XmlRpc.XmlRpcResponse res = RPC.DoXmlRpcRequest(m_Uri, req, TimeoutMs);
 
             Map hash = (Map)res.ReturnValue;
             if (hash == null)

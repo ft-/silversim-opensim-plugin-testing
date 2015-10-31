@@ -4,7 +4,7 @@
 using SilverSim.BackendConnectors.Simian.Common;
 using SilverSim.ServiceInterfaces.Groups;
 using SilverSim.ServiceInterfaces.Inventory;
-using SilverSim.StructuredData.JSON;
+using SilverSim.Types.StructuredData.Json;
 using SilverSim.Types;
 using SilverSim.Types.Asset;
 using SilverSim.Types.Inventory;
@@ -105,7 +105,7 @@ namespace SilverSim.BackendConnectors.Simian.Inventory
             post["CreatorID"] = (string)item.Creator.ID;
             post["CreatorData"] = item.Creator.CreatorData;
             post["ContentType"] = invContentType;
-            post["ExtraData"] = JSON.Serialize(extraData);
+            post["ExtraData"] = Json.Serialize(extraData);
 
             Map m = SimianGrid.PostToService(m_InventoryURI, m_InventoryCapability, post, TimeoutMs);
             if (!m["Success"].AsBoolean)
@@ -165,7 +165,7 @@ namespace SilverSim.BackendConnectors.Simian.Inventory
                     post.Clear();
                     post["RequestMethod"] = "AddUserData";
                     post["UserID"] = (string)item.Owner.ID;
-                    post["Gestures"] = JSON.Serialize(json_gestures);
+                    post["Gestures"] = Json.Serialize(json_gestures);
                     m = SimianGrid.PostToService(m_InventoryURI, m_InventoryCapability, post, TimeoutMs);
                 }
                 catch

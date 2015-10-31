@@ -28,8 +28,8 @@ using SilverSim.ServiceInterfaces.Presence;
 using SilverSim.ServiceInterfaces.Profile;
 using SilverSim.ServiceInterfaces.ServerParam;
 using SilverSim.ServiceInterfaces.UserAgents;
-using SilverSim.StructuredData.Agent;
-using SilverSim.StructuredData.JSON;
+using SilverSim.Types.StructuredData.Agent;
+using SilverSim.Types.StructuredData.Json;
 using SilverSim.Types;
 using SilverSim.Types.Agent;
 using SilverSim.Types.Asset.Format;
@@ -789,7 +789,7 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
 
             try
             {
-                json = JSON.Deserialize(httpBody);
+                json = Json.Deserialize(httpBody);
             }
             catch (Exception e)
             {
@@ -1225,7 +1225,7 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
 
             try
             {
-                jsonreq = JSON.Deserialize(req.Body) as Map;
+                jsonreq = Json.Deserialize(req.Body) as Map;
             }
             catch (Exception e)
             {
@@ -1343,7 +1343,7 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
             {
                 using(Stream s = res.GetOutputStream())
                 {
-                    JSON.Serialize(response, s);
+                    Json.Serialize(response, s);
                 }
             }
         }

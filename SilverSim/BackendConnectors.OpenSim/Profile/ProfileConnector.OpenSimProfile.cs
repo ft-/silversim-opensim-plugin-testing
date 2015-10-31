@@ -4,7 +4,7 @@
 using SilverSim.Main.Common.Rpc;
 using SilverSim.Types;
 using SilverSim.Types.Profile;
-using SilverSim.Types.StructuredData.XMLRPC;
+using SilverSim.Types.StructuredData.XmlRpc;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -26,10 +26,10 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
 
             protected IValue OpenSimXmlRpcCall(string methodName, Map structparam)
             {
-                XMLRPC.XmlRpcRequest req = new XMLRPC.XmlRpcRequest();
+                XmlRpc.XmlRpcRequest req = new XmlRpc.XmlRpcRequest();
                 req.MethodName = methodName;
                 req.Params.Add(structparam);
-                XMLRPC.XmlRpcResponse res = RPC.DoXmlRpcRequest(m_Uri, req, m_Connector.TimeoutMs);
+                XmlRpc.XmlRpcResponse res = RPC.DoXmlRpcRequest(m_Uri, req, m_Connector.TimeoutMs);
                 Map p = res.ReturnValue as Map;
                 if (null == p)
                 {

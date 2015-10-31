@@ -3,7 +3,7 @@
 
 using log4net;
 using SilverSim.Http.Client;
-using SilverSim.StructuredData.JSON;
+using SilverSim.Types.StructuredData.Json;
 using SilverSim.Types;
 using SilverSim.Types.Grid;
 using System;
@@ -44,7 +44,7 @@ namespace SilverSim.Backend.OpenSim.Neighbor.Neighbor
             /* region_type is defined but when is it ever used? */
             m.Add("destination_handle", toRegion.Location.RegionHandle.ToString());
             m_Log.InfoFormat("notifying neighbor {0} ({1}) of {2} ({3})", toRegion.Name, toRegion.ID, fromRegion.Name, fromRegion.Name);
-            Map res = (Map)JSON.Deserialize(HttpRequestHandler.DoStreamRequest("POST", uri, null, "application/json", JSON.Serialize(m), false, 10000));
+            Map res = (Map)Json.Deserialize(HttpRequestHandler.DoStreamRequest("POST", uri, null, "application/json", Json.Serialize(m), false, 10000));
             if(!res["success"].AsBoolean)
             {
                 throw new Exception("notifying neighbor failed");

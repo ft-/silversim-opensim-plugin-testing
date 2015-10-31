@@ -2,7 +2,7 @@
 // GNU Affero General Public License v3
 
 using SilverSim.Http.Client;
-using SilverSim.StructuredData.LLSD;
+using SilverSim.Types.StructuredData.Llsd;
 using SilverSim.Types;
 using System.Collections.Generic;
 using System.IO;
@@ -16,7 +16,7 @@ namespace SilverSim.BackendConnectors.Simian.Common
             requestargs["cap"] = capability;
             using(Stream s = HttpRequestHandler.DoStreamPostRequest(serverUrl, null, requestargs, compressed, timeoutms))
             {
-                return (Map)LLSD_XML.Deserialize(s);
+                return (Map)LlsdXml.Deserialize(s);
             }
         }
 
@@ -25,7 +25,7 @@ namespace SilverSim.BackendConnectors.Simian.Common
             requestargs["cap"] = capability;
             using(Stream s = HttpRequestHandler.DoStreamPostRequest(serverUrl, null, requestargs, false, timeoutms))
             {
-                return (Map)LLSD_XML.Deserialize(s);
+                return (Map)LlsdXml.Deserialize(s);
             }
         }
     }

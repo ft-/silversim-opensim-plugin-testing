@@ -7,7 +7,7 @@ using SilverSim.Main.Common.HttpServer;
 using SilverSim.ServiceInterfaces.IM;
 using SilverSim.Types;
 using SilverSim.Types.IM;
-using SilverSim.Types.StructuredData.XMLRPC;
+using SilverSim.Types.StructuredData.XmlRpc;
 using System;
 using System.Threading;
 
@@ -30,10 +30,10 @@ namespace SilverSim.BackendConnectors.Robust.IM
             m_IMService = loader.GetService<IMServiceInterface>("IMService");
         }
 
-        public XMLRPC.XmlRpcResponse IMReceived(XMLRPC.XmlRpcRequest req)
+        public XmlRpc.XmlRpcResponse IMReceived(XmlRpc.XmlRpcRequest req)
         {
             GridInstantMessage im = new GridInstantMessage();
-            XMLRPC.XmlRpcResponse res = new XMLRPC.XmlRpcResponse();
+            XmlRpc.XmlRpcResponse res = new XmlRpc.XmlRpcResponse();
             try
             {
                 im.NoOfflineIMStore = m_DisallowOfflineIM;
@@ -66,7 +66,7 @@ namespace SilverSim.BackendConnectors.Robust.IM
             }
             catch
             {
-                throw new XMLRPC.XmlRpcFaultException(-32602, "invalid method parameters");
+                throw new XmlRpc.XmlRpcFaultException(-32602, "invalid method parameters");
             }
 
             ManualResetEvent e = new ManualResetEvent(false);

@@ -6,7 +6,7 @@ using Nini.Config;
 using SilverSim.Http.Client;
 using SilverSim.Main.Common;
 using SilverSim.ServiceInterfaces.Asset;
-using SilverSim.StructuredData.AssetXml;
+using SilverSim.Types.StructuredData.AssetXml;
 using SilverSim.Types;
 using SilverSim.Types.Asset;
 using System;
@@ -229,7 +229,7 @@ namespace SilverSim.BackendConnectors.Robust.Asset
                 {
                     using (Stream stream = HttpRequestHandler.DoStreamGetRequest(m_AssetURI + "assets/" + key.ToString(), null, TimeoutMs))
                     {
-                        return AssetXml.parseAssetData(stream);
+                        return AssetXml.ParseAssetData(stream);
                     }
                 }
                 catch(HttpException e)

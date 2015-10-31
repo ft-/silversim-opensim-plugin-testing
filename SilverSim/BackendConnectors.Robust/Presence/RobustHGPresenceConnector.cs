@@ -5,7 +5,7 @@ using SilverSim.Main.Common.Rpc;
 using SilverSim.ServiceInterfaces.Presence;
 using SilverSim.Types;
 using SilverSim.Types.Presence;
-using SilverSim.Types.StructuredData.XMLRPC;
+using SilverSim.Types.StructuredData.XmlRpc;
 using System;
 using System.Collections.Generic;
 
@@ -32,14 +32,14 @@ namespace SilverSim.BackendConnectors.Robust.Presence
             p.Add("userID", userId);
             p.Add("sessionID", sessionID);
 
-            XMLRPC.XmlRpcRequest req = new XMLRPC.XmlRpcRequest("logout_agent");
+            XmlRpc.XmlRpcRequest req = new XmlRpc.XmlRpcRequest("logout_agent");
             req.Params.Add(p);
-            XMLRPC.XmlRpcResponse res;
+            XmlRpc.XmlRpcResponse res;
             try
             {
                 res = RPC.DoXmlRpcRequest(m_HomeURI, req, TimeoutMs);
             }
-            catch(XMLRPC.XmlRpcFaultException)
+            catch (XmlRpc.XmlRpcFaultException)
             {
                 throw new PresenceUpdateFailedException();
             }

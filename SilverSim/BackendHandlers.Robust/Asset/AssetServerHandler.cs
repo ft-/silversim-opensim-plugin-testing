@@ -6,7 +6,7 @@ using Nini.Config;
 using SilverSim.Main.Common;
 using SilverSim.Main.Common.HttpServer;
 using SilverSim.ServiceInterfaces.Asset;
-using SilverSim.StructuredData.AssetXml;
+using SilverSim.Types.StructuredData.AssetXml;
 using SilverSim.Types;
 using SilverSim.Types.Asset;
 using System;
@@ -370,7 +370,7 @@ namespace SilverSim.BackendHandlers.Robust.Asset
             AssetData data;
             try
             {
-                data = AssetXml.parseAssetData(req.Body);
+                data = AssetXml.ParseAssetData(req.Body);
             }
             catch
             {
