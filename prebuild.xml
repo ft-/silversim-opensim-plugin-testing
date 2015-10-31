@@ -18,7 +18,7 @@
     </Configuration>
     <Configuration name="Debug">
       <Options>
-        <CompilerDefines>TRACE;DEBUG</CompilerDefines>
+        <CompilerDefines>TRACE;DEBUG;CODE_ANALYSIS</CompilerDefines>
         <OptimizeCode>false</OptimizeCode>
         <CheckUnderflowOverflow>false</CheckUnderflowOverflow>
         <AllowUnsafe>false</AllowUnsafe>
