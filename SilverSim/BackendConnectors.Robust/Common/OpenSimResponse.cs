@@ -20,7 +20,7 @@ namespace SilverSim.BackendConnectors.Robust.Common
 
             }
 
-            public new string Message
+            public override string Message
             {
                 get
                 {

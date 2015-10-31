@@ -24,7 +24,7 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
 
         }
 
-        public new void Startup(ConfigurationLoader loader)
+        public override void Startup(ConfigurationLoader loader)
         {
             base.Startup(loader);
             m_Log.Info("Initializing DirectHG XMLRPC handlers");
@@ -33,7 +33,7 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
             m_XmlRpcServer.XmlRpcMethods.Add("get_region", GetRegion);
         }
 
-        public new void Shutdown()
+        public override void Shutdown()
         {
             m_XmlRpcServer.XmlRpcMethods.Remove("link_region");
             m_XmlRpcServer.XmlRpcMethods.Remove("get_region");
