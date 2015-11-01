@@ -6,6 +6,7 @@ using SilverSim.Types;
 using SilverSim.Types.Profile;
 using System;
 using System.Collections.Generic;
+using System.Runtime.Serialization;
 
 namespace SilverSim.BackendConnectors.OpenSim.Profile
 {
@@ -14,9 +15,31 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
 #if DEBUG
         static readonly ILog m_Log = LogManager.GetLogger("PROFILE AUTO-DETECT HANDLER");
 #endif
+        [Serializable]
         public class ProfileAutoDetectFailedException : Exception
         {
+            public ProfileAutoDetectFailedException()
+            {
 
+            }
+
+            public ProfileAutoDetectFailedException(string message)
+                : base(message)
+            {
+
+            }
+
+            protected ProfileAutoDetectFailedException(SerializationInfo info, StreamingContext context)
+                : base(info, context)
+            {
+
+            }
+
+            public ProfileAutoDetectFailedException(string message, Exception inner)
+                : base(message, inner)
+            {
+
+            }
         }
 
         public class AutoDetectClassifiedsConnector : IClassifiedsInterface

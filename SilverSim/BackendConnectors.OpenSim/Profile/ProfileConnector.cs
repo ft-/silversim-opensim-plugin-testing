@@ -3,14 +3,34 @@
 
 using SilverSim.ServiceInterfaces.Profile;
 using System;
+using System.Runtime.Serialization;
 
 namespace SilverSim.BackendConnectors.OpenSim.Profile
 {
     public partial class ProfileConnector : ProfileServiceInterface
     {
+        [Serializable]
         public class RpcFaultException : Exception
         {
             public RpcFaultException()
+            {
+
+            }
+
+            public RpcFaultException(string message)
+                : base(message)
+            {
+
+            }
+
+            protected RpcFaultException(SerializationInfo info, StreamingContext context)
+                : base(info, context)
+            {
+
+            }
+
+            public RpcFaultException(string message, Exception innerException)
+                : base(message, innerException)
             {
 
             }
