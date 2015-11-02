@@ -245,11 +245,7 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
                             foreach(string sim in sims)
                             {
                                 UUID id;
-                                try
-                                {
-                                    id = UUID.Parse(sim.Trim());
-                                }
-                                catch
+                                if(!UUID.TryParse(sim.Trim(), out id))
                                 {
                                     m_Log.ErrorFormat("Invalid UUID {0} encountered within ValidFor in section {1}", sim, section.Name);
                                     continue;
@@ -305,10 +301,16 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
             }
             else
             {
-                agentID = UUID.Parse(parts[1]);
+                if(!UUID.TryParse(parts[1], out agentID))
+                {
+                    throw new InvalidDataException();
+                }
                 if(parts.Length > 2)
                 {
-                    regionID = UUID.Parse(parts[2]);
+                     if(!UUID.TryParse(parts[2], out regionID))
+                     {
+                         throw new InvalidDataException();
+                     }
                 }
                 if(parts.Length > 3)
                 {
@@ -674,7 +676,13 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
                 agent.ServiceURLs,
                 gatekeeperURI,
                 m_PacketHandlerPlugins);
-            IPEndPoint ep = new IPEndPoint(IPAddress.Parse(agentPost.Client.ClientIP), 0);
+            IPAddress ipAddr;
+            if(!IPAddress.TryParse(agentPost.Client.ClientIP, out ipAddr))
+            {
+                DoAgentResponse(req, "Invalid IP address", false);
+                return;
+            }
+            IPEndPoint ep = new IPEndPoint(ipAddr, 0);
             circuit.RemoteEndPoint = ep;
             circuit.Agent = agent;
             circuit.AgentID = agentPost.Account.Principal.ID;
@@ -846,9 +854,13 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
                             Map group = (Map)gval;
                             ChildAgentUpdate.GroupDataEntry g = new ChildAgentUpdate.GroupDataEntry();
                             g.AcceptNotices = group["accept_notices"].AsBoolean;
-                            g.GroupPowers = (GroupPowers)UInt64.Parse(group["group_powers"].ToString());
-                            g.GroupID = group["group_id"].AsUUID;
-                            childAgentData.GroupData.Add(g);
+                            UInt64 groupPowers;
+                            if (UInt64.TryParse(group["group_powers"].ToString(), out groupPowers))
+                            {
+                                g.GroupPowers = (GroupPowers)groupPowers;
+                                g.GroupID = group["group_id"].AsUUID;
+                                childAgentData.GroupData.Add(g);
+                            }
                         }
                     }
                 }
@@ -962,7 +974,11 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
                     foreach (IValue apv in (AnArray)appearancePack["attachments"])
                     {
                         Map ap = (Map)apv;
-                        Appearance.Attachments[(AttachmentPoint)uint.Parse(ap["point"].ToString())][ap["item"].AsUUID] = UUID.Zero;
+                        uint apid;
+                        if (uint.TryParse(ap["point"].ToString(), out apid))
+                        {
+                            Appearance.Attachments[(AttachmentPoint)apid][ap["item"].AsUUID] = UUID.Zero;
+                        }
                     }
                 }
 
@@ -1065,7 +1081,13 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
             {
                 ChildAgentPositionUpdate childAgentPosition = new ChildAgentPositionUpdate();
 
-                childAgentPosition.RegionLocation.RegionHandle = UInt64.Parse(param["region_handle"].ToString());
+                UInt64 regionHandle;
+                if(!UInt64.TryParse(param["region_handle"].ToString(), out regionHandle))
+                {
+                    req.ErrorResponse(HttpStatusCode.BadRequest, "Unknown message type");
+                    return;
+                }
+                childAgentPosition.RegionLocation.RegionHandle = regionHandle;
                 childAgentPosition.ViewerCircuitCode = param["circuit_code"].AsUInt;
                 childAgentPosition.AgentID = param["agent_uuid"].AsUUID;
                 childAgentPosition.SessionID = param["session_uuid"].AsUUID;
@@ -1083,11 +1105,7 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
                 if (Scene.Management.Scene.SceneManager.Scenes.TryGetValue(childAgentPosition.RegionLocation.RegionHandle, out scene))
                 {
                     IAgent agent;
-                    try
-                    {
-                        agent = scene.Agents[childAgentPosition.AgentID];
-                    }
-                    catch
+                    if(!scene.Agents.TryGetValue(childAgentPosition.AgentID, out agent))
                     {
                         req.ErrorResponse(HttpStatusCode.BadRequest, "Unknown message type");
                         return;
@@ -1270,8 +1288,16 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
                 req.ErrorResponse(HttpStatusCode.BadRequest, "Bad Request");
                 return;
             }
-            int versionMajor = int.Parse(myVersionSplit[1]);
-            int versionMinor = int.Parse(myVersionSplit[2]);
+            int versionMajor;
+            if(!int.TryParse(myVersionSplit[1], out versionMajor))
+            {
+                versionMajor = 0;
+            }
+            int versionMinor;
+            if(!int.TryParse(myVersionSplit[2], out versionMinor))
+            {
+                versionMinor = 0;
+            }
             /* check version and limit it down to what we actually understand
              * weird but the truth of OpenSim protocol versioning
              */
