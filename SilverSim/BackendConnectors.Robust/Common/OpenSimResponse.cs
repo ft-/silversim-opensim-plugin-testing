@@ -4,6 +4,7 @@
 using SilverSim.Types;
 using System;
 using System.IO;
+using System.Runtime.Serialization;
 using System.Xml;
 
 namespace SilverSim.BackendConnectors.Robust.Common
@@ -13,12 +14,16 @@ namespace SilverSim.BackendConnectors.Robust.Common
         [Serializable]
         public class InvalidOpenSimResponseSerializationException : Exception
         {
-            public string Path;
+            public string Path = string.Empty;
 
             public InvalidOpenSimResponseSerializationException(string path)
+                : base(path)
             {
-
+                Path = path;
             }
+            public InvalidOpenSimResponseSerializationException() {}
+            public InvalidOpenSimResponseSerializationException(string msg, Exception innerException) : base(msg, innerException) { }
+            protected InvalidOpenSimResponseSerializationException(SerializationInfo info, StreamingContext context) : base(info, context) { }
 
             public override string Message
             {

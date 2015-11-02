@@ -9,10 +9,12 @@ using SilverSim.ServiceInterfaces.Groups;
 using SilverSim.Types;
 using SilverSim.Types.Account;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 
 namespace SilverSim.BackendConnectors.Robust.GroupsV2
 {
+    [SuppressMessage("Gendarme.Rules.Exceptions", "DoNotThrowInUnexpectedLocationRule")]
     public partial class RobustGroupsConnector : GroupsServiceInterface, IPlugin
     {
         GroupsAccessor m_Groups;

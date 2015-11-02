@@ -8,13 +8,15 @@ using SilverSim.ServiceInterfaces.Inventory;
 using SilverSim.Types;
 using SilverSim.Types.Inventory;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Net;
 using System.Web;
 
 namespace SilverSim.BackendConnectors.Robust.Inventory
 {
-    public class RobustInventoryFolderContentConnector : InventoryFolderContentServiceInterface
+    [SuppressMessage("Gendarme.Rules.Exceptions", "DoNotThrowInUnexpectedLocationRule")]
+    public sealed class RobustInventoryFolderContentConnector : InventoryFolderContentServiceInterface
     {
         bool m_IsMultipeServiceSupported = true;
         string m_InventoryURI;

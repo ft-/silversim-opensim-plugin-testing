@@ -17,6 +17,7 @@ using System.Net;
 using System.Text;
 using System.Web;
 using System.Xml;
+using System.Runtime.Serialization;
 
 namespace SilverSim.BackendConnectors.Robust.Asset
 {
@@ -26,7 +27,10 @@ namespace SilverSim.BackendConnectors.Robust.Asset
         [Serializable]
         public class RobustAssetProtocolErrorException : Exception
         {
+            public RobustAssetProtocolErrorException() { }
             public RobustAssetProtocolErrorException(string msg) : base(msg) {}
+            public RobustAssetProtocolErrorException(string msg, Exception innerException) : base(msg, innerException) { }
+            protected RobustAssetProtocolErrorException(SerializationInfo info, StreamingContext context) : base(info, context) { }
         }
 
         private static int MAX_ASSET_BASE64_CONVERSION_SIZE = 9 * 1024; /* must be an integral multiple of 3 */

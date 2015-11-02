@@ -10,13 +10,16 @@ using SilverSim.ServiceInterfaces.Avatar;
 using SilverSim.Types;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
+using System.Runtime.Serialization;
 using System.Web;
 using System.Xml;
 
 namespace SilverSim.BackendConnectors.Robust.Avatar
 {
     #region Service implementation
+    [SuppressMessage("Gendarme.Rules.Exceptions", "DoNotThrowInUnexpectedLocationRule")]
     public sealed class RobustAvatarConnector : AvatarServiceInterface, IPlugin
     {
         [Serializable]
@@ -26,6 +29,9 @@ namespace SilverSim.BackendConnectors.Robust.Avatar
             {
 
             }
+            public AvatarInaccessibleException(string msg) : base(msg) {}
+            public AvatarInaccessibleException(string msg, Exception innerException) : base(msg, innerException) { }
+            protected AvatarInaccessibleException(SerializationInfo info, StreamingContext context) : base(info, context) { }
         }
 
         string m_AvatarURI;

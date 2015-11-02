@@ -9,10 +9,12 @@ using SilverSim.Types;
 using SilverSim.Types.Asset;
 using SilverSim.Types.Inventory;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 
 namespace SilverSim.BackendConnectors.Robust.Inventory
 {
+    [SuppressMessage("Gendarme.Rules.Exceptions", "DoNotThrowInUnexpectedLocationRule")]
     public sealed class RobustInventoryFolderConnector : InventoryFolderServiceInterface
     {
         private string m_InventoryURI;

@@ -6,12 +6,14 @@ using SilverSim.Http.Client;
 using SilverSim.Types;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 
 namespace SilverSim.BackendConnectors.Robust.GroupsV2
 {
     public partial class RobustGroupsConnector
     {
+        [SuppressMessage("Gendarme.Rules.Exceptions", "DoNotThrowInUnexpectedLocationRule")]
         public sealed class ActiveGroupAccessor : IGroupSelectInterface
         {
             public int TimeoutMs = 20000;

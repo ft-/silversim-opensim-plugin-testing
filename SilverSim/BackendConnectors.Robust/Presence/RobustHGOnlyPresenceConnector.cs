@@ -8,9 +8,11 @@ using SilverSim.Types.Presence;
 using SilverSim.Types.StructuredData.XmlRpc;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 
 namespace SilverSim.BackendConnectors.Robust.Presence
 {
+    [SuppressMessage("Gendarme.Rules.Exceptions", "DoNotThrowInUnexpectedLocationRule")]
     public class RobustHGOnlyPresenceConnector : PresenceServiceInterface
     {
         public int TimeoutMs { get; set; }

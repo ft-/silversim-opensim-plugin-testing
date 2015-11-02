@@ -10,12 +10,14 @@ using SilverSim.Types;
 using SilverSim.Types.IM;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Timers;
 using ThreadedClasses;
 
 namespace SilverSim.BackendConnectors.Robust.IM
 {
     #region Service Implementation
+    [SuppressMessage("Gendarme.Rules.Design", "TypesWithDisposableFieldsShouldBeDisposableRule")]
     public class RobustHGIM : IPlugin, IPluginShutdown
     {
         RwLockedDictionary<string, KeyValuePair<int, IM.RobustIMConnector>> m_IMUrlCache = new RwLockedDictionary<string, KeyValuePair<int, IM.RobustIMConnector>>();

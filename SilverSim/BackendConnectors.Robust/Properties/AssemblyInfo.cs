@@ -28,3 +28,6 @@ using System.Reflection;
 [assembly: SuppressMessage("Gendarme.Rules.Design", "AvoidMultidimensionalIndexerRule")]
 [assembly: SuppressMessage("Gendarme.Rules.Exceptions", "DoNotSwallowErrorsCatchingNonSpecificExceptionsRule")]
 [assembly: SuppressMessage("Gendarme.Rules.Design", "AvoidPropertiesWithoutGetAccessorRule")]
+
+/* this assembly only */
+[assembly: SuppressMessage("Gendarme.Rules.BadPractice", "PreferTryParseRule")]

@@ -4,6 +4,7 @@
 using SilverSim.Http.Client;
 using SilverSim.ServiceInterfaces.Asset;
 using SilverSim.Types;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 
 namespace SilverSim.BackendConnectors.Robust.Asset
@@ -21,6 +22,7 @@ namespace SilverSim.BackendConnectors.Robust.Asset
         #endregion
 
         #region Metadata accessors
+        [SuppressMessage("Gendarme.Rules.Correctness", "EnsureLocalDisposalRule")]
         public override Stream this[UUID key]
         {
             get

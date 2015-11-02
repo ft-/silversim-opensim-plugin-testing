@@ -8,12 +8,14 @@ using SilverSim.ServiceInterfaces.Inventory;
 using SilverSim.Types;
 using SilverSim.Types.Inventory;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Net;
 using System.Web;
 
 namespace SilverSim.BackendConnectors.Robust.Inventory
 {
+    [SuppressMessage("Gendarme.Rules.Exceptions", "DoNotThrowInUnexpectedLocationRule")]
     public sealed class RobustInventoryItemConnector : InventoryItemServiceInterface
     {
         private string m_InventoryURI;

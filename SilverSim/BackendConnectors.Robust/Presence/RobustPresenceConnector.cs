@@ -11,11 +11,13 @@ using SilverSim.Types;
 using SilverSim.Types.Presence;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 
 namespace SilverSim.BackendConnectors.Robust.Presence
 {
     #region Service Implementation
+    [SuppressMessage("Gendarme.Rules.Exceptions", "DoNotThrowInUnexpectedLocationRule")]
     public class RobustPresenceConnector : PresenceServiceInterface, IPlugin
     {
         public int TimeoutMs { get; set; }
