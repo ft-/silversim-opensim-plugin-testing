@@ -12,6 +12,7 @@ using SilverSim.Types;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 
 namespace SilverSim.OpenSimArchiver
@@ -34,6 +35,7 @@ namespace SilverSim.OpenSimArchiver
         }
 
         #region Load Assets
+        [SuppressMessage("Gendarme.Rules.Correctness", "EnsureLocalDisposalRule")]
         public void LoadAssetsCommand(List<string> args, TTY io, UUID limitedToScene)
         {
             if(args[0] == "help")
@@ -99,7 +101,7 @@ namespace SilverSim.OpenSimArchiver
             {
                 try
                 {
-                    s = new FileStream(args[2], FileMode.Open);
+                    s = new FileStream(args[2], FileMode.Open, FileAccess.Read);
                 }
                 catch(Exception e)
                 {
@@ -124,10 +126,12 @@ namespace SilverSim.OpenSimArchiver
             {
 
             }
+            s.Dispose();
         }
         #endregion
 
         #region Save OAR
+        [SuppressMessage("Gendarme.Rules.Correctness", "EnsureLocalDisposalRule")]
         public void SaveOarCommand(List<string> args, TTY io, UUID limitedToScene)
         {
             if (args[0] == "help")
@@ -186,7 +190,7 @@ namespace SilverSim.OpenSimArchiver
             Stream s;
             try
             {
-                s = new FileStream(filename, FileMode.Create);
+                s = new FileStream(filename, FileMode.Create, FileAccess.Write);
             }
             catch(Exception e)
             {
@@ -204,10 +208,12 @@ namespace SilverSim.OpenSimArchiver
                 io.Write(e.Message);
                 s.Close();
             }
+            s.Dispose();
         }
         #endregion
 
         #region Load OAR
+        [SuppressMessage("Gendarme.Rules.Correctness", "EnsureLocalDisposalRule")]
         public void LoadOarCommand(List<string> args, TTY io, UUID limitedToScene)
         {
             if (args[0] == "help")
@@ -287,7 +293,7 @@ namespace SilverSim.OpenSimArchiver
             {
                 try
                 {
-                    s = new FileStream(filename, FileMode.Open);
+                    s = new FileStream(filename, FileMode.Open, FileAccess.Read);
                 }
                 catch(Exception e)
                 {
@@ -325,6 +331,7 @@ namespace SilverSim.OpenSimArchiver
             {
 
             }
+            s.Dispose();
         }
         #endregion
     }

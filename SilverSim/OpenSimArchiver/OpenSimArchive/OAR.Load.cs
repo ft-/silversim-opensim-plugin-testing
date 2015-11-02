@@ -12,8 +12,10 @@ using SilverSim.Types.Asset.Format;
 using SilverSim.Types.Parcel;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.IO.Compression;
+using System.Runtime.Serialization;
 
 namespace SilverSim.OpenSimArchiver.RegionArchiver
 {
@@ -22,8 +24,25 @@ namespace SilverSim.OpenSimArchiver.RegionArchiver
         [Serializable]
         public class OARLoadingErrorException : Exception
         {
+            public OARLoadingErrorException()
+            {
+
+            }
+
+            public OARLoadingErrorException(string message)
+                : base(message)
+            {
+
+            }
+
             public OARLoadingErrorException(string message, Exception innerException)
                 : base(message, innerException)
+            {
+
+            }
+
+            protected OARLoadingErrorException(SerializationInfo info, StreamingContext context)
+                : base(info, context)
             {
 
             }
@@ -36,12 +55,48 @@ namespace SilverSim.OpenSimArchiver.RegionArchiver
             {
 
             }
+
+            public OARLoadingTriedWithoutSelectedRegionException(string message)
+                : base(message)
+            {
+
+            }
+
+            public OARLoadingTriedWithoutSelectedRegionException(string message, Exception innerException)
+                : base(message, innerException)
+            {
+
+            }
+
+            protected OARLoadingTriedWithoutSelectedRegionException(SerializationInfo info, StreamingContext context)
+                : base(info, context)
+            {
+
+            }
         }
 
         [Serializable]
         public class MultiRegionOARLoadingTriedOnRegionException : Exception
         {
             public MultiRegionOARLoadingTriedOnRegionException()
+            {
+
+            }
+
+            public MultiRegionOARLoadingTriedOnRegionException(string message)
+                : base(message)
+            {
+
+            }
+
+            public MultiRegionOARLoadingTriedOnRegionException(string message, Exception innerException)
+                : base(message, innerException)
+            {
+
+            }
+
+            protected MultiRegionOARLoadingTriedOnRegionException(SerializationInfo info, StreamingContext context)
+                : base(info, context)
             {
 
             }
@@ -54,9 +109,28 @@ namespace SilverSim.OpenSimArchiver.RegionArchiver
             {
 
             }
+
+            public OARFormatException(string message)
+                : base(message)
+            {
+
+            }
+
+            public OARFormatException(string message, Exception innerException)
+                : base(message, innerException)
+            {
+
+            }
+
+            protected OARFormatException(SerializationInfo info, StreamingContext context)
+                : base(info, context)
+            {
+
+            }
         }
 
         [Flags]
+        [SuppressMessage("Gendarme.Rules.Design", "FlagsShouldNotDefineAZeroValueRule")]
         public enum LoadOptions
         {
             None = 0,

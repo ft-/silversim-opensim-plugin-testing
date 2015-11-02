@@ -15,12 +15,14 @@ using System.IO;
 using System.IO.Compression;
 using System.Text;
 using System.Xml;
+using System.Diagnostics.CodeAnalysis;
 
 namespace SilverSim.OpenSimArchiver.RegionArchiver
 {
     public static partial class OAR
     {
         [Flags]
+        [SuppressMessage("Gendarme.Rules.Design", "FlagsShouldNotDefineAZeroValueRule")]
         public enum SaveOptions
         {
             None = 0,

@@ -418,11 +418,17 @@ namespace SilverSim.OpenSimArchiver.RegionArchiver
                                     switch (reader.Name)
                                     {
                                         case "major_version":
-                                            majorVersion = uint.Parse(reader.Value);
+                                            if(!uint.TryParse(reader.Value, out majorVersion))
+                                            {
+                                                throw new OARFormatException();
+                                            }
                                             break;
 
                                         case "minor_version":
-                                            minorVersion = uint.Parse(reader.Value);
+                                            if(!uint.TryParse(reader.Value, out minorVersion))
+                                            {
+                                                throw new OARFormatException();
+                                            }
                                             break;
 
                                         default:

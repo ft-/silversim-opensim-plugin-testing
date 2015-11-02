@@ -14,6 +14,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
+using System.Runtime.Serialization;
 using System.Xml;
 
 namespace SilverSim.OpenSimArchiver.InventoryArchiver
@@ -27,12 +28,48 @@ namespace SilverSim.OpenSimArchiver.InventoryArchiver
             {
 
             }
+
+            public IARFormatException(string message)
+                : base(message)
+            {
+
+            }
+
+            public IARFormatException(string message, Exception innerException)
+                : base(message, innerException)
+            {
+
+            }
+
+            protected IARFormatException(SerializationInfo info, StreamingContext context)
+                : base(info, context)
+            {
+
+            }
         }
 
         [Serializable]
         public class InvalidInventoryPathException : Exception
         {
             public InvalidInventoryPathException()
+            {
+
+            }
+
+            public InvalidInventoryPathException(string message)
+                : base(message)
+            {
+
+            }
+
+            public InvalidInventoryPathException(string message, Exception innerException)
+                : base(message, innerException)
+            {
+
+            }
+
+            protected InvalidInventoryPathException(SerializationInfo info, StreamingContext context)
+                : base(info, context)
             {
 
             }
@@ -105,7 +142,10 @@ namespace SilverSim.OpenSimArchiver.InventoryArchiver
                         {
                             if (header.FileName == "archive.xml")
                             {
-                                ArchiveXmlLoader.LoadArchiveXml(new ObjectXmlStreamFilter(reader));
+                                using (Stream s = new ObjectXmlStreamFilter(reader))
+                                {
+                                    ArchiveXmlLoader.LoadArchiveXml(s);
+                                }
                             }
 
                             if (header.FileName.StartsWith("assets/") && (options & LoadOptions.NoAssets) == 0)

@@ -18,37 +18,38 @@ namespace SilverSim.OpenSimArchiver.Assets
             UUI owner,
             Stream inputFile)
         {
-            TarArchiveReader reader;
+            using (GZipStream gzipStream = new GZipStream(inputFile, CompressionMode.Decompress))
             {
-                GZipStream gzipStream = new GZipStream(inputFile, CompressionMode.Decompress);
-                reader = new TarArchiveReader(gzipStream);
-            }
+                using (TarArchiveReader reader = new TarArchiveReader(gzipStream))
+                {
 
-            for (; ; )
-            {
-                TarArchiveReader.Header header;
-                try
-                {
-                    header = reader.ReadHeader();
-                }
-                catch (TarArchiveReader.EndOfTarException)
-                {
-                    return;
-                }
-
-                if (header.FileType == TarFileType.File)
-                {
-                    if (header.FileName.StartsWith("assets/"))
+                    for (; ; )
                     {
-                        /* Load asset */
-                        AssetData ad = reader.LoadAsset(header, owner);
+                        TarArchiveReader.Header header;
                         try
                         {
-                            assetService.Exists(ad.ID);
+                            header = reader.ReadHeader();
                         }
-                        catch
+                        catch (TarArchiveReader.EndOfTarException)
                         {
-                            assetService.Store(ad);
+                            return;
+                        }
+
+                        if (header.FileType == TarFileType.File)
+                        {
+                            if (header.FileName.StartsWith("assets/"))
+                            {
+                                /* Load asset */
+                                AssetData ad = reader.LoadAsset(header, owner);
+                                try
+                                {
+                                    assetService.Exists(ad.ID);
+                                }
+                                catch
+                                {
+                                    assetService.Store(ad);
+                                }
+                            }
                         }
                     }
                 }

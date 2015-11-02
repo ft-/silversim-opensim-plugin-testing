@@ -42,11 +42,17 @@ namespace SilverSim.OpenSimArchiver.InventoryArchiver
                                     switch (reader.Name)
                                     {
                                         case "major_version":
-                                            majorVersion = uint.Parse(reader.Value);
+                                            if(!uint.TryParse(reader.Value, out majorVersion))
+                                            {
+                                                throw new IARFormatException();
+                                            }
                                             break;
 
                                         case "minor_version":
-                                            minorVersion = uint.Parse(reader.Value);
+                                            if(!uint.TryParse(reader.Value, out minorVersion))
+                                            {
+                                                throw new IARFormatException();
+                                            }
                                             break;
 
                                         default:

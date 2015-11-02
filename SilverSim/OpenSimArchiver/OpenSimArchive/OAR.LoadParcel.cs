@@ -148,11 +148,17 @@ namespace SilverSim.OpenSimArchiver.RegionArchiver
                                     break;
 
                                 case "UserLocation":
-                                    pinfo.LandingPosition = Vector3.Parse(reader.ReadElementValueAsString());
+                                    if(!Vector3.TryParse(reader.ReadElementValueAsString(), out pinfo.LandingPosition))
+                                    {
+                                        throw new OARFormatException();
+                                    }
                                     break;
 
                                 case "UserLookAt":
-                                    pinfo.LandingLookAt = Vector3.Parse(reader.ReadElementValueAsString());
+                                    if(!Vector3.TryParse(reader.ReadElementValueAsString(), out pinfo.LandingLookAt))
+                                    {
+                                        throw new OARFormatException();
+                                    }
                                     break;
 
                                 case "Dwell":
