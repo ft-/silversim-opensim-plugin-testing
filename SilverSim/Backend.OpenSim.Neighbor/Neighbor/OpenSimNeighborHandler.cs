@@ -11,9 +11,11 @@ using SilverSim.Types;
 using SilverSim.Types.Grid;
 using System.IO;
 using System.Net;
+using System.Diagnostics.CodeAnalysis;
 
 namespace SilverSim.Backend.OpenSim.Neighbor.Neighbor
 {
+    [SuppressMessage("Gendarme.Rules.Design", "TypesWithDisposableFieldsShouldBeDisposableRule")]
     public class OpenSimNeighborHandler : IPlugin
     {
         protected static readonly ILog m_Log = LogManager.GetLogger("OPENSIM NEIGHBOR HANDLER");
@@ -32,6 +34,7 @@ namespace SilverSim.Backend.OpenSim.Neighbor.Neighbor
             m_HttpServer.StartsWithUriHandlers.Add("/region", RegionPostHandler);
         }
 
+        [SuppressMessage("Gendarme.Rules.BadPractice", "PreferTryParseRule")]
         private void GetRegionParams(string uri, out UUID regionID)
         {
             /* /region/<UUID> */
@@ -108,7 +111,7 @@ namespace SilverSim.Backend.OpenSim.Neighbor.Neighbor
             }
 
             RegionInfo fromRegion = new RegionInfo();
-            HttpResponse resp;
+            
 
             try
             {
@@ -145,10 +148,14 @@ namespace SilverSim.Backend.OpenSim.Neighbor.Neighbor
             {
                 m = new Map();
                 m.Add("success", false);
-                resp = req.BeginResponse();
-                resp.ContentType = "application/json";
-                Json.Serialize(m, resp.GetOutputStream());
-                resp.Close();
+                using (HttpResponse resp = req.BeginResponse())
+                {
+                    resp.ContentType = "application/json";
+                    using (Stream outStream = resp.GetOutputStream())
+                    {
+                        Json.Serialize(m, outStream);
+                    }
+                }
                 return;
             }
 
@@ -159,7 +166,7 @@ namespace SilverSim.Backend.OpenSim.Neighbor.Neighbor
                 {
                     fromRegion.ProtocolVariant = RegionInfo.ProtocolVariantId.Local;
                 }
-                m_NeighborHandler.notifyRemoteNeighborStatus(fromRegion, scene.ID);
+                m_NeighborHandler.NotifyRemoteNeighborStatus(fromRegion, scene.ID);
                 m.Add("success", true);
             }
             catch
@@ -170,10 +177,14 @@ namespace SilverSim.Backend.OpenSim.Neighbor.Neighbor
                 m.Add("success", false);
             }
 
-            resp = req.BeginResponse();
-            resp.ContentType = "application/json";
-            Json.Serialize(m, resp.GetOutputStream());
-            resp.Close();
+            using (HttpResponse resp = req.BeginResponse())
+            {
+                resp.ContentType = "application/json";
+                using (Stream outStream = resp.GetOutputStream())
+                {
+                    Json.Serialize(m, outStream);
+                }
+            }
         }
     }
 }

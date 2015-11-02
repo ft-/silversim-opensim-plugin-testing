@@ -7,6 +7,7 @@ using SilverSim.Types.StructuredData.Json;
 using SilverSim.Types;
 using SilverSim.Types.Grid;
 using System;
+using System.IO;
 
 namespace SilverSim.Backend.OpenSim.Neighbor.Neighbor
 {
@@ -14,13 +15,13 @@ namespace SilverSim.Backend.OpenSim.Neighbor.Neighbor
     {
         static readonly ILog m_Log = LogManager.GetLogger("OPENSIM NEIGHBOR NOTIFIER");
 
-        public static void notifyNeighborStatus(RegionInfo fromRegion, RegionInfo toRegion)
+        public static void NotifyNeighborStatus(RegionInfo fromRegion, RegionInfo toRegion)
         {
             if (toRegion.ProtocolVariant != RegionInfo.ProtocolVariantId.OpenSim)
             {
                 return;
             }
-            string uri = toRegion.ServerURI + "region/" + fromRegion.ID + "/";
+            string uri = toRegion.ServerURI + "region/" + fromRegion.ID.ToString() + "/";
 
             Map m = new Map();
             m.Add("region_id", fromRegion.ID);
@@ -35,7 +36,7 @@ namespace SilverSim.Backend.OpenSim.Neighbor.Neighbor
             m.Add("region_size_x", fromRegion.Size.X.ToString());
             m.Add("region_size_y", fromRegion.Size.Y.ToString());
             m.Add("region_size_z", "4096");
-            m.Add("internal_ep_address", fromRegion.ServerIP.ToString());
+            m.Add("internal_ep_address", fromRegion.ServerIP);
             m.Add("internal_ep_port", fromRegion.ServerPort.ToString());
             /* proxy_url is defined but when is it ever used? */
             /* remoting_address is defined but why does the neighbor need to know this data? */
@@ -44,10 +45,14 @@ namespace SilverSim.Backend.OpenSim.Neighbor.Neighbor
             /* region_type is defined but when is it ever used? */
             m.Add("destination_handle", toRegion.Location.RegionHandle.ToString());
             m_Log.InfoFormat("notifying neighbor {0} ({1}) of {2} ({3})", toRegion.Name, toRegion.ID, fromRegion.Name, fromRegion.Name);
-            Map res = (Map)Json.Deserialize(HttpRequestHandler.DoStreamRequest("POST", uri, null, "application/json", Json.Serialize(m), false, 10000));
+            Map res;
+            using (Stream resStream = HttpRequestHandler.DoStreamRequest("POST", uri, null, "application/json", Json.Serialize(m), false, 10000))
+            {
+                res = (Map)Json.Deserialize(resStream);
+            }
             if(!res["success"].AsBoolean)
             {
-                throw new Exception("notifying neighbor failed");
+                throw new InvalidDataException("notifying neighbor failed");
             }
         }
     }

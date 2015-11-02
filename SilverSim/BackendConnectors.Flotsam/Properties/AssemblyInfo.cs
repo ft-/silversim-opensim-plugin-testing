@@ -29,3 +29,8 @@ using System.Reflection;
 [assembly: SuppressMessage("Gendarme.Rules.Exceptions", "DoNotSwallowErrorsCatchingNonSpecificExceptionsRule")]
 [assembly: SuppressMessage("Gendarme.Rules.Design", "AvoidPropertiesWithoutGetAccessorRule")]
 [assembly: SuppressMessage("Gendarme.Rules.Design", "AvoidPropertiesWithoutGetAccessorRule")]
+
+/* this assembly only */
+[assembly: SuppressMessage("Gendarme.Rules.Exceptions", "DoNotThrowInUnexpectedLocationRule")]
+[assembly: SuppressMessage("Gendarme.Rules.BadPractice", "PreferTryParseRule")]
+

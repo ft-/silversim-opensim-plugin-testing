@@ -10,19 +10,22 @@ using SilverSim.ServiceInterfaces.Neighbor;
 using SilverSim.Types;
 using SilverSim.Types.Grid;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 using System.Timers;
 using ThreadedClasses;
 
 namespace SilverSim.Backend.OpenSim.Neighbor.Neighbor
 {
+    [SuppressMessage("Gendarme.Rules.Design", "TypesWithDisposableFieldsShouldBeDisposableRule")]
+    [SuppressMessage("Gendarme.Rules.Concurrency", "WriteStaticFieldFromInstanceMethodRule")]
     public class OpenSimNeighbor : NeighborServiceInterface, IPlugin, IPluginShutdown, IPluginSubFactory
     {
         RwLockedDictionary<UUID, NeighborList> m_NeighborLists = new RwLockedDictionary<UUID, NeighborList>();
         object m_NeighborListAddLock = new object();
-        static OpenSimNeighborHandler m_NeighborHandler = null;
+        static OpenSimNeighborHandler m_NeighborHandler;
         static object m_NeighborHandlerInitLock = new object();
-        bool m_ShutdownRequestThread = false;
+        bool m_ShutdownRequestThread;
         System.Timers.Timer m_Timer = new System.Timers.Timer(3600000);
 
         BlockingQueue<UUID> m_NeighborNotifyRequestQueue = new BlockingQueue<UUID>();
@@ -106,7 +109,7 @@ namespace SilverSim.Backend.OpenSim.Neighbor.Neighbor
                 {
                     try
                     {
-                        OpenSimNeighborConnector.notifyNeighborStatus(regionInfo, neighbor);
+                        OpenSimNeighborConnector.NotifyNeighborStatus(regionInfo, neighbor);
                         m_NeighborLists[regionInfo.ID].Add(neighbor);
                         scene.NotifyNeighborOnline(neighbor);
                     }
@@ -151,7 +154,7 @@ namespace SilverSim.Backend.OpenSim.Neighbor.Neighbor
             }
         }
 
-        public void notifyRemoteNeighborStatus(RegionInfo fromRegion, UUID toRegionID)
+        public void NotifyRemoteNeighborStatus(RegionInfo fromRegion, UUID toRegionID)
         {
             SceneInterface scene;
             if(SceneManager.Scenes.TryGetValue(toRegionID, out scene))
@@ -184,7 +187,7 @@ namespace SilverSim.Backend.OpenSim.Neighbor.Neighbor
     }
 
     [PluginName("OpenSimNeighbor")]
-    class OpenSimNeighborFactory : IPluginFactory
+    public class OpenSimNeighborFactory : IPluginFactory
     {
         public OpenSimNeighborFactory()
         {
