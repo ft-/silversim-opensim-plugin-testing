@@ -5,6 +5,7 @@ using SilverSim.Types;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Serialization;
 using System.Text;
 
 namespace SilverSim.BackendHandlers.Robust
@@ -13,6 +14,24 @@ namespace SilverSim.BackendHandlers.Robust
     public class FailureResultException : Exception
     {
         public FailureResultException()
+        {
+
+        }
+
+        public FailureResultException(string message)
+            : base(message)
+        {
+
+        }
+
+        public FailureResultException(string message, Exception innerException)
+            : base(message, innerException)
+        {
+
+        }
+
+        protected FailureResultException(SerializationInfo info, StreamingContext context)
+            : base(info, context)
         {
 
         }

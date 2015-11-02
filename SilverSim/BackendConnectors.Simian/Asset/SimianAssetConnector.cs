@@ -10,6 +10,7 @@ using SilverSim.Types;
 using SilverSim.Types.Asset;
 using System;
 using System.Collections.Generic;
+using System.Runtime.Serialization;
 using System.Text;
 
 namespace SilverSim.BackendConnectors.Simian.Asset
@@ -20,7 +21,10 @@ namespace SilverSim.BackendConnectors.Simian.Asset
         [Serializable]
         public class SimianAssetProtocolErrorException : Exception
         {
+            public SimianAssetProtocolErrorException() { }
             public SimianAssetProtocolErrorException(string msg) : base(msg) {}
+            public SimianAssetProtocolErrorException(string msg, Exception innerException) : base(msg, innerException) { }
+            protected SimianAssetProtocolErrorException(SerializationInfo info, StreamingContext context) : base(info, context) { }
         }
 
         private int m_TimeoutMs = 20000;

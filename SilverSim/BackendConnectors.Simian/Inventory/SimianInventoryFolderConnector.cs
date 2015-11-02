@@ -9,6 +9,7 @@ using SilverSim.Types.Asset;
 using SilverSim.Types.Inventory;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 
 namespace SilverSim.BackendConnectors.Simian.Inventory
 {
@@ -29,6 +30,7 @@ namespace SilverSim.BackendConnectors.Simian.Inventory
         #endregion
 
         #region Accessors
+        [SuppressMessage("Gendarme.Rules.Exceptions", "DoNotThrowInUnexpectedLocationRule")]
         public override InventoryFolder this[UUID principalID, UUID key]
         {
             get
@@ -53,6 +55,7 @@ namespace SilverSim.BackendConnectors.Simian.Inventory
             }
         }
 
+        [SuppressMessage("Gendarme.Rules.Exceptions", "DoNotThrowInUnexpectedLocationRule")]
         public override InventoryFolder this[UUID principalID, AssetType type]
         {
             get
