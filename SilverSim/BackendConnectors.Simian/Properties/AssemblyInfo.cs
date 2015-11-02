@@ -28,3 +28,4 @@ using System.Reflection;
 [assembly: SuppressMessage("Gendarme.Rules.Design", "AvoidMultidimensionalIndexerRule")]
 [assembly: SuppressMessage("Gendarme.Rules.Exceptions", "DoNotSwallowErrorsCatchingNonSpecificExceptionsRule")]
 [assembly: SuppressMessage("Gendarme.Rules.Design", "AvoidPropertiesWithoutGetAccessorRule")]
+[assembly: SuppressMessage("Gendarme.Rules.Exceptions", "DoNotThrowInUnexpectedLocationRule")]
