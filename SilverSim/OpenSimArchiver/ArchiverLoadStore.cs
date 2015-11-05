@@ -35,7 +35,6 @@ namespace SilverSim.OpenSimArchiver
         }
 
         #region Load Assets
-        [SuppressMessage("Gendarme.Rules.Correctness", "EnsureLocalDisposalRule")]
         public void LoadAssetsCommand(List<string> args, TTY io, UUID limitedToScene)
         {
             if(args[0] == "help")
@@ -84,54 +83,24 @@ namespace SilverSim.OpenSimArchiver
                 return;
             }
 
-            Stream s;
-            if (Uri.IsWellFormedUriString(args[2], UriKind.Absolute))
-            {
-                try
-                {
-                    s = HttpRequestHandler.DoStreamGetRequest(args[2], null, 20000);
-                }
-                catch(Exception e)
-                {
-                    io.Write(e.Message);
-                    return;
-                }
-            }
-            else
-            {
-                try
-                {
-                    s = new FileStream(args[2], FileMode.Open, FileAccess.Read);
-                }
-                catch(Exception e)
-                {
-                    io.Write(e.Message);
-                    return;
-                }
-            }
             try
             {
-                Assets.AssetsLoad.Load(assetService, owner, s);
+                using (Stream s = Uri.IsWellFormedUriString(args[2], UriKind.Absolute) ?
+                    HttpRequestHandler.DoStreamGetRequest(args[2], null, 20000) :
+                    new FileStream(args[2], FileMode.Open, FileAccess.Read))
+                {
+                    Assets.AssetsLoad.Load(assetService, owner, s);
+                }
                 io.Write("Assets loaded successfully.");
             }
             catch (Exception e)
             {
                 io.Write(e.Message);
             }
-            try
-            {
-                s.Close();
-            }
-            catch
-            {
-
-            }
-            s.Dispose();
         }
         #endregion
 
         #region Save OAR
-        [SuppressMessage("Gendarme.Rules.Correctness", "EnsureLocalDisposalRule")]
         public void SaveOarCommand(List<string> args, TTY io, UUID limitedToScene)
         {
             if (args[0] == "help")
@@ -187,33 +156,22 @@ namespace SilverSim.OpenSimArchiver
                 }
             }
 
-            Stream s;
             try
             {
-                s = new FileStream(filename, FileMode.Create, FileAccess.Write);
-            }
-            catch(Exception e)
-            {
-                io.Write(e.Message);
-                return;
-            }
-            try
-            {
-                RegionArchiver.OAR.Save(scene, options, s);
+                using (Stream s = new FileStream(filename, FileMode.Create, FileAccess.Write))
+                {
+                    RegionArchiver.OAR.Save(scene, options, s);
+                }
                 io.Write("OAR saved successfully.");
-                s.Close();
             }
             catch (Exception e)
             {
                 io.Write(e.Message);
-                s.Close();
             }
-            s.Dispose();
         }
         #endregion
 
         #region Load OAR
-        [SuppressMessage("Gendarme.Rules.Correctness", "EnsureLocalDisposalRule")]
         public void LoadOarCommand(List<string> args, TTY io, UUID limitedToScene)
         {
             if (args[0] == "help")
@@ -276,34 +234,14 @@ namespace SilverSim.OpenSimArchiver
                 return;
             }
 
-            Stream s;
-            if (Uri.IsWellFormedUriString(filename, UriKind.Absolute))
-            {
-                try
-                {
-                    s = HttpRequestHandler.DoStreamGetRequest(filename, null, 20000);
-                }
-                catch(Exception e)
-                {
-                    io.Write(e.Message);
-                    return;
-                }
-            }
-            else
-            {
-                try
-                {
-                    s = new FileStream(filename, FileMode.Open, FileAccess.Read);
-                }
-                catch(Exception e)
-                {
-                    io.Write(e.Message);
-                    return;
-                }
-            }
             try
             {
-                RegionArchiver.OAR.Load(scene, options, s);
+                using (Stream s = Uri.IsWellFormedUriString(filename, UriKind.Absolute) ?
+                    HttpRequestHandler.DoStreamGetRequest(filename, null, 20000) :
+                    new FileStream(filename, FileMode.Open, FileAccess.Read))
+                {
+                    RegionArchiver.OAR.Load(scene, options, s);
+                }
                 io.Write("OAR loaded successfully.");
             }
             catch(RegionArchiver.OAR.OARLoadingTriedWithoutSelectedRegionException)
@@ -323,15 +261,6 @@ namespace SilverSim.OpenSimArchiver
                 m_Log.Info("OAR load exception encountered", e);
                 io.Write(e.Message);
             }
-            try
-            {
-                s.Close();
-            }
-            catch
-            {
-
-            }
-            s.Dispose();
         }
         #endregion
     }
