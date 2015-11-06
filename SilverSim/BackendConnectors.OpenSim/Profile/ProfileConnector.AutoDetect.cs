@@ -44,9 +44,9 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
 
         public class AutoDetectClassifiedsConnector : IClassifiedsInterface
         {
-            OpenSimClassifiedsConnector m_OpenSim;
-            RobustClassifiedsConnector m_Robust;
-            ProfileConnector m_Connector;
+            readonly OpenSimClassifiedsConnector m_OpenSim;
+            readonly RobustClassifiedsConnector m_Robust;
+            readonly ProfileConnector m_Connector;
             
             public AutoDetectClassifiedsConnector(ProfileConnector connector, string url)
             {
@@ -204,9 +204,9 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
 
         public class AutoDetectPicksConnector : IPicksInterface
         {
-            OpenSimPicksConnector m_OpenSim;
-            RobustPicksConnector m_Robust;
-            ProfileConnector m_Connector;
+            readonly OpenSimPicksConnector m_OpenSim;
+            readonly RobustPicksConnector m_Robust;
+            readonly ProfileConnector m_Connector;
 
             public AutoDetectPicksConnector(ProfileConnector connector, string url)
             {
@@ -364,9 +364,9 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
 
         public class AutoDetectNotesConnector : INotesInterface
         {
-            ProfileConnector m_Connector;
-            OpenSimNotesConnector m_OpenSim;
-            RobustNotesConnector m_Robust;
+            readonly ProfileConnector m_Connector;
+            readonly OpenSimNotesConnector m_OpenSim;
+            readonly RobustNotesConnector m_Robust;
 
             public AutoDetectNotesConnector(ProfileConnector connector, string url)
             {
@@ -451,9 +451,9 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
 
         public class AutoDetectUserPreferencesConnector : IUserPreferencesInterface
         {
-            ProfileConnector m_Connector;
-            OpenSimUserPreferencesConnector m_OpenSim;
-            RobustUserPreferencesConnector m_Robust;
+            readonly ProfileConnector m_Connector;
+            readonly OpenSimUserPreferencesConnector m_OpenSim;
+            readonly RobustUserPreferencesConnector m_Robust;
 
             public AutoDetectUserPreferencesConnector(ProfileConnector connector, string url)
             {
@@ -538,9 +538,9 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
 
         public class AutoDetectPropertiesConnector : IPropertiesInterface
         {
-            ProfileConnector m_Connector;
-            OpenSimPropertiesConnector m_OpenSim;
-            RobustPropertiesConnector m_Robust;
+            readonly ProfileConnector m_Connector;
+            readonly OpenSimPropertiesConnector m_OpenSim;
+            readonly RobustPropertiesConnector m_Robust;
 
             public AutoDetectPropertiesConnector(ProfileConnector connector, string url)
             {
