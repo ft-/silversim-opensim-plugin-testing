@@ -10,7 +10,7 @@ namespace SilverSim.BackendConnectors.OpenSim
 {
     public class ProfileInventoryPlugin : ServicePluginHelo, IProfileServicePlugin, IPlugin
     {
-        string m_ProfileName;
+        readonly string m_ProfileName;
         public ProfileInventoryPlugin(string profileName)
         {
             m_ProfileName = profileName;
@@ -18,7 +18,7 @@ namespace SilverSim.BackendConnectors.OpenSim
 
         public void Startup(ConfigurationLoader loader)
         {
-
+            /* no action needed */
         }
 
         public ProfileServiceInterface Instantiate(string url)

@@ -14,7 +14,7 @@ namespace SilverSim.BackendConnectors.Robust.Asset
     public class RobustAssetMetadataConnector : AssetMetadataServiceInterface
     {
         public int TimeoutMs = 20000;
-        private string m_AssetURI;
+        readonly string m_AssetURI;
 
         #region Constructor
         public RobustAssetMetadataConnector(string uri)

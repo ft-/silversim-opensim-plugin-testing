@@ -50,15 +50,15 @@ namespace SilverSim.BackendConnectors.Flotsam.Groups
 {
     public partial class FlotsamGroupsConnector : GroupsServiceInterface, IPlugin
     {
-        GroupsAccessor m_Groups;
-        GroupRolesAccessor m_GroupRoles;
-        MembersAccessor m_Members;
-        RoleMembersAccessor m_Rolemembers;
-        ActiveGroupAccessor m_ActiveGroup;
-        MembershipsAccessor m_Memberships;
-        InvitesAccessor m_Invites;
-        NoticesAccessor m_Notices;
-        ActiveGroupMembershipAccessor m_ActiveGroupMembership;
+        readonly GroupsAccessor m_Groups;
+        readonly GroupRolesAccessor m_GroupRoles;
+        readonly MembersAccessor m_Members;
+        readonly RoleMembersAccessor m_Rolemembers;
+        readonly ActiveGroupAccessor m_ActiveGroup;
+        readonly MembershipsAccessor m_Memberships;
+        readonly InvitesAccessor m_Invites;
+        readonly NoticesAccessor m_Notices;
+        readonly ActiveGroupMembershipAccessor m_ActiveGroupMembership;
         int m_TimeoutMs = 20000;
 
         public int TimeoutMs
@@ -97,14 +97,15 @@ namespace SilverSim.BackendConnectors.Flotsam.Groups
 
         public void Startup(ConfigurationLoader loader)
         {
+            /* no action needed */
         }
 
         public class FlotsamGroupsCommonConnector
         {
-            protected string m_Uri;
+            readonly string m_Uri;
             public int TimeoutMs = 20000;
-            string m_ReadKey = string.Empty;
-            string m_WriteKey = string.Empty;
+            readonly string m_ReadKey = string.Empty;
+            readonly string m_WriteKey = string.Empty;
 
             public FlotsamGroupsCommonConnector(string uri)
             {
@@ -136,14 +137,7 @@ namespace SilverSim.BackendConnectors.Flotsam.Groups
                 {
                     throw new KeyNotFoundException();
                 }
-                if (p.ContainsKey("results"))
-                {
-                    return p["results"];
-                }
-                else
-                {
-                    return null; /* some calls have no data */
-                }
+                return (p.ContainsKey("results")) ? p["results"] : null /* some calls have no data */;
             }
 
             protected IValue FlotsamXmlRpcGetCall(UUI requestingAgent, string methodName, Map structparam)
@@ -158,12 +152,9 @@ namespace SilverSim.BackendConnectors.Flotsam.Groups
                 req.Params.Add(structparam);
                 XmlRpc.XmlRpcResponse res = RPC.DoXmlRpcRequest(m_Uri, req, TimeoutMs);
                 Map p = res.ReturnValue as Map;
-                if (null != p)
+                if (null != p && p.ContainsKey("error"))
                 {
-                    if (p.ContainsKey("error"))
-                    {
-                        throw new InvalidDataException("Unexpected FlotsamGroups return value");
-                    }
+                    throw new InvalidDataException("Unexpected FlotsamGroups return value");
                 }
                 
                 return res.ReturnValue;

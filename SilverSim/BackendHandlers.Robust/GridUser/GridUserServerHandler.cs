@@ -28,10 +28,10 @@ namespace SilverSim.BackendHandlers.Robust.GridUser
         GridUserServiceInterface m_GridUserService;
         AvatarNameServiceInterface m_AvatarNameService;
         UserAccountServiceInterface m_UserAccountService;
-        string m_GridUserServiceName;
-        string m_UserAccountServiceName;
-        string m_AvatarNameStorageName;
-        private static Encoding UTF8NoBOM = new System.Text.UTF8Encoding(false);
+        readonly string m_GridUserServiceName;
+        readonly string m_UserAccountServiceName;
+        readonly string m_AvatarNameStorageName;
+        private static readonly Encoding UTF8NoBOM = new System.Text.UTF8Encoding(false);
 
         public RobustGridUserServerHandler(string gridUserService, string userAccountService, string avatarNameService)
         {

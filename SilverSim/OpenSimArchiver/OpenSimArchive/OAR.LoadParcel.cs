@@ -184,6 +184,9 @@ namespace SilverSim.OpenSimArchiver.RegionArchiver
                                 throw new OARFormatException();
                             }
                             return;
+
+                        default:
+                            break;
                     }
                 }
             }
@@ -207,6 +210,9 @@ namespace SilverSim.OpenSimArchiver.RegionArchiver
                             }
                             LoadParcelInner(reader, pinfo);
                             return pinfo;
+
+                        default:
+                            break;
                     }
                 }
             }

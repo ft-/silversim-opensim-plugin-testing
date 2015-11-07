@@ -17,7 +17,7 @@ namespace SilverSim.BackendConnectors.Robust.AvatarName
     public sealed class RobustGridUserAvatarNameConnector : AvatarNameServiceInterface, IPlugin
     {
         public int TimeoutMs { get; set; }
-        string m_GridUserURI;
+        readonly string m_GridUserURI;
 
         #region Constructor
         public RobustGridUserAvatarNameConnector(string uri)
@@ -34,7 +34,7 @@ namespace SilverSim.BackendConnectors.Robust.AvatarName
 
         public void Startup(ConfigurationLoader loader)
         {
-
+            /* no action needed */
         }
         #endregion
 
@@ -82,7 +82,7 @@ namespace SilverSim.BackendConnectors.Robust.AvatarName
             }
             set
             {
-
+                /* no action needed */
             }
         }
     }

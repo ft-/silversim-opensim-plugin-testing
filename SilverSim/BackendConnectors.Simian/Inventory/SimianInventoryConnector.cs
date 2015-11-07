@@ -17,12 +17,12 @@ namespace SilverSim.BackendConnectors.Simian.Inventory
     #region Service Implementation
     public sealed class SimianInventoryConnector : InventoryServiceInterface, IPlugin
     {
-        private string m_InventoryURI;
-        private SimianInventoryFolderConnector m_FolderService;
-        private SimianInventoryItemConnector m_ItemService;
-        private GroupsServiceInterface m_GroupsService;
+        readonly string m_InventoryURI;
+        readonly SimianInventoryFolderConnector m_FolderService;
+        readonly SimianInventoryItemConnector m_ItemService;
+        readonly GroupsServiceInterface m_GroupsService;
         private int m_TimeoutMs = 20000;
-        private string m_InventoryCapability;
+        readonly string m_InventoryCapability;
 
         #region Constructor
         public SimianInventoryConnector(string uri, string simCapability)
@@ -56,7 +56,7 @@ namespace SilverSim.BackendConnectors.Simian.Inventory
 
         public void Startup(ConfigurationLoader loader)
         {
-
+            /* no action needed */
         }
         #endregion
 
@@ -110,7 +110,7 @@ namespace SilverSim.BackendConnectors.Simian.Inventory
                     }
                     catch
                     {
-
+                        /* no action needed */
                     }
                 }
             }
@@ -123,11 +123,10 @@ namespace SilverSim.BackendConnectors.Simian.Inventory
         {
             switch(type)
             {
-                case AssetType.Unknown: return "application/octet-stream";
                 case AssetType.Texture: return "image/x-j2c";
-                case AssetType.TextureTGA: return "image/tga";
-                case AssetType.ImageJPEG: return "image/jpeg";
+                case AssetType.TextureTGA:
                 case AssetType.ImageTGA: return "image/tga";
+                case AssetType.ImageJPEG: return "image/jpeg";
                 case AssetType.Sound: return "audio/ogg";
                 case AssetType.SoundWAV: return "audio/x-wav";
                 case AssetType.CallingCard: return "application/vnd.ll.callingcard";
@@ -154,6 +153,7 @@ namespace SilverSim.BackendConnectors.Simian.Inventory
                 case AssetType.MyOutfitsFolder: return "application/vnd.ll.myoutfitsfolder";
                 case AssetType.Mesh: return "application/vnd.ll.mesh";
                 case AssetType.Material: return "application/llsd+xml";
+                case AssetType.Unknown: 
                 default: return "application/octet-stream";
             }
         }
@@ -162,49 +162,48 @@ namespace SilverSim.BackendConnectors.Simian.Inventory
         {
             switch(contenttype)
             {
-                case "application/octet-stream": return AssetType.Unknown;
-                case "image/x-j2c": return AssetType.Texture;
+                case "image/x-j2c": 
                 case "image/jp2": return AssetType.Texture;
                 case "image/tga": return AssetType.TextureTGA;
                 case "image/jpeg": return AssetType.ImageJPEG;
                 case "audio/ogg": return AssetType.Sound;
                 case "audio/x-wav": return AssetType.SoundWAV;
 
-                case "application/vnd.ll.callingcard": return AssetType.CallingCard;
+                case "application/vnd.ll.callingcard":
                 case "application/x-metaverse-callingcard": return AssetType.CallingCard;
 
-                case "application/vnd.ll.landmark": return AssetType.Landmark;
+                case "application/vnd.ll.landmark": 
                 case "application/x-metaverse-landmark": return AssetType.Landmark;
 
-                case "application/vnd.ll.clothing": return AssetType.Clothing;
+                case "application/vnd.ll.clothing": 
                 case "application/x-metaverse-clothing": return AssetType.Clothing;
 
-                case "application/vnd.ll.primitive": return AssetType.Object;
+                case "application/vnd.ll.primitive": 
                 case "application/x-metaverse-primitive": return AssetType.Object;
 
-                case "application/vnd.ll.notecard": return AssetType.Notecard;
+                case "application/vnd.ll.notecard": 
                 case "application/x-metaverse-notecard": return AssetType.Notecard;
 
                 //case "application/vnd.ll.folder": return AssetType.Folder;
                 case "application/vnd.ll.rootfolder": return AssetType.RootFolder;
 
-                case "application/vnd.ll.lsltext": return AssetType.LSLText;
+                case "application/vnd.ll.lsltext": 
                 case "application/x-metaverse-lsl": return AssetType.LSLText;
 
-                case "application/vnd.ll.lslbyte": return AssetType.LSLBytecode;
+                case "application/vnd.ll.lslbyte": 
                 case "application/x-metaverse-lso": return AssetType.LSLBytecode;
 
-                case "application/vnd.ll.bodypart": return AssetType.Bodypart;
+                case "application/vnd.ll.bodypart":
                 case "application/x-metaverse-bodypart": return AssetType.Bodypart;
 
                 case "application/vnd.ll.trashfolder": return AssetType.TrashFolder;
                 case "application/vnd.ll.snapshotfolder": return AssetType.SnapshotFolder;
                 case "application/vnd.ll.lostandfoundfolder": return AssetType.LostAndFoundFolder;
 
-                case "application/vnd.ll.animation": return AssetType.Animation;
+                case "application/vnd.ll.animation":
                 case "application/x-metaverse-animation": return AssetType.Animation;
 
-                case "application/vnd.ll.gesture": return AssetType.Gesture;
+                case "application/vnd.ll.gesture": 
                 case "application/x-metaverse-gesture": return AssetType.Gesture;
 
                 case "application/x-metaverse-simstate": return AssetType.Simstate;
@@ -225,6 +224,7 @@ namespace SilverSim.BackendConnectors.Simian.Inventory
 
                 case "application/llsd+xml": return AssetType.Material;
 
+                case "application/octet-stream": 
                 default: return AssetType.Unknown;
             }
         }
@@ -233,7 +233,6 @@ namespace SilverSim.BackendConnectors.Simian.Inventory
         {
             switch(type)
             {
-                case InventoryType.Unknown: return "application/octet-stream";
                 case InventoryType.Texture: return "image/x-j2c";
                 case InventoryType.TextureTGA: return "image/tga";
                 case InventoryType.Sound: return "audio/ogg";
@@ -258,6 +257,7 @@ namespace SilverSim.BackendConnectors.Simian.Inventory
                 case InventoryType.OutfitFolder: return "application/vnd.ll.outfitfolder";
                 case InventoryType.MyOutfitsFolder: return "application/vnd.ll.myoutfitsfolder";
                 case InventoryType.Mesh: return "application/vnd.ll.mesh";
+                case InventoryType.Unknown: 
                 default: return "application/octet-stream";
             }
         }
@@ -266,49 +266,48 @@ namespace SilverSim.BackendConnectors.Simian.Inventory
         {
             switch (contenttype)
             {
-                case "application/octet-stream": return InventoryType.Unknown;
-                case "image/x-j2c": return InventoryType.Texture;
-                case "image/jp2": return InventoryType.Texture;
-                case "image/tga": return InventoryType.TextureTGA;
+                case "image/x-j2c": 
+                case "image/jp2":
                 case "image/jpeg": return InventoryType.Texture;
-                case "audio/ogg": return InventoryType.Sound;
+                case "image/tga": return InventoryType.TextureTGA;
+                case "audio/ogg": 
                 case "audio/x-wav": return InventoryType.Sound;
 
-                case "application/vnd.ll.callingcard": return InventoryType.CallingCard;
+                case "application/vnd.ll.callingcard":
                 case "application/x-metaverse-callingcard": return InventoryType.CallingCard;
 
-                case "application/vnd.ll.landmark": return InventoryType.Landmark;
+                case "application/vnd.ll.landmark": 
                 case "application/x-metaverse-landmark": return InventoryType.Landmark;
 
-                case "application/vnd.ll.clothing": return InventoryType.Clothing;
+                case "application/vnd.ll.clothing":
                 case "application/x-metaverse-clothing": return InventoryType.Clothing;
 
-                case "application/vnd.ll.primitive": return InventoryType.Object;
+                case "application/vnd.ll.primitive": 
                 case "application/x-metaverse-primitive": return InventoryType.Object;
 
-                case "application/vnd.ll.notecard": return InventoryType.Notecard;
+                case "application/vnd.ll.notecard": 
                 case "application/x-metaverse-notecard": return InventoryType.Notecard;
 
                 case "application/vnd.ll.folder": return InventoryType.Folder;
                 case "application/vnd.ll.rootfolder": return InventoryType.RootFolder;
 
-                case "application/vnd.ll.lsltext": return InventoryType.LSLText;
+                case "application/vnd.ll.lsltext": 
                 case "application/x-metaverse-lsl": return InventoryType.LSLText;
 
-                case "application/vnd.ll.lslbyte": return InventoryType.LSLBytecode;
+                case "application/vnd.ll.lslbyte": 
                 case "application/x-metaverse-lso": return InventoryType.LSLBytecode;
 
-                case "application/vnd.ll.bodypart": return InventoryType.Bodypart;
+                case "application/vnd.ll.bodypart":
                 case "application/x-metaverse-bodypart": return InventoryType.Bodypart;
 
                 case "application/vnd.ll.trashfolder": return InventoryType.TrashFolder;
                 case "application/vnd.ll.snapshotfolder": return InventoryType.SnapshotFolder;
                 case "application/vnd.ll.lostandfoundfolder": return InventoryType.LostAndFoundFolder;
 
-                case "application/vnd.ll.animation": return InventoryType.Animation;
+                case "application/vnd.ll.animation":
                 case "application/x-metaverse-animation": return InventoryType.Animation;
 
-                case "application/vnd.ll.gesture": return InventoryType.Gesture;
+                case "application/vnd.ll.gesture": 
                 case "application/x-metaverse-gesture": return InventoryType.Gesture;
 
                 case "application/x-metaverse-simstate": return InventoryType.Simstate;
@@ -323,6 +322,7 @@ namespace SilverSim.BackendConnectors.Simian.Inventory
 
                 case "application/vnd.ll.mesh": return InventoryType.Mesh;
 
+                case "application/octet-stream": 
                 default: return InventoryType.Unknown;
             }
         }

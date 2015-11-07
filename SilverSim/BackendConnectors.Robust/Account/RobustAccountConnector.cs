@@ -18,7 +18,7 @@ namespace SilverSim.BackendConnectors.Robust.Account
     #region Service Implementation
     public sealed class RobustAccountConnector : UserAccountServiceInterface, IPlugin
     {
-        string m_UserAccountURI;
+        readonly string m_UserAccountURI;
         public int TimeoutMs { get; set; }
 
         #region Constructor
@@ -35,7 +35,7 @@ namespace SilverSim.BackendConnectors.Robust.Account
 
         public void Startup(ConfigurationLoader loader)
         {
-
+            /* no action needed */
         }
         #endregion
 

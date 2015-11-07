@@ -18,7 +18,7 @@ namespace SilverSim.BackendConnectors.Robust.Grid
     #region Service Implementation
     public class RobustGridConnector : GridServiceInterface, IPlugin
     {
-        string m_GridURI;
+        readonly string m_GridURI;
         public int TimeoutMs { get; set; }
 
         #region Constructor
@@ -35,7 +35,7 @@ namespace SilverSim.BackendConnectors.Robust.Grid
 
         public void Startup(ConfigurationLoader loader)
         {
-
+            /* no action needed */
         }
         #endregion
 
@@ -348,14 +348,7 @@ namespace SilverSim.BackendConnectors.Robust.Grid
             r.ID = map["uuid"].ToString();
             r.Location.X = map["locX"].AsUInt;
             r.Location.Y = map["locY"].AsUInt;
-            if(map.ContainsKey("flags"))
-            {
-                r.Flags = (RegionFlags)map["flags"].AsUInt;
-            }
-            else
-            {
-                r.Flags = RegionFlags.RegionOnline;
-            }
+            r.Flags = map.ContainsKey("flags") ? ((RegionFlags)map["flags"].AsUInt) : RegionFlags.RegionOnline;
             r.Size.X = map["sizeX"].AsUInt;
             r.Size.Y = map["sizeY"].AsUInt;
             r.Name = map["regionName"].ToString();

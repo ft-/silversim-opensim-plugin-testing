@@ -20,7 +20,7 @@ namespace SilverSim.BackendConnectors.Robust.IM
     public class RobustOfflineIMConnector : OfflineIMServiceInterface, IPlugin
     {
         public int TimeoutMs { get; set; }
-        string m_OfflineIMURI;
+        readonly string m_OfflineIMURI;
         public RobustOfflineIMConnector(string uri)
         {
             TimeoutMs = 20000;
@@ -34,7 +34,7 @@ namespace SilverSim.BackendConnectors.Robust.IM
 
         public void Startup(ConfigurationLoader loader)
         {
-
+            /* no action required */
         }
 
         private static byte[] StringToByteArray(string hex)
@@ -47,18 +47,11 @@ namespace SilverSim.BackendConnectors.Robust.IM
         public override void StoreOfflineIM(GridInstantMessage im)
         {
             Dictionary<string, string> post = new Dictionary<string, string>();
+            bool isFromGroup = im.IsFromGroup;
             post["BinaryBucket"] = BitConverter.ToString(im.BinaryBucket).Replace("-", string.Empty);
             post["Dialog"] = ((int)im.Dialog).ToString();
-            if (im.IsFromGroup)
-            {
-                post["FromAgentID"] = (string)im.FromGroup.ID;
-            }
-            else
-            {
-                post["FromAgentID"] = (string)im.FromAgent.ID;
-            }
+            post["FromAgentID"] = isFromGroup ? (string)im.FromGroup.ID : (string)im.FromAgent.ID;
             post["FromAgentName"] = im.FromAgent.FullName;
-            bool isFromGroup = !im.IsFromGroup.Equals(UUID.Zero);
             post["FromGroup"] = isFromGroup.ToString();
             post["Message"] = im.Message;
             post["EstateID"] = im.ParentEstateID.ToString();
@@ -132,7 +125,7 @@ namespace SilverSim.BackendConnectors.Robust.IM
 
         public override void DeleteOfflineIM(ulong offlineImID)
         {
-
+            /* no action required */
         }
 
     }

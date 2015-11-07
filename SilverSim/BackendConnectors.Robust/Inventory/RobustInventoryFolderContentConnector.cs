@@ -19,9 +19,9 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
     public sealed class RobustInventoryFolderContentConnector : InventoryFolderContentServiceInterface
     {
         bool m_IsMultipeServiceSupported = true;
-        string m_InventoryURI;
+        readonly string m_InventoryURI;
         public int TimeoutMs = 20000;
-        private GroupsServiceInterface m_GroupsService;
+        readonly GroupsServiceInterface m_GroupsService;
 
         public RobustInventoryFolderContentConnector(string url, GroupsServiceInterface groupsService)
         {

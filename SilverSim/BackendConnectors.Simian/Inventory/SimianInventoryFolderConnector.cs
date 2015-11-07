@@ -15,10 +15,10 @@ namespace SilverSim.BackendConnectors.Simian.Inventory
 {
     public sealed class SimianInventoryFolderConnector : InventoryFolderServiceInterface
     {
-        private string m_InventoryURI;
+        readonly string m_InventoryURI;
         public int TimeoutMs = 20000;
-        private GroupsServiceInterface m_GroupsService;
-        private string m_SimCapability;
+        readonly GroupsServiceInterface m_GroupsService;
+        readonly string m_SimCapability;
 
         #region Constructor
         public SimianInventoryFolderConnector(string uri, GroupsServiceInterface groupsService, string simCapability)

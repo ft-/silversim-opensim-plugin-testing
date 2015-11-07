@@ -14,10 +14,10 @@ namespace SilverSim.BackendConnectors.Robust.Friends
 {
     public class RobustHGFriendsConnector : FriendsServiceInterface, IPlugin
     {
-        string m_Uri;
+        readonly string m_Uri;
         public int TimeoutMs = 20000;
-        UUID m_SessionID;
-        string m_ServiceKey;
+        readonly UUID m_SessionID;
+        readonly string m_ServiceKey;
 
         public RobustHGFriendsConnector(string uri, UUID sessionID, string serviceKey)
         {
@@ -117,6 +117,7 @@ namespace SilverSim.BackendConnectors.Robust.Friends
 
         public void Startup(ConfigurationLoader loader)
         {
+            /* no action needed */
         }
     }
 }

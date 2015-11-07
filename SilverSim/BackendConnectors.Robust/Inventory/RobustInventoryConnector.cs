@@ -21,10 +21,10 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
     [SuppressMessage("Gendarme.Rules.Exceptions", "DoNotThrowInUnexpectedLocationRule")]
     public class RobustInventoryConnector : InventoryServiceInterface, IPlugin
     {
-        private string m_InventoryURI;
-        private RobustInventoryFolderConnector m_FolderService;
-        private RobustInventoryItemConnector m_ItemService;
-        private GroupsServiceInterface m_GroupsService;
+        readonly string m_InventoryURI;
+        readonly RobustInventoryFolderConnector m_FolderService;
+        readonly RobustInventoryItemConnector m_ItemService;
+        readonly GroupsServiceInterface m_GroupsService;
         private int m_TimeoutMs = 20000;
 
         #region Constructor
@@ -59,7 +59,7 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
 
         public void Startup(ConfigurationLoader loader)
         {
-
+            /* no action needed */
         }
         #endregion
 

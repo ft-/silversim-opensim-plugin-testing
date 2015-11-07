@@ -363,14 +363,9 @@ namespace SilverSim.BackendConnectors.Robust.GroupsV2
                 post["AttachmentItemID"] = (string)notice.AttachmentItemID;
                 post["AttachmentName"] = notice.AttachmentName;
                 post["AttachmentType"] = ((int)notice.AttachmentType).ToString();
-                if (notice.AttachmentOwner != null && notice.AttachmentOwner.ID != UUID.Zero)
-                {
-                    post["AttachmentOwnerID"] = getGroupsAgentID(notice.AttachmentOwner);
-                }
-                else
-                {
-                    post["AttachmentOwnerID"] = string.Empty;
-                }
+                post["AttachmentOwnerID"] = (notice.AttachmentOwner != null && notice.AttachmentOwner.ID != UUID.Zero) ?
+                        getGroupsAgentID(notice.AttachmentOwner) :
+                        post["AttachmentOwnerID"] = string.Empty;
             }
             return post;
         }

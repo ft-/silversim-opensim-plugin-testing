@@ -14,7 +14,7 @@ namespace SilverSim.BackendConnectors.Robust.IM
     {
         public int TimeoutMs { get; set; }
 
-        string m_IMUri;
+        readonly string m_IMUri;
 
         public RobustIMConnector(string uri)
         {

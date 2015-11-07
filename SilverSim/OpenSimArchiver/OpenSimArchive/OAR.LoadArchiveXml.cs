@@ -65,6 +65,9 @@ namespace SilverSim.OpenSimArchiver.RegionArchiver
                                 throw new OARFormatException();
                             }
                             return;
+
+                        default:
+                            break;
                     }
                 }
             }
@@ -106,6 +109,9 @@ namespace SilverSim.OpenSimArchiver.RegionArchiver
                                 throw new OARFormatException();
                             }
                             return;
+
+                        default:
+                            break;
                     }
                 }
             }
@@ -156,6 +162,9 @@ namespace SilverSim.OpenSimArchiver.RegionArchiver
                                 throw new OARFormatException();
                             }
                             return rinfo;
+
+                        default:
+                            break;
                     }
                 }
             }
@@ -196,6 +205,9 @@ namespace SilverSim.OpenSimArchiver.RegionArchiver
                                 throw new OARFormatException();
                             }
                             return creationDate;
+
+                        default:
+                            break;
                     }
                 }
             }
@@ -248,6 +260,9 @@ namespace SilverSim.OpenSimArchiver.RegionArchiver
                             }
                             regionInfos.Add(rinfo);
                             return rinfo.RegionSize;
+
+                        default:
+                            break;
                     }
                 }
             }
@@ -289,6 +304,9 @@ namespace SilverSim.OpenSimArchiver.RegionArchiver
                                 throw new OARFormatException();
                             }
                             return;
+
+                        default:
+                            break;
                     }
                 }
             }
@@ -332,6 +350,9 @@ namespace SilverSim.OpenSimArchiver.RegionArchiver
                                 throw new OARFormatException();
                             }
                             return;
+
+                        default:
+                            break;
                     }
                 }
             }
@@ -380,6 +401,9 @@ namespace SilverSim.OpenSimArchiver.RegionArchiver
                                 throw new OARFormatException();
                             }
                             return regionInfos[0];
+
+                        default:
+                            break;
                     }
                 }
             }
@@ -454,6 +478,9 @@ namespace SilverSim.OpenSimArchiver.RegionArchiver
                             {
                                 throw new OARFormatException();
                             }
+
+                        default:
+                            break;
                     }
                 }
             }

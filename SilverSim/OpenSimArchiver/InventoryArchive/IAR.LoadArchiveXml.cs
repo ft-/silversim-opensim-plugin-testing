@@ -78,6 +78,9 @@ namespace SilverSim.OpenSimArchiver.InventoryArchiver
                             {
                                 throw new IARFormatException();
                             }
+
+                        default:
+                            break;
                     }
                 }
             }

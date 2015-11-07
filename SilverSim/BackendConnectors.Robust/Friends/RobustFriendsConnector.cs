@@ -16,7 +16,7 @@ namespace SilverSim.BackendConnectors.Robust.Friends
 {
     public sealed class RobustFriendsConnector : FriendsServiceInterface, IPlugin
     {
-        string m_Uri;
+        readonly string m_Uri;
         public int TimeoutMs = 20000;
 
         public RobustFriendsConnector(string uri)
@@ -98,7 +98,7 @@ namespace SilverSim.BackendConnectors.Robust.Friends
                         }
                         catch
                         {
-
+                            /* no action needed */
                         }
                     }
                 }
@@ -143,6 +143,7 @@ namespace SilverSim.BackendConnectors.Robust.Friends
 
         public void Startup(ConfigurationLoader loader)
         {
+            /* no action needed */
         }
     }
 

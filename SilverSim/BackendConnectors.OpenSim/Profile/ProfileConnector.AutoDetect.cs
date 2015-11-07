@@ -69,6 +69,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
                     (Exception e)
 #endif
                 {
+                    /* no action needed */
 #if DEBUG
                     m_Log.Debug("Classifieds.getClassifieds: OpenSimProfile", e);
 #endif
@@ -84,6 +85,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
                     (Exception e)
 #endif
                 {
+                    /* no action needed */
 #if DEBUG
                     m_Log.Debug("Classifieds.getClassifieds: CoreProfile", e);
 #endif
@@ -107,6 +109,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
                         (Exception e)
 #endif
                     {
+                        /* no action needed */
 #if DEBUG
                         m_Log.Debug("Classifieds.this[UUI, UUID]: OpenSimProfile", e);
 #endif
@@ -122,6 +125,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
                         (Exception e)
 #endif
                     {
+                        /* no action needed */
 #if DEBUG
                         m_Log.Debug("Classifieds.this[UUI, UUID]: CoreProfile", e);
 #endif
@@ -144,6 +148,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
                     (Exception e)
 #endif
                 {
+                    /* no action needed */
 #if DEBUG
                     m_Log.Debug("Classifieds.Update: OpenSimProfile", e);
 #endif
@@ -159,6 +164,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
                     (Exception e)
 #endif
                 {
+                    /* no action needed */
 #if DEBUG
                     m_Log.Debug("Classifieds.Update: CoreProfile", e);
 #endif
@@ -179,6 +185,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
                     (Exception e)
 #endif
                 {
+                    /* no action needed */
 #if DEBUG
                     m_Log.Debug("Classifieds.Delete: OpenSimProfile", e);
 #endif
@@ -194,6 +201,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
                     (Exception e)
 #endif
                 {
+                    /* no action needed */
 #if DEBUG
                     m_Log.Debug("Classifieds.Delete: CoreProfile", e);
 #endif
@@ -229,6 +237,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
                     (Exception e)
 #endif
                 {
+                    /* no action needed */
 #if DEBUG
                     m_Log.Debug("Picks.getPicks: OpenSimProfile", e);
 #endif
@@ -244,6 +253,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
                     (Exception e)
 #endif
                 {
+                    /* no action needed */
 #if DEBUG
                     m_Log.Debug("Picks.getPicks: CoreProfile", e);
 #endif
@@ -267,6 +277,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
                         (Exception e)
 #endif
                     {
+                        /* no action needed */
 #if DEBUG
                         m_Log.Debug("Picks.this[UUI, UUID]: OpenSimProfile", e);
 #endif
@@ -282,6 +293,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
                         (Exception e)
 #endif
                     {
+                        /* no action needed */
 #if DEBUG
                         m_Log.Debug("Picks.this[UUI, UUID]: CoreProfile", e);
 #endif
@@ -304,6 +316,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
                     (Exception e)
 #endif
                 {
+                    /* no action needed */
 #if DEBUG
                     m_Log.Debug("Picks.Update: OpenSimProfile", e);
 #endif
@@ -319,6 +332,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
                     (Exception e)
 #endif
                 {
+                    /* no action needed */
 #if DEBUG
                     m_Log.Debug("Picks.Update: CoreProfile", e);
 #endif
@@ -339,6 +353,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
                     (Exception e)
 #endif
                 {
+                    /* no action needed */
 #if DEBUG
                     m_Log.Debug("Picks.Delete: OpenSimProfile", e);
 #endif
@@ -354,6 +369,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
                     (Exception e)
 #endif
                 {
+                    /* no action needed */
 #if DEBUG
                     m_Log.Debug("Picks.Delete: CoreProfile", e);
 #endif
@@ -391,6 +407,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
                         (Exception e)
 #endif
                     {
+                        /* no action needed */
 #if DEBUG
                         m_Log.Debug("Notes.this[UUI, UUI]: OpenSimProfile", e);
 #endif
@@ -406,6 +423,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
                         (Exception e)
 #endif
                     {
+                        /* no action needed */
 #if DEBUG
                         m_Log.Debug("Notes.this[UUI, UUI]: CoreProfile", e);
 #endif
@@ -425,6 +443,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
                         (Exception e)
 #endif
                     {
+                        /* no action needed */
 #if DEBUG
                         m_Log.Debug("Notes.this[UUI, UUI]: OpenSimProfile", e);
 #endif
@@ -440,6 +459,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
                         (Exception e)
 #endif
                     {
+                        /* no action needed */
 #if DEBUG
                         m_Log.Debug("Notes.this[UUI, UUI]: CoreProfile", e);
 #endif
@@ -478,6 +498,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
                         (Exception e)
 #endif
                     {
+                        /* no action needed */
 #if DEBUG
                         m_Log.Debug("Preferences.this[UUI, UUI]: OpenSimProfile", e);
 #endif
@@ -493,6 +514,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
                         (Exception e)
 #endif
                     {
+                        /* no action needed */
 #if DEBUG
                         m_Log.Debug("Preferences.this[UUI, UUI]: CoreProfile", e);
 #endif
@@ -512,6 +534,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
                         (Exception e)
 #endif
                     {
+                        /* no action needed */
 #if DEBUG
                         m_Log.Debug("Preferences.this[UUI, UUI]: OpenSimProfile", e);
 #endif
@@ -527,6 +550,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
                         (Exception e)
 #endif
                     {
+                        /* no action needed */
 #if DEBUG
                         m_Log.Debug("Preferences.this[UUI, UUI]: CoreProfile", e);
 #endif
@@ -565,6 +589,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
                         (Exception e)
 #endif
                     {
+                        /* no action needed */
 #if DEBUG
                         m_Log.Debug("Properties.this[UUI, UUI]: OpenSimProfile", e);
 #endif
@@ -580,6 +605,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
                         (Exception e)
 #endif
                     {
+                        /* no action needed */
 #if DEBUG
                         m_Log.Debug("Properties.this[UUI, UUI]: CoreProfile", e);
 #endif
@@ -602,6 +628,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
                         (Exception e)
 #endif
                     {
+                        /* no action needed */
 #if DEBUG
                         m_Log.Debug("Properties.this[UUI, UUI]: OpenSimProfile", e);
 #endif
@@ -617,6 +644,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
                         (Exception e)
 #endif
                     {
+                        /* no action needed */
 #if DEBUG
                         m_Log.Debug("Properties.this[UUI, UUI]: CoreProfile", e);
 #endif

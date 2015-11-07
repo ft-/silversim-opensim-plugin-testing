@@ -19,7 +19,7 @@ namespace SilverSim.BackendConnectors.Robust.GridUser
     public sealed class RobustGridUserConnector : GridUserServiceInterface, IPlugin
     {
         public int TimeoutMs { get; set; }
-        string m_GridUserURI;
+        readonly string m_GridUserURI;
 
         #region Constructor
         public RobustGridUserConnector(string uri)
@@ -36,7 +36,7 @@ namespace SilverSim.BackendConnectors.Robust.GridUser
 
         public void Startup(ConfigurationLoader loader)
         {
-
+            /* no action needed */
         }
         #endregion
 

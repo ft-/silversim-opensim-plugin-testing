@@ -34,7 +34,7 @@ namespace SilverSim.BackendConnectors.Robust.Avatar
             protected AvatarInaccessibleException(SerializationInfo info, StreamingContext context) : base(info, context) { }
         }
 
-        string m_AvatarURI;
+        readonly string m_AvatarURI;
         public int TimeoutMs { get; set; }
 
         #region Constructor
@@ -50,7 +50,7 @@ namespace SilverSim.BackendConnectors.Robust.Avatar
 
         public void Startup(ConfigurationLoader loader)
         {
-
+            /* no action needed */
         }
         #endregion
 
@@ -130,14 +130,7 @@ namespace SilverSim.BackendConnectors.Robust.Avatar
                 foreach (string key in itemKeys)
                 {
                     string val;
-                    if (res.TryGetValue(key, out val))
-                    {
-                        result.Add(val);
-                    }
-                    else
-                    {
-                        result.Add(string.Empty);
-                    }
+                    result.Add( res.TryGetValue(key, out val) ? val : string.Empty);
                 }
                 return result;
             }

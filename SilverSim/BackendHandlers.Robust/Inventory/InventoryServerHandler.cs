@@ -159,8 +159,8 @@ namespace SilverSim.BackendHandlers.Robust.Inventory
         protected static readonly ILog m_Log = LogManager.GetLogger("ROBUST INVENTORY HANDLER");
         private BaseHttpServer m_HttpServer;
         private InventoryServiceInterface m_InventoryService;
-        string m_InventoryServiceName;
-        Dictionary<string, Action<HttpRequest, Dictionary<string, object>>> m_Handlers = new Dictionary<string, Action<HttpRequest, Dictionary<string, object>>>();
+        readonly string m_InventoryServiceName;
+        readonly Dictionary<string, Action<HttpRequest, Dictionary<string, object>>> m_Handlers = new Dictionary<string, Action<HttpRequest, Dictionary<string, object>>>();
 
         public RobustInventoryServerHandler(string inventoryServiceName)
         {

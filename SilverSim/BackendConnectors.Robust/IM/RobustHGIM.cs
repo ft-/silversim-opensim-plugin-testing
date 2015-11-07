@@ -20,14 +20,14 @@ namespace SilverSim.BackendConnectors.Robust.IM
     [SuppressMessage("Gendarme.Rules.Design", "TypesWithDisposableFieldsShouldBeDisposableRule")]
     public class RobustHGIM : IPlugin, IPluginShutdown
     {
-        RwLockedDictionary<string, KeyValuePair<int, IM.RobustIMConnector>> m_IMUrlCache = new RwLockedDictionary<string, KeyValuePair<int, IM.RobustIMConnector>>();
+        readonly RwLockedDictionary<string, KeyValuePair<int, IM.RobustIMConnector>> m_IMUrlCache = new RwLockedDictionary<string, KeyValuePair<int, IM.RobustIMConnector>>();
 
         public int TimeoutMs { get; set; }
-        List<AvatarNameServiceInterface> m_AvatarNameServices = new List<AvatarNameServiceInterface>();
-        List<string> m_AvatarNameServiceNames;
+        readonly List<AvatarNameServiceInterface> m_AvatarNameServices = new List<AvatarNameServiceInterface>();
+        readonly List<string> m_AvatarNameServiceNames;
         PresenceServiceInterface m_PresenceService;
-        string m_PresenceServiceName;
-        Timer m_Timer;
+        readonly string m_PresenceServiceName;
+        readonly Timer m_Timer;
 
         public RobustHGIM(List<string> avatarNameServiceNames, string presenceServiceName)
         {
@@ -71,7 +71,7 @@ namespace SilverSim.BackendConnectors.Robust.IM
                 }
                 catch
                 {
-
+                    /* no action required */
                 }
             }
 

@@ -16,7 +16,7 @@ namespace SilverSim.BackendConnectors.Robust.Presence
     public class RobustHGOnlyPresenceConnector : PresenceServiceInterface
     {
         public int TimeoutMs { get; set; }
-        string m_HomeURI;
+        readonly string m_HomeURI;
 
         #region Constructor
         public RobustHGOnlyPresenceConnector(string homeuri)
@@ -89,11 +89,9 @@ namespace SilverSim.BackendConnectors.Robust.Presence
                 {
                     HGLogout(sessionID, userID);
                 }
-                else if(reportType == SetType.Login)
+                else if(reportType == SetType.Login || reportType == SetType.Report)
                 {
-                }
-                else if(reportType == SetType.Report)
-                {
+                    /* no action needed */
                 }
                 else
                 {
@@ -104,6 +102,7 @@ namespace SilverSim.BackendConnectors.Robust.Presence
 
         public override void LogoutRegion(UUID regionID)
         {
+            /* no action needed */
         }
     }
 }

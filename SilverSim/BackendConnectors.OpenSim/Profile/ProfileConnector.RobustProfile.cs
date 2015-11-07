@@ -12,8 +12,8 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
     {
         public class RobustClassifiedsConnector : IClassifiedsInterface
         {
-            string m_Uri;
-            ProfileConnector m_Connector;
+            readonly string m_Uri;
+            readonly ProfileConnector m_Connector;
 
             public RobustClassifiedsConnector(ProfileConnector connector, string uri)
             {
@@ -95,8 +95,8 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
 
         public class RobustPicksConnector : IPicksInterface
         {
-            string m_Uri;
-            ProfileConnector m_Connector;
+            readonly string m_Uri;
+            readonly ProfileConnector m_Connector;
 
             public RobustPicksConnector(ProfileConnector connector, string uri)
             {
@@ -180,8 +180,8 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
 
         public class RobustNotesConnector : INotesInterface
         {
-            string m_Uri;
-            ProfileConnector m_Connector;
+            readonly string m_Uri;
+            readonly ProfileConnector m_Connector;
 
             public RobustNotesConnector(ProfileConnector connector, string uri)
             {
@@ -212,8 +212,8 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
 
         public class RobustUserPreferencesConnector : IUserPreferencesInterface
         {
-            string m_Uri;
-            ProfileConnector m_Connector;
+            readonly string m_Uri;
+            readonly ProfileConnector m_Connector;
 
             public RobustUserPreferencesConnector(ProfileConnector connector, string uri)
             {
@@ -247,8 +247,8 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
 
         public class RobustPropertiesConnector : IPropertiesInterface
         {
-            string m_Uri;
-            ProfileConnector m_Connector;
+            readonly string m_Uri;
+            readonly ProfileConnector m_Connector;
 
             public RobustPropertiesConnector(ProfileConnector connector, string uri)
             {

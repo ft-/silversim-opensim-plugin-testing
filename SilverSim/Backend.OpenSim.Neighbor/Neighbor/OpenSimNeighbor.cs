@@ -21,28 +21,34 @@ namespace SilverSim.Backend.OpenSim.Neighbor.Neighbor
     [SuppressMessage("Gendarme.Rules.Concurrency", "WriteStaticFieldFromInstanceMethodRule")]
     public class OpenSimNeighbor : NeighborServiceInterface, IPlugin, IPluginShutdown, IPluginSubFactory
     {
-        RwLockedDictionary<UUID, NeighborList> m_NeighborLists = new RwLockedDictionary<UUID, NeighborList>();
-        object m_NeighborListAddLock = new object();
+        readonly RwLockedDictionary<UUID, NeighborList> m_NeighborLists = new RwLockedDictionary<UUID, NeighborList>();
+        readonly object m_NeighborListAddLock = new object();
         static OpenSimNeighborHandler m_NeighborHandler;
         static object m_NeighborHandlerInitLock = new object();
         bool m_ShutdownRequestThread;
-        System.Timers.Timer m_Timer = new System.Timers.Timer(3600000);
+        readonly System.Timers.Timer m_Timer = new System.Timers.Timer(3600000);
 
-        BlockingQueue<UUID> m_NeighborNotifyRequestQueue = new BlockingQueue<UUID>();
+        readonly BlockingQueue<UUID> m_NeighborNotifyRequestQueue = new BlockingQueue<UUID>();
 
         public OpenSimNeighbor()
         {
         }
 
-        public void AddPlugins(ConfigurationLoader loader)
+        static void InitNeighborHandler(ConfigurationLoader loader, OpenSimNeighbor neigh)
         {
             lock (m_NeighborHandlerInitLock)
             {
                 if (null == m_NeighborHandler)
                 {
-                    loader.AddPlugin("OpenSimNeighborHandler", m_NeighborHandler = new OpenSimNeighborHandler(this));
+                    m_NeighborHandler = new OpenSimNeighborHandler(neigh);
+                    loader.AddPlugin("OpenSimNeighborHandler", m_NeighborHandler);
                 }
             }
+        }
+
+        public void AddPlugins(ConfigurationLoader loader)
+        {
+            InitNeighborHandler(loader, this);
         }
 
         public void Startup(ConfigurationLoader loader)

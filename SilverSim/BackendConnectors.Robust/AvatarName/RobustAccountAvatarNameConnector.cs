@@ -17,9 +17,9 @@ namespace SilverSim.BackendConnectors.Robust.AvatarName
     #region Service Implementation
     public sealed class RobustAccountAvatarNameConnector : AvatarNameServiceInterface, IPlugin
     {
-        string m_UserAccountURI;
-        string m_HomeURI;
-        UUID m_ScopeID;
+        readonly string m_UserAccountURI;
+        readonly string m_HomeURI;
+        readonly UUID m_ScopeID;
         public int TimeoutMs { get; set; }
 
         #region Constructor
@@ -38,7 +38,7 @@ namespace SilverSim.BackendConnectors.Robust.AvatarName
 
         public void Startup(ConfigurationLoader loader)
         {
-
+            /* no action needed */
         }
         #endregion
 
@@ -103,7 +103,7 @@ namespace SilverSim.BackendConnectors.Robust.AvatarName
                 }
                 catch
                 {
-
+                    /* no action needed */
                 }
             }
 
@@ -139,7 +139,7 @@ namespace SilverSim.BackendConnectors.Robust.AvatarName
             }
             set
             {
-
+                /* no action needed */
             }
         }
     }

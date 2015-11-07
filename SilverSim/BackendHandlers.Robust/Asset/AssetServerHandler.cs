@@ -26,10 +26,10 @@ namespace SilverSim.BackendHandlers.Robust.Asset
         AssetServiceInterface m_TemporaryAssetService;
         AssetServiceInterface m_PersistentAssetService;
         AssetServiceInterface m_ResourceAssetService;
-        string m_TemporaryAssetServiceName;
-        string m_PersistentAssetServiceName;
-        bool m_EnableGet;
-        private static Encoding UTF8NoBOM = new System.Text.UTF8Encoding(false);
+        readonly string m_TemporaryAssetServiceName;
+        readonly string m_PersistentAssetServiceName;
+        readonly bool m_EnableGet;
+        private static readonly Encoding UTF8NoBOM = new System.Text.UTF8Encoding(false);
 
         public RobustAssetServerHandler(string persistentAssetServiceName, string temporaryAssetServiceName, bool enableGet)
         {
@@ -139,14 +139,7 @@ namespace SilverSim.BackendHandlers.Robust.Asset
 
                 string assetbase_header = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<AssetBase>";
                 string flags = string.Empty;
-                if(data.Data.Length != 0)
-                {
-                    assetbase_header += "<Data>";
-                }
-                else
-                {
-                    assetbase_header += "<Data/>";
-                }
+                assetbase_header += (data.Data.Length != 0) ? "<Data>" : "<Data/>";
 
                 if(0 != (data.Flags & AssetFlags.Maptile))
                 {
@@ -378,27 +371,25 @@ namespace SilverSim.BackendHandlers.Robust.Asset
                 return;
             }
 
-            if (data.Temporary || data.Local)
+            if ((data.Temporary || data.Local) && 
+                null != m_TemporaryAssetService)
             {
-                if (null != m_TemporaryAssetService)
+                try
                 {
-                    try
+                    m_TemporaryAssetService.Store(data);
+                    using (HttpResponse res = req.BeginResponse())
                     {
-                        m_TemporaryAssetService.Store(data);
-                        using (HttpResponse res = req.BeginResponse())
+                        using (XmlTextWriter writer = new XmlTextWriter(res.GetOutputStream(), UTF8NoBOM))
                         {
-                            using (XmlTextWriter writer = new XmlTextWriter(res.GetOutputStream(), UTF8NoBOM))
-                            {
-                                writer.WriteStartElement("string");
-                                writer.WriteValue(data.ID.ToString());
-                                writer.WriteEndElement();
-                            }
+                            writer.WriteStartElement("string");
+                            writer.WriteValue(data.ID.ToString());
+                            writer.WriteEndElement();
                         }
                     }
-                    catch
-                    {
-                        req.ErrorResponse(HttpStatusCode.InternalServerError, "Internal Server Error");
-                    }
+                }
+                catch
+                {
+                    req.ErrorResponse(HttpStatusCode.InternalServerError, "Internal Server Error");
                 }
             }
 
@@ -457,6 +448,9 @@ namespace SilverSim.BackendHandlers.Robust.Asset
 
                     case XmlNodeType.EndElement:
                         throw new InvalidDataException();
+
+                    default:
+                        break;
                 }
             }
         }
@@ -498,6 +492,9 @@ namespace SilverSim.BackendHandlers.Robust.Asset
                             throw new InvalidDataException("Invalid ArrayOfString");
                         }
                         return result;
+
+                    default:
+                        break;
                 }
             }
         }
@@ -564,7 +561,7 @@ namespace SilverSim.BackendHandlers.Robust.Asset
                         }
                         catch
                         {
-
+                            /* no action needed */
                         }
                         writer.WriteStartElement("boolean");
                         if (found)

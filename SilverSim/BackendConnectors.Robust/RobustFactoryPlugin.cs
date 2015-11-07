@@ -20,7 +20,7 @@ namespace SilverSim.BackendConnectors.Robust
 
         public void Startup(ConfigurationLoader loader)
         {
-
+            /* no action needed */
         }
 
         public InventoryServiceInterface Instantiate(string url)
@@ -56,7 +56,7 @@ namespace SilverSim.BackendConnectors.Robust
 
         public void Startup(ConfigurationLoader loader)
         {
-
+            /* no action needed */
         }
 
         public AssetServiceInterface Instantiate(string url)
@@ -91,7 +91,7 @@ namespace SilverSim.BackendConnectors.Robust
     #region Asset plugin
     public class RobustUserAgentPlugin : ServicePluginHelo, IUserAgentServicePlugin, IPlugin
     {
-        string m_Name;
+        readonly string m_Name;
         public RobustUserAgentPlugin(string name)
         {
             m_Name = name;
@@ -99,7 +99,7 @@ namespace SilverSim.BackendConnectors.Robust
 
         public void Startup(ConfigurationLoader loader)
         {
-
+            /* no action needed */
         }
 
         public UserAgentServiceInterface Instantiate(string url)
@@ -127,6 +127,7 @@ namespace SilverSim.BackendConnectors.Robust
 
         public void Startup(ConfigurationLoader loader)
         {
+            /* no action needed */
         }
 
         public void AddPlugins(ConfigurationLoader loader)

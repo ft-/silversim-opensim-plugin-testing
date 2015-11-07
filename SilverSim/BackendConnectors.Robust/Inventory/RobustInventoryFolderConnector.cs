@@ -17,10 +17,10 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
     [SuppressMessage("Gendarme.Rules.Exceptions", "DoNotThrowInUnexpectedLocationRule")]
     public sealed class RobustInventoryFolderConnector : InventoryFolderServiceInterface
     {
-        private string m_InventoryURI;
+        readonly string m_InventoryURI;
         public int TimeoutMs = 20000;
-        private GroupsServiceInterface m_GroupsService;
-        private RobustInventoryFolderContentConnector m_FolderContentService;
+        readonly GroupsServiceInterface m_GroupsService;
+        readonly RobustInventoryFolderContentConnector m_FolderContentService;
 
         #region Constructor
         public RobustInventoryFolderConnector(string uri, GroupsServiceInterface groupsService)

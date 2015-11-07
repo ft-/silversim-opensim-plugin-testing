@@ -40,14 +40,14 @@ namespace SilverSim.BackendConnectors.Simian.Asset
                 m_TimeoutMs = value;
             }
         }
-        private string m_AssetURI;
-        private SimianAssetMetadataConnector m_MetadataService;
-        private DefaultAssetReferencesService m_ReferencesService;
-        private SimianAssetDataConnector m_DataService;
-        private bool m_EnableCompression;
-        private bool m_EnableLocalStorage;
-        private bool m_EnableTempStorage;
-        private string m_AssetCapability = "00000000-0000-0000-0000-000000000000";
+        readonly string m_AssetURI;
+        readonly SimianAssetMetadataConnector m_MetadataService;
+        readonly DefaultAssetReferencesService m_ReferencesService;
+        readonly SimianAssetDataConnector m_DataService;
+        readonly bool m_EnableCompression;
+        readonly bool m_EnableLocalStorage;
+        readonly bool m_EnableTempStorage;
+        readonly string m_AssetCapability = "00000000-0000-0000-0000-000000000000";
 
         #region Constructor
         public SimianAssetConnector(string uri, string capability, bool enableCompression = false, bool enableLocalStorage = false, bool enableTempStorage = false)
@@ -70,7 +70,7 @@ namespace SilverSim.BackendConnectors.Simian.Asset
 
         public void Startup(ConfigurationLoader loader)
         {
-
+            /* no action needed */
         }
         #endregion
 
@@ -98,14 +98,7 @@ namespace SilverSim.BackendConnectors.Simian.Asset
 
             foreach(UUID assetid in assets)
             {
-                if(Exists(assetid))
-                { 
-                    res[assetid] = true;
-                }
-                else
-                {
-                    res[assetid] = false;
-                }
+                res[assetid] = Exists(assetid);
             }
 
             return res;
@@ -127,14 +120,7 @@ namespace SilverSim.BackendConnectors.Simian.Asset
                 }
                 AssetData data = new AssetData();
                 data.ID = key;
-                if (m.ContainsKey("Name"))
-                {
-                    data.Name = m["Name"].ToString();
-                }
-                else
-                {
-                    data.Name = string.Empty;
-                }
+                data.Name = m.ContainsKey("Name") ? m["Name"].ToString() : string.Empty;
                 data.ContentType = m["ContentType"].ToString();
                 data.Creator.FullName = m["CreatorID"].ToString();
                 data.Local = false;

@@ -18,8 +18,8 @@ namespace SilverSim.BackendConnectors.Robust.GroupsV2
         public sealed class ActiveGroupMembershipAccesor : IActiveGroupMembershipInterface
         {
             public int TimeoutMs = 20000;
-            string m_Uri;
-            Func<UUI, string> m_GetGroupsAgentID;
+            readonly string m_Uri;
+            readonly Func<UUI, string> m_GetGroupsAgentID;
 
             public ActiveGroupMembershipAccesor(string uri, Func<UUI, string> getGroupsAgentID)
             {

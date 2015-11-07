@@ -16,7 +16,7 @@ namespace SilverSim.BackendConnectors.Robust.IM
     #region Service Implementation
     public sealed class RobustIMHandler : IPlugin
     {
-        bool m_DisallowOfflineIM;
+        readonly bool m_DisallowOfflineIM;
         IMServiceInterface m_IMService;
         public RobustIMHandler(bool disallowOfflineIM)
         {

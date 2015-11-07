@@ -21,7 +21,7 @@ namespace SilverSim.BackendConnectors.Robust.Presence
     public class RobustPresenceConnector : PresenceServiceInterface, IPlugin
     {
         public int TimeoutMs { get; set; }
-        string m_PresenceUri;
+        readonly string m_PresenceUri;
 
         #region Constructor
         public RobustPresenceConnector(string uri, string homeuri)
@@ -37,6 +37,7 @@ namespace SilverSim.BackendConnectors.Robust.Presence
 
         public void Startup(ConfigurationLoader loader)
         {
+            /* no action needed */
         }
         #endregion
 

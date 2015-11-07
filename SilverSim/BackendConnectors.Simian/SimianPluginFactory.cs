@@ -19,7 +19,7 @@ namespace SilverSim.BackendConnectors.Simian
 
         public void Startup(ConfigurationLoader loader)
         {
-
+            /* no action needed */
         }
 
         public InventoryServiceInterface Instantiate(string url)
@@ -48,12 +48,11 @@ namespace SilverSim.BackendConnectors.Simian
     {
         public SimianAssetPlugin()
         {
-
         }
 
         public void Startup(ConfigurationLoader loader)
         {
-
+            /* no action needed */
         }
 
         public AssetServiceInterface Instantiate(string url)

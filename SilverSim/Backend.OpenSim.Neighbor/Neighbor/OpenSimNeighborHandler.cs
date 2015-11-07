@@ -19,8 +19,8 @@ namespace SilverSim.Backend.OpenSim.Neighbor.Neighbor
     public class OpenSimNeighborHandler : IPlugin
     {
         protected static readonly ILog m_Log = LogManager.GetLogger("OPENSIM NEIGHBOR HANDLER");
-        private BaseHttpServer m_HttpServer;
-        OpenSimNeighbor m_NeighborHandler;
+        BaseHttpServer m_HttpServer;
+        readonly OpenSimNeighbor m_NeighborHandler;
 
         public OpenSimNeighborHandler(OpenSimNeighbor neighborHandler)
         {
@@ -40,8 +40,8 @@ namespace SilverSim.Backend.OpenSim.Neighbor.Neighbor
             /* /region/<UUID> */
             regionID = UUID.Zero;
 
-            uri = uri.Trim(new char[] { '/' });
-            string[] parts = uri.Split('/');
+            string trimmed_uri = uri.Trim(new char[] { '/' });
+            string[] parts = trimmed_uri.Split('/');
             if(parts.Length < 2)
             {
                 throw new InvalidDataException();

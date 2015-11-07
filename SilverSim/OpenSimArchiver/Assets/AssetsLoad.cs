@@ -35,20 +35,18 @@ namespace SilverSim.OpenSimArchiver.Assets
                             return;
                         }
 
-                        if (header.FileType == TarFileType.File)
+                        if (header.FileType == TarFileType.File &&
+                            header.FileName.StartsWith("assets/"))
                         {
-                            if (header.FileName.StartsWith("assets/"))
+                            /* Load asset */
+                            AssetData ad = reader.LoadAsset(header, owner);
+                            try
                             {
-                                /* Load asset */
-                                AssetData ad = reader.LoadAsset(header, owner);
-                                try
-                                {
-                                    assetService.Exists(ad.ID);
-                                }
-                                catch
-                                {
-                                    assetService.Store(ad);
-                                }
+                                assetService.Exists(ad.ID);
+                            }
+                            catch
+                            {
+                                assetService.Store(ad);
                             }
                         }
                     }

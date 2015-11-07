@@ -12,7 +12,7 @@ namespace SilverSim.BackendConnectors.Simian.Asset
     public sealed class SimianAssetDataConnector : AssetDataServiceInterface
     {
         public int TimeoutMs = 20000;
-        private string m_AssetURI;
+        readonly string m_AssetURI;
 
         #region Constructor
         public SimianAssetDataConnector(string uri)

@@ -18,9 +18,9 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
     [SuppressMessage("Gendarme.Rules.Exceptions", "DoNotThrowInUnexpectedLocationRule")]
     public sealed class RobustInventoryItemConnector : InventoryItemServiceInterface
     {
-        private string m_InventoryURI;
+        readonly string m_InventoryURI;
         public int TimeoutMs = 20000;
-        private GroupsServiceInterface m_GroupsService;
+        readonly GroupsServiceInterface m_GroupsService;
         bool m_isMultipleSupported = true;
 
         #region Constructor

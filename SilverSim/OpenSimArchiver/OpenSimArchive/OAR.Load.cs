@@ -151,16 +151,12 @@ namespace SilverSim.OpenSimArchiver.RegionArchiver
                     foreach (ObjectPart part in sog.ValuesByKey1)
                     {
                         UUID oldID;
-                        try
+                        ObjectPart check;
+                        if(scene.Primitives.TryGetValue(part.ID, out check))
                         {
-                            ObjectPart check = scene.Primitives[part.ID];
                             oldID = part.ID;
                             part.ID = UUID.Random;
                             sog.ChangeKey(part.ID, oldID);
-                        }
-                        catch
-                        {
-
                         }
                         foreach (ObjectPartInventoryItem item in part.Inventory.ValuesByKey2)
                         {
@@ -334,14 +330,10 @@ namespace SilverSim.OpenSimArchiver.RegionArchiver
                                         }
                                         if ((options & LoadOptions.PersistUuids) == LoadOptions.PersistUuids)
                                         {
-                                            try
+                                            ParcelInfo check;
+                                            if(scene.Parcels.TryGetValue(pinfo.ID, out check))
                                             {
-                                                ParcelInfo check = scene.Parcels[pinfo.ID];
                                                 pinfo.ID = UUID.Random;
-                                            }
-                                            catch
-                                            {
-
                                             }
                                         }
                                         else
@@ -351,13 +343,10 @@ namespace SilverSim.OpenSimArchiver.RegionArchiver
                                         scene.AddParcel(pinfo);
                                     }
                                 }
-                                else if (header.FileName.StartsWith("settings/"))
+                                else if (header.FileName.StartsWith("settings/") && ((options & LoadOptions.Merge) == 0))
                                 {
                                     /* Load settings */
-                                    if ((options & LoadOptions.Merge) == 0)
-                                    {
-                                        RegionSettingsLoader.LoadRegionSettings(new ObjectXmlStreamFilter(reader), scene);
-                                    }
+                                    RegionSettingsLoader.LoadRegionSettings(new ObjectXmlStreamFilter(reader), scene);
                                 }
                             }
                         }

@@ -57,13 +57,13 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
         private BaseHttpServer m_HttpServer;
         protected ServerParamServiceInterface m_ServerParams;
         private Main.Common.Caps.CapsHttpRedirector m_CapsRedirector;
-        private string m_DefaultGridUserServerURI = string.Empty;
-        private string m_DefaultPresenceServerURI = string.Empty;
-        private Dictionary<string, IAssetServicePlugin> m_AssetServicePlugins = new Dictionary<string,IAssetServicePlugin>();
-        private Dictionary<string, IInventoryServicePlugin> m_InventoryServicePlugins = new Dictionary<string,IInventoryServicePlugin>();
-        private Dictionary<string, IProfileServicePlugin> m_ProfileServicePlugins = new Dictionary<string, IProfileServicePlugin>();
-        private List<IProtocolExtender> m_PacketHandlerPlugins = new List<IProtocolExtender>();
-        private List<AuthorizationServiceInterface> m_AuthorizationServices;
+        readonly string m_DefaultGridUserServerURI = string.Empty;
+        readonly string m_DefaultPresenceServerURI = string.Empty;
+        readonly Dictionary<string, IAssetServicePlugin> m_AssetServicePlugins = new Dictionary<string, IAssetServicePlugin>();
+        readonly Dictionary<string, IInventoryServicePlugin> m_InventoryServicePlugins = new Dictionary<string, IInventoryServicePlugin>();
+        readonly Dictionary<string, IProfileServicePlugin> m_ProfileServicePlugins = new Dictionary<string, IProfileServicePlugin>();
+        List<IProtocolExtender> m_PacketHandlerPlugins = new List<IProtocolExtender>();
+        List<AuthorizationServiceInterface> m_AuthorizationServices;
 
         sealed class GridParameterMap : ICloneable
         {
@@ -464,7 +464,7 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
             string gatekeeperURI = scene.GatekeeperURI;
 
             ProfileServiceInterface profileService = null;
-            UserAgentServiceInterface userAgentService = null;
+            UserAgentServiceInterface userAgentService;
             PresenceServiceInterface presenceService = null;
             GridUserServiceInterface gridUserService = null;
             FriendsServiceInterface friendsService = null;
@@ -495,14 +495,9 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
             }
             else
             {
-                if (string.IsNullOrEmpty(m_DefaultPresenceServerURI))
-                {
-                    presenceService = new RobustHGOnlyPresenceConnector(agentPost.Account.Principal.HomeURI.ToString());
-                }
-                else
-                {
-                    presenceService = new RobustHGPresenceConnector(m_DefaultPresenceServerURI, agentPost.Account.Principal.HomeURI.ToString());
-                }
+                presenceService = string.IsNullOrEmpty(m_DefaultPresenceServerURI) ?
+                    (PresenceServiceInterface)new RobustHGOnlyPresenceConnector(agentPost.Account.Principal.HomeURI.ToString()) :
+                    (PresenceServiceInterface)new RobustHGPresenceConnector(m_DefaultPresenceServerURI, agentPost.Account.Principal.HomeURI.ToString());
             }
             userAgentService = new RobustUserAgentConnector(agentPost.Account.Principal.HomeURI.ToString());
 
@@ -601,7 +596,7 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
             }
             catch
             {
-
+                /* no action needed */
             }
 
             GroupsServiceInterface groupsService = null;
@@ -609,22 +604,15 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
             InventoryServiceInterface inventoryService;
             string inventoryType = HeloRequester(inventoryServerURI);
             string assetType = HeloRequester(assetServerURI);
-            if (string.IsNullOrEmpty(assetType) || assetType == "opensim-robust")
-            {
-                assetService = new RobustAssetConnector(assetServerURI);
-            }
-            else
-            {
-                assetService = m_AssetServicePlugins[assetType].Instantiate(assetServerURI);
-            }
-            if (string.IsNullOrEmpty(inventoryType) || inventoryType == "opensim-robust")
-            {
-                inventoryService = new RobustInventoryConnector(inventoryServerURI, groupsService);
-            }
-            else
-            {
+
+            assetService = (string.IsNullOrEmpty(assetType) || assetType == "opensim-robust") ?
+                (AssetServiceInterface)new RobustAssetConnector(assetServerURI) :
+                m_AssetServicePlugins[assetType].Instantiate(assetServerURI);
+
+            inventoryService = (string.IsNullOrEmpty(inventoryType) || inventoryType == "opensim-robust") ?
+                new RobustInventoryConnector(inventoryServerURI, groupsService) :
                 inventoryService = m_InventoryServicePlugins[assetType].Instantiate(inventoryServerURI);
-            }
+
             GridServiceInterface gridService = scene.GridService;
 
             AgentServiceList serviceList = new AgentServiceList();

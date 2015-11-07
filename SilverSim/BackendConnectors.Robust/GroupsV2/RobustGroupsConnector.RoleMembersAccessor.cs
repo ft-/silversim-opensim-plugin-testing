@@ -19,9 +19,9 @@ namespace SilverSim.BackendConnectors.Robust.GroupsV2
         public sealed class RoleMembersAccessor : IGroupRolemembersInterface
         {
             public int TimeoutMs = 20000;
-            string m_Uri;
-            IGroupMembershipsInterface m_MembershipsAccessor;
-            Func<UUI, string> m_GetGroupsAgentID;
+            readonly string m_Uri;
+            readonly IGroupMembershipsInterface m_MembershipsAccessor;
+            readonly Func<UUI, string> m_GetGroupsAgentID;
 
             public RoleMembersAccessor(string uri, IGroupMembershipsInterface membershipsAccessor, Func<UUI, string> getGroupsAgentID)
             {

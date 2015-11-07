@@ -33,8 +33,8 @@ namespace SilverSim.BackendConnectors.Robust.Asset
             protected RobustAssetProtocolErrorException(SerializationInfo info, StreamingContext context) : base(info, context) { }
         }
 
-        private static int MAX_ASSET_BASE64_CONVERSION_SIZE = 9 * 1024; /* must be an integral multiple of 3 */
-        private int m_TimeoutMs = 20000;
+        static int MAX_ASSET_BASE64_CONVERSION_SIZE = 9 * 1024; /* must be an integral multiple of 3 */
+        int m_TimeoutMs = 20000;
         public int TimeoutMs
         {
             get
@@ -47,13 +47,13 @@ namespace SilverSim.BackendConnectors.Robust.Asset
                 m_TimeoutMs = value;
             }
         }
-        private string m_AssetURI;
-        private RobustAssetMetadataConnector m_MetadataService;
-        private DefaultAssetReferencesService m_ReferencesService;
-        private RobustAssetDataConnector m_DataService;
-        private bool m_EnableCompression;
-        private bool m_EnableLocalStorage;
-        private bool m_EnableTempStorage;
+        readonly string m_AssetURI;
+        readonly RobustAssetMetadataConnector m_MetadataService;
+        readonly DefaultAssetReferencesService m_ReferencesService;
+        readonly RobustAssetDataConnector m_DataService;
+        readonly bool m_EnableCompression;
+        readonly bool m_EnableLocalStorage;
+        readonly bool m_EnableTempStorage;
 
         #region Constructor
         public RobustAssetConnector(string uri, bool enableCompression = false, bool enableLocalStorage = false, bool enableTempStorage = false)
@@ -75,7 +75,7 @@ namespace SilverSim.BackendConnectors.Robust.Asset
 
         public void Startup(ConfigurationLoader loader)
         {
-
+            /* no action needed */
         }
         #endregion
 
@@ -120,6 +120,9 @@ namespace SilverSim.BackendConnectors.Robust.Asset
 
                     case XmlNodeType.EndElement:
                         throw new InvalidDataException();
+
+                    default:
+                        break;
                 }
             }
         }
@@ -150,6 +153,9 @@ namespace SilverSim.BackendConnectors.Robust.Asset
                             throw new InvalidDataException();
                         }
                         return result;
+
+                    default:
+                        break;
                 }
             }
         }
@@ -291,14 +297,7 @@ namespace SilverSim.BackendConnectors.Robust.Asset
             }
             string assetbase_header = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<AssetBase>";
             string flags = string.Empty;
-            if(asset.Data.Length != 0)
-            {
-                assetbase_header += "<Data>";
-            }
-            else
-            {
-                assetbase_header += "<Data/>";
-            }
+            assetbase_header += (asset.Data.Length != 0) ? "<Data>" : "<Data/>";
 
             if(0 != (asset.Flags & AssetFlags.Maptile))
             {

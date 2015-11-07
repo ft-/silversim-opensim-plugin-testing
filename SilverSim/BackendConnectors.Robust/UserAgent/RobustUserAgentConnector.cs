@@ -13,7 +13,7 @@ namespace SilverSim.BackendConnectors.Robust.UserAgent
     public class RobustUserAgentConnector : UserAgentServiceInterface
     {
         public int TimeoutMs = 20000;
-        string m_Uri;
+        readonly string m_Uri;
 
         public RobustUserAgentConnector(string uri)
         {
@@ -71,23 +71,8 @@ namespace SilverSim.BackendConnectors.Robust.UserAgent
         {
             Dictionary<string, string> info = GetUserInfo_Internal(user);
             UserInfo userInfo = new UserInfo();
-            if (info.ContainsKey("user_firstname"))
-            {
-                userInfo.FirstName = info["user_firstname"];
-            }
-            else
-            {
-                userInfo.FirstName = user.FirstName;
-            }
-            
-            if (info.ContainsKey("user_lastname"))
-            {
-                userInfo.LastName = info["user_lastname"];
-            }
-            else
-            {
-                userInfo.LastName = user.LastName;
-            }
+            userInfo.FirstName = info.ContainsKey("user_firstname") ? info["user_firstname"] : user.FirstName;
+            userInfo.LastName = info.ContainsKey("user_lastname") ? info["user_lastname"] : user.LastName;
 
             if (info.ContainsKey("user_flags"))
             {

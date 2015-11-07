@@ -15,8 +15,8 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
     {
         public class OpenSimProfileConnector
         {
-            protected string m_Uri;
-            protected ProfileConnector m_Connector;
+            readonly string m_Uri;
+            readonly ProfileConnector m_Connector;
 
             public OpenSimProfileConnector(ProfileConnector connector, string uri)
             {
@@ -44,14 +44,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
                 {
                     throw new KeyNotFoundException();
                 }
-                if (p.ContainsKey("data"))
-                {
-                    return p["data"];
-                }
-                else
-                {
-                    return null; /* some calls have no data */
-                }
+                return (p.ContainsKey("data")) ? p["data"] : null; /* some calls have no data */
             }
         }
 

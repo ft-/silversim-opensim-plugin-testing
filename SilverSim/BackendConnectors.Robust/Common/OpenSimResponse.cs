@@ -59,6 +59,9 @@ namespace SilverSim.BackendConnectors.Robust.Common
                             throw new InvalidOpenSimResponseSerializationException("/" + tagname);
                         }
                         return astring;
+
+                    default:
+                        break;
                 }
             }
         }
@@ -121,6 +124,9 @@ namespace SilverSim.BackendConnectors.Robust.Common
                         }
 
                         return map;
+
+                    default:
+                        break;
                 }
             }
         }

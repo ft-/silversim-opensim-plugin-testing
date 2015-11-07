@@ -15,10 +15,10 @@ namespace SilverSim.BackendConnectors.Simian.Inventory
 {
     public sealed class SimianInventoryItemConnector : InventoryItemServiceInterface
     {
-        private string m_InventoryURI;
+        readonly string m_InventoryURI;
         public int TimeoutMs = 20000;
-        private GroupsServiceInterface m_GroupsService;
-        private string m_InventoryCapability;
+        readonly GroupsServiceInterface m_GroupsService;
+        readonly string m_InventoryCapability;
 
         #region Constructor
         public SimianInventoryItemConnector(string uri, GroupsServiceInterface groupsService, string simCapability)
@@ -166,11 +166,11 @@ namespace SilverSim.BackendConnectors.Simian.Inventory
                     post["RequestMethod"] = "AddUserData";
                     post["UserID"] = (string)item.Owner.ID;
                     post["Gestures"] = Json.Serialize(json_gestures);
-                    m = SimianGrid.PostToService(m_InventoryURI, m_InventoryCapability, post, TimeoutMs);
+                    SimianGrid.PostToService(m_InventoryURI, m_InventoryCapability, post, TimeoutMs);
                 }
                 catch
                 {
-
+                    /* no action needed */
                 }
             }
         }

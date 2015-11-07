@@ -17,17 +17,17 @@ namespace SilverSim.BackendConnectors.Robust.GroupsV2
     [SuppressMessage("Gendarme.Rules.Exceptions", "DoNotThrowInUnexpectedLocationRule")]
     public partial class RobustGroupsConnector : GroupsServiceInterface, IPlugin
     {
-        GroupsAccessor m_Groups;
-        GroupRolesAccessor m_GroupRoles;
-        MembersAccessor m_Members;
-        MembershipsAccessor m_Memberships;
-        RoleMembersAccessor m_Rolemembers;
-        ActiveGroupAccessor m_ActiveGroup;
-        InvitesAccessor m_Invites;
-        NoticesAccessor m_Notices;
-        ActiveGroupMembershipAccesor m_ActiveGroupMembership;
+        readonly GroupsAccessor m_Groups;
+        readonly GroupRolesAccessor m_GroupRoles;
+        readonly MembersAccessor m_Members;
+        readonly MembershipsAccessor m_Memberships;
+        readonly RoleMembersAccessor m_Rolemembers;
+        readonly ActiveGroupAccessor m_ActiveGroup;
+        readonly InvitesAccessor m_Invites;
+        readonly NoticesAccessor m_Notices;
+        readonly ActiveGroupMembershipAccesor m_ActiveGroupMembership;
         UserAccountServiceInterface m_UserAccountService;
-        string m_UserAccountServiceName = string.Empty;
+        readonly string m_UserAccountServiceName = string.Empty;
         int m_TimeoutMs = 20000;
 
         public int TimeoutMs

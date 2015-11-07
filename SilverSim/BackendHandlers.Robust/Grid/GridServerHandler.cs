@@ -18,6 +18,7 @@ namespace SilverSim.BackendHandlers.Robust.Grid
 
         public void Startup(ConfigurationLoader loader)
         {
+            /* no action needed */
         }
     }
     #endregion

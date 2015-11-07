@@ -52,8 +52,8 @@ namespace SilverSim.BackendHandlers.Robust.UserAccounts
         private static readonly ILog m_Log = LogManager.GetLogger("ROBUST USERACCOUNT HANDLER");
         private BaseHttpServer m_HttpServer;
         UserAccountServiceInterface m_UserAccountService;
-        string m_UserAccountServiceName;
-        static Encoding UTF8NoBOM = new System.Text.UTF8Encoding(false);
+        readonly string m_UserAccountServiceName;
+        static readonly Encoding UTF8NoBOM = new System.Text.UTF8Encoding(false);
 
         public RobustUserAccountServerHandler(string userAccountServiceName)
         {
@@ -153,7 +153,7 @@ namespace SilverSim.BackendHandlers.Robust.UserAccounts
             }
             else if(reqdata.ContainsKey("PrincipalID"))
             {
-                UUID userID = reqdata.GetUUID("UserID");
+                UUID userID = reqdata.GetUUID("PrincipalID");
                 try
                 {
                     ua = m_UserAccountService[scopeID, userID];

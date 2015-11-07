@@ -186,12 +186,11 @@ namespace SilverSim.OpenSimArchiver.InventoryArchiver
 
 
             int pathidx = 0;
-            if ((options & LoadOptions.Merge) != 0)
+            if ((options & LoadOptions.Merge) != 0 &&
+                pathcomps[0].StartsWith("MyInventory") && 
+                pathcomps[0].Length == 13 + 36)
             {
-                if (pathcomps[0].StartsWith("MyInventory") && pathcomps[0].Length == 13 + 36)
-                {
-                    pathidx = 1;
-                }
+                pathidx = 1;
             }
 
             for(; pathidx < pathcomps.Length; ++pathidx)
@@ -202,11 +201,7 @@ namespace SilverSim.OpenSimArchiver.InventoryArchiver
                 }
                 string pname = pathcomps[pathidx].Substring(0, pathcomps[pathidx].Length - 38);
                 finalpath += pname;
-                if (folders.TryGetValue(finalpath, out folderID))
-                {
-
-                }
-                else
+                if (!folders.TryGetValue(finalpath, out folderID))
                 {
                     InventoryFolder folder = new InventoryFolder();
                     folder.Owner = principalID;
@@ -241,6 +236,9 @@ namespace SilverSim.OpenSimArchiver.InventoryArchiver
                             {
                                 return LoadInventoryItemData(reader, principal, nameService);
                             }
+                            break;
+
+                        default:
                             break;
                     }
                 }
@@ -402,6 +400,9 @@ namespace SilverSim.OpenSimArchiver.InventoryArchiver
                             throw new IARFormatException();
                         }
                         return item;
+
+                    default:
+                        break;
                 }
             }
         }
