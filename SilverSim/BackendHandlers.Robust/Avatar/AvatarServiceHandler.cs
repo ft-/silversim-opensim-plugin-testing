@@ -55,7 +55,7 @@ namespace SilverSim.BackendHandlers.Robust.Avatar
         protected static readonly ILog m_Log = LogManager.GetLogger("ROBUST AVATAR HANDLER");
         private BaseHttpServer m_HttpServer;
         AvatarServiceInterface m_AvatarService;
-        string m_AvatarServiceName;
+        readonly string m_AvatarServiceName;
         private static Encoding UTF8NoBOM = new System.Text.UTF8Encoding(false);
 
         public RobustAvatarServerHandler(string avatarServiceName)

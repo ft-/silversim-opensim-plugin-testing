@@ -298,6 +298,13 @@ namespace SilverSim.OpenSimArchiver.RegionArchiver
                                 case "Telehub":
                                     LoadRegionSettingsTelehub(reader, scene);
                                     break;
+
+                                default:
+                                    if (!reader.IsEmptyElement)
+                                    {
+                                        reader.Skip();
+                                    }
+                                    break;
                             }
                             break;
 

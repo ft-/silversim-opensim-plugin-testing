@@ -102,9 +102,9 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
             }
         }
 
-        private readonly RwLockedList<GridParameterMap> m_GridParameterMap = new RwLockedList<GridParameterMap>();
+        readonly RwLockedList<GridParameterMap> m_GridParameterMap = new RwLockedList<GridParameterMap>();
 
-        private string m_AgentBaseURL = "/agent/";
+        readonly string m_AgentBaseURL = "/agent/";
 
         public PostAgentHandler(IConfig ownSection)
         {
@@ -611,7 +611,7 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
 
             inventoryService = (string.IsNullOrEmpty(inventoryType) || inventoryType == "opensim-robust") ?
                 new RobustInventoryConnector(inventoryServerURI, groupsService) :
-                inventoryService = m_InventoryServicePlugins[assetType].Instantiate(inventoryServerURI);
+                m_InventoryServicePlugins[assetType].Instantiate(inventoryServerURI);
 
             GridServiceInterface gridService = scene.GridService;
 
