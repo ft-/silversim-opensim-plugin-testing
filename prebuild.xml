@@ -1,5 +1,5 @@
-<?xml version="1.0" ?>
-<Prebuild version="1.10" xmlns="http://dnpb.sourceforge.net/schemas/prebuild-1.10.xsd">
+<?xml version="1.0"?>
+<Prebuild xmlns="http://dnpb.sourceforge.net/schemas/prebuild-1.10.xsd" version="1.10">
   <Solution activeConfig="Release" name="SilverSim.OpenSim" path="./" version="0.8.0-$Rev$">
     <Configuration name="Release">
       <Options>
@@ -31,8 +31,6 @@
         <NoStdLib>false</NoStdLib>
       </Options>
     </Configuration>
-	<?include file="SilverSim/*/Prebuild.xml" ?>
-    
+    <?include file="SilverSim/*/Prebuild.xml" ?>
   </Solution>
-
 </Prebuild>
