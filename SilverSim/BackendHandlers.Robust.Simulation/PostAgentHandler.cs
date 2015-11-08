@@ -944,14 +944,7 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
                             Map wp = (Map)val;
                             AgentWearables.WearableInfo wi = new AgentWearables.WearableInfo();
                             wi.ItemID = wp["item"].AsUUID;
-                            if (wp.ContainsKey("asset"))
-                            {
-                                wi.AssetID = wp["Asset"].AsUUID;
-                            }
-                            else
-                            {
-                                wi.AssetID = UUID.Zero;
-                            }
+                            wi.AssetID = wp.ContainsKey("asset") ? wp["Asset"].AsUUID : UUID.Zero;
                             WearableType type = (WearableType)i;
                             Appearance.Wearables[type, n++] = wi;
                         }
