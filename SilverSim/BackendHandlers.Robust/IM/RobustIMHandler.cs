@@ -14,6 +14,43 @@ using System.Threading;
 namespace SilverSim.BackendConnectors.Robust.IM
 {
     #region Service Implementation
+    public class RobustIMMessage : GridInstantMessage
+    {
+        Func<bool> SignalEvent;
+        void IMProcessed(GridInstantMessage im, bool result)
+        {
+            lock(this)
+            {
+                im.ResultInfo = result;
+                if(SignalEvent != null)
+                {
+                    SignalEvent();
+                }
+            }
+        }
+
+        internal void ActivateIMEvent(Func<bool> e)
+        {
+            lock(this)
+            {
+                SignalEvent = e;
+            }
+        }
+
+        internal void DeactivateIMEvent()
+        {
+            lock(this)
+            {
+                SignalEvent = null;
+            }
+        }
+
+        internal RobustIMMessage()
+        {
+            OnResult = IMProcessed;
+        }
+    }
+
     public sealed class RobustIMHandler : IPlugin
     {
         readonly bool m_DisallowOfflineIM;
@@ -32,7 +69,7 @@ namespace SilverSim.BackendConnectors.Robust.IM
 
         public XmlRpc.XmlRpcResponse IMReceived(XmlRpc.XmlRpcRequest req)
         {
-            GridInstantMessage im = new GridInstantMessage();
+            RobustIMMessage im = new RobustIMMessage();
             XmlRpc.XmlRpcResponse res = new XmlRpc.XmlRpcResponse();
             try
             {
@@ -69,23 +106,28 @@ namespace SilverSim.BackendConnectors.Robust.IM
                 throw new XmlRpc.XmlRpcFaultException(-32602, "invalid method parameters");
             }
 
-            ManualResetEvent e = new ManualResetEvent(false);
-            Map p;
-            im.OnResult = delegate(GridInstantMessage _im, bool result) { _im.ResultInfo = result;  e.Set(); };
-            m_IMService.Send(im);
-            try
+            Map p = new Map();
+            using (ManualResetEvent e = new ManualResetEvent(false))
             {
-                e.WaitOne(15000);
-            }
-            catch
-            {
-                p = new Map();
-                p.Add("result", "FALSE");
-                res.ReturnValue = p;
-                return res;
+                im.ActivateIMEvent(e.Set);
+                m_IMService.Send(im);
+                try
+                {
+                    e.WaitOne(15000);
+                }
+                catch
+                {
+                    p.Add("result", "FALSE");
+                    res.ReturnValue = p;
+                    return res;
+                }
+                finally
+                {
+                    im.DeactivateIMEvent();
+                }
             }
 
-            p = new Map();
+            
             p.Add("result", im.ResultInfo ? "TRUE" : "FALSE");
             res.ReturnValue = p;
 
