@@ -166,9 +166,10 @@ namespace SilverSim.Backend.OpenSim.Neighbor.Neighbor
             if(SceneManager.Scenes.TryGetValue(toRegionID, out scene))
             {
                 /* some matching request validate that it is really a neighbor and not some wannabe */
+                RegionInfo rinfo;
                 try
                 {
-                    RegionInfo rinfo = scene.GridService[fromRegion.ScopeID, fromRegion.ID];
+                    rinfo = scene.GridService[fromRegion.ScopeID, fromRegion.ID];
                 }
                 catch(KeyNotFoundException)
                 {
@@ -178,6 +179,14 @@ namespace SilverSim.Backend.OpenSim.Neighbor.Neighbor
                 catch
                 {
                     /* TODO: make a retry request here? */
+                    return;
+                }
+
+                if(rinfo.ServerURI != fromRegion.ServerURI ||
+                    rinfo.ServerIP != fromRegion.ServerIP ||
+                    rinfo.ServerPort != fromRegion.ServerPort)
+                {
+                    /* this one cannot be a neighbor since it does not match with grid details */
                     return;
                 }
             }
