@@ -60,7 +60,7 @@ namespace SilverSim.BackendConnectors.Robust.GroupsV2
             try
             {
                 UserAccount account = m_UserAccountService[UUID.Zero, agent.ID];
-                return (string)agent.ID;
+                return (string)account.Principal.ID;
             }
             catch
             {
