@@ -305,12 +305,10 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
                 {
                     throw new InvalidDataException();
                 }
-                if(parts.Length > 2)
+                if(parts.Length > 2 &&
+                    !UUID.TryParse(parts[2], out regionID))
                 {
-                     if(!UUID.TryParse(parts[2], out regionID))
-                     {
-                         throw new InvalidDataException();
-                     }
+                    throw new InvalidDataException();
                 }
                 if(parts.Length > 3)
                 {
@@ -326,12 +324,10 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
                 /* some grids have weird ideas about how to map their URIs, so we need this checking for whether the grid name starts with it */
                 if (map.HomeURI.StartsWith(homeURI))
                 {
-                    if (map.ValidForSims.Count != 0)
+                    if (map.ValidForSims.Count != 0 &&
+                        !map.ValidForSims.Contains(scene.ID))
                     {
-                        if (!map.ValidForSims.Contains(scene.ID))
-                        {
-                            continue;
-                        }
+                        continue;
                     }
                     return map;
                 }
@@ -1292,16 +1288,15 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
                 versionMinor = 3;
             }
 
-            if (success && 0 == versionMajor && versionMinor < 3)
+            if (success && 
+                0 == versionMajor && versionMinor < 3 &&
+                (scene.RegionData.Size.X > 256 || scene.RegionData.Size.Y > 256))
             {
                 /* check region size 
                  * check both parameters. It seems rectangular vars are not that impossible to have.
                  */
-                if (scene.RegionData.Size.X > 256 || scene.RegionData.Size.Y > 256)
-                {
-                    success = false;
-                    reason = "Destination is a variable-sized region, and source is an old simulator. Consider upgrading.";
-                }
+                success = false;
+                reason = "Destination is a variable-sized region, and source is an old simulator. Consider upgrading.";
             }
 
             UUI agentUUI = new UUI();
