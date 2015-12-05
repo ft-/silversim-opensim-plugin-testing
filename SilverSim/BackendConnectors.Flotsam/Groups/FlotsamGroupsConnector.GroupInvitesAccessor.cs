@@ -17,23 +17,34 @@ namespace SilverSim.BackendConnectors.Flotsam.Groups
             {
             }
 
+            public bool TryGetValue(UUI requestingAgent, UUID groupInviteID, out GroupInvite inv)
+            {
+                Map m = new Map();
+                m.Add("InviteID", groupInviteID);
+                m = FlotsamXmlRpcGetCall(requestingAgent, "groups.getAgentToGroupInvite", m) as Map;
+                if (null == m)
+                {
+                    inv = default(GroupInvite);
+                    return false;
+                }
+
+                inv = new GroupInvite();
+                inv.ID = groupInviteID;
+                inv.Principal.ID = m["AgentID"].AsUUID;
+                inv.Group.ID = m["GroupID"].AsUUID;
+                inv.RoleID = m["RoleID"].AsUUID;
+                return true;
+            }
+
             public GroupInvite this[UUI requestingAgent, UUID groupInviteID]
             {
                 get 
                 {
-                    Map m = new Map();
-                    m.Add("InviteID", groupInviteID);
-                    m = FlotsamXmlRpcGetCall(requestingAgent, "groups.getAgentToGroupInvite", m) as Map;
-                    if(null == m)
+                    GroupInvite inv;
+                    if (!TryGetValue(requestingAgent, groupInviteID, out inv))
                     {
-                        throw new AccessFailedException();
+                        throw new KeyNotFoundException();
                     }
-
-                    GroupInvite inv = new GroupInvite();
-                    inv.ID = groupInviteID;
-                    inv.Principal.ID = m["AgentID"].AsUUID;
-                    inv.Group.ID = m["GroupID"].AsUUID;
-                    inv.RoleID = m["RoleID"].AsUUID;
                     return inv;
                 }
             }

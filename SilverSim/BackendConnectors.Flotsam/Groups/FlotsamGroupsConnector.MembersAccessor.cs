@@ -18,6 +18,28 @@ namespace SilverSim.BackendConnectors.Flotsam.Groups
             {
             }
 
+            public bool TryGetValue(UUI requestingAgent, UGI group, UUI principal, out GroupMember gmem)
+            {
+                IEnumerable<GroupMember> e = this[requestingAgent, group].Where(p => p.Principal.ID == principal.ID);
+                foreach (GroupMember g in e)
+                {
+                    gmem = g;
+                    return true;
+                }
+                gmem = default(GroupMember);
+                return false;
+            }
+
+            public bool ContainsKey(UUI requestingAgent, UGI group, UUI principal)
+            {
+                IEnumerable<GroupMember> e = this[requestingAgent, group].Where(p => p.Principal.ID == principal.ID);
+                foreach (GroupMember g in e)
+                {
+                    return true;
+                }
+                return false;
+            }
+
             public GroupMember this[UUI requestingAgent, UGI group, UUI principal]
             {
                 get 

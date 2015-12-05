@@ -39,24 +39,93 @@ namespace SilverSim.BackendConnectors.Robust.Account
         }
         #endregion
 
+        public override bool TryGetValue(UUID scopeID, UUID accountID, out UserAccount account)
+        {
+            Dictionary<string, string> post = new Dictionary<string, string>();
+            post["UserID"] = (string)accountID;
+            post["SCOPEID"] = (string)scopeID;
+            post["METHOD"] = "getaccount";
+            using (Stream s = HttpRequestHandler.DoStreamPostRequest(m_UserAccountURI, null, post, false, TimeoutMs))
+            {
+                Map map = OpenSimResponse.Deserialize(s);
+                Map resultmap = map["result"] as Map;
+                if (null == resultmap)
+                {
+                    account = default(UserAccount);
+                    return false;
+                }
+                account = DeserializeEntry(resultmap);
+                return true;
+            }
+        }
+
+        public override bool ContainsKey(UUID scopeID, UUID accountID)
+        {
+            Dictionary<string, string> post = new Dictionary<string, string>();
+            post["UserID"] = (string)accountID;
+            post["SCOPEID"] = (string)scopeID;
+            post["METHOD"] = "getaccount";
+            using (Stream s = HttpRequestHandler.DoStreamPostRequest(m_UserAccountURI, null, post, false, TimeoutMs))
+            {
+                Map map = OpenSimResponse.Deserialize(s);
+                Map resultmap = map["result"] as Map;
+                return null != resultmap;
+            }
+        }
+
         public override UserAccount this[UUID scopeID, UUID accountID]
         {
             get
             {
-                Dictionary<string, string> post = new Dictionary<string, string>();
-                post["UserID"] = (string)accountID;
-                post["SCOPEID"] = (string)scopeID;
-                post["METHOD"] = "getaccount";
-                using (Stream s = HttpRequestHandler.DoStreamPostRequest(m_UserAccountURI, null, post, false, TimeoutMs))
+                UserAccount account;
+                if(!TryGetValue(scopeID, accountID, out account))
                 {
-                    Map map = OpenSimResponse.Deserialize(s);
-                    Map resultmap = map["result"] as Map;
-                    if (null == resultmap)
-                    {
-                        throw new UserAccountNotFoundException();
-                    }
-                    return DeserializeEntry(resultmap);
+                    throw new UserAccountNotFoundException();
                 }
+                return account;
+            }
+        }
+
+        public override bool TryGetValue(UUID scopeID, string email, out UserAccount account)
+        {
+            Dictionary<string, string> post = new Dictionary<string, string>();
+            post["Email"] = email;
+            post["SCOPEID"] = (string)scopeID;
+            post["METHOD"] = "getaccount";
+            using (Stream s = HttpRequestHandler.DoStreamPostRequest(m_UserAccountURI, null, post, false, TimeoutMs))
+            {
+                Map map = OpenSimResponse.Deserialize(s);
+                if(!map.ContainsKey("result"))
+                {
+                    account = default(UserAccount);
+                    return false;
+                }
+                Map resultmap = map["result"] as Map;
+                if (null == resultmap)
+                { 
+                    account = default(UserAccount);
+                    return false;
+                }
+                account = DeserializeEntry(resultmap);
+                return true;
+            }
+        }
+
+        public override bool ContainsKey(UUID scopeID, string email)
+        {
+            Dictionary<string, string> post = new Dictionary<string, string>();
+            post["Email"] = email;
+            post["SCOPEID"] = (string)scopeID;
+            post["METHOD"] = "getaccount";
+            using (Stream s = HttpRequestHandler.DoStreamPostRequest(m_UserAccountURI, null, post, false, TimeoutMs))
+            {
+                Map map = OpenSimResponse.Deserialize(s);
+                if (!map.ContainsKey("result"))
+                {
+                    return false;
+                }
+                Map resultmap = map["result"] as Map;
+                return null != resultmap;
             }
         }
 
@@ -64,20 +133,61 @@ namespace SilverSim.BackendConnectors.Robust.Account
         {
             get
             {
-                Dictionary<string, string> post = new Dictionary<string, string>();
-                post["Email"] = email;
-                post["SCOPEID"] = (string)scopeID;
-                post["METHOD"] = "getaccount";
-                using (Stream s = HttpRequestHandler.DoStreamPostRequest(m_UserAccountURI, null, post, false, TimeoutMs))
+                UserAccount account;
+                if(!TryGetValue(scopeID, email, out account))
                 {
-                    Map map = OpenSimResponse.Deserialize(s);
-                    Map resultmap = map["result"] as Map;
-                    if (null == resultmap)
-                    {
-                        throw new UserAccountNotFoundException();
-                    }
-                    return DeserializeEntry(resultmap);
+                    throw new UserAccountNotFoundException();
                 }
+                return account;
+            }
+        }
+
+        public override bool TryGetValue(UUID scopeID, string firstName, string lastName, out UserAccount account)
+        {
+            Dictionary<string, string> post = new Dictionary<string, string>();
+            post["FirstName"] = firstName;
+            post["LastName"] = lastName;
+            post["SCOPEID"] = (string)scopeID;
+            post["METHOD"] = "getaccount";
+            using (Stream s = HttpRequestHandler.DoStreamPostRequest(m_UserAccountURI, null, post, false, TimeoutMs))
+            {
+                Map map = OpenSimResponse.Deserialize(s);
+                if(!map.ContainsKey("result"))
+                {
+                    account = default(UserAccount);
+                    return false;
+                }
+                Map resultmap = map["result"] as Map;
+                if (null == resultmap)
+                {
+                    account = default(UserAccount);
+                    return false;
+                }
+                account = DeserializeEntry(resultmap);
+                return true;
+            }
+        }
+
+        public override bool ContainsKey(UUID scopeID, string firstName, string lastName)
+        {
+            Dictionary<string, string> post = new Dictionary<string, string>();
+            post["FirstName"] = firstName;
+            post["LastName"] = lastName;
+            post["SCOPEID"] = (string)scopeID;
+            post["METHOD"] = "getaccount";
+            using (Stream s = HttpRequestHandler.DoStreamPostRequest(m_UserAccountURI, null, post, false, TimeoutMs))
+            {
+                Map map = OpenSimResponse.Deserialize(s);
+                if (!map.ContainsKey("result"))
+                {
+                    return false;
+                }
+                Map resultmap = map["result"] as Map;
+                if (null == resultmap)
+                {
+                    return false;
+                }
+                return true;
             }
         }
 
@@ -85,21 +195,12 @@ namespace SilverSim.BackendConnectors.Robust.Account
         {
             get
             {
-                Dictionary<string, string> post = new Dictionary<string, string>();
-                post["FirstName"] = firstName;
-                post["LastName"] = lastName;
-                post["SCOPEID"] = (string)scopeID;
-                post["METHOD"] = "getaccount";
-                using (Stream s = HttpRequestHandler.DoStreamPostRequest(m_UserAccountURI, null, post, false, TimeoutMs))
-                {
-                    Map map = OpenSimResponse.Deserialize(s);
-                    Map resultmap = map["result"] as Map;
-                    if (null == resultmap)
-                    {
-                        throw new UserAccountNotFoundException();
-                    }
-                    return DeserializeEntry(resultmap);
+                UserAccount account;
+                if(!TryGetValue(scopeID, firstName, lastName, out account))
+                { 
+                    throw new UserAccountNotFoundException();
                 }
+                return account;
             }
         }
 

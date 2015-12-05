@@ -46,6 +46,54 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
                 }
                 return (p.ContainsKey("data")) ? p["data"] : null; /* some calls have no data */
             }
+
+            protected bool TryOpenSimXmlRpcCall(string methodName, Map structparam, out IValue iv)
+            {
+                XmlRpc.XmlRpcRequest req = new XmlRpc.XmlRpcRequest();
+                req.MethodName = methodName;
+                req.Params.Add(structparam);
+                XmlRpc.XmlRpcResponse res = RPC.DoXmlRpcRequest(m_Uri, req, m_Connector.TimeoutMs);
+                Map p = res.ReturnValue as Map;
+                if (null == p)
+                {
+                    throw new InvalidDataException("Unexpected OpenSimProfile return value");
+                }
+                if (!p.ContainsKey("success"))
+                {
+                    throw new InvalidDataException("Unexpected OpenSimProfile return value");
+                }
+
+                if (p["success"].ToString().ToLower() != "true")
+                {
+                    iv = default(IValue);
+                    return false;
+                }
+                iv = (p.ContainsKey("data")) ? p["data"] : null; /* some calls have no data */
+                return true;
+            }
+
+            protected bool TryOpenSimXmlRpcCall(string methodName, Map structparam)
+            {
+                XmlRpc.XmlRpcRequest req = new XmlRpc.XmlRpcRequest();
+                req.MethodName = methodName;
+                req.Params.Add(structparam);
+                XmlRpc.XmlRpcResponse res = RPC.DoXmlRpcRequest(m_Uri, req, m_Connector.TimeoutMs);
+                Map p = res.ReturnValue as Map;
+                if (null == p)
+                {
+                    throw new InvalidDataException("Unexpected OpenSimProfile return value");
+                }
+                if (!p.ContainsKey("success"))
+                {
+                    throw new InvalidDataException("Unexpected OpenSimProfile return value");
+                }
+
+                if (p["success"].ToString().ToLower() != "true")
+                {
+                    return false;
+                }
+                return true;
+            }
         }
 
         public class OpenSimClassifiedsConnector : OpenSimProfileConnector, IClassifiedsInterface
@@ -70,30 +118,53 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
                 return classifieds;
             }
 
+            public bool TryGetValue(UUI user, UUID id, out ProfileClassified classified)
+            {
+                IValue iv;
+                Map map = new Map();
+                map.Add("classifiedID", user.ID);
+                if(!TryOpenSimXmlRpcCall("classifieds_info_query", map, out iv))
+                {
+                    classified = default(ProfileClassified);
+                    return false;
+                }
+                Map res = (Map)(((AnArray)iv)[0]);
+
+                classified = new ProfileClassified();
+                classified.ClassifiedID = res["classifieduuid"].AsUUID;
+                classified.Creator.ID = res["creatoruuid"].AsUUID;
+                classified.CreationDate = Date.UnixTimeToDateTime(res["creationdate"].AsULong);
+                classified.ExpirationDate = Date.UnixTimeToDateTime(res["expirationdate"].AsULong);
+                classified.Category = res["category"].AsInt;
+                classified.Name = res["name"].ToString();
+                classified.Description = res["description"].ToString();
+                classified.ParcelID = res["parceluuid"].AsUUID;
+                classified.ParentEstate = res["parentestate"].AsInt;
+                classified.SnapshotID = res["snapshotuuid"].AsUUID;
+                classified.SimName = res["simname"].ToString();
+                classified.GlobalPos = res["posglobal"].AsVector3;
+                classified.ParcelName = res["parcelname"].ToString();
+                classified.Flags = (byte)res["classifiedflags"].AsUInt;
+                classified.Price = res["priceforlisting"].AsInt;
+                return true;
+            }
+
+            public bool ContainsKey(UUI user, UUID id)
+            {
+                Map map = new Map();
+                map.Add("classifiedID", user.ID);
+                return TryOpenSimXmlRpcCall("classifieds_info_query", map);
+            }
+
             public ProfileClassified this[UUI user, UUID id]
             {
                 get
                 {
-                    Map map = new Map();
-                    map.Add("classifiedID", user.ID);
-                    Map res = (Map)(((AnArray)OpenSimXmlRpcCall("classifieds_info_query", map))[0]);
-
-                    ProfileClassified classified = new ProfileClassified();
-                    classified.ClassifiedID = res["classifieduuid"].AsUUID;
-                    classified.Creator.ID = res["creatoruuid"].AsUUID;
-                    classified.CreationDate = Date.UnixTimeToDateTime(res["creationdate"].AsULong);
-                    classified.ExpirationDate = Date.UnixTimeToDateTime(res["expirationdate"].AsULong);
-                    classified.Category = res["category"].AsInt;
-                    classified.Name = res["name"].ToString();
-                    classified.Description = res["description"].ToString();
-                    classified.ParcelID = res["parceluuid"].AsUUID;
-                    classified.ParentEstate = res["parentestate"].AsInt;
-                    classified.SnapshotID = res["snapshotuuid"].AsUUID;
-                    classified.SimName = res["simname"].ToString();
-                    classified.GlobalPos = res["posglobal"].AsVector3;
-                    classified.ParcelName = res["parcelname"].ToString();
-                    classified.Flags = (byte)res["classifiedflags"].AsUInt;
-                    classified.Price = res["priceforlisting"].AsInt;
+                    ProfileClassified classified;
+                    if(!TryGetValue(user, id, out classified))
+                    {
+                        throw new KeyNotFoundException();
+                    }
                     return classified;
                 }
             }
@@ -147,6 +218,47 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
                     classifieds.Add(m["pickid"].AsUUID, m["name"].ToString());
                 }
                 return classifieds;
+            }
+
+            public bool TryGetValue(UUI user, UUID id, out ProfilePick pick)
+            {
+                Map map = new Map();
+                map.Add("avatar_id", user.ID);
+                map.Add("pick_id", id);
+                IValue iv;
+                if(!TryOpenSimXmlRpcCall("pickinforequest", map, out iv))
+                {
+                    pick = default(ProfilePick);
+                    return false;
+                }
+                Map res = (Map)(((AnArray)iv)[0]);
+                pick = new ProfilePick();
+                pick.PickID = res["pickuuid"].AsUUID;
+                pick.Creator.ID = res["creatoruuid"].AsUUID;
+                pick.TopPick = Convert.ToBoolean(res["toppick"].ToString());
+                pick.ParcelID = res["parceluuid"].AsUUID;
+                pick.Name = res["name"].ToString();
+                pick.Description = res["description"].ToString();
+                pick.SnapshotID = res["snapshotuuid"].AsUUID;
+                pick.OriginalName = res["originalname"].ToString();
+                pick.SimName = res["simname"].ToString();
+                pick.GlobalPosition = res["posglobal"].AsVector3;
+                pick.SortOrder = res["sortorder"].AsInt;
+                pick.Enabled = Convert.ToBoolean(res["enabled"].ToString());
+                return true;
+            }
+
+            public bool ContainsKey(UUI user, UUID id)
+            {
+                Map map = new Map();
+                map.Add("avatar_id", user.ID);
+                map.Add("pick_id", id);
+                IValue iv;
+                if (!TryOpenSimXmlRpcCall("pickinforequest", map, out iv))
+                {
+                    return false;
+                }
+                return ((AnArray)iv)[0] is Map;
             }
 
             public ProfilePick this[UUI user, UUID id]
@@ -210,6 +322,30 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
 
             }
 
+            public bool TryGetValue(UUI user, UUI target, out string notes)
+            {
+                Map map = new Map();
+                map.Add("avatar_id", user.ID);
+                map.Add("uuid", target.ID);
+                IValue iv;
+                if(!TryOpenSimXmlRpcCall("avatarnotesrequest", map, out iv))
+                {
+                    notes = string.Empty;
+                    return false;
+                }
+                Map res = (Map)(((AnArray)iv)[0]);
+                notes = res["notes"].ToString();
+                return true;
+            }
+
+            public bool ContainsKey(UUI user, UUI target)
+            {
+                Map map = new Map();
+                map.Add("avatar_id", user.ID);
+                map.Add("uuid", target.ID);
+                return TryOpenSimXmlRpcCall("avatarnotesrequest", map);
+            }
+
             public string this[UUI user, UUI target]
             {
                 get
@@ -237,6 +373,36 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
                 : base(connector, uri)
             {
 
+            }
+
+            public bool TryGetValue(UUI user, out ProfilePreferences prefs)
+            {
+                Map map = new Map();
+                map.Add("avatar_id", user.ID);
+                IValue iv;
+                if(!TryOpenSimXmlRpcCall("user_preferences_request", map, out iv))
+                {
+                    prefs = default(ProfilePreferences);
+                    return false;
+                }
+                Map res = (Map)(((AnArray)iv)[0]);
+                prefs = new ProfilePreferences();
+                prefs.User = user;
+                prefs.IMviaEmail = Convert.ToBoolean(res["imviaemail"].ToString());
+                prefs.Visible = Convert.ToBoolean(res["visible"].ToString());
+                return true;
+            }
+
+            public bool ContainsKey(UUI user)
+            {
+                Map map = new Map();
+                map.Add("avatar_id", user.ID);
+                IValue iv;
+                if (!TryOpenSimXmlRpcCall("user_preferences_request", map, out iv))
+                {
+                    return false;
+                }
+                return true;
             }
 
             public ProfilePreferences this[UUI user]

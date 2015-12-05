@@ -9,6 +9,7 @@ using SilverSim.Types;
 using SilverSim.Types.Friends;
 using System.Collections.Generic;
 using System.IO;
+using System;
 
 namespace SilverSim.BackendConnectors.Robust.Friends
 {
@@ -43,32 +44,42 @@ namespace SilverSim.BackendConnectors.Robust.Friends
             }
         }
 
+        public override bool TryGetValue(UUI user, UUI friend, out FriendInfo fInfo)
+        {
+            Dictionary<string, string> post = new Dictionary<string, string>();
+            post["METHOD"] = "getfriendperms";
+            post["PRINCIPALID"] = (string)user.ID;
+            post["FRIENDID"] = (string)friend.ID;
+            post["KEY"] = m_ServiceKey;
+            post["SESSIONID"] = (string)m_SessionID;
+
+            Map res;
+            using (Stream s = HttpRequestHandler.DoStreamPostRequest(m_Uri, null, post, false, TimeoutMs))
+            {
+                res = OpenSimResponse.Deserialize(s);
+            }
+            if (res.ContainsKey("Value") && res["Value"] != null)
+            {
+                fInfo = new FriendInfo();
+                fInfo.User = user;
+                fInfo.Friend = friend;
+                fInfo.UserGivenFlags = res["Value"].AsInt;
+                return true;
+            }
+            fInfo = default(FriendInfo);
+            return false;
+        }
 
         public override FriendInfo this[UUI user, UUI friend]
         {
             get 
             {
-                Dictionary<string, string> post = new Dictionary<string, string>();
-                post["METHOD"] = "getfriendperms";
-                post["PRINCIPALID"] = (string)user.ID;
-                post["FRIENDID"] = (string)friend.ID;
-                post["KEY"] = m_ServiceKey;
-                post["SESSIONID"] = (string)m_SessionID;
-
-                Map res;
-                using(Stream s = HttpRequestHandler.DoStreamPostRequest(m_Uri, null, post, false, TimeoutMs))
+                FriendInfo fi;
+                if (!TryGetValue(user, friend, out fi))
                 {
-                    res = OpenSimResponse.Deserialize(s);
+                    throw new KeyNotFoundException();
                 }
-                if(res.ContainsKey("Value") && res["Value"] != null)
-                {
-                    FriendInfo fi = new FriendInfo();
-                    fi.User = user;
-                    fi.Friend = friend;
-                    fi.UserGivenFlags = res["Value"].AsInt;
-                    return fi;
-                }
-                throw new KeyNotFoundException();
+                return fi;
             }
         }
 

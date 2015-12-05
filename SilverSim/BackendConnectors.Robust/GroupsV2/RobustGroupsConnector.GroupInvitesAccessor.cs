@@ -27,41 +27,54 @@ namespace SilverSim.BackendConnectors.Robust.GroupsV2
                 m_GetGroupsAgentID = getGroupsAgentID;
             }
 
+            public bool TryGetValue(UUI requestingAgent, UUID groupInviteID, out GroupInvite gi)
+            {
+                Dictionary<string, string> post = new Dictionary<string, string>();
+                post["InviteID"] = (string)groupInviteID;
+                post["RequestingAgentID"] = m_GetGroupsAgentID(requestingAgent);
+                post["OP"] = "GET";
+                post["METHOD"] = "INVITE";
+
+                Map m;
+                using (Stream s = HttpRequestHandler.DoStreamPostRequest(m_Uri, null, post, false, TimeoutMs))
+                {
+                    m = OpenSimResponse.Deserialize(s);
+                }
+                if (!m.ContainsKey("RESULT"))
+                {
+                    gi = default(GroupInvite);
+                    return false;
+                }
+                if (m["RESULT"].ToString() == "NULL")
+                {
+                    gi = default(GroupInvite);
+                    return false;
+                }
+
+                Map resultMap = m["RESULT"] as Map;
+                if (null == resultMap)
+                {
+                    gi = default(GroupInvite);
+                    return false;
+                }
+                gi = new GroupInvite();
+                gi.ID = resultMap["InviteID"].AsUUID;
+                gi.Group.ID = resultMap["GroupID"].AsUUID;
+                gi.RoleID = resultMap["RoleID"].AsUUID;
+                gi.Principal.ID = resultMap["AgentID"].AsUUID;
+
+                return true;
+            }
+
             public GroupInvite this[UUI requestingAgent, UUID groupInviteID]
             {
                 get 
-                { 
-                    Dictionary<string, string> post = new Dictionary<string, string>();
-                    post["InviteID"] = (string)groupInviteID;
-                    post["RequestingAgentID"] = m_GetGroupsAgentID(requestingAgent);
-                    post["OP"] = "GET";
-                    post["METHOD"] = "INVITE";
-
-                    Map m;
-                    using(Stream s = HttpRequestHandler.DoStreamPostRequest(m_Uri, null, post, false, TimeoutMs))
-                    {
-                        m = OpenSimResponse.Deserialize(s);
-                    }
-                    if (!m.ContainsKey("RESULT"))
+                {
+                    GroupInvite gi;
+                    if(!TryGetValue(requestingAgent, groupInviteID, out gi))
                     {
                         throw new KeyNotFoundException();
                     }
-                    if (m["RESULT"].ToString() == "NULL")
-                    {
-                        throw new KeyNotFoundException();
-                    }
-
-                    Map resultMap = m["RESULT"] as Map;
-                    if(null == resultMap)
-                    {
-                        throw new KeyNotFoundException();
-                    }
-                    GroupInvite gi = new GroupInvite();
-                    gi.ID = resultMap["InviteID"].AsUUID;
-                    gi.Group.ID = resultMap["GroupID"].AsUUID;
-                    gi.RoleID = resultMap["RoleID"].AsUUID;
-                    gi.Principal.ID = resultMap["AgentID"].AsUUID;
-
                     return gi;
                 }
             }

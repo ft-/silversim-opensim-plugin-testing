@@ -231,25 +231,37 @@ namespace SilverSim.BackendConnectors.Robust.Asset
         #endregion
 
         #region Accessors
+        public override bool TryGetValue(UUID key, out AssetData assetData)
+        {
+            try
+            {
+                using (Stream stream = HttpRequestHandler.DoStreamGetRequest(m_AssetURI + "assets/" + key.ToString(), null, TimeoutMs))
+                {
+                    assetData = AssetXml.ParseAssetData(stream);
+                    return true;
+                }
+            }
+            catch (HttpException e)
+            {
+                if (e.GetHttpCode() == (int)HttpStatusCode.NotFound)
+                {
+                    assetData = default(AssetData);
+                    return false;
+                }
+                throw;
+            }
+        }
+
         public override AssetData this[UUID key]
         {
             get
             {
-                try
+                AssetData assetData;
+                if(!TryGetValue(key, out assetData))
                 {
-                    using (Stream stream = HttpRequestHandler.DoStreamGetRequest(m_AssetURI + "assets/" + key.ToString(), null, TimeoutMs))
-                    {
-                        return AssetXml.ParseAssetData(stream);
-                    }
+                    throw new AssetNotFoundException(key);
                 }
-                catch(HttpException e)
-                {
-                    if (e.GetHttpCode() == (int)HttpStatusCode.NotFound)
-                    {
-                        throw new AssetNotFoundException(key);
-                    }
-                    throw;
-                }
+                return assetData;
             }
         }
         #endregion

@@ -11,6 +11,7 @@ using SilverSim.Types;
 using SilverSim.Types.Friends;
 using System.Collections.Generic;
 using System.IO;
+using System;
 
 namespace SilverSim.BackendConnectors.Robust.Friends
 {
@@ -41,19 +42,31 @@ namespace SilverSim.BackendConnectors.Robust.Friends
             }
         }
 
+        public override bool TryGetValue(UUI user, UUI friend, out FriendInfo fInfo)
+        {
+            List<FriendInfo> filist = this[user];
+            foreach (FriendInfo fi in filist)
+            {
+                if (fi.Friend.Equals(friend))
+                {
+                    fInfo = fi;
+                    return true;
+                }
+            }
+            fInfo = default(FriendInfo);
+            return false;
+        }
+
         public override FriendInfo this[UUI user, UUI friend]
         {
             get 
             {
-                List<FriendInfo> filist = this[user];
-                foreach(FriendInfo fi in filist)
+                FriendInfo fi;
+                if(!TryGetValue(user, friend, out fi))
                 {
-                    if(fi.Friend.Equals(friend))
-                    {
-                        return fi;
-                    }
+                    throw new KeyNotFoundException();
                 }
-                throw new KeyNotFoundException();
+                return fi;
             }
         }
 

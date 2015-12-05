@@ -18,6 +18,30 @@ namespace SilverSim.BackendConnectors.Flotsam.Groups
 
             }
 
+            public bool TryGetValue(UUI requestingAgent, UGI group, UUI principal, out GroupMembership gmem)
+            {
+                Map m = new Map();
+                m.Add("AgentID", principal.ID);
+                m.Add("GroupID", group.ID);
+                m = FlotsamXmlRpcGetCall(requestingAgent, "groups.getAgentGroupMembership", m) as Map;
+                if (null == m)
+                {
+                    gmem = default(GroupMembership);
+                    return false;
+                }
+                gmem = m.ToGroupMembership();
+                return true;
+            }
+
+            public bool ContainsKey(UUI requestingAgent, UGI group, UUI principal)
+            {
+                Map m = new Map();
+                m.Add("AgentID", principal.ID);
+                m.Add("GroupID", group.ID);
+                m = FlotsamXmlRpcGetCall(requestingAgent, "groups.getAgentGroupMembership", m) as Map;
+                return null != m;
+            }
+
             public GroupMembership this[UUI requestingAgent, UGI group, UUI principal]
             {
                 get

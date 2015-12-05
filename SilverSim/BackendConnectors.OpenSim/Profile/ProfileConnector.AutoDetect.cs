@@ -93,6 +93,89 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
                 throw new ProfileAutoDetectFailedException();
             }
 
+            public bool TryGetValue(UUI user, UUID id, out ProfileClassified classified)
+            {
+                try
+                {
+                    if (m_OpenSim.TryGetValue(user, id, out classified))
+                    {
+                        m_Connector.m_Classifieds = m_OpenSim;
+                        return true;
+                    }
+                }
+                catch
+#if DEBUG
+                        (Exception e)
+#endif
+                {
+                    /* no action needed */
+#if DEBUG
+                    m_Log.Debug("Classifieds.TryGetValue(UUI, UUID, out ProfileClassified): OpenSimProfile", e);
+#endif
+                }
+                try
+                {
+                    if (m_Robust.TryGetValue(user, id, out classified))
+                    {
+                        m_Connector.m_Classifieds = m_Robust;
+                        return true;
+                    }
+                }
+                catch
+#if DEBUG
+                        (Exception e)
+#endif
+                {
+                    /* no action needed */
+#if DEBUG
+                    m_Log.Debug("Classifieds.TryGetValue(UUI, UUID, out ProfileClassified): CoreProfile", e);
+#endif
+                }
+                classified = default(ProfileClassified);
+                return false;
+            }
+
+            public bool ContainsKey(UUI user, UUID id)
+            {
+                try
+                {
+                    if (m_OpenSim.ContainsKey(user, id))
+                    {
+                        m_Connector.m_Classifieds = m_OpenSim;
+                        return true;
+                    }
+                }
+                catch
+#if DEBUG
+                        (Exception e)
+#endif
+                {
+                    /* no action needed */
+#if DEBUG
+                    m_Log.Debug("Classifieds.ContainsKey(UUI, UUID): OpenSimProfile", e);
+#endif
+                }
+                try
+                {
+                    if (m_Robust.ContainsKey(user, id))
+                    {
+                        m_Connector.m_Classifieds = m_Robust;
+                        return true;
+                    }
+                }
+                catch
+#if DEBUG
+                        (Exception e)
+#endif
+                {
+                    /* no action needed */
+#if DEBUG
+                    m_Log.Debug("Classifieds.ContainsKey(UUI, UUID): CoreProfile", e);
+#endif
+                }
+                return false;
+            }
+
             public ProfileClassified this[UUI user, UUID id]
             {
                 get 
@@ -261,6 +344,91 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
                 throw new ProfileAutoDetectFailedException();
             }
 
+            public bool TryGetValue(UUI user, UUID id, out ProfilePick pick)
+            {
+                try
+                {
+                    if (m_OpenSim.TryGetValue(user, id, out pick))
+                    {
+                        m_Connector.m_Picks = m_OpenSim;
+                        return true;
+                    }
+                }
+                catch
+#if DEBUG
+                        (Exception e)
+#endif
+                {
+                    /* no action needed */
+#if DEBUG
+                    m_Log.Debug("Picks.TryGetValue(UUI, UUID, out ProfilePick): OpenSimProfile", e);
+#endif
+                }
+                try
+                {
+                    if (m_Robust.TryGetValue(user, id, out pick))
+                    {
+                        m_Connector.m_Picks = m_Robust;
+                        return true;
+                    }
+                }
+                catch
+#if DEBUG
+                        (Exception e)
+#endif
+                {
+                    /* no action needed */
+#if DEBUG
+                    m_Log.Debug("Picks.TryGetValue(UUI, UUID, out ProfilePick): CoreProfile", e);
+#endif
+                }
+
+                pick = default(ProfilePick);
+                return false;
+            }
+
+            public bool ContainsKey(UUI user, UUID id)
+            {
+                try
+                {
+                    if (m_OpenSim.ContainsKey(user, id))
+                    {
+                        m_Connector.m_Picks = m_OpenSim;
+                        return true;
+                    }
+                }
+                catch
+#if DEBUG
+                        (Exception e)
+#endif
+                {
+                    /* no action needed */
+#if DEBUG
+                    m_Log.Debug("Picks.ContainsKey(UUI, UUID): OpenSimProfile", e);
+#endif
+                }
+                try
+                {
+                    if (m_Robust.ContainsKey(user, id))
+                    {
+                        m_Connector.m_Picks = m_Robust;
+                        return true;
+                    }
+                }
+                catch
+#if DEBUG
+                        (Exception e)
+#endif
+                {
+                    /* no action needed */
+#if DEBUG
+                    m_Log.Debug("Picks.ContainsKey(UUI, UUID): CoreProfile", e);
+#endif
+                }
+
+                return false;
+            }
+
             public ProfilePick this[UUI user, UUID id]
             {
                 get 
@@ -391,6 +559,91 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
                 m_Robust = new RobustNotesConnector(connector, url);
             }
 
+            public bool TryGetValue(UUI user, UUI target, out string notes)
+            {
+                try
+                {
+                    if (m_OpenSim.TryGetValue(user, target, out notes))
+                    {
+                        m_Connector.m_Notes = m_OpenSim;
+                        return true;
+                    }
+                }
+                catch
+#if DEBUG
+                        (Exception e)
+#endif
+                {
+                    /* no action needed */
+#if DEBUG
+                    m_Log.Debug("Notes.TryGetValue(UUI, UUI, out string): OpenSimProfile", e);
+#endif
+                }
+                try
+                {
+                    if (m_Robust.TryGetValue(user, target, out notes))
+                    {
+                        m_Connector.m_Notes = m_Robust;
+                        return true;
+                    }
+                }
+                catch
+#if DEBUG
+                        (Exception e)
+#endif
+                {
+                    /* no action needed */
+#if DEBUG
+                    m_Log.Debug("Notes.TryGetValue(UUI, UUI, out string): CoreProfile", e);
+#endif
+                }
+
+                notes = string.Empty;
+                return false;
+            }
+
+            public bool ContainsKey(UUI user, UUI target)
+            {
+                try
+                {
+                    if (m_OpenSim.ContainsKey(user, target))
+                    {
+                        m_Connector.m_Notes = m_OpenSim;
+                        return true;
+                    }
+                }
+                catch
+#if DEBUG
+                        (Exception e)
+#endif
+                {
+                    /* no action needed */
+#if DEBUG
+                    m_Log.Debug("Notes.ContainsKey(UUI, UUI): OpenSimProfile", e);
+#endif
+                }
+                try
+                {
+                    if (m_Robust.ContainsKey(user, target))
+                    {
+                        m_Connector.m_Notes = m_Robust;
+                        return true;
+                    }
+                }
+                catch
+#if DEBUG
+                        (Exception e)
+#endif
+                {
+                    /* no action needed */
+#if DEBUG
+                    m_Log.Debug("Notes.ContainsKey(UUI, UUI): CoreProfile", e);
+#endif
+                }
+
+                return false;
+            }
+
             public string this[UUI user, UUI target]
             {
                 get
@@ -480,6 +733,49 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
                 m_Connector = connector;
                 m_OpenSim = new OpenSimUserPreferencesConnector(connector, url);
                 m_Robust = new RobustUserPreferencesConnector(connector, url);
+            }
+
+            public bool TryGetValue(UUI user, out ProfilePreferences prefs)
+            {
+                try
+                {
+                    if (m_OpenSim.TryGetValue(user, out prefs))
+                    {
+                        m_Connector.m_Preferences = m_OpenSim;
+                        return true;
+                    }
+                }
+                catch
+#if DEBUG
+                        (Exception e)
+#endif
+                {
+                    /* no action needed */
+#if DEBUG
+                    m_Log.Debug("Preferences.TryGetValue(UUI, UUI, out ProfilePreferences): OpenSimProfile", e);
+#endif
+                }
+                try
+                {
+                    if (m_Robust.TryGetValue(user, out prefs))
+                    {
+                        m_Connector.m_Preferences = m_Robust;
+                        return true;
+                    }
+                }
+                catch
+#if DEBUG
+                        (Exception e)
+#endif
+                {
+                    /* no action needed */
+#if DEBUG
+                    m_Log.Debug("Preferences.TryGetValue(UUI, UUI, out ProfilePreferences): CoreProfile", e);
+#endif
+                }
+
+                prefs = default(ProfilePreferences);
+                return false;
             }
 
             public ProfilePreferences this[UUI user]

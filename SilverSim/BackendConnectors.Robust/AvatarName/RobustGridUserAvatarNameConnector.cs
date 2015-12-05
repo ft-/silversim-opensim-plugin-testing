@@ -10,6 +10,7 @@ using SilverSim.ServiceInterfaces.AvatarName;
 using SilverSim.Types;
 using System.Collections.Generic;
 using System.IO;
+using System;
 
 namespace SilverSim.BackendConnectors.Robust.AvatarName
 {
@@ -45,6 +46,12 @@ namespace SilverSim.BackendConnectors.Robust.AvatarName
             return uui;
         }
 
+        public override bool TryGetValue(string firstName, string lastName, out UUI uui)
+        {
+            uui = default(UUI);
+            return false;
+        }
+
         public override UUI this[string firstName, string lastName] 
         { 
             get
@@ -58,27 +65,41 @@ namespace SilverSim.BackendConnectors.Robust.AvatarName
             return new List<UUI>();
         }
 
+        public override bool TryGetValue(UUID userID, out UUI uui)
+        {
+            Dictionary<string, string> post = new Dictionary<string, string>();
+            post["UserID"] = (string)userID;
+            post["METHOD"] = "getgriduserinfo";
+            Map map;
+            using (Stream s = HttpRequestHandler.DoStreamPostRequest(m_GridUserURI, null, post, false, TimeoutMs))
+            {
+                map = OpenSimResponse.Deserialize(s);
+            }
+            if (!map.ContainsKey("result"))
+            {
+                uui = default(UUI);
+                return false;
+            }
+            Map m = map["result"] as Map;
+            if (null == m)
+            {
+                uui = default(UUI);
+                return false;
+            }
+            uui = FromResult(m);
+            return true;
+        }
+
         public override UUI this[UUID userID]
         {
             get
             {
-                Dictionary<string, string> post = new Dictionary<string, string>();
-                post["UserID"] = (string)userID;
-                post["METHOD"] = "getgriduserinfo";
-                Map map;
-                using(Stream s = HttpRequestHandler.DoStreamPostRequest(m_GridUserURI, null, post, false, TimeoutMs))
-                {
-                    map = OpenSimResponse.Deserialize(s);
-                }
-                if (!map.ContainsKey("result"))
+                UUI uui;
+                if(!TryGetValue(userID, out uui))
                 {
                     throw new KeyNotFoundException();
                 }
-                if (!(map["result"] is Map))
-                {
-                    throw new KeyNotFoundException();
-                }
-                return FromResult((Map)map["result"]);
+                return uui;
             }
             set
             {

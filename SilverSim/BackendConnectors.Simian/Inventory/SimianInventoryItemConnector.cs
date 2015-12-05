@@ -30,42 +30,96 @@ namespace SilverSim.BackendConnectors.Simian.Inventory
         #endregion
 
         #region Accessors
+        public override bool TryGetValue(UUID key, out InventoryItem item)
+        {
+            throw new NotSupportedException();
+        }
+
+        public override bool ContainsKey(UUID key)
+        {
+            throw new NotSupportedException();
+        }
+
         public override InventoryItem this[UUID key]
         {
             get 
             { 
-                throw new NotImplementedException(); 
+                throw new NotSupportedException(); 
             }
         }
+
+        public override bool TryGetValue(UUID principalID, UUID key, out InventoryItem item)
+        {
+            Dictionary<string, string> post = new Dictionary<string, string>();
+            post["RequestMethod"] = "GetInventoryNode";
+            post["ItemID"] = (string)key;
+            post["OwnerID"] = (string)principalID;
+            post["IncludeFolders"] = "1";
+            post["IncludeItems"] = "1";
+            post["ChildrenOnly"] = "1";
+
+            Map res = SimianGrid.PostToService(m_InventoryURI, m_InventoryCapability, post, TimeoutMs);
+            if (res["Success"].AsBoolean && res.ContainsKey("Items"))
+            {
+                AnArray resarray = res["Items"] as AnArray;
+                if (null != resarray)
+                {
+                    foreach (IValue iv in resarray)
+                    {
+                        Map m = iv as Map;
+                        if (null != m && m["Type"].ToString() == "Item")
+                        {
+                            item = SimianInventoryConnector.ItemFromMap(m, m_GroupsService);
+                            return true;
+                        }
+                    }
+                }
+            }
+
+            item = default(InventoryItem);
+            return false;
+        }
+
+        public override bool ContainsKey(UUID principalID, UUID key)
+        {
+            Dictionary<string, string> post = new Dictionary<string, string>();
+            post["RequestMethod"] = "GetInventoryNode";
+            post["ItemID"] = (string)key;
+            post["OwnerID"] = (string)principalID;
+            post["IncludeFolders"] = "1";
+            post["IncludeItems"] = "1";
+            post["ChildrenOnly"] = "1";
+
+            Map res = SimianGrid.PostToService(m_InventoryURI, m_InventoryCapability, post, TimeoutMs);
+            if (res["Success"].AsBoolean && res.ContainsKey("Items"))
+            {
+                AnArray resarray = res["Items"] as AnArray;
+                if (null != resarray)
+                {
+                    foreach (IValue iv in resarray)
+                    {
+                        Map m = iv as Map;
+                        if (null != m && m["Type"].ToString() == "Item")
+                        {
+                            return true;
+                        }
+                    }
+                }
+            }
+
+            return false;
+        }
+
         public override InventoryItem this[UUID principalID, UUID key]
         {
             get
             {
-                Dictionary<string, string> post = new Dictionary<string, string>();
-                post["RequestMethod"] = "GetInventoryNode";
-                post["ItemID"] = (string)key;
-                post["OwnerID"] = (string)principalID;
-                post["IncludeFolders"] = "1";
-                post["IncludeItems"] = "1";
-                post["ChildrenOnly"] = "1";
-
-                Map res = SimianGrid.PostToService(m_InventoryURI, m_InventoryCapability, post, TimeoutMs);
-                if (res["Success"].AsBoolean && res.ContainsKey("Items"))
+                InventoryItem item;
+                if (!TryGetValue(principalID, key, out item))
                 {
-                    AnArray resarray = res["Items"] as AnArray;
-                    if(null != resarray)
-                    {
-                        foreach (IValue iv in resarray)
-                        {
-                            Map m = iv as Map;
-                            if (null != m && m["Type"].ToString() == "Item")
-                            {
-                                return SimianInventoryConnector.ItemFromMap(m, m_GroupsService);
-                            }
-                        }
-                    }
+                    throw new InventoryItemNotFoundException(key);
                 }
-                throw new InventoryItemNotFoundException(key);
+                return item;
             }
         }
         #endregion

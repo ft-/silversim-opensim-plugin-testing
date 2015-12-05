@@ -27,6 +27,57 @@ namespace SilverSim.BackendConnectors.Robust.GroupsV2
                 m_GetGroupsAgentID = getGroupsAgentID;
             }
 
+            public bool TryGetValue(UUI requestingAgent, UGI group, UUI principal, out GroupMembership gm)
+            {
+                Dictionary<string, string> post = new Dictionary<string, string>();
+                post["AgentID"] = m_GetGroupsAgentID(principal);
+                post["GroupID"] = (string)group.ID;
+                post["RequestingAgentID"] = m_GetGroupsAgentID(requestingAgent);
+                post["METHOD"] = "GETMEMBERSHIP";
+                Map m;
+                using (Stream s = HttpRequestHandler.DoStreamPostRequest(m_Uri, null, post, false, TimeoutMs))
+                {
+                    m = OpenSimResponse.Deserialize(s);
+                }
+                if (!m.ContainsKey("RESULT"))
+                {
+                    gm = default(GroupMembership);
+                    return false;
+                }
+                if (m["RESULT"].ToString() == "NULL")
+                {
+                    gm = default(GroupMembership);
+                    return false;
+                }
+
+                gm = m["RESULT"].ToGroupMembership();
+                return true;
+            }
+
+            public bool ContainsKey(UUI requestingAgent, UGI group, UUI principal)
+            {
+                Dictionary<string, string> post = new Dictionary<string, string>();
+                post["AgentID"] = m_GetGroupsAgentID(principal);
+                post["GroupID"] = (string)group.ID;
+                post["RequestingAgentID"] = m_GetGroupsAgentID(requestingAgent);
+                post["METHOD"] = "GETMEMBERSHIP";
+                Map m;
+                using (Stream s = HttpRequestHandler.DoStreamPostRequest(m_Uri, null, post, false, TimeoutMs))
+                {
+                    m = OpenSimResponse.Deserialize(s);
+                }
+                if (!m.ContainsKey("RESULT"))
+                {
+                    return false;
+                }
+                if (m["RESULT"].ToString() == "NULL")
+                {
+                    return false;
+                }
+
+                return true;
+            }
+
             public GroupMembership this[UUI requestingAgent, UGI group, UUI principal]
             {
                 get

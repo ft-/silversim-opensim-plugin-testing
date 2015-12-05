@@ -62,6 +62,32 @@ namespace SilverSim.BackendConnectors.Flotsam.Groups
                 throw new NotImplementedException();
             }
 
+            public bool TryGetValue(UUI requestingAgent, UUID groupID, out UGI ugi)
+            {
+                Map m = new Map();
+                m.Add("GroupID", groupID);
+                m = FlotsamXmlRpcGetCall(requestingAgent, "groups.getGroup", m) as Map;
+                if (null == m)
+                {
+                    ugi = default(UGI);
+                    return false;
+                }
+                ugi = m.ToGroupInfo().ID;
+                return true;
+            }
+
+            public bool ContainsKey(UUI requestingAgent, UUID groupID)
+            {
+                Map m = new Map();
+                m.Add("GroupID", groupID);
+                m = FlotsamXmlRpcGetCall(requestingAgent, "groups.getGroup", m) as Map;
+                if (null == m)
+                {
+                    return false;
+                }
+                return true;
+            }
+
             public UGI this[UUI requestingAgent, UUID groupID]
             {
                 get
@@ -77,6 +103,32 @@ namespace SilverSim.BackendConnectors.Flotsam.Groups
                 }
             }
 
+            public bool TryGetValue(UUI requestingAgent, UGI group, out GroupInfo groupInfo)
+            {
+                Map m = new Map();
+                m.Add("GroupID", group.ID);
+                m = FlotsamXmlRpcGetCall(requestingAgent, "groups.getGroup", m) as Map;
+                if (null == m)
+                {
+                    groupInfo = default(GroupInfo);
+                    return false;
+                }
+                groupInfo = m.ToGroupInfo();
+                return true;
+            }
+
+            public bool ContainsKey(UUI requestingAgent, UGI group)
+            {
+                Map m = new Map();
+                m.Add("GroupID", group.ID);
+                m = FlotsamXmlRpcGetCall(requestingAgent, "groups.getGroup", m) as Map;
+                if (null == m)
+                {
+                    return false;
+                }
+                return true;
+            }
+
             public GroupInfo this[UUI requestingAgent, UGI group]
             {
                 get 
@@ -90,6 +142,32 @@ namespace SilverSim.BackendConnectors.Flotsam.Groups
                     }
                     return m.ToGroupInfo();
                 }
+            }
+
+            public bool TryGetValue(UUI requestingAgent, string groupName, out GroupInfo groupInfo)
+            {
+                Map m = new Map();
+                m.Add("Name", groupName);
+                m = FlotsamXmlRpcGetCall(requestingAgent, "groups.getGroup", m) as Map;
+                if (null == m)
+                {
+                    groupInfo = default(GroupInfo);
+                    return false;
+                }
+                groupInfo = m.ToGroupInfo();
+                return true;
+            }
+
+            public bool ContainsKey(UUI requestingAgent, string groupName)
+            {
+                Map m = new Map();
+                m.Add("Name", groupName);
+                m = FlotsamXmlRpcGetCall(requestingAgent, "groups.getGroup", m) as Map;
+                if (null == m)
+                {
+                    return false;
+                }
+                return true;
             }
 
             public GroupInfo this[UUI requestingAgent, string groupName]

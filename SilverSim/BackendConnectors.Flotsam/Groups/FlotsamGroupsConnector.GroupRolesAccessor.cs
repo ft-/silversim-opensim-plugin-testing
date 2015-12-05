@@ -16,18 +16,42 @@ namespace SilverSim.BackendConnectors.Flotsam.Groups
             {
             }
 
+            public bool TryGetValue(UUI requestingAgent, UGI group, UUID roleID, out GroupRole groupRole)
+            {
+                foreach (GroupRole role in this[requestingAgent, group])
+                {
+                    if (role.ID.Equals(roleID))
+                    {
+                        groupRole = role;
+                        return true;
+                    }
+                }
+                groupRole = default(GroupRole);
+                return false;
+            }
+
+            public bool ContainsKey(UUI requestingAgent, UGI group, UUID roleID)
+            {
+                foreach (GroupRole role in this[requestingAgent, group])
+                {
+                    if (role.ID.Equals(roleID))
+                    {
+                        return true;
+                    }
+                }
+                return false;
+            }
+
             public GroupRole this[UUI requestingAgent, UGI group, UUID roleID]
             {
                 get 
                 {
-                    foreach(GroupRole role in this[requestingAgent, group])
+                    GroupRole role;
+                    if (!TryGetValue(requestingAgent, group, roleID, out role))
                     {
-                        if(role.ID.Equals(roleID))
-                        {
-                            return role;
-                        }
+                        throw new KeyNotFoundException();
                     }
-                    throw new KeyNotFoundException();
+                    return role;
                 }
             }
 

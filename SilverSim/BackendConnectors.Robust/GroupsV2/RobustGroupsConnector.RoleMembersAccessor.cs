@@ -30,19 +30,44 @@ namespace SilverSim.BackendConnectors.Robust.GroupsV2
                 m_GetGroupsAgentID = getGroupsAgentID;
             }
 
+            public bool TryGetValue(UUI requestingAgent, UGI group, UUID roleID, UUI principal, out GroupRolemember rolemem)
+            {
+                foreach (GroupRolemember member in this[requestingAgent, group])
+                {
+                    if (member.RoleID.Equals(roleID) &&
+                        member.Principal.EqualsGrid(principal))
+                    {
+                        rolemem = member;
+                        return true;
+                    }
+                }
+                rolemem = default(GroupRolemember);
+                return false;
+            }
+
+            public bool ContainsKey(UUI requestingAgent, UGI group, UUID roleID, UUI principal)
+            {
+                foreach (GroupRolemember member in this[requestingAgent, group])
+                {
+                    if (member.RoleID.Equals(roleID) &&
+                        member.Principal.EqualsGrid(principal))
+                    {
+                        return true;
+                    }
+                }
+                return false;
+            }
+
             public GroupRolemember this[UUI requestingAgent, UGI group, UUID roleID, UUI principal]
             {
                 get
                 {
-                    foreach(GroupRolemember member in this[requestingAgent, group])
+                    GroupRolemember member;
+                    if(!TryGetValue(requestingAgent, group, roleID, principal, out member))
                     {
-                        if(member.RoleID.Equals(roleID) &&
-                            member.Principal.EqualsGrid(principal))
-                        {
-                            return member;
-                        }
+                        throw new KeyNotFoundException();
                     }
-                    throw new KeyNotFoundException();
+                    return member;
                 }
             }
 

@@ -12,6 +12,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Net;
 using System.Web;
+using System;
 
 namespace SilverSim.BackendConnectors.Robust.Inventory
 {
@@ -32,26 +33,118 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
         #endregion
 
         #region Accessors
+        public override bool TryGetValue(UUID key, out InventoryItem item)
+        {
+            Dictionary<string, string> post = new Dictionary<string, string>();
+            post["ID"] = (string)key;
+            post["METHOD"] = "GETITEM";
+            Map map;
+            using (Stream s = HttpRequestHandler.DoStreamPostRequest(m_InventoryURI, null, post, false, TimeoutMs))
+            {
+                map = OpenSimResponse.Deserialize(s);
+            }
+            if(!map.ContainsKey("item"))
+            {
+                item = default(InventoryItem);
+                return false;
+            }
+
+            Map itemmap = map["item"] as Map;
+            if (null == itemmap)
+            {
+                item = default(InventoryItem);
+                return false;
+            }
+
+            item = RobustInventoryConnector.ItemFromMap(itemmap, m_GroupsService);
+            return true;
+        }
+
+        public override bool ContainsKey(UUID key)
+        {
+            Dictionary<string, string> post = new Dictionary<string, string>();
+            post["ID"] = (string)key;
+            post["METHOD"] = "GETITEM";
+            Map map;
+            using (Stream s = HttpRequestHandler.DoStreamPostRequest(m_InventoryURI, null, post, false, TimeoutMs))
+            {
+                map = OpenSimResponse.Deserialize(s);
+            }
+            if (!map.ContainsKey("item"))
+            {
+                return false;
+            }
+            Map itemmap = map["item"] as Map;
+            if (null == itemmap)
+            {
+                return false;
+            }
+
+            return true;
+        }
+
         public override InventoryItem this[UUID key]
         {
             get
             {
-                Dictionary<string, string> post = new Dictionary<string, string>();
-                post["ID"] = (string)key;
-                post["METHOD"] = "GETITEM";
-                Map map;
-                using(Stream s = HttpRequestHandler.DoStreamPostRequest(m_InventoryURI, null, post, false, TimeoutMs))
-                {
-                    map = OpenSimResponse.Deserialize(s);
-                }
-                Map itemmap = map["item"] as Map;
-                if (null == itemmap)
+                InventoryItem item;
+                if(!TryGetValue(key, out item))
                 {
                     throw new InventoryInaccessibleException();
                 }
-
-                return RobustInventoryConnector.ItemFromMap(itemmap, m_GroupsService);
+                return item;
             }
+        }
+
+
+        public override bool TryGetValue(UUID principalID, UUID key, out InventoryItem item)
+        {
+            Dictionary<string, string> post = new Dictionary<string, string>();
+            post["PRINCIPAL"] = (string)principalID;
+            post["ID"] = (string)key;
+            post["METHOD"] = "GETITEM";
+            Map map;
+            using (Stream s = HttpRequestHandler.DoStreamPostRequest(m_InventoryURI, null, post, false, TimeoutMs))
+            {
+                map = OpenSimResponse.Deserialize(s);
+            }
+
+            if(!map.ContainsKey("item"))
+            {
+                item = default(InventoryItem);
+                return false;
+            }
+
+            Map itemmap = map["item"] as Map;
+            if (null == itemmap)
+            {
+                item = default(InventoryItem);
+                return false;
+            }
+
+            item = RobustInventoryConnector.ItemFromMap(itemmap, m_GroupsService);
+            return true;
+        }
+
+        public override bool ContainsKey(UUID principalID, UUID key)
+        {
+            Dictionary<string, string> post = new Dictionary<string, string>();
+            post["PRINCIPAL"] = (string)principalID;
+            post["ID"] = (string)key;
+            post["METHOD"] = "GETITEM";
+            Map map;
+            using (Stream s = HttpRequestHandler.DoStreamPostRequest(m_InventoryURI, null, post, false, TimeoutMs))
+            {
+                map = OpenSimResponse.Deserialize(s);
+            }
+
+            if (!map.ContainsKey("item"))
+            {
+                return false;
+            }
+
+            Map itemmap = map["item"] as Map;
+            return (null != itemmap);
         }
 
         public override InventoryItem this[UUID principalID, UUID key]

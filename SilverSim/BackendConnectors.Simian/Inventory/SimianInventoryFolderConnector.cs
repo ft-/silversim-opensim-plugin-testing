@@ -30,29 +30,135 @@ namespace SilverSim.BackendConnectors.Simian.Inventory
         #endregion
 
         #region Accessors
+        public override bool TryGetValue(UUID principalID, UUID key, out InventoryFolder invfolder)
+        {
+            List<InventoryFolder> folders = GetFolders(principalID, key);
+            foreach (InventoryFolder folder in folders)
+            {
+                if (folder.ID.Equals(key))
+                {
+                    invfolder = folder;
+                    return true;
+                }
+            }
+            invfolder = default(InventoryFolder);
+            return false;
+        }
+
+        public override bool ContainsKey(UUID principalID, UUID key)
+        {
+            List<InventoryFolder> folders = GetFolders(principalID, key);
+            foreach (InventoryFolder folder in folders)
+            {
+                if (folder.ID.Equals(key))
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
         [SuppressMessage("Gendarme.Rules.Exceptions", "DoNotThrowInUnexpectedLocationRule")]
         public override InventoryFolder this[UUID principalID, UUID key]
         {
             get
             {
-                List<InventoryFolder> folders = GetFolders(principalID, key);
-                foreach(InventoryFolder folder in folders)
+                InventoryFolder folder;
+                if(!TryGetValue(principalID, key, out folder))
                 {
-                    if(folder.ID.Equals(key))
-                    {
-                        return folder;
-                    }
+                    throw new InventoryInaccessibleException();
                 }
-                throw new InventoryInaccessibleException();
+
+                return folder;
             }
+        }
+
+        public override bool TryGetValue(UUID key, out InventoryFolder folder)
+        {
+            throw new NotSupportedException();
+        }
+
+        public override bool ContainsKey(UUID key)
+        {
+            throw new NotSupportedException();
         }
 
         public override InventoryFolder this[UUID key]
         {
             get 
             { 
-                throw new NotImplementedException();
+                throw new NotSupportedException();
             }
+        }
+
+        public override bool TryGetValue(UUID principalID, AssetType type, out InventoryFolder folder)
+        {
+            Dictionary<string, string> post = new Dictionary<string, string>();
+            if (type == AssetType.RootFolder)
+            {
+                post["RequestMethod"] = "GetInventoryNode";
+                post["ItemID"] = (string)principalID;
+                post["OwnerID"] = (string)principalID;
+                post["IncludeFolders"] = "1";
+                post["IncludeItems"] = "0";
+                post["ChildrenOnly"] = "1";
+            }
+            else
+            {
+                post["RequestMethod"] = "GetFolderForType";
+                post["OwnerID"] = (string)principalID;
+                post["ContentType"] = SimianInventoryConnector.ContentTypeFromAssetType(type);
+            }
+            Map res = SimianGrid.PostToService(m_InventoryURI, m_SimCapability, post, TimeoutMs);
+            if (res["Success"].AsBoolean && res.ContainsKey("Items"))
+            {
+                AnArray resarray = res["Items"] as AnArray;
+                if (null != resarray && resarray.Count != 0)
+                {
+                    Map m = resarray[0] as Map;
+                    if (m != null)
+                    {
+                        folder = SimianInventoryConnector.FolderFromMap(m);
+                        return true;
+                    }
+                }
+            }
+            folder = default(InventoryFolder);
+            return false;
+        }
+
+        public override bool ContainsKey(UUID principalID, AssetType type)
+        {
+            Dictionary<string, string> post = new Dictionary<string, string>();
+            if (type == AssetType.RootFolder)
+            {
+                post["RequestMethod"] = "GetInventoryNode";
+                post["ItemID"] = (string)principalID;
+                post["OwnerID"] = (string)principalID;
+                post["IncludeFolders"] = "1";
+                post["IncludeItems"] = "0";
+                post["ChildrenOnly"] = "1";
+            }
+            else
+            {
+                post["RequestMethod"] = "GetFolderForType";
+                post["OwnerID"] = (string)principalID;
+                post["ContentType"] = SimianInventoryConnector.ContentTypeFromAssetType(type);
+            }
+            Map res = SimianGrid.PostToService(m_InventoryURI, m_SimCapability, post, TimeoutMs);
+            if (res["Success"].AsBoolean && res.ContainsKey("Items"))
+            {
+                AnArray resarray = res["Items"] as AnArray;
+                if (null != resarray && resarray.Count != 0)
+                {
+                    Map m = resarray[0] as Map;
+                    if (m != null)
+                    {
+                        return true;
+                    }
+                }
+            }
+            return false;
         }
 
         [SuppressMessage("Gendarme.Rules.Exceptions", "DoNotThrowInUnexpectedLocationRule")]
@@ -60,36 +166,12 @@ namespace SilverSim.BackendConnectors.Simian.Inventory
         {
             get
             {
-                Dictionary<string, string> post = new Dictionary<string, string>();
-                if (type == AssetType.RootFolder)
+                InventoryFolder folder;
+                if(!TryGetValue(principalID, type, out folder))
                 {
-                    post["RequestMethod"] = "GetInventoryNode";
-                    post["ItemID"] = (string)principalID;
-                    post["OwnerID"] = (string)principalID;
-                    post["IncludeFolders"] = "1";
-                    post["IncludeItems"] = "0";
-                    post["ChildrenOnly"] = "1";
+                    throw new InventoryInaccessibleException();
                 }
-                else
-                {
-                    post["RequestMethod"] = "GetFolderForType";
-                    post["OwnerID"] = (string)principalID;
-                    post["ContentType"] = SimianInventoryConnector.ContentTypeFromAssetType(type);
-                }
-                Map res = SimianGrid.PostToService(m_InventoryURI, m_SimCapability, post, TimeoutMs);
-                if (res["Success"].AsBoolean && res.ContainsKey("Items"))
-                {
-                    AnArray resarray = res["Items"] as AnArray;
-                    if(null != resarray && resarray.Count != 0)
-                    {
-                        Map m = resarray[0] as Map;
-                        if (m != null)
-                        {
-                            return SimianInventoryConnector.FolderFromMap(m);
-                        }
-                    }
-                }
-                throw new InventoryInaccessibleException();
+                return folder;
             }
         }
 

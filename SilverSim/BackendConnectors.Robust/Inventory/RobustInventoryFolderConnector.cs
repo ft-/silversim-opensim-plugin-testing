@@ -11,6 +11,7 @@ using SilverSim.Types.Inventory;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
+using System;
 
 namespace SilverSim.BackendConnectors.Robust.Inventory
 {
@@ -40,89 +41,195 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
             }
         }
 
+        public override bool TryGetValue(UUID key, out InventoryFolder folder)
+        {
+            Dictionary<string, string> post = new Dictionary<string, string>();
+            post["ID"] = (string)key;
+            post["METHOD"] = "GETFOLDER";
+            Map map;
+            using (Stream s = HttpRequestHandler.DoStreamPostRequest(m_InventoryURI, null, post, false, TimeoutMs))
+            {
+                map = OpenSimResponse.Deserialize(s);
+            }
+            if (!map.ContainsKey("folder"))
+            {
+                folder = default(InventoryFolder);
+                return false;
+            }
+
+            Map foldermap = map["folder"] as Map;
+            if (null == foldermap)
+            {
+                folder = default(InventoryFolder);
+                return false;
+            }
+
+            folder = RobustInventoryConnector.FolderFromMap(foldermap);
+            return true;
+        }
+
+        public override bool ContainsKey(UUID key)
+        {
+            Dictionary<string, string> post = new Dictionary<string, string>();
+            post["ID"] = (string)key;
+            post["METHOD"] = "GETFOLDER";
+            Map map;
+            using (Stream s = HttpRequestHandler.DoStreamPostRequest(m_InventoryURI, null, post, false, TimeoutMs))
+            {
+                map = OpenSimResponse.Deserialize(s);
+            }
+            if (!map.ContainsKey("folder"))
+            {
+                return false;
+            }
+
+            Map foldermap = map["folder"] as Map;
+            if (null == foldermap)
+            {
+                return false;
+            }
+
+            return true;
+        }
+
         public override InventoryFolder this[UUID key]
         {
             get
             {
-                Dictionary<string, string> post = new Dictionary<string, string>();
-                post["ID"] = (string)key;
-                post["METHOD"] = "GETFOLDER";
-                Map map;
-                using(Stream s = HttpRequestHandler.DoStreamPostRequest(m_InventoryURI, null, post, false, TimeoutMs))
-                {
-                    map = OpenSimResponse.Deserialize(s);
-                }
-                if (!map.ContainsKey("folder"))
+                InventoryFolder folder;
+                if(!TryGetValue(key, out folder))
                 {
                     throw new InventoryInaccessibleException();
                 }
 
-                Map foldermap = map["folder"] as Map;
-                if (null == foldermap)
-                {
-                    throw new InventoryInaccessibleException();
-                }
-
-                return RobustInventoryConnector.FolderFromMap(foldermap);
+                return folder;
             }
+        }
+
+        public override bool TryGetValue(UUID principalID, UUID key, out InventoryFolder folder)
+        {
+            Dictionary<string, string> post = new Dictionary<string, string>();
+            post["PRINCIPAL"] = (string)principalID;
+            post["ID"] = (string)key;
+            post["METHOD"] = "GETFOLDER";
+            Map map;
+            using (Stream s = HttpRequestHandler.DoStreamPostRequest(m_InventoryURI, null, post, false, TimeoutMs))
+            {
+                map = OpenSimResponse.Deserialize(s);
+            }
+            if (!map.ContainsKey("folder"))
+            {
+                folder = default(InventoryFolder);
+                return false;
+            }
+
+            Map foldermap = map["folder"] as Map;
+            if (null == foldermap)
+            {
+                folder = default(InventoryFolder);
+                return false;
+            }
+
+            folder = RobustInventoryConnector.FolderFromMap(foldermap);
+            return true;
+        }
+
+        public override bool ContainsKey(UUID principalID, UUID key)
+        {
+            Dictionary<string, string> post = new Dictionary<string, string>();
+            post["PRINCIPAL"] = (string)principalID;
+            post["ID"] = (string)key;
+            post["METHOD"] = "GETFOLDER";
+            Map map;
+            using (Stream s = HttpRequestHandler.DoStreamPostRequest(m_InventoryURI, null, post, false, TimeoutMs))
+            {
+                map = OpenSimResponse.Deserialize(s);
+            }
+            if (!map.ContainsKey("folder"))
+            {
+                return false;
+            }
+
+            Map foldermap = map["folder"] as Map;
+            return (null != foldermap);
         }
 
         public override InventoryFolder this[UUID principalID, UUID key]
         {
             get
             {
-                Dictionary<string, string> post = new Dictionary<string, string>();
-                post["PRINCIPAL"] = (string)principalID;
-                post["ID"] = (string)key;
-                post["METHOD"] = "GETFOLDER";
-                Map map;
-                using(Stream s = HttpRequestHandler.DoStreamPostRequest(m_InventoryURI, null, post, false, TimeoutMs))
-                {
-                    map = OpenSimResponse.Deserialize(s);
-                }
-                if (!map.ContainsKey("folder"))
+                InventoryFolder folder;
+                if(!TryGetValue(principalID, key, out folder))
                 {
                     throw new InventoryInaccessibleException();
                 }
-
-                Map foldermap = map["folder"] as Map;
-                if (null == foldermap)
-                {
-                    throw new InventoryInaccessibleException();
-                }
-
-                return RobustInventoryConnector.FolderFromMap(foldermap);
+                return folder;
             }
+        }
+
+        public override bool TryGetValue(UUID principalID, AssetType type, out InventoryFolder folder)
+        {
+            Dictionary<string, string> post = new Dictionary<string, string>();
+            post["PRINCIPAL"] = (string)principalID;
+            if (type == AssetType.RootFolder)
+            {
+                post["METHOD"] = "GETROOTFOLDER";
+            }
+            else
+            {
+                post["TYPE"] = ((int)type).ToString();
+                post["METHOD"] = "GETFOLDERFORTYPE";
+            }
+            Map map;
+            using (Stream s = HttpRequestHandler.DoStreamPostRequest(m_InventoryURI, null, post, false, TimeoutMs))
+            {
+                map = OpenSimResponse.Deserialize(s);
+            }
+
+            Map foldermap = map["folder"] as Map;
+            if (null == foldermap)
+            {
+                folder = default(InventoryFolder);
+                return false;
+            }
+
+            folder = RobustInventoryConnector.FolderFromMap(foldermap);
+            return true;
+        }
+
+        public override bool ContainsKey(UUID principalID, AssetType type)
+        {
+            Dictionary<string, string> post = new Dictionary<string, string>();
+            post["PRINCIPAL"] = (string)principalID;
+            if (type == AssetType.RootFolder)
+            {
+                post["METHOD"] = "GETROOTFOLDER";
+            }
+            else
+            {
+                post["TYPE"] = ((int)type).ToString();
+                post["METHOD"] = "GETFOLDERFORTYPE";
+            }
+            Map map;
+            using (Stream s = HttpRequestHandler.DoStreamPostRequest(m_InventoryURI, null, post, false, TimeoutMs))
+            {
+                map = OpenSimResponse.Deserialize(s);
+            }
+
+            Map foldermap = map["folder"] as Map;
+            return (null != foldermap);
         }
 
         public override InventoryFolder this[UUID principalID, AssetType type]
         {
             get
             {
-                Dictionary<string, string> post = new Dictionary<string, string>();
-                post["PRINCIPAL"] = (string)principalID;
-                if (type == AssetType.RootFolder)
-                {
-                    post["METHOD"] = "GETROOTFOLDER";
-                }
-                else
-                { 
-                    post["TYPE"] = ((int)type).ToString();
-                    post["METHOD"] = "GETFOLDERFORTYPE";
-                }
-                Map map;
-                using(Stream s = HttpRequestHandler.DoStreamPostRequest(m_InventoryURI, null, post, false, TimeoutMs))
-                {
-                    map = OpenSimResponse.Deserialize(s);
-                }
-
-                Map foldermap = map["folder"] as Map;
-                if(null == foldermap)
+                InventoryFolder folder;
+                if(!TryGetValue(principalID, type, out folder))
                 {
                     throw new InventoryInaccessibleException();
                 }
-
-                return RobustInventoryConnector.FolderFromMap(foldermap);
+                return folder;
             }
         }
 

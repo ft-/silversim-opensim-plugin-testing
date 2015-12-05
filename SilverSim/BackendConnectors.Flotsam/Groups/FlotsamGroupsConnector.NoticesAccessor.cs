@@ -39,6 +39,28 @@ namespace SilverSim.BackendConnectors.Flotsam.Groups
                 return notices;
             }
 
+            public bool TryGetValue(UUI requestingAgent, UUID groupNoticeID, out GroupNotice notice)
+            {
+                Map m = new Map();
+                m.Add("NoticeID", groupNoticeID);
+                Map r = FlotsamXmlRpcGetCall(requestingAgent, "groups.getGroupNotice", m) as Map;
+                if (null == r)
+                {
+                    notice = default(GroupNotice);
+                    return false;
+                }
+                notice = r.ToGroupNotice();
+                return true;
+            }
+
+            public bool ContainsKey(UUI requestingAgent, UUID groupNoticeID)
+            {
+                Map m = new Map();
+                m.Add("NoticeID", groupNoticeID);
+                Map r = FlotsamXmlRpcGetCall(requestingAgent, "groups.getGroupNotice", m) as Map;
+                return r != null;
+            }
+
             public GroupNotice this[UUI requestingAgent, UUID groupNoticeID]
             {
                 get 

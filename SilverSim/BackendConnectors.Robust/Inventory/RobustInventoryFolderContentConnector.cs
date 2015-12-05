@@ -12,6 +12,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Net;
 using System.Web;
+using System;
 
 namespace SilverSim.BackendConnectors.Robust.Inventory
 {
@@ -55,6 +56,34 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
             return RobustInventoryConnector.FolderFromMap(foldermap);
         }
         #endregion
+
+        public override bool TryGetValue(UUID principalID, UUID folderID, out InventoryFolderContent inventoryFolderContent)
+        {
+            try
+            {
+                inventoryFolderContent = this[principalID, folderID];
+                return true;
+            }
+            catch
+            {
+                inventoryFolderContent = default(InventoryFolderContent);
+                return false;
+            }
+        }
+
+        public override bool ContainsKey(UUID principalID, UUID folderID)
+        {
+            InventoryFolderContent inventoryFolderContent;
+            try
+            {
+                inventoryFolderContent = this[principalID, folderID];
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
 
         public override InventoryFolderContent this[UUID principalID, UUID folderID]
         {

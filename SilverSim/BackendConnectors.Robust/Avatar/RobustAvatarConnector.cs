@@ -176,6 +176,12 @@ namespace SilverSim.BackendConnectors.Robust.Avatar
             }
         }
 
+        public override bool TryGetValue(UUID avatarID, string itemKey, out string value)
+        {
+            Dictionary<string, string> items = this[avatarID];
+            return items.TryGetValue(itemKey, out value);
+        }
+
         public override string this[UUID avatarID, string itemKey]
         {
             get

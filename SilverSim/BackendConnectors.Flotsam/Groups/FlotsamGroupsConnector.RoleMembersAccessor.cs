@@ -17,6 +17,58 @@ namespace SilverSim.BackendConnectors.Flotsam.Groups
             {
             }
 
+            public bool TryGetValue(UUI requestingAgent, UGI group, UUID roleID, UUI principal, out GroupRolemember role)
+            {
+                Map m = new Map();
+                m.Add("GroupID", group.ID);
+                m.Add("AgentID", principal.ID);
+                AnArray iv = FlotsamXmlRpcGetCall(requestingAgent, "groups.getAgentRoles", m) as AnArray;
+                if (null != iv)
+                {
+                    foreach (IValue v in iv)
+                    {
+                        m = v as Map;
+                        if (null != m)
+                        {
+                            GroupRolemember gmem = m.ToGroupRolemember(group);
+                            if (gmem.RoleID.Equals(roleID))
+                            {
+                                role = gmem;
+                                return true;
+                            }
+                        }
+                    }
+                }
+
+                role = default(GroupRolemember);
+                return false;
+            }
+
+            public bool ContainsKey(UUI requestingAgent, UGI group, UUID roleID, UUI principal)
+            {
+                Map m = new Map();
+                m.Add("GroupID", group.ID);
+                m.Add("AgentID", principal.ID);
+                AnArray iv = FlotsamXmlRpcGetCall(requestingAgent, "groups.getAgentRoles", m) as AnArray;
+                if (null != iv)
+                {
+                    foreach (IValue v in iv)
+                    {
+                        m = v as Map;
+                        if (null != m)
+                        {
+                            GroupRolemember gmem = m.ToGroupRolemember(group);
+                            if (gmem.RoleID.Equals(roleID))
+                            {
+                                return true;
+                            }
+                        }
+                    }
+                }
+
+                return false;
+            }
+
             public GroupRolemember this[UUI requestingAgent, UGI group, UUID roleID, UUI principal]
             {
                 get 

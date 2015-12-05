@@ -106,27 +106,43 @@ namespace SilverSim.BackendConnectors.Simian.Asset
         #endregion
 
         #region Accessors
+        public override bool TryGetValue(UUID key, out AssetData assetData)
+        {
+            Dictionary<string, string> para = new Dictionary<string, string>();
+            para["RequestMethod"] = "xGetAsset";
+            para["ID"] = (string)key;
+            Map m = SimianGrid.PostToService(m_AssetURI, m_AssetCapability, para, TimeoutMs);
+            if(!m.ContainsKey("Success"))
+            {
+                assetData = default(AssetData);
+                return false;
+            }
+            if (!m["Success"].AsBoolean)
+            {
+                assetData = default(AssetData);
+                return false;
+            }
+            assetData = new AssetData();
+            assetData.ID = key;
+            assetData.Name = m.ContainsKey("Name") ? m["Name"].ToString() : string.Empty;
+            assetData.ContentType = m["ContentType"].ToString();
+            assetData.Creator.FullName = m["CreatorID"].ToString();
+            assetData.Local = false;
+            assetData.Data = Convert.FromBase64String(m["EncodedData"].ToString());
+            assetData.Temporary = m["Temporary"].AsBoolean;
+            return true;
+        }
+
         public override AssetData this[UUID key]
         {
             get
             {
-                Dictionary<string, string> para = new Dictionary<string, string>();
-                para["RequestMethod"] = "xGetAsset";
-                para["ID"] = (string)key;
-                Map m = SimianGrid.PostToService(m_AssetURI, m_AssetCapability, para, TimeoutMs);
-                if (!m["Success"].AsBoolean)
+                AssetData assetData;
+                if(!TryGetValue(key, out assetData))
                 {
                     throw new AssetNotFoundException(key);
                 }
-                AssetData data = new AssetData();
-                data.ID = key;
-                data.Name = m.ContainsKey("Name") ? m["Name"].ToString() : string.Empty;
-                data.ContentType = m["ContentType"].ToString();
-                data.Creator.FullName = m["CreatorID"].ToString();
-                data.Local = false;
-                data.Data = Convert.FromBase64String(m["EncodedData"].ToString());
-                data.Temporary = m["Temporary"].AsBoolean;
-                return data;
+                return assetData;
             }
         }
         #endregion

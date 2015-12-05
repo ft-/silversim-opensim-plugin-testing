@@ -63,6 +63,34 @@ namespace SilverSim.BackendConnectors.Robust.GroupsV2
                 return groupnotices;
             }
 
+            public bool TryGetValue(UUI requestingAgent, UUID groupNoticeID, out GroupNotice notice)
+            {
+                Dictionary<string, string> post = new Dictionary<string, string>();
+                post["InviteID"] = (string)groupNoticeID;
+                post["RequestingAgentID"] = m_GetGroupsAgentID(requestingAgent);
+                post["OP"] = "GET";
+                post["METHOD"] = "INVITE";
+                Map m;
+                using (Stream s = HttpRequestHandler.DoStreamPostRequest(m_Uri, null, post, false, TimeoutMs))
+                {
+                    m = OpenSimResponse.Deserialize(s);
+                }
+                if (!m.ContainsKey("RESULT"))
+                {
+                    notice = default(GroupNotice);
+                    return false;
+                }
+                if (m["RESULT"].ToString() == "NULL")
+                {
+                    notice = default(GroupNotice);
+                    return false;
+                }
+
+                notice = m["RESULT"].ToGroupNotice();
+#warning TODO: GroupNotice service does not deliver any group ID in response
+                return true;
+            }
+
             public GroupNotice this[UUI requestingAgent, UUID groupNoticeID]
             {
                 get 

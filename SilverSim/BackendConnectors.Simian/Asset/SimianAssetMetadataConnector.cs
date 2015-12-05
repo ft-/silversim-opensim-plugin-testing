@@ -25,36 +25,47 @@ namespace SilverSim.BackendConnectors.Simian.Asset
         #endregion
 
         #region Metadata accessors
+        public override bool TryGetValue(UUID key, out AssetMetadata metadata)
+        {
+            Dictionary<string, string> para = new Dictionary<string, string>();
+            para["RequestMethod"] = "xGetAssetMetadata";
+            para["ID"] = (string)key;
+            Map m = SimianGrid.PostToService(m_AssetURI, m_AssetCapability, para, TimeoutMs);
+            if (!m["Success"].AsBoolean)
+            {
+                metadata = default(AssetMetadata);
+                return false;
+            }
+            metadata = new AssetMetadata();
+            metadata.ID = key;
+            metadata.Name = string.Empty;
+            metadata.ContentType = m["ContentType"].ToString();
+            metadata.Creator.FullName = m["CreatorID"].ToString();
+            metadata.Local = false;
+            metadata.Temporary = m["Temporary"].AsBoolean;
+
+            string lastModifiedStr = m["Last-Modified"].ToString();
+            if (!string.IsNullOrEmpty(lastModifiedStr))
+            {
+                DateTime lastModified;
+                if (DateTime.TryParse(lastModifiedStr, out lastModified))
+                {
+                    metadata.CreateTime = new Date(lastModified);
+                }
+            }
+            return true;
+        }
+
         public override AssetMetadata this[UUID key]
         {
             get
             {
-                Dictionary<string, string> para = new Dictionary<string, string>();
-                para["RequestMethod"] = "xGetAssetMetadata";
-                para["ID"] = (string)key;
-                Map m = SimianGrid.PostToService(m_AssetURI, m_AssetCapability, para, TimeoutMs);
-                if(!m["Success"].AsBoolean)
+                AssetMetadata metadata;
+                if(!TryGetValue(key, out metadata))
                 {
                     throw new AssetNotFoundException(key);
                 }
-                AssetMetadata data = new AssetMetadata();
-                data.ID = key;
-                data.Name = string.Empty;
-                data.ContentType = m["ContentType"].ToString();
-                data.Creator.FullName = m["CreatorID"].ToString();
-                data.Local = false;
-                data.Temporary = m["Temporary"].AsBoolean;
-
-                string lastModifiedStr = m["Last-Modified"].ToString();
-                if (!string.IsNullOrEmpty(lastModifiedStr))
-                {
-                    DateTime lastModified;
-                    if (DateTime.TryParse(lastModifiedStr, out lastModified))
-                    {
-                        data.CreateTime = new Date(lastModified);
-                    }
-                }
-                return data;
+                return metadata;
             }
         }
         #endregion

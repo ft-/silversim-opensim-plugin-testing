@@ -60,40 +60,64 @@ namespace SilverSim.BackendConnectors.Robust.GridUser
             return info;
         }
 
-        private GridUserInfo GetUserInfo(string userID)
+        bool TryGetUserInfo(string userID, out GridUserInfo gridUserInfo)
         {
             Dictionary<string, string> post = new Dictionary<string, string>();
             post["UserID"] = userID;
             post["METHOD"] = "getgriduserinfo";
             Map map;
-            using(Stream s = HttpRequestHandler.DoStreamPostRequest(m_GridUserURI, null, post, false, TimeoutMs))
+            using (Stream s = HttpRequestHandler.DoStreamPostRequest(m_GridUserURI, null, post, false, TimeoutMs))
             {
                 map = OpenSimResponse.Deserialize(s);
             }
             if (!map.ContainsKey("result"))
             {
-                throw new GridUserNotFoundException();
+                gridUserInfo = default(GridUserInfo);
+                return false;
             }
             Map resultmap = map["result"] as Map;
             if (null == resultmap)
             {
-                throw new GridUserNotFoundException();
+                gridUserInfo = default(GridUserInfo);
+                return false;
             }
-            return FromResult(resultmap);
+            gridUserInfo = FromResult(resultmap);
+            return true;
+        }
+
+        public override bool TryGetValue(UUID userID, out GridUserInfo userInfo)
+        {
+            return TryGetUserInfo((string)userID, out userInfo);
         }
 
         public override GridUserInfo this[UUID userID]
         {
             get
             {
-                return GetUserInfo((string)userID);
+                GridUserInfo gridUserInfo;
+                if(TryGetUserInfo((string)userID, out gridUserInfo))
+                {
+                    throw new GridUserNotFoundException();
+                }
+                return gridUserInfo;
             }
         }
+
+        public override bool TryGetValue(UUI userID, out GridUserInfo userInfo)
+        {
+            return TryGetUserInfo((string)userID, out userInfo);
+        }
+
         public override GridUserInfo this[UUI userID]
         {
             get
             {
-                return GetUserInfo((string)userID.ID);
+                GridUserInfo gridUserInfo;
+                if (TryGetUserInfo((string)userID, out gridUserInfo))
+                {
+                    throw new GridUserNotFoundException();
+                }
+                return gridUserInfo;
             }
         }
 

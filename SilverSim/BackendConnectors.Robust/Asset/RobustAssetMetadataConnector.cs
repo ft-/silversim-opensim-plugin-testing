@@ -8,6 +8,8 @@ using SilverSim.Types;
 using SilverSim.Types.Asset;
 using System.IO;
 using System.Web;
+using System;
+using System.Net;
 
 namespace SilverSim.BackendConnectors.Robust.Asset
 {
@@ -24,21 +26,37 @@ namespace SilverSim.BackendConnectors.Robust.Asset
         #endregion
 
         #region Metadata accessors
+        public override bool TryGetValue(UUID key, out AssetMetadata metadata)
+        {
+            try
+            {
+                using (Stream stream = HttpRequestHandler.DoStreamGetRequest(m_AssetURI + "assets/" + key.ToString() + "/metadata", null, TimeoutMs))
+                {
+                    metadata = AssetXml.ParseAssetMetadata(stream);
+                    return true;
+                }
+            }
+            catch (HttpException e)
+            {
+                if (e.GetHttpCode() == (int)HttpStatusCode.NotFound)
+                {
+                    metadata = default(AssetData);
+                    return false;
+                }
+                throw;
+            }
+        }
+
         public override AssetMetadata this[UUID key]
         {
             get
             {
-                try
-                {
-                    using(Stream stream = HttpRequestHandler.DoStreamGetRequest(m_AssetURI + "assets/" + key.ToString() + "/metadata", null, TimeoutMs))
-                    {
-                        return AssetXml.ParseAssetMetadata(stream);
-                    }
-                }
-                catch(HttpException)
+                AssetMetadata metadata;
+                if(!TryGetValue(key, out metadata))
                 {
                     throw new AssetNotFoundException(key);
                 }
+                return metadata;
             }
         }
         #endregion

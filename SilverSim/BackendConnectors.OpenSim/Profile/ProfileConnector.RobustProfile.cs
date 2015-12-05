@@ -35,6 +35,53 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
                 return data;
             }
 
+            public bool TryGetValue(UUI user, UUID id, out ProfileClassified classified)
+            {
+                try
+                {
+                    classified = new ProfileClassified();
+                    Map m = new Map();
+                    m["ClassifiedId"] = id;
+                    Map reslist = (Map)RPC.DoJson20RpcRequest(m_Uri, "classifieds_info_query", (string)UUID.Random, m, m_Connector.TimeoutMs);
+                    classified.ClassifiedID = id;
+                    classified.Creator.ID = reslist["CreatorId"].AsUUID;
+                    classified.CreationDate = Date.UnixTimeToDateTime(reslist["CreationDate"].AsULong);
+                    classified.ExpirationDate = Date.UnixTimeToDateTime(reslist["ExpirationDate"].AsULong);
+                    classified.Category = reslist["Category"].AsInt;
+                    classified.Name = reslist["Name"].ToString();
+                    classified.Description = reslist["Description"].ToString();
+                    classified.ParcelID = reslist["ParcelId"].AsUUID;
+                    classified.ParentEstate = reslist["ParentEstate"].AsInt;
+                    classified.SnapshotID = reslist["SnapshotId"].AsUUID;
+                    classified.SimName = reslist["SimName"].ToString();
+                    classified.GlobalPos = reslist["GlobalPos"].AsVector3;
+                    classified.ParcelName = reslist["ParcelName"].ToString();
+                    classified.Flags = (byte)reslist["Flags"].AsUInt;
+                    classified.Price = reslist["Price"].AsInt;
+                    return true;
+                }
+                catch
+                {
+                    classified = default(ProfileClassified);
+                    return false;
+                }
+            }
+
+            public bool ContainsKey(UUI user, UUID id)
+            {
+                try
+                {
+                    Map m = new Map();
+                    m["ClassifiedId"] = id;
+                    RPC.DoJson20RpcRequest(m_Uri, "classifieds_info_query", (string)UUID.Random, m, m_Connector.TimeoutMs);
+                    return true;
+                }
+                catch
+                {
+                    return false;
+                }
+            }
+
             public ProfileClassified this[UUI user, UUID id]
             {
                 get 
@@ -118,6 +165,60 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
                 return data;
             }
 
+            public bool TryGetValue(UUI user, UUID id, out ProfilePick pick)
+            {
+                try
+                {
+                    pick = new ProfilePick();
+                    Map m = new Map();
+                    m["ClassifiedId"] = id;
+                    m["CreatorId"] = user.ID;
+                    Map reslist = (Map)RPC.DoJson20RpcRequest(m_Uri, "pickinforequest", (string)UUID.Random, m, m_Connector.TimeoutMs);
+
+                    pick.PickID = reslist["PickId"].AsUUID;
+                    pick.Creator = user;
+                    pick.TopPick = (ABoolean)reslist["TopPick"];
+                    pick.Name = reslist["Name"].ToString();
+                    pick.OriginalName = reslist["OriginalName"].ToString();
+                    pick.Description = reslist["Desc"].ToString();
+                    pick.ParcelID = reslist["ParcelId"].AsUUID;
+                    pick.SnapshotID = reslist["SnapshotId"].AsUUID;
+                    pick.ParcelName = reslist["ParcelName"].ToString();
+                    pick.SimName = reslist["SimName"].ToString();
+                    pick.GlobalPosition = reslist["GlobalPos"].AsVector3;
+                    pick.SortOrder = reslist["SortOrder"].AsInt;
+                    pick.Enabled = (ABoolean)reslist["Enabled"];
+                    if (reslist.ContainsKey("Gatekeeper"))
+                    {
+                        pick.GatekeeperURI = reslist["Gatekeeper"].ToString();
+                    }
+                    return true;
+                }
+                catch
+                {
+                    pick = default(ProfilePick);
+                    return false;
+                }
+
+            }
+
+            public bool ContainsKey(UUI user, UUID id)
+            {
+                try
+                {
+                    Map m = new Map();
+                    m["ClassifiedId"] = id;
+                    m["CreatorId"] = user.ID;
+                    RPC.DoJson20RpcRequest(m_Uri, "pickinforequest", (string)UUID.Random, m, m_Connector.TimeoutMs);
+                    return true;
+                }
+                catch
+                {
+                    return false;
+                }
+
+            }
+
             public ProfilePick this[UUI user, UUID id]
             {
                 get
@@ -189,6 +290,40 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
                 m_Connector = connector;
             }
 
+            public bool TryGetValue(UUI user, UUI target, out string notes)
+            {
+                try
+                {
+                    Map m = new Map();
+                    m["UserId"] = user.ID;
+                    m["TargetId"] = target.ID;
+                    Map reslist = (Map)RPC.DoJson20RpcRequest(m_Uri, "avatarnotesrequest", (string)UUID.Random, m, m_Connector.TimeoutMs);
+                    notes = reslist["Notes"].ToString();
+                    return true;
+                }
+                catch
+                {
+                    notes = string.Empty;
+                    return false;
+                }
+            }
+
+            public bool ContainsKey(UUI user, UUI target)
+            {
+                try
+                {
+                    Map m = new Map();
+                    m["UserId"] = user.ID;
+                    m["TargetId"] = target.ID;
+                    RPC.DoJson20RpcRequest(m_Uri, "avatarnotesrequest", (string)UUID.Random, m, m_Connector.TimeoutMs);
+                    return true;
+                }
+                catch
+                {
+                    return false;
+                }
+            }
+
             public string this[UUI user, UUI target]
             {
                 get
@@ -219,6 +354,41 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
             {
                 m_Uri = uri;
                 m_Connector = connector;
+            }
+
+            public bool TryGetValue(UUI user, out ProfilePreferences prefs)
+            {
+                try
+                {
+                    prefs = new ProfilePreferences();
+                    Map m = new Map();
+                    m["UserId"] = user.ID;
+                    Map reslist = (Map)RPC.DoJson20RpcRequest(m_Uri, "user_preferences_request", (string)UUID.Random, m, m_Connector.TimeoutMs);
+                    prefs.User = user;
+                    prefs.IMviaEmail = (ABoolean)reslist["IMViaEmail"];
+                    prefs.Visible = (ABoolean)reslist["Visible"];
+                    return true;
+                }
+                catch
+                {
+                    prefs = default(ProfilePreferences);
+                    return false;
+                }
+            }
+
+            public bool ContainsKey(UUI user)
+            {
+                try
+                {
+                    Map m = new Map();
+                    m["UserId"] = user.ID;
+                    RPC.DoJson20RpcRequest(m_Uri, "user_preferences_request", (string)UUID.Random, m, m_Connector.TimeoutMs);
+                    return true;
+                }
+                catch
+                {
+                    return false;
+                }
             }
 
             public ProfilePreferences this[UUI user]

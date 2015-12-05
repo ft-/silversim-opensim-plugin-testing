@@ -26,30 +26,43 @@ namespace SilverSim.BackendConnectors.Robust.GroupsV2
                 m_GetGroupsAgentID = getGroupsAgentID;
             }
 
+            public bool TryGetValue(UUI requestingAgent, UUI principal, out UGI ugi)
+            {
+                Dictionary<string, string> post = new Dictionary<string, string>();
+                post["AgentID"] = m_GetGroupsAgentID(principal);
+                post["RequestingAgentID"] = m_GetGroupsAgentID(requestingAgent);
+                post["METHOD"] = "GETMEMBERSHIP";
+
+                Map m;
+                using (Stream s = HttpRequestHandler.DoStreamPostRequest(m_Uri, null, post, false, TimeoutMs))
+                {
+                    m = OpenSimResponse.Deserialize(s);
+                }
+                if (!m.ContainsKey("RESULT"))
+                {
+                    ugi = default(UGI);
+                    return false;
+                }
+                if (m["RESULT"].ToString() == "NULL")
+                {
+                    ugi = default(UGI);
+                    return false;
+                }
+
+                ugi = m["RESULT"].ToGroupMemberFromMembership().Group;
+                return true;
+            }
+
             public UGI this[UUI requestingAgent, UUI principal]
             {
                 get
                 {
-                    Dictionary<string, string> post = new Dictionary<string, string>();
-                    post["AgentID"] = m_GetGroupsAgentID(principal);
-                    post["RequestingAgentID"] = m_GetGroupsAgentID(requestingAgent);
-                    post["METHOD"] = "GETMEMBERSHIP";
-
-                    Map m;
-                    using(Stream s = HttpRequestHandler.DoStreamPostRequest(m_Uri, null, post, false, TimeoutMs))
-                    {
-                        m = OpenSimResponse.Deserialize(s);
-                    }
-                    if (!m.ContainsKey("RESULT"))
+                    UGI ugi;
+                    if(!TryGetValue(requestingAgent, principal, out ugi))
                     {
                         throw new KeyNotFoundException();
                     }
-                    if (m["RESULT"].ToString() == "NULL")
-                    {
-                        throw new KeyNotFoundException();
-                    }
-
-                    return m["RESULT"].ToGroupMemberFromMembership().Group;
+                    return ugi;
                 }
                 set
                 {
@@ -76,30 +89,43 @@ namespace SilverSim.BackendConnectors.Robust.GroupsV2
                 }
             }
 
+            public bool TryGetValue(UUI requestingAgent, UGI group, UUI principal, out UUID id)
+            {
+                Dictionary<string, string> post = new Dictionary<string, string>();
+                post["AgentID"] = m_GetGroupsAgentID(principal);
+                post["RequestingAgentID"] = m_GetGroupsAgentID(requestingAgent);
+                post["METHOD"] = "GETMEMBERSHIP";
+
+                Map m;
+                using (Stream s = HttpRequestHandler.DoStreamPostRequest(m_Uri, null, post, false, TimeoutMs))
+                {
+                    m = OpenSimResponse.Deserialize(s);
+                }
+                if (!m.ContainsKey("RESULT"))
+                {
+                    id = default(UUID);
+                    return false;
+                }
+                if (m["RESULT"].ToString() == "NULL")
+                {
+                    id = default(UUID);
+                    return false;
+                }
+
+                id = m["RESULT"].ToGroupMemberFromMembership().SelectedRoleID;
+                return true;
+            }
+
             public UUID this[UUI requestingAgent, UGI group, UUI principal]
             {
                 get
                 {
-                    Dictionary<string, string> post = new Dictionary<string, string>();
-                    post["AgentID"] = m_GetGroupsAgentID(principal);
-                    post["RequestingAgentID"] = m_GetGroupsAgentID(requestingAgent);
-                    post["METHOD"] = "GETMEMBERSHIP";
-
-                    Map m;
-                    using(Stream s = HttpRequestHandler.DoStreamPostRequest(m_Uri, null, post, false, TimeoutMs))
-                    {
-                        m = OpenSimResponse.Deserialize(s);
-                    }
-                    if (!m.ContainsKey("RESULT"))
+                    UUID id;
+                    if(!TryGetValue(requestingAgent, group, principal, out id))
                     {
                         throw new KeyNotFoundException();
                     }
-                    if (m["RESULT"].ToString() == "NULL")
-                    {
-                        throw new KeyNotFoundException();
-                    }
-
-                    return m["RESULT"].ToGroupMemberFromMembership().SelectedRoleID;
+                    return id;
                 }
                 set
                 {

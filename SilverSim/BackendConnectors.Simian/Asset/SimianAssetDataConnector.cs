@@ -6,6 +6,7 @@ using SilverSim.ServiceInterfaces.Asset;
 using SilverSim.Types;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
+using System;
 
 namespace SilverSim.BackendConnectors.Simian.Asset
 {
@@ -22,16 +23,32 @@ namespace SilverSim.BackendConnectors.Simian.Asset
         #endregion
 
         #region Metadata accessors
+        public override bool TryGetValue(UUID key, out Stream s)
+        {
+            try
+            {
+                s = HttpRequestHandler.DoStreamGetRequest(m_AssetURI + "assets/" + key.ToString() + "/data", null, TimeoutMs);
+                return true;
+            }
+            catch
+            {
+                s = null;
+                return false;
+            }
+
+        }
+
         [SuppressMessage("Gendarme.Rules.Correctness", "EnsureLocalDisposalRule")]
         public override Stream this[UUID key]
         {
             get
             {
-                try
+                Stream s;
+                if(TryGetValue(key, out s))
                 {
-                    return HttpRequestHandler.DoStreamGetRequest(m_AssetURI + "assets/" + key.ToString() + "/data", null, TimeoutMs);
+                    return s;
                 }
-                catch
+                else
                 {
                     throw new AssetNotFoundException(key);
                 }

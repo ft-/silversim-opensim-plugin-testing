@@ -14,31 +14,44 @@ namespace SilverSim.BackendConnectors.Flotsam.Groups
             {
             }
 
+            public bool TryGetValue(UUI requestingAgent, UUI principal, out UGI ugi)
+            {
+                Map m = new Map();
+                m["AgentID"] = principal.ID;
+                m = FlotsamXmlRpcGetCall(requestingAgent, "groups.getAgentActiveMembership", m) as Map;
+                if (null == m)
+                {
+                    ugi = default(UGI);
+                    return false;
+                }
+
+                if (m.ContainsKey("error"))
+                {
+                    if (m["error"].ToString() == "No Active Group Specified")
+                    {
+                        ugi = UGI.Unknown;
+                        return true;
+                    }
+                    ugi = default(UGI);
+                    return false;
+                }
+
+                ugi = new UGI();
+                ugi.ID = m["GroupID"].AsUUID;
+                ugi.GroupName = m["GroupName"].ToString();
+                return true;
+            }
+
             public UGI this[UUI requestingAgent, UUI principal]
             {
                 get
                 {
-                    Map m = new Map();
-                    m["AgentID"] = principal.ID;
-                    m = FlotsamXmlRpcGetCall(requestingAgent, "groups.getAgentActiveMembership", m) as Map;
-                    if(null == m)
+                    UGI ugi;
+                    if(!TryGetValue(requestingAgent, principal, out ugi))
                     {
                         throw new AccessFailedException();
                     }
-
-                    if(m.ContainsKey("error"))
-                    {
-                        if(m["error"].ToString() == "No Active Group Specified")
-                        {
-                            return UGI.Unknown;
-                        }
-                        throw new AccessFailedException();
-                    }
-
-                    UGI res = new UGI();
-                    res.ID = m["GroupID"].AsUUID;
-                    res.GroupName = m["GroupName"].ToString();
-                    return res;
+                    return ugi;
                 }
                 set
                 {
@@ -49,28 +62,42 @@ namespace SilverSim.BackendConnectors.Flotsam.Groups
                 }
             }
 
+            public bool TryGetValue(UUI requestingAgent, UGI group, UUI principal, out UUID id)
+            {
+                Map m = new Map();
+                m["AgentID"] = principal.ID;
+                m = FlotsamXmlRpcGetCall(requestingAgent, "groups.getAgentActiveMembership", m) as Map;
+                if (m == null)
+                {
+                    id = default(UUID);
+                    return false;
+                }
+
+                if (m.ContainsKey("error"))
+                {
+                    if (m["error"].ToString() == "No Active Group Specified")
+                    {
+                        id = UUID.Zero;
+                        return true;
+                    }
+                    id = default(UUID);
+                    return false;
+                }
+
+                id = m["SelectedRoleID"].AsUUID;
+                return true;
+            }
+
             public UUID this[UUI requestingAgent, UGI group, UUI principal]
             {
                 get
                 {
-                    Map m = new Map();
-                    m["AgentID"] = principal.ID;
-                    m = FlotsamXmlRpcGetCall(requestingAgent, "groups.getAgentActiveMembership", m) as Map;
-                    if (m == null)
+                    UUID id;
+                    if(!TryGetValue(requestingAgent, group, principal, out id))
                     {
                         throw new AccessFailedException();
                     }
-
-                    if (m.ContainsKey("error"))
-                    {
-                        if (m["error"].ToString() == "No Active Group Specified")
-                        {
-                            return UUID.Zero;
-                        }
-                        throw new AccessFailedException();
-                    }
-
-                    return m["SelectedRoleID"].AsUUID;
+                    return id;
                 }
 
                 set

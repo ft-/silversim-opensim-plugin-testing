@@ -27,19 +27,44 @@ namespace SilverSim.BackendConnectors.Robust.GroupsV2
                 m_GetGroupsAgentID = getGroupsAgentID;
             }
 
+            public bool TryGetValue(UUI requestingAgent, UGI group, UUID roleID, out GroupRole groupRole)
+            {
+                List<GroupRole> roles = this[requestingAgent, group];
+                foreach (GroupRole role in roles)
+                {
+                    if (role.ID.Equals(roleID))
+                    {
+                        groupRole = role;
+                        return true;
+                    }
+                }
+                groupRole = default(GroupRole);
+                return false;
+            }
+
+            public bool ContainsKey(UUI requestingAgent, UGI group, UUID roleID)
+            {
+                List<GroupRole> roles = this[requestingAgent, group];
+                foreach (GroupRole role in roles)
+                {
+                    if (role.ID.Equals(roleID))
+                    {
+                        return true;
+                    }
+                }
+                return false;
+            }
+
             public GroupRole this[UUI requestingAgent, UGI group, UUID roleID]
             {
                 get 
                 {
-                    List<GroupRole> roles = this[requestingAgent, group];
-                    foreach(GroupRole role in roles)
+                    GroupRole role;
+                    if (TryGetValue(requestingAgent, group, roleID, out role))
                     {
-                        if(role.ID.Equals(roleID))
-                        {
-                            return role;
-                        }
+                        throw new KeyNotFoundException();
                     }
-                    throw new KeyNotFoundException();
+                    return role;
                 }
             }
 

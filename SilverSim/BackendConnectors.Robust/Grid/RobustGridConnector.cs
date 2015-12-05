@@ -40,6 +40,18 @@ namespace SilverSim.BackendConnectors.Robust.Grid
         #endregion
 
         #region Accessors
+        public override bool TryGetValue(UUID scopeID, UUID regionID, out RegionInfo rInfo)
+        {
+            Dictionary<string, string> post = new Dictionary<string, string>();
+            post["SCOPEID"] = (string)scopeID;
+            post["REGIONID"] = regionID.ToString();
+            post["METHOD"] = "get_region_by_uuid";
+            using (Stream s = HttpRequestHandler.DoStreamPostRequest(m_GridURI, null, post, false, TimeoutMs))
+            {
+                return TryDeserializeRegion(OpenSimResponse.Deserialize(s), out rInfo);
+            }
+        }
+
         public override RegionInfo this[UUID scopeID, UUID regionID]
         {
             get
@@ -52,6 +64,19 @@ namespace SilverSim.BackendConnectors.Robust.Grid
                 {
                     return DeserializeRegion(OpenSimResponse.Deserialize(s));
                 }
+            }
+        }
+
+        public override bool TryGetValue(UUID scopeID, uint gridX, uint gridY, out RegionInfo rInfo)
+        {
+            Dictionary<string, string> post = new Dictionary<string, string>();
+            post["SCOPEID"] = (string)scopeID;
+            post["X"] = gridX.ToString();
+            post["Y"] = gridY.ToString();
+            post["METHOD"] = "get_region_by_position";
+            using (Stream s = HttpRequestHandler.DoStreamPostRequest(m_GridURI, null, post, false, TimeoutMs))
+            {
+                return TryDeserializeRegion(OpenSimResponse.Deserialize(s), out rInfo);
             }
         }
 
@@ -71,6 +96,18 @@ namespace SilverSim.BackendConnectors.Robust.Grid
             }
         }
 
+        public override bool TryGetValue(UUID scopeID, string regionName, out RegionInfo rInfo)
+        {
+            Dictionary<string, string> post = new Dictionary<string, string>();
+            post["SCOPEID"] = (string)scopeID;
+            post["NAME"] = regionName;
+            post["METHOD"] = "get_region_by_name";
+            using (Stream s = HttpRequestHandler.DoStreamPostRequest(m_GridURI, null, post, false, TimeoutMs))
+            {
+                return TryDeserializeRegion(OpenSimResponse.Deserialize(s), out rInfo);
+            }
+        }
+
         public override RegionInfo this[UUID scopeID, string regionName]
         {
             get
@@ -83,6 +120,18 @@ namespace SilverSim.BackendConnectors.Robust.Grid
                 {
                     return DeserializeRegion(OpenSimResponse.Deserialize(s));
                 }
+            }
+        }
+
+        public override bool TryGetValue(UUID regionID, out RegionInfo rInfo)
+        {
+            Dictionary<string, string> post = new Dictionary<string, string>();
+            post["SCOPEID"] = (string)UUID.Zero;
+            post["REGIONID"] = regionID.ToString();
+            post["METHOD"] = "get_region_by_uuid";
+            using (Stream s = HttpRequestHandler.DoStreamPostRequest(m_GridURI, null, post, false, TimeoutMs))
+            {
+                return TryDeserializeRegion(OpenSimResponse.Deserialize(s), out rInfo);
             }
         }
 
@@ -185,19 +234,36 @@ namespace SilverSim.BackendConnectors.Robust.Grid
 
         private RegionInfo DeserializeRegion(Map map)
         {
-            Map m = map["result"] as Map;
-            if(null != m)
+            RegionInfo rInfo;
+            if(!map.ContainsKey("result"))
             {
-                RegionInfo r = Deserialize(m);
-                if(r == null)
+                throw new GridServiceInaccessibleException();
+            }
+
+            if(!TryDeserializeRegion(map, out rInfo))
+            {
+                throw new GridRegionNotFoundException();
+            }
+
+            return rInfo;
+        }
+
+        private bool TryDeserializeRegion(Map map, out RegionInfo r)
+        {
+            Map m = map["result"] as Map;
+            if (null != m)
+            {
+                r = Deserialize(m);
+                if (r == null)
                 {
                     throw new GridRegionNotFoundException();
                 }
-                return r;
+                return true;
             }
             else
             {
-                throw new GridServiceInaccessibleException();
+                r = default(RegionInfo);
+                return false;
             }
         }
 

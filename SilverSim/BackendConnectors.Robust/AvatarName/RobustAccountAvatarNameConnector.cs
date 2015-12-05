@@ -42,33 +42,50 @@ namespace SilverSim.BackendConnectors.Robust.AvatarName
         }
         #endregion
 
+        public override bool TryGetValue(string firstName, string lastName, out UUI uui)
+        {
+            Dictionary<string, string> post = new Dictionary<string, string>();
+            post["FirstName"] = firstName;
+            post["LastName"] = lastName;
+            post["SCOPEID"] = (string)m_ScopeID;
+            post["METHOD"] = "getaccount";
+            Map map;
+            using (Stream s = HttpRequestHandler.DoStreamPostRequest(m_UserAccountURI, null, post, false, TimeoutMs))
+            {
+                map = OpenSimResponse.Deserialize(s);
+            }
+
+            if (!map.ContainsKey("result"))
+            {
+                uui = default(UUI);
+                return false;
+            }
+
+            Map m = map["result"] as Map;
+            if(null == m)
+            {
+                uui = default(UUI);
+                return false;
+            }
+            uui = new UUI();
+            uui.FirstName = m["FirstName"].ToString();
+            uui.LastName = m["LastName"].ToString();
+            uui.ID = m["PrincipalID"].ToString();
+            uui.HomeURI = new Uri(m_HomeURI);
+            uui.IsAuthoritative = true;
+            return true;
+        }
+
         public override UUI this[string firstName, string lastName] 
         { 
             get
             {
-                Dictionary<string, string> post = new Dictionary<string, string>();
-                post["FirstName"] = firstName;
-                post["LastName"] = lastName;
-                post["SCOPEID"] = (string)m_ScopeID;
-                post["METHOD"] = "getaccount";
-                Map map;
-                using(Stream s = HttpRequestHandler.DoStreamPostRequest(m_UserAccountURI, null, post, false, TimeoutMs))
-                {
-                    map = OpenSimResponse.Deserialize(s);
-                }
-                if (!(map["result"] is Map))
+                UUI uui;
+                if(!TryGetValue(firstName, lastName, out uui))
                 {
                     throw new KeyNotFoundException();
                 }
-
-                Map m = (Map)(map["result"]);
-                UUI nd = new UUI();
-                nd.FirstName = m["FirstName"].ToString();
-                nd.LastName = m["LastName"].ToString();
-                nd.ID = m["PrincipalID"].ToString();
-                nd.HomeURI = new Uri(m_HomeURI);
-                nd.IsAuthoritative = true;
-                return nd;
+                return uui;
             }
         }
 
@@ -110,32 +127,48 @@ namespace SilverSim.BackendConnectors.Robust.AvatarName
             return results;
         }
 
+        public override bool TryGetValue(UUID key, out UUI uui)
+        {
+            Dictionary<string, string> post = new Dictionary<string, string>();
+            post["UserID"] = (string)key;
+            post["SCOPEID"] = (string)m_ScopeID;
+            post["METHOD"] = "getaccount";
+            Map map;
+            using (Stream s = HttpRequestHandler.DoStreamPostRequest(m_UserAccountURI, null, post, false, TimeoutMs))
+            {
+                map = OpenSimResponse.Deserialize(s);
+            }
+            if(!map.ContainsKey("result"))
+            {
+                uui = default(UUI);
+                return false;
+            }
+            Map m = map["result"] as Map;
+            if (m == null)
+            {
+                uui = default(UUI);
+                return false;
+            }
+
+            uui = new UUI();
+            uui.FirstName = m["FirstName"].ToString();
+            uui.LastName = m["LastName"].ToString();
+            uui.ID = m["PrincipalID"].ToString();
+            uui.HomeURI = new Uri(m_HomeURI);
+            uui.IsAuthoritative = true;
+            return true;
+        }
+
         public override UUI this[UUID accountID]
         {
             get
             {
-                Dictionary<string, string> post = new Dictionary<string, string>();
-                post["UserID"] = (string)accountID;
-                post["SCOPEID"] = (string)m_ScopeID;
-                post["METHOD"] = "getaccount";
-                Map map;
-                using(Stream s = HttpRequestHandler.DoStreamPostRequest(m_UserAccountURI, null, post, false, TimeoutMs))
-                {
-                    map = OpenSimResponse.Deserialize(s);
-                }
-                Map m = map["result"] as Map;
-                if (m == null)
+                UUI uui;
+                if(!TryGetValue(accountID, out uui))
                 {
                     throw new KeyNotFoundException();
                 }
-
-                UUI nd = new UUI();
-                nd.FirstName = m["FirstName"].ToString();
-                nd.LastName = m["LastName"].ToString();
-                nd.ID = m["PrincipalID"].ToString();
-                nd.HomeURI = new Uri(m_HomeURI);
-                nd.IsAuthoritative = true;
-                return nd;
+                return uui;
             }
             set
             {
