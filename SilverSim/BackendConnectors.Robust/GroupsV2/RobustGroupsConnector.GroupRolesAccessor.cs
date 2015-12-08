@@ -60,7 +60,7 @@ namespace SilverSim.BackendConnectors.Robust.GroupsV2
                 get 
                 {
                     GroupRole role;
-                    if (TryGetValue(requestingAgent, group, roleID, out role))
+                    if (!TryGetValue(requestingAgent, group, roleID, out role))
                     {
                         throw new KeyNotFoundException();
                     }
