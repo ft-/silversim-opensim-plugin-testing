@@ -22,7 +22,7 @@ namespace SilverSim.BackendConnectors.Robust.GridInfo
     {
         readonly string m_GridURI;
         public int TimeoutMs { get; set; }
-        object m_UpdateLock = new object();
+        readonly object m_UpdateLock = new object();
         Map m_CachedGridInfo = new Map();
 
         Date m_LastUpdate = new Date();
