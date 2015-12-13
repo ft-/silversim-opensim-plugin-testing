@@ -73,16 +73,22 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
 
         public override bool ContainsKey(UUID principalID, UUID folderID)
         {
-            InventoryFolderContent inventoryFolderContent;
-            try
+            Dictionary<string, string> post = new Dictionary<string, string>();
+            post["PRINCIPAL"] = (string)principalID;
+            post["ID"] = (string)folderID;
+            post["METHOD"] = "GETFOLDER";
+            Map map;
+            using (Stream s = HttpRequestHandler.DoStreamPostRequest(m_InventoryURI, null, post, false, TimeoutMs))
             {
-                inventoryFolderContent = this[principalID, folderID];
-                return true;
+                map = OpenSimResponse.Deserialize(s);
             }
-            catch
+            if (!map.ContainsKey("folder"))
             {
                 return false;
             }
+
+            Map foldermap = map["folder"] as Map;
+            return (null != foldermap);
         }
 
         public override InventoryFolderContent this[UUID principalID, UUID folderID]
