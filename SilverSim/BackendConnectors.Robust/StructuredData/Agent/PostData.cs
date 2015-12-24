@@ -174,16 +174,11 @@ namespace SilverSim.BackendConnectors.Robust.StructuredData.Agent
                 agentparams.Account.ServiceURLs["GatekeeperURI"] = agentparams.Account.ServiceURLs["HomeURI"];
             }
 
-            if(agentparams.Account.ServiceURLs.ContainsKey("HomeURI"))
+            if(!(agentparams.Account.ServiceURLs.ContainsKey("HomeURI") &&
+                Uri.TryCreate(agentparams.Account.ServiceURLs["HomeURI"], 
+                    UriKind.Absolute, out agentparams.Account.Principal.HomeURI)))
             {
-                try
-                {
-                    agentparams.Account.Principal.HomeURI = new Uri(agentparams.Account.ServiceURLs["HomeURI"]);
-                }
-                catch
-                {
-
-                }
+                agentparams.Account.Principal.HomeURI = null;
             }
 
             /*-----------------------------------------------------------------*/
