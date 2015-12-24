@@ -28,7 +28,6 @@ using SilverSim.ServiceInterfaces.Presence;
 using SilverSim.ServiceInterfaces.Profile;
 using SilverSim.ServiceInterfaces.ServerParam;
 using SilverSim.ServiceInterfaces.UserAgents;
-using SilverSim.Types.StructuredData.Agent;
 using SilverSim.Types.StructuredData.Json;
 using SilverSim.Types;
 using SilverSim.Types.Agent;
@@ -45,6 +44,7 @@ using System.IO.Compression;
 using System.Net;
 using System.Text;
 using ThreadedClasses;
+using SilverSim.BackendConnectors.Robust.StructuredData.Agent;
 
 namespace SilverSim.BackendHandlers.Robust.Simulation
 {

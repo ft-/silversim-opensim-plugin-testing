@@ -7,7 +7,6 @@ using SilverSim.Scene.Types.Agent;
 using SilverSim.Scene.Types.Neighbor;
 using SilverSim.ServiceInterfaces.Grid;
 using SilverSim.ServiceInterfaces.Teleport;
-using SilverSim.Types.StructuredData.Agent;
 using SilverSim.Types.StructuredData.Json;
 using SilverSim.Types;
 using SilverSim.Types.Agent;
@@ -15,6 +14,7 @@ using SilverSim.Types.Grid;
 using System;
 using System.IO;
 using System.IO.Compression;
+using SilverSim.BackendConnectors.Robust.StructuredData.Agent;
 
 namespace SilverSim.BackendConnectors.OpenSim.Teleport
 {
