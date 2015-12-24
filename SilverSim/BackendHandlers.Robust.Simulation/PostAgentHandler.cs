@@ -1021,7 +1021,7 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
                  */
 
                 SceneInterface scene;
-                if (Scene.Management.Scene.SceneManager.Scenes.TryGetValue(childAgentData.RegionLocation.RegionHandle, out scene))
+                if (SceneManager.Scenes.TryGetValue(childAgentData.RegionLocation.RegionHandle, out scene))
                 {
                     IAgent agent;
                     
