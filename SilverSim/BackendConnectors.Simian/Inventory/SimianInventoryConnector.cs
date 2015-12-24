@@ -134,7 +134,6 @@ namespace SilverSim.BackendConnectors.Simian.Inventory
                 case AssetType.Clothing: return "application/vnd.ll.clothing";
                 case AssetType.Object: return "application/vnd.ll.primitive";
                 case AssetType.Notecard: return "application/vnd.ll.notecard";
-                //case AssetType.Folder: return "application/vnd.ll.folder";
                 case AssetType.RootFolder: return "application/vnd.ll.rootfolder";
                 case AssetType.LSLText: return "application/vnd.ll.lsltext";
                 case AssetType.LSLBytecode: return "application/vnd.ll.lslbyte";
@@ -184,7 +183,6 @@ namespace SilverSim.BackendConnectors.Simian.Inventory
                 case "application/vnd.ll.notecard": 
                 case "application/x-metaverse-notecard": return AssetType.Notecard;
 
-                //case "application/vnd.ll.folder": return AssetType.Folder;
                 case "application/vnd.ll.rootfolder": return AssetType.RootFolder;
 
                 case "application/vnd.ll.lsltext": 

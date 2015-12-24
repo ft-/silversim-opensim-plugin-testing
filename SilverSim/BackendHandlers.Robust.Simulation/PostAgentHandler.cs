@@ -896,7 +896,6 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
                 Map appearancePack = (Map)param["packed_appearance"];
                 AppearanceInfo Appearance = new AppearanceInfo();
                 Appearance.AvatarHeight = appearancePack["height"].AsReal;
-                //agentparams.Appearance.Serial = appearancePack["serial"].AsInt;
 
                 {
                     AnArray vParams = (AnArray)appearancePack["visualparams"];
@@ -958,6 +957,7 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
                         }
                     }
                 }
+                Appearance.Serial = appearancePack["serial"].AsUInt;
 
                 /*
         if ((args["controllers"] != null) && (args["controllers"]).Type == OSDType.Array)
