@@ -283,14 +283,7 @@ namespace SilverSim.BackendConnectors.Robust.StructuredData.Agent
         }
         private void WriteJSONValue(TextWriter w, string name, bool value)
         {
-            if (value)
-            {
-                w.Write(string.Format("\"{0}\":true", Json.SerializeString(name)));
-            }
-            else
-            {
-                w.Write(string.Format("\"{0}\":false", Json.SerializeString(name)));
-            }
+            w.Write(string.Format("\"{0}\":{1}", Json.SerializeString(name), value ? "true" : "false"));
         }
 
         static UTF8Encoding UTF8NoBOM = new UTF8Encoding(false);
