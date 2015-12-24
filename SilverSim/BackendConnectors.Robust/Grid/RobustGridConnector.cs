@@ -52,6 +52,18 @@ namespace SilverSim.BackendConnectors.Robust.Grid
             }
         }
 
+        public override bool ContainsKey(UUID scopeID, UUID regionID)
+        {
+            Dictionary<string, string> post = new Dictionary<string, string>();
+            post["SCOPEID"] = (string)scopeID;
+            post["REGIONID"] = regionID.ToString();
+            post["METHOD"] = "get_region_by_uuid";
+            using (Stream s = HttpRequestHandler.DoStreamPostRequest(m_GridURI, null, post, false, TimeoutMs))
+            {
+                return TryDeserializeRegion(OpenSimResponse.Deserialize(s));
+            }
+        }
+
         public override RegionInfo this[UUID scopeID, UUID regionID]
         {
             get
@@ -77,6 +89,19 @@ namespace SilverSim.BackendConnectors.Robust.Grid
             using (Stream s = HttpRequestHandler.DoStreamPostRequest(m_GridURI, null, post, false, TimeoutMs))
             {
                 return TryDeserializeRegion(OpenSimResponse.Deserialize(s), out rInfo);
+            }
+        }
+
+        public override bool ContainsKey(UUID scopeID, uint gridX, uint gridY)
+        {
+            Dictionary<string, string> post = new Dictionary<string, string>();
+            post["SCOPEID"] = (string)scopeID;
+            post["X"] = gridX.ToString();
+            post["Y"] = gridY.ToString();
+            post["METHOD"] = "get_region_by_position";
+            using (Stream s = HttpRequestHandler.DoStreamPostRequest(m_GridURI, null, post, false, TimeoutMs))
+            {
+                return TryDeserializeRegion(OpenSimResponse.Deserialize(s));
             }
         }
 
@@ -108,6 +133,18 @@ namespace SilverSim.BackendConnectors.Robust.Grid
             }
         }
 
+        public override bool ContainsKey(UUID scopeID, string regionName)
+        {
+            Dictionary<string, string> post = new Dictionary<string, string>();
+            post["SCOPEID"] = (string)scopeID;
+            post["NAME"] = regionName;
+            post["METHOD"] = "get_region_by_name";
+            using (Stream s = HttpRequestHandler.DoStreamPostRequest(m_GridURI, null, post, false, TimeoutMs))
+            {
+                return TryDeserializeRegion(OpenSimResponse.Deserialize(s));
+            }
+        }
+
         public override RegionInfo this[UUID scopeID, string regionName]
         {
             get
@@ -132,6 +169,18 @@ namespace SilverSim.BackendConnectors.Robust.Grid
             using (Stream s = HttpRequestHandler.DoStreamPostRequest(m_GridURI, null, post, false, TimeoutMs))
             {
                 return TryDeserializeRegion(OpenSimResponse.Deserialize(s), out rInfo);
+            }
+        }
+
+        public override bool ContainsKey(UUID regionID)
+        {
+            Dictionary<string, string> post = new Dictionary<string, string>();
+            post["SCOPEID"] = (string)UUID.Zero;
+            post["REGIONID"] = regionID.ToString();
+            post["METHOD"] = "get_region_by_uuid";
+            using (Stream s = HttpRequestHandler.DoStreamPostRequest(m_GridURI, null, post, false, TimeoutMs))
+            {
+                return TryDeserializeRegion(OpenSimResponse.Deserialize(s));
             }
         }
 
@@ -256,13 +305,31 @@ namespace SilverSim.BackendConnectors.Robust.Grid
                 r = Deserialize(m);
                 if (r == null)
                 {
-                    throw new GridRegionNotFoundException();
+                    return false;
                 }
                 return true;
             }
             else
             {
                 r = default(RegionInfo);
+                return false;
+            }
+        }
+
+        private bool TryDeserializeRegion(Map map)
+        {
+            Map m = map["result"] as Map;
+            if (null != m)
+            {
+                RegionInfo r = Deserialize(m);
+                if (r == null)
+                {
+                    return false;
+                }
+                return true;
+            }
+            else
+            {
                 return false;
             }
         }
