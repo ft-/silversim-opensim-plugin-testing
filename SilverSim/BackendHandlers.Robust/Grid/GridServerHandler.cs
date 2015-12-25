@@ -29,6 +29,7 @@ namespace SilverSim.BackendHandlers.Robust.Grid
         public RobustGridServerHandler(string gridServiceName)
         {
             m_GridServiceName = gridServiceName;
+            m_ExtraFeatures["ExportSupported"] = "true";
         }
 
         public void Startup(ConfigurationLoader loader)
