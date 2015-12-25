@@ -334,6 +334,19 @@ namespace SilverSim.BackendConnectors.Robust.Grid
             }
         }
 
+        public override List<RegionInfo> GetHyperlinks(UUID scopeID)
+        {
+            Dictionary<string, string> post = new Dictionary<string, string>();
+            post["SCOPEID"] = (string)scopeID;
+            post["METHOD"] = "get_hyperlinks";
+            Map res;
+            using (Stream s = HttpRequestHandler.DoStreamPostRequest(m_GridURI, null, post, false, TimeoutMs))
+            {
+                res = OpenSimResponse.Deserialize(s);
+            }
+            return DeserializeList(res);
+        }
+
         public override List<RegionInfo> GetDefaultRegions(UUID scopeID)
         {
             Dictionary<string, string> post = new Dictionary<string, string>();
