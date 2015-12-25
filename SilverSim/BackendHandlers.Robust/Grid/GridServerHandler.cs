@@ -730,7 +730,17 @@ namespace SilverSim.BackendHandlers.Robust.Grid
                 scopeid = UUID.Zero;
             }
 
-            ListFailureResult(req);
+            List<RegionInfo> regions;
+            try
+            {
+                regions = m_GridService.GetHyperlinks(scopeid);
+            }
+            catch
+            {
+                ListFailureResult(req);
+                return;
+            }
+            SuccessResult(req, regions);
         }
 
         void GetRegionFlags(HttpRequest req, Dictionary<string, object> reqdata)
