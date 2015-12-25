@@ -3,6 +3,7 @@
 
 using SilverSim.Scene.Types.Scene;
 using SilverSim.Types;
+using SilverSim.Types.Grid;
 using System.IO;
 using System.Xml;
 
@@ -68,7 +69,19 @@ namespace SilverSim.OpenSimArchiver.RegionArchiver
                                     break;
 
                                 case "MaturityRating":
-                                    scene.RegionSettings.Maturity = reader.ReadElementValueAsInt();
+                                    switch(reader.ReadElementValueAsInt())
+                                    {
+                                        case 0:
+                                            scene.RegionData.Access = RegionAccess.PG;
+                                            break;
+                                        case 1:
+                                            scene.RegionData.Access = RegionAccess.Mature;
+                                            break;
+                                        case 2:
+                                        default:
+                                            scene.RegionData.Access = RegionAccess.Adult;
+                                            break;
+                                    }
                                     break;
 
                                 case "RestrictPushing":
