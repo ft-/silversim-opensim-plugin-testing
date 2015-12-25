@@ -276,41 +276,35 @@ namespace SilverSim.BackendHandlers.Robust.Grid
                 rInfo.Owner.CreatorData = reqdata["owner_data"].ToString();
             }
 
-            uint uint_val;
-
             if (!reqdata.ContainsKey("locX") ||
-                !uint.TryParse(reqdata["locX"].ToString(), out uint_val))
+                !uint.TryParse(reqdata["locX"].ToString(), out rInfo.Location.X))
             {
                 FailureResult(req, "Invalid parameter locX");
                 return;
             }
-            rInfo.Location.X = uint_val;
 
             if (!reqdata.ContainsKey("locY") ||
-                !uint.TryParse(reqdata["locY"].ToString(), out uint_val))
+                !uint.TryParse(reqdata["locY"].ToString(), out rInfo.Location.Y))
             {
                 FailureResult(req, "Invalid parameter locY");
                 return;
             }
-            rInfo.Location.Y = uint_val;
 
-            uint_val = 256;
+            rInfo.Size.X = 256;
             if(reqdata.ContainsKey("sizeX") &&
-                !uint.TryParse(reqdata["sizeX"].ToString(),out uint_val))
+                !uint.TryParse(reqdata["sizeX"].ToString(),out rInfo.Size.X))
             {
                 FailureResult(req, "Invalid parameter sizeX");
                 return;
             }
-            rInfo.Size.X = uint_val;
 
-            uint_val = 256;
+            rInfo.Size.Y = 256;
             if (reqdata.ContainsKey("sizeY") &&
-                !uint.TryParse(reqdata["sizeY"].ToString(), out uint_val))
+                !uint.TryParse(reqdata["sizeY"].ToString(), out rInfo.Size.Y))
             {
                 FailureResult(req, "Invalid parameter sizeY");
                 return;
             }
-            rInfo.Size.Y = uint_val;
 
             if(!reqdata.ContainsKey("serverIP"))
             {
@@ -327,22 +321,20 @@ namespace SilverSim.BackendHandlers.Robust.Grid
             rInfo.ServerURI = reqdata["serverURI"].ToString();
 
             if(!reqdata.ContainsKey("serverHttpPort") ||
-                uint.TryParse(reqdata["serverHttpPort"].ToString(), out uint_val) ||
-                uint_val < 1 || uint_val > 65535)
+                uint.TryParse(reqdata["serverHttpPort"].ToString(), out rInfo.ServerHttpPort) ||
+                rInfo.ServerHttpPort < 1 || rInfo.ServerHttpPort > 65535)
             {
                 FailureResult(req, "Invalid parameter serverHttpPort");
                 return;
             }
-            rInfo.ServerHttpPort = uint_val;
 
             if (!reqdata.ContainsKey("serverPort") ||
-                uint.TryParse(reqdata["serverPort"].ToString(), out uint_val) ||
-                uint_val < 1 || uint_val > 65535)
+                uint.TryParse(reqdata["serverPort"].ToString(), out rInfo.ServerPort) ||
+                rInfo.ServerPort < 1 || rInfo.ServerPort > 65535)
             {
                 FailureResult(req, "Invalid parameter serverPort");
                 return;
             }
-            rInfo.ServerPort = uint_val;
 
             if(reqdata.ContainsKey("regionMapTexture") &&
                 !UUID.TryParse(reqdata["regionMapTexture"].ToString(), out rInfo.RegionMapTexture))
@@ -358,13 +350,14 @@ namespace SilverSim.BackendHandlers.Robust.Grid
                 return;
             }
 
+            uint access_val = (uint)RegionAccess.Adult;
             if(reqdata.ContainsKey("access") &&
-                !uint.TryParse(reqdata["access"].ToString(), out uint_val))
+                !uint.TryParse(reqdata["access"].ToString(), out access_val))
             {
                 FailureResult(req, "Invalid parameter access");
                 return;
             }
-            rInfo.Access = (RegionAccess)uint_val;
+            rInfo.Access = (RegionAccess)access_val;
 
             if(reqdata.ContainsKey("PrincipalID") &&
                 !UUI.TryParse(reqdata["PrincipalID"].ToString(),out rInfo.AuthenticatingPrincipal))
@@ -378,10 +371,11 @@ namespace SilverSim.BackendHandlers.Robust.Grid
                 rInfo.AuthenticatingToken = reqdata["Token"].ToString();
             }
 
+            uint flags_val;
             if(reqdata.ContainsKey("flags") &&
-                uint.TryParse(reqdata["flags"].ToString(), out uint_val))
+                uint.TryParse(reqdata["flags"].ToString(), out flags_val))
             {
-                rInfo.Flags = (RegionFlags)uint_val;
+                rInfo.Flags = (RegionFlags)flags_val;
             }
             else
             {
