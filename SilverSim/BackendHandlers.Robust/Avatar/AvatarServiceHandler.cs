@@ -28,14 +28,8 @@ namespace SilverSim.BackendHandlers.Robust.Avatar
                 switch(key)
                 {
                     case "UserID":
-                        break;
-
                     case "VERSIONMAX":
-                        break;
-
                     case "VERSIONMIN":
-                        break;
-
                     case "METHOD":
                         break;
 
