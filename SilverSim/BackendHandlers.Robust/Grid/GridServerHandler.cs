@@ -373,15 +373,11 @@ namespace SilverSim.BackendHandlers.Robust.Grid
             }
 
             uint flags_val;
-            if(reqdata.ContainsKey("flags") &&
-                uint.TryParse(reqdata["flags"].ToString(), out flags_val))
-            {
-                rInfo.Flags = (RegionFlags)flags_val;
-            }
-            else
-            {
-                rInfo.Flags = RegionFlags.RegionOnline;
-            }
+            rInfo.Flags = (reqdata.ContainsKey("flags") &&
+                uint.TryParse(reqdata["flags"].ToString(), out flags_val)) ?
+                (RegionFlags)flags_val :
+                RegionFlags.RegionOnline;
+            
             try
             {
                 m_GridService.RegisterRegion(rInfo);
