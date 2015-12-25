@@ -82,6 +82,7 @@ namespace SilverSim.OpenSimArchiver.RegionArchiver
                                             scene.RegionData.Access = RegionAccess.Adult;
                                             break;
                                     }
+                                    scene.ReregisterRegion();
                                     break;
 
                                 case "RestrictPushing":
