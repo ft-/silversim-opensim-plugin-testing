@@ -6,9 +6,9 @@ using Nini.Config;
 using SilverSim.Main.Common;
 using SilverSim.Main.Common.HttpServer;
 using SilverSim.ServiceInterfaces.Asset;
-using SilverSim.Types.StructuredData.AssetXml;
 using SilverSim.Types;
 using SilverSim.Types.Asset;
+using SilverSim.Types.StructuredData.AssetXml;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -29,7 +29,6 @@ namespace SilverSim.BackendHandlers.Robust.Asset
         readonly string m_TemporaryAssetServiceName;
         readonly string m_PersistentAssetServiceName;
         readonly bool m_EnableGet;
-        private static readonly Encoding UTF8NoBOM = new System.Text.UTF8Encoding(false);
 
         public RobustAssetServerHandler(string persistentAssetServiceName, string temporaryAssetServiceName, bool enableGet)
         {
@@ -184,8 +183,8 @@ namespace SilverSim.BackendHandlers.Robust.Asset
                      data.Creator.ToString(),
                      flags);
 
-                byte[] header = UTF8NoBOM.GetBytes(assetbase_header);
-                byte[] footer = UTF8NoBOM.GetBytes(assetbase_footer);
+                byte[] header = assetbase_header.ToUTF8Bytes();
+                byte[] footer = assetbase_footer.ToUTF8Bytes();
 
                 using (HttpResponse res = req.BeginResponse())
                 {
@@ -277,8 +276,8 @@ namespace SilverSim.BackendHandlers.Robust.Asset
                     data.Temporary.ToString(),
                     data.Creator.ToString(),
                     flags);
-                byte[] header = UTF8NoBOM.GetBytes(assetbase_header);
-                byte[] footer = UTF8NoBOM.GetBytes(assetbase_footer);
+                byte[] header = assetbase_header.ToUTF8Bytes();
+                byte[] footer = assetbase_footer.ToUTF8Bytes();
 
                 using (HttpResponse res = req.BeginResponse())
                 {
@@ -349,7 +348,7 @@ namespace SilverSim.BackendHandlers.Robust.Asset
         {
             using (HttpResponse res = req.BeginResponse())
             {
-                using (XmlTextWriter writer = new XmlTextWriter(res.GetOutputStream(), UTF8NoBOM))
+                using (XmlTextWriter writer = res.GetOutputStream().UTF8XmlTextWriter())
                 {
                     writer.WriteStartElement("boolean");
                     writer.WriteValue(false);
@@ -379,7 +378,7 @@ namespace SilverSim.BackendHandlers.Robust.Asset
                     m_TemporaryAssetService.Store(data);
                     using (HttpResponse res = req.BeginResponse())
                     {
-                        using (XmlTextWriter writer = new XmlTextWriter(res.GetOutputStream(), UTF8NoBOM))
+                        using (XmlTextWriter writer = res.GetOutputStream().UTF8XmlTextWriter())
                         {
                             writer.WriteStartElement("string");
                             writer.WriteValue(data.ID.ToString());
@@ -398,7 +397,7 @@ namespace SilverSim.BackendHandlers.Robust.Asset
                 m_PersistentAssetService.Store(data);
                 using (HttpResponse res = req.BeginResponse())
                 {
-                    using (XmlTextWriter writer = new XmlTextWriter(res.GetOutputStream(), UTF8NoBOM))
+                    using (XmlTextWriter writer = res.GetOutputStream().UTF8XmlTextWriter())
                     {
                         writer.WriteStartElement("string");
                         writer.WriteValue(data.ID.ToString());
@@ -415,7 +414,7 @@ namespace SilverSim.BackendHandlers.Robust.Asset
             {
                 using (HttpResponse res = req.BeginResponse())
                 {
-                    using (XmlTextWriter writer = new XmlTextWriter(res.GetOutputStream(), UTF8NoBOM))
+                    using (XmlTextWriter writer = res.GetOutputStream().UTF8XmlTextWriter())
                     {
                         writer.WriteStartElement("string");
                         writer.WriteValue(data.ID.ToString());
@@ -549,7 +548,7 @@ namespace SilverSim.BackendHandlers.Robust.Asset
             using (HttpResponse res = req.BeginResponse())
             {
                 res.ContentType = "text/xml";
-                using (XmlTextWriter writer = new XmlTextWriter(res.GetOutputStream(), UTF8NoBOM))
+                using (XmlTextWriter writer = res.GetOutputStream().UTF8XmlTextWriter())
                 {
                     writer.WriteStartElement("ArrayOfBoolean");
                     foreach (UUID id in ids)

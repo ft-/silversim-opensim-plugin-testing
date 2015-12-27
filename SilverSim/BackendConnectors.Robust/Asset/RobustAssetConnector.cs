@@ -6,18 +6,17 @@ using Nini.Config;
 using SilverSim.Http.Client;
 using SilverSim.Main.Common;
 using SilverSim.ServiceInterfaces.Asset;
-using SilverSim.Types.StructuredData.AssetXml;
 using SilverSim.Types;
 using SilverSim.Types.Asset;
+using SilverSim.Types.StructuredData.AssetXml;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Net;
-using System.Text;
+using System.Runtime.Serialization;
 using System.Web;
 using System.Xml;
-using System.Runtime.Serialization;
 
 namespace SilverSim.BackendConnectors.Robust.Asset
 {
@@ -297,7 +296,6 @@ namespace SilverSim.BackendConnectors.Robust.Asset
         #endregion
 
         #region Store asset method
-        static Encoding UTF8NoBOM = new UTF8Encoding(false);
 
         public override void Store(AssetData asset)
         {
@@ -354,8 +352,8 @@ namespace SilverSim.BackendConnectors.Robust.Asset
                 asset.Creator.ToString(),
                 flags);
 
-            byte[] header = UTF8NoBOM.GetBytes(assetbase_header);
-            byte[] footer = UTF8NoBOM.GetBytes(assetbase_footer);
+            byte[] header = assetbase_header.ToUTF8Bytes();
+            byte[] footer = assetbase_footer.ToUTF8Bytes();
             if (m_EnableCompression)
             {
                 byte[] compressedAsset;
@@ -396,14 +394,14 @@ namespace SilverSim.BackendConnectors.Robust.Asset
             while (asset.Data.Length - pos >= MAX_ASSET_BASE64_CONVERSION_SIZE)
             {
                 string b = Convert.ToBase64String(asset.Data, pos, MAX_ASSET_BASE64_CONVERSION_SIZE);
-                byte[] block = UTF8NoBOM.GetBytes(b);
+                byte[] block = b.ToUTF8Bytes();
                 st.Write(block, 0, block.Length);
                 pos += MAX_ASSET_BASE64_CONVERSION_SIZE;
             }
             if (asset.Data.Length > pos)
             {
                 string b = Convert.ToBase64String(asset.Data, pos, asset.Data.Length - pos);
-                byte[] block = UTF8NoBOM.GetBytes(b);
+                byte[] block = b.ToUTF8Bytes();
                 st.Write(block, 0, block.Length);
             }
         }

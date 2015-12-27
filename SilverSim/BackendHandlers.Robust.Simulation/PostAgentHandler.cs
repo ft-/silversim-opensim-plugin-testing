@@ -9,6 +9,7 @@ using SilverSim.BackendConnectors.Robust.GridUser;
 using SilverSim.BackendConnectors.Robust.IM;
 using SilverSim.BackendConnectors.Robust.Inventory;
 using SilverSim.BackendConnectors.Robust.Presence;
+using SilverSim.BackendConnectors.Robust.StructuredData.Agent;
 using SilverSim.BackendConnectors.Robust.UserAgent;
 using SilverSim.Http.Client;
 using SilverSim.Main.Common;
@@ -28,12 +29,12 @@ using SilverSim.ServiceInterfaces.Presence;
 using SilverSim.ServiceInterfaces.Profile;
 using SilverSim.ServiceInterfaces.ServerParam;
 using SilverSim.ServiceInterfaces.UserAgents;
-using SilverSim.Types.StructuredData.Json;
 using SilverSim.Types;
 using SilverSim.Types.Agent;
 using SilverSim.Types.Asset.Format;
 using SilverSim.Types.Groups;
 using SilverSim.Types.Presence;
+using SilverSim.Types.StructuredData.Json;
 using SilverSim.Viewer.Core;
 using SilverSim.Viewer.Messages.Agent;
 using SilverSim.Viewer.Messages.Circuit;
@@ -44,7 +45,6 @@ using System.IO.Compression;
 using System.Net;
 using System.Text;
 using ThreadedClasses;
-using SilverSim.BackendConnectors.Robust.StructuredData.Agent;
 
 namespace SilverSim.BackendHandlers.Robust.Simulation
 {

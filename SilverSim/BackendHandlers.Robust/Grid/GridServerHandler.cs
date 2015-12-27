@@ -13,7 +13,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
-using System.Text;
 using System.Xml;
 
 namespace SilverSim.BackendHandlers.Robust.Grid
@@ -38,15 +37,13 @@ namespace SilverSim.BackendHandlers.Robust.Grid
             loader.HttpServer.StartsWithUriHandlers.Add("/grid", GridAccessHandler);
         }
 
-        static readonly UTF8Encoding UTF8NoBOM = new UTF8Encoding(false);
-
         void SuccessResult(HttpRequest req, RegionInfo rInfo)
         {
             using (HttpResponse res = req.BeginResponse("text/xml"))
             {
                 using (Stream o = res.GetOutputStream())
                 {
-                    using (XmlTextWriter w = new XmlTextWriter(o, UTF8NoBOM))
+                    using (XmlTextWriter w = o.UTF8XmlTextWriter())
                     {
                         w.WriteStartElement("ServerResponse");
                         w.WriteStartElement("result");
@@ -65,7 +62,7 @@ namespace SilverSim.BackendHandlers.Robust.Grid
             {
                 using (Stream o = res.GetOutputStream())
                 {
-                    using (XmlTextWriter w = new XmlTextWriter(o, UTF8NoBOM))
+                    using (XmlTextWriter w = o.UTF8XmlTextWriter())
                     {
                         w.WriteStartElement("ServerResponse");
                         w.WriteStartElement("result");
@@ -91,7 +88,7 @@ namespace SilverSim.BackendHandlers.Robust.Grid
             {
                 using (Stream o = res.GetOutputStream())
                 {
-                    using (XmlTextWriter w = new XmlTextWriter(o, UTF8NoBOM))
+                    using (XmlTextWriter w = o.UTF8XmlTextWriter())
                     {
                         w.WriteStartElement("ServerResponse");
                         w.WriteStartElement("result");
@@ -109,7 +106,7 @@ namespace SilverSim.BackendHandlers.Robust.Grid
             {
                 using (Stream o = res.GetOutputStream())
                 {
-                    using (XmlWriter w = new XmlTextWriter(o, UTF8NoBOM))
+                    using (XmlWriter w = o.UTF8XmlTextWriter())
                     {
                         w.WriteStartElement("ServerResponse");
                         w.WriteStartElement("Result");
@@ -130,7 +127,7 @@ namespace SilverSim.BackendHandlers.Robust.Grid
             {
                 using (Stream o = res.GetOutputStream())
                 {
-                    using (XmlWriter w = new XmlTextWriter(o, UTF8NoBOM))
+                    using (XmlWriter w = o.UTF8XmlTextWriter())
                     {
                         w.WriteStartElement("ServerResponse");
                         w.WriteStartElement("Result");
@@ -774,7 +771,7 @@ namespace SilverSim.BackendHandlers.Robust.Grid
             {
                 using (Stream o = res.GetOutputStream())
                 {
-                    using (XmlTextWriter w = new XmlTextWriter(o, UTF8NoBOM))
+                    using (XmlTextWriter w = o.UTF8XmlTextWriter())
                     {
                         w.WriteStartElement("ServerResponse");
                         w.WriteNamedValue("result", regionFlags);
@@ -790,7 +787,7 @@ namespace SilverSim.BackendHandlers.Robust.Grid
             {
                 using (Stream o = res.GetOutputStream())
                 {
-                    using (XmlWriter w = new XmlTextWriter(o, UTF8NoBOM))
+                    using (XmlWriter w = o.UTF8XmlTextWriter())
                     {
                         w.WriteStartElement("ServerResponse");
                         List<Dictionary<string, object>.Enumerator> enumStack = new List<Dictionary<string, object>.Enumerator>();

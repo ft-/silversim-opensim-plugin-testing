@@ -1,7 +1,6 @@
 ﻿// SilverSim is distributed under the terms of the
 // GNU Affero General Public License v3
 
-using SilverSim.Viewer.Messages.LayerData;
 using SilverSim.Main.Common.CmdIO;
 using SilverSim.Main.Common.Tar;
 using SilverSim.Scene.Types.Object;
@@ -9,13 +8,13 @@ using SilverSim.Scene.Types.Scene;
 using SilverSim.Types;
 using SilverSim.Types.Asset;
 using SilverSim.Types.Parcel;
+using SilverSim.Viewer.Messages.LayerData;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.IO.Compression;
-using System.Text;
 using System.Xml;
-using System.Diagnostics.CodeAnalysis;
 
 namespace SilverSim.OpenSimArchiver.RegionArchiver
 {
@@ -128,7 +127,7 @@ namespace SilverSim.OpenSimArchiver.RegionArchiver
                 {
                     using (MemoryStream ms = new MemoryStream())
                     {
-                        using (XmlTextWriter xmlwriter = new XmlTextWriter(ms, UTF8NoBOM))
+                        using (XmlTextWriter xmlwriter = ms.UTF8XmlTextWriter())
                         {
                             xmlwriter.WriteStartElement("LandData");
                             {
@@ -213,7 +212,7 @@ namespace SilverSim.OpenSimArchiver.RegionArchiver
         {
             using(MemoryStream ms = new MemoryStream())
             {
-                using(XmlTextWriter writer = new XmlTextWriter(ms, UTF8NoBOM))
+                using(XmlTextWriter writer = ms.UTF8XmlTextWriter())
                 {
                     writer.WriteStartElement("archive");
                     writer.WriteAttributeString("major_version", "0");
@@ -292,7 +291,5 @@ namespace SilverSim.OpenSimArchiver.RegionArchiver
         {
             return (p.Y - minY) * lineWidth + p.X;
         }
-
-        static UTF8Encoding UTF8NoBOM = new UTF8Encoding(false);
     }
 }

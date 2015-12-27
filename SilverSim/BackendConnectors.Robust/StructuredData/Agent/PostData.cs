@@ -12,7 +12,6 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Runtime.Serialization;
-using System.Text;
 using ThreadedClasses;
 
 namespace SilverSim.BackendConnectors.Robust.StructuredData.Agent
@@ -281,11 +280,10 @@ namespace SilverSim.BackendConnectors.Robust.StructuredData.Agent
             w.Write(string.Format("\"{0}\":{1}", Json.SerializeString(name), value ? "true" : "false"));
         }
 
-        static UTF8Encoding UTF8NoBOM = new UTF8Encoding(false);
         public void Serialize(Stream output)
         {
             string prefix;
-            using (TextWriter w = new StreamWriter(output, UTF8NoBOM))
+            using (TextWriter w = output.UTF8StreamWriter())
             {
                 w.Write("{");
                 /*-----------------------------------------------------------------*/

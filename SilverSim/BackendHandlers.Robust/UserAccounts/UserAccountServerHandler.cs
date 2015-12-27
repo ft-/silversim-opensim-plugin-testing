@@ -6,13 +6,11 @@ using Nini.Config;
 using SilverSim.Main.Common;
 using SilverSim.Main.Common.HttpServer;
 using SilverSim.ServiceInterfaces.Account;
-using SilverSim.ServiceInterfaces.ServerParam;
 using SilverSim.Types;
 using SilverSim.Types.Account;
 using SilverSim.Types.StructuredData.REST;
 using System.Collections.Generic;
 using System.Net;
-using System.Text;
 using System.Xml;
 
 namespace SilverSim.BackendHandlers.Robust.UserAccounts
@@ -53,7 +51,6 @@ namespace SilverSim.BackendHandlers.Robust.UserAccounts
         private BaseHttpServer m_HttpServer;
         UserAccountServiceInterface m_UserAccountService;
         readonly string m_UserAccountServiceName;
-        static readonly Encoding UTF8NoBOM = new System.Text.UTF8Encoding(false);
 
         public RobustUserAccountServerHandler(string userAccountServiceName)
         {
@@ -88,8 +85,8 @@ namespace SilverSim.BackendHandlers.Robust.UserAccounts
             }
         }
 
-        readonly byte[] SuccessResult = UTF8NoBOM.GetBytes("<?xml version=\"1.0\"?><ServerResponse><result>Success</result></ServerResponse>");
-        readonly byte[] FailureResult = UTF8NoBOM.GetBytes("<?xml version=\"1.0\"?><ServerResponse><result>Failure</result></ServerResponse>");
+        readonly byte[] SuccessResult = "<?xml version=\"1.0\"?><ServerResponse><result>Success</result></ServerResponse>".ToUTF8Bytes();
+        readonly byte[] FailureResult = "<?xml version=\"1.0\"?><ServerResponse><result>Failure</result></ServerResponse>".ToUTF8Bytes();
 
         public void PostUserAccountHandler(HttpRequest req)
         {
@@ -191,7 +188,7 @@ namespace SilverSim.BackendHandlers.Robust.UserAccounts
 
             using(HttpResponse res = req.BeginResponse("text/xml"))
             {
-                using(XmlTextWriter writer = new XmlTextWriter(res.GetOutputStream(), UTF8NoBOM))
+                using(XmlTextWriter writer = res.GetOutputStream().UTF8XmlTextWriter())
                 {
                     writer.WriteStartElement("ServerResponse");
                     if(ua == null)
@@ -226,7 +223,7 @@ namespace SilverSim.BackendHandlers.Robust.UserAccounts
 
             using (HttpResponse res = req.BeginResponse("text/xml"))
             {
-                using (XmlTextWriter writer = new XmlTextWriter(res.GetOutputStream(), UTF8NoBOM))
+                using (XmlTextWriter writer = res.GetOutputStream().UTF8XmlTextWriter())
                 {
                     writer.WriteStartElement("ServerResponse");
                     writer.WriteStartElement("result");

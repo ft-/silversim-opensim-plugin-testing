@@ -8,11 +8,8 @@ using SilverSim.Main.Common.HttpServer;
 using SilverSim.ServiceInterfaces.Avatar;
 using SilverSim.Types;
 using SilverSim.Types.StructuredData.REST;
-using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Net;
-using System.Text;
 using System.Xml;
 
 namespace SilverSim.BackendHandlers.Robust.Avatar
@@ -50,7 +47,6 @@ namespace SilverSim.BackendHandlers.Robust.Avatar
         private BaseHttpServer m_HttpServer;
         AvatarServiceInterface m_AvatarService;
         readonly string m_AvatarServiceName;
-        private static Encoding UTF8NoBOM = new System.Text.UTF8Encoding(false);
 
         public RobustAvatarServerHandler(string avatarServiceName)
         {
@@ -69,7 +65,7 @@ namespace SilverSim.BackendHandlers.Robust.Avatar
         {
             using (HttpResponse res = req.BeginResponse("text/xml"))
             {
-                using (XmlTextWriter writer = new XmlTextWriter(res.GetOutputStream(), UTF8NoBOM))
+                using (XmlTextWriter writer = res.GetOutputStream().UTF8XmlTextWriter())
                 {
                     writer.WriteStartElement("ServerResponse");
                     writer.WriteStartElement("result");
@@ -144,7 +140,7 @@ namespace SilverSim.BackendHandlers.Robust.Avatar
             {
                 using (HttpResponse res = req.BeginResponse("text/xml"))
                 {
-                    using (XmlTextWriter writer = new XmlTextWriter(res.GetOutputStream(), UTF8NoBOM))
+                    using (XmlTextWriter writer = res.GetOutputStream().UTF8XmlTextWriter())
                     {
                         writer.WriteStartElement("ServerResponse");
                         writer.WriteStartElement("result");
@@ -170,7 +166,7 @@ namespace SilverSim.BackendHandlers.Robust.Avatar
             }
             using (HttpResponse res = req.BeginResponse("text/xml"))
             {
-                using (XmlTextWriter writer = new XmlTextWriter(res.GetOutputStream(), UTF8NoBOM))
+                using (XmlTextWriter writer = res.GetOutputStream().UTF8XmlTextWriter())
                 {
                     writer.WriteStartElement("ServerResponse");
                     {

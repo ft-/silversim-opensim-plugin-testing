@@ -13,7 +13,6 @@ using SilverSim.Types.StructuredData.REST;
 using System;
 using System.Collections.Generic;
 using System.Net;
-using System.Text;
 using System.Xml;
 
 namespace SilverSim.BackendHandlers.Robust.Inventory
@@ -199,7 +198,7 @@ namespace SilverSim.BackendHandlers.Robust.Inventory
         {
             using (HttpResponse res = httpreq.BeginResponse("text/xml"))
             {
-                using (XmlTextWriter writer = new XmlTextWriter(res.GetOutputStream(), UTF8NoBOM))
+                using (XmlTextWriter writer = res.GetOutputStream().UTF8XmlTextWriter())
                 {
                     writer.WriteStartElement("ServerResponse");
                     writer.WriteStartElement("RESULT");
@@ -257,7 +256,7 @@ namespace SilverSim.BackendHandlers.Robust.Inventory
             {
                 using (HttpResponse res = httpreq.BeginResponse("text/xml"))
                 {
-                    using (XmlTextWriter writer = new XmlTextWriter(res.GetOutputStream(), UTF8NoBOM))
+                    using (XmlTextWriter writer = res.GetOutputStream().UTF8XmlTextWriter())
                     {
                         writer.WriteStartElement("ServerResponse");
                         writer.WriteStartElement("RESULT");
@@ -277,7 +276,7 @@ namespace SilverSim.BackendHandlers.Robust.Inventory
                 {
                     using (HttpResponse res = httpreq.BeginResponse("text/xml"))
                     {
-                        using (XmlTextWriter writer = new XmlTextWriter(res.GetOutputStream(), UTF8NoBOM))
+                        using (XmlTextWriter writer = res.GetOutputStream().UTF8XmlTextWriter())
                         {
                             writer.WriteStartElement("ServerResponse");
                             writer.WriteStartElement("RESULT");
@@ -319,7 +318,7 @@ namespace SilverSim.BackendHandlers.Robust.Inventory
             int count = 0;
             using (HttpResponse res = httpreq.BeginResponse("text/xml"))
             {
-                using (XmlTextWriter writer = new XmlTextWriter(res.GetOutputStream(), UTF8NoBOM))
+                using (XmlTextWriter writer = res.GetOutputStream().UTF8XmlTextWriter())
                 {
                     writer.WriteStartElement("ServerResponse");
                     foreach (InventoryFolder folder in folders)
@@ -347,7 +346,7 @@ namespace SilverSim.BackendHandlers.Robust.Inventory
 
             using (HttpResponse res = httpreq.BeginResponse("text/xml"))
             {
-                using (XmlTextWriter writer = new XmlTextWriter(res.GetOutputStream(), UTF8NoBOM))
+                using (XmlTextWriter writer = res.GetOutputStream().UTF8XmlTextWriter())
                 {
                     writer.WriteStartElement("ServerResponse");
                     writer.WriteFolder("folder", folder);
@@ -372,7 +371,7 @@ namespace SilverSim.BackendHandlers.Robust.Inventory
 
             using (HttpResponse res = httpreq.BeginResponse("text/xml"))
             {
-                using (XmlTextWriter writer = new XmlTextWriter(res.GetOutputStream(), UTF8NoBOM))
+                using (XmlTextWriter writer = res.GetOutputStream().UTF8XmlTextWriter())
                 {
                     writer.WriteStartElement("ServerResponse");
                     writer.WriteFolder("folder", folder);
@@ -398,7 +397,7 @@ namespace SilverSim.BackendHandlers.Robust.Inventory
 
             using (HttpResponse res = httpreq.BeginResponse("text/xml"))
             {
-                using (XmlTextWriter writer = new XmlTextWriter(res.GetOutputStream(), UTF8NoBOM))
+                using (XmlTextWriter writer = res.GetOutputStream().UTF8XmlTextWriter())
                 {
                     writer.WriteStartElement("ServerResponse");
                     writer.WriteFolderContent(string.Empty, folder);
@@ -434,7 +433,7 @@ namespace SilverSim.BackendHandlers.Robust.Inventory
 
             using (HttpResponse res = httpreq.BeginResponse("text/xml"))
             {
-                using (XmlTextWriter writer = new XmlTextWriter(res.GetOutputStream(), UTF8NoBOM))
+                using (XmlTextWriter writer = res.GetOutputStream().UTF8XmlTextWriter())
                 {
                     writer.WriteStartElement("ServerResponse");
                     foreach (InventoryFolderContent content in foldercontents)
@@ -463,7 +462,7 @@ namespace SilverSim.BackendHandlers.Robust.Inventory
 
             using (HttpResponse res = httpreq.BeginResponse("text/xml"))
             {
-                using (XmlTextWriter writer = new XmlTextWriter(res.GetOutputStream(), UTF8NoBOM))
+                using (XmlTextWriter writer = res.GetOutputStream().UTF8XmlTextWriter())
                 {
                     writer.WriteStartElement("ServerResponse");
                     int count = 0;
@@ -671,7 +670,7 @@ namespace SilverSim.BackendHandlers.Robust.Inventory
 
             using (HttpResponse res = httpreq.BeginResponse("text/xml"))
             {
-                using (XmlTextWriter writer = new XmlTextWriter(res.GetOutputStream(), UTF8NoBOM))
+                using (XmlTextWriter writer = res.GetOutputStream().UTF8XmlTextWriter())
                 {
                     writer.WriteStartElement("ServerResponse");
                     writer.WriteItem("item", item);
@@ -706,7 +705,7 @@ namespace SilverSim.BackendHandlers.Robust.Inventory
             using (HttpResponse res = httpreq.BeginResponse("text/xml"))
             {
                 int count = 0;
-                using (XmlTextWriter writer = new XmlTextWriter(res.GetOutputStream(), UTF8NoBOM))
+                using (XmlTextWriter writer = res.GetOutputStream().UTF8XmlTextWriter())
                 {
                     writer.WriteStartElement("ServerResponse");
                     foreach (UUID uuid in uuids)
@@ -759,7 +758,7 @@ namespace SilverSim.BackendHandlers.Robust.Inventory
 
             using (HttpResponse res = httpreq.BeginResponse("text/xml"))
             {
-                using (XmlTextWriter writer = new XmlTextWriter(res.GetOutputStream(), UTF8NoBOM))
+                using (XmlTextWriter writer = res.GetOutputStream().UTF8XmlTextWriter())
                 {
                     writer.WriteStartElement("ServerResponse");
                     writer.WriteFolder("folder", folder);
@@ -784,7 +783,7 @@ namespace SilverSim.BackendHandlers.Robust.Inventory
             using (HttpResponse res = httpreq.BeginResponse("text/xml"))
             {
                 int count = 0;
-                using (XmlTextWriter writer = new XmlTextWriter(res.GetOutputStream(), UTF8NoBOM))
+                using (XmlTextWriter writer = res.GetOutputStream().UTF8XmlTextWriter())
                 {
                     writer.WriteStartElement("ServerResponse");
                     foreach (InventoryItem item in gestures)
@@ -796,8 +795,6 @@ namespace SilverSim.BackendHandlers.Robust.Inventory
                 }
             }
         }
-
-        static UTF8Encoding UTF8NoBOM = new UTF8Encoding(false);
     }
     #endregion
 

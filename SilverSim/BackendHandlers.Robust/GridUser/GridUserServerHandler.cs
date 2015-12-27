@@ -15,7 +15,6 @@ using SilverSim.Types.StructuredData.REST;
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
-using System.Text;
 using System.Xml;
 
 namespace SilverSim.BackendHandlers.Robust.GridUser
@@ -31,7 +30,6 @@ namespace SilverSim.BackendHandlers.Robust.GridUser
         readonly string m_GridUserServiceName;
         readonly string m_UserAccountServiceName;
         readonly string m_AvatarNameStorageName;
-        private static readonly Encoding UTF8NoBOM = new System.Text.UTF8Encoding(false);
 
         public RobustGridUserServerHandler(string gridUserService, string userAccountService, string avatarNameService)
         {
@@ -70,8 +68,8 @@ namespace SilverSim.BackendHandlers.Robust.GridUser
             }
         }
 
-        readonly byte[] SuccessResult = UTF8NoBOM.GetBytes("<?xml version=\"1.0\"?><ServerResponse><result>Success</result></ServerResponse>");
-        readonly byte[] FailureResult = UTF8NoBOM.GetBytes("<?xml version=\"1.0\"?><ServerResponse><result>Failure</result></ServerResponse>");
+        readonly byte[] SuccessResult = "<?xml version=\"1.0\"?><ServerResponse><result>Success</result></ServerResponse>".ToUTF8Bytes();
+        readonly byte[] FailureResult = "<?xml version=\"1.0\"?><ServerResponse><result>Failure</result></ServerResponse>".ToUTF8Bytes();
 
         public void PostGridUserHandler(HttpRequest req)
         {
@@ -253,7 +251,7 @@ namespace SilverSim.BackendHandlers.Robust.GridUser
                 {
                     using(HttpResponse resp = httpreq.BeginResponse("text/xml"))
                     {
-                        using (XmlTextWriter writer = new XmlTextWriter(resp.GetOutputStream(), UTF8NoBOM))
+                        using (XmlTextWriter writer = resp.GetOutputStream().UTF8XmlTextWriter())
                         {
                             writer.WriteStartElement("ServerResponse");
                             WriteXmlGridUserEntry(writer, aui, "result");
@@ -265,7 +263,7 @@ namespace SilverSim.BackendHandlers.Robust.GridUser
                 {
                     using (HttpResponse resp = httpreq.BeginResponse("text/xml"))
                     {
-                        using (XmlTextWriter writer = new XmlTextWriter(resp.GetOutputStream(), UTF8NoBOM))
+                        using (XmlTextWriter writer = resp.GetOutputStream().UTF8XmlTextWriter())
                         {
                             writer.WriteStartElement("ServerResponse");
                             writer.WriteStartElement("result");
@@ -338,7 +336,7 @@ namespace SilverSim.BackendHandlers.Robust.GridUser
 
             using (HttpResponse resp = httpreq.BeginResponse("text/xml"))
             {
-                using (XmlTextWriter writer = new XmlTextWriter(resp.GetOutputStream(), UTF8NoBOM))
+                using (XmlTextWriter writer = resp.GetOutputStream().UTF8XmlTextWriter())
                 {
                     writer.WriteStartElement("ServerResponse");
                     WriteUserInfo(writer, uui, "result", true);
@@ -352,7 +350,7 @@ namespace SilverSim.BackendHandlers.Robust.GridUser
             bool anyFound = false;
             using (HttpResponse resp = httpreq.BeginResponse("text/xml"))
             {
-                using(XmlTextWriter writer = new XmlTextWriter(resp.GetOutputStream(), UTF8NoBOM))
+                using(XmlTextWriter writer = resp.GetOutputStream().UTF8XmlTextWriter())
                 {
                     List<string> userIDs = (List<string>)req["AgentIDs"];
 
