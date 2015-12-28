@@ -322,10 +322,6 @@ namespace SilverSim.BackendConnectors.Robust.StructuredData.Agent
                     WriteJSONString(w, "destination_serveruri", Destination.ServerURI); w.Write(",");
                     WriteJSONString(w, "gatekeeper_serveruri", Destination.GatekeeperURI); w.Write(",");
                 }
-                else
-                {
-
-                }
 
                 /*-----------------------------------------------------------------*/
                 /* Account */
