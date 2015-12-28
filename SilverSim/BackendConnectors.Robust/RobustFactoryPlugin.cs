@@ -120,6 +120,7 @@ namespace SilverSim.BackendConnectors.Robust
         }
     }
 
+    [Description("Robust UserAgent Connector Factory Factory")]
     public class RobustUserAgentPluginSubFactory : IPlugin, IPluginSubFactory
     {
         public RobustUserAgentPluginSubFactory()
