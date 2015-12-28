@@ -9,6 +9,7 @@ using SilverSim.ServiceInterfaces.Avatar;
 using SilverSim.Types;
 using SilverSim.Types.StructuredData.REST;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Net;
 using System.Xml;
 
@@ -41,6 +42,7 @@ namespace SilverSim.BackendHandlers.Robust.Avatar
     }
 
     #region Service Implementation
+    [Description("Robust Avatar Protocol Server")]
     public class RobustAvatarServerHandler : IPlugin
     {
         protected static readonly ILog m_Log = LogManager.GetLogger("ROBUST AVATAR HANDLER");

@@ -11,11 +11,13 @@ using SilverSim.Types;
 using SilverSim.Types.GridUser;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 
 namespace SilverSim.BackendConnectors.Robust.GridUser
 {
     #region Service Implementation
+    [Description("Robust GridUser Connector")]
     public sealed class RobustGridUserConnector : GridUserServiceInterface, IPlugin
     {
         public int TimeoutMs { get; set; }

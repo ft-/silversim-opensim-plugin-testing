@@ -10,6 +10,7 @@ using SilverSim.ServiceInterfaces.Avatar;
 using SilverSim.Types;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Runtime.Serialization;
@@ -20,6 +21,7 @@ namespace SilverSim.BackendConnectors.Robust.Avatar
 {
     #region Service implementation
     [SuppressMessage("Gendarme.Rules.Exceptions", "DoNotThrowInUnexpectedLocationRule")]
+    [Description("Robust Avatar Connector")]
     public sealed class RobustAvatarConnector : AvatarServiceInterface, IPlugin
     {
         [Serializable]

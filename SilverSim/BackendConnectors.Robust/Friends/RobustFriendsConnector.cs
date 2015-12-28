@@ -4,17 +4,18 @@
 using log4net;
 using Nini.Config;
 using SilverSim.BackendConnectors.Robust.Common;
-using SilverSim.Main.Common;
 using SilverSim.Http.Client;
+using SilverSim.Main.Common;
 using SilverSim.ServiceInterfaces.Friends;
 using SilverSim.Types;
 using SilverSim.Types.Friends;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
-using System;
 
 namespace SilverSim.BackendConnectors.Robust.Friends
 {
+    [Description("Robust Friends Connector")]
     public sealed class RobustFriendsConnector : FriendsServiceInterface, IPlugin
     {
         readonly string m_Uri;

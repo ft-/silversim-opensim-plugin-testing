@@ -8,11 +8,12 @@ using SilverSim.ServiceInterfaces.Friends;
 using SilverSim.Types;
 using SilverSim.Types.Friends;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
-using System;
 
 namespace SilverSim.BackendConnectors.Robust.Friends
 {
+    [Description("Robust HGFriends Connector")]
     public class RobustHGFriendsConnector : FriendsServiceInterface, IPlugin
     {
         readonly string m_Uri;

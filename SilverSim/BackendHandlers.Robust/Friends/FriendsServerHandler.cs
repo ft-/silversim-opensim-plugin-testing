@@ -4,10 +4,12 @@
 using log4net;
 using Nini.Config;
 using SilverSim.Main.Common;
+using System.ComponentModel;
 
 namespace SilverSim.BackendHandlers.Robust.Friends
 {
     #region Service Implementation
+    [Description("Robust Friends Protocol Server")]
     public sealed class RobustFriendsServerHandler : IPlugin
     {
         //private static readonly ILog m_Log = LogManager.GetLogger("ROBUST FRIENDS HANDLER");

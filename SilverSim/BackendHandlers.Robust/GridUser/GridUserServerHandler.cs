@@ -13,6 +13,7 @@ using SilverSim.Types.Account;
 using SilverSim.Types.GridUser;
 using SilverSim.Types.StructuredData.REST;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 using System.Net;
 using System.Xml;
@@ -20,6 +21,7 @@ using System.Xml;
 namespace SilverSim.BackendHandlers.Robust.GridUser
 {
     #region Service Implementation
+    [Description("Robust GridUser Protocol Server")]
     public sealed class RobustGridUserServerHandler : IPlugin
     {
         private static readonly ILog m_Log = LogManager.GetLogger("ROBUST GRIDUSER HANDLER");

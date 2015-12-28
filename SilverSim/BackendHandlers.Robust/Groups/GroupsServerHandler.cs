@@ -4,10 +4,12 @@
 using log4net;
 using Nini.Config;
 using SilverSim.Main.Common;
+using System.ComponentModel;
 
 namespace SilverSim.BackendHandlers.Robust.Groups
 {
     #region Service Implementation
+    [Description("Robust Groups Protocol Server")]
     public sealed class RobustGroupsServerHandler : IPlugin
     {
         //private static readonly ILog m_Log = LogManager.GetLogger("ROBUST GROUPS HANDLER");

@@ -8,6 +8,7 @@ using SilverSim.Types;
 using SilverSim.Types.StructuredData.XmlRpc;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 
 /*
@@ -48,6 +49,7 @@ using System.IO;
 
 namespace SilverSim.BackendConnectors.Flotsam.Groups
 {
+    [Description("XmlRpc Groups Connector")]
     public partial class FlotsamGroupsConnector : GroupsServiceInterface, IPlugin
     {
         readonly GroupsAccessor m_Groups;

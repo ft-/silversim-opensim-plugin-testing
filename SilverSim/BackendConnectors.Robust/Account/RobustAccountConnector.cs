@@ -11,11 +11,13 @@ using SilverSim.Types;
 using SilverSim.Types.Account;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 
 namespace SilverSim.BackendConnectors.Robust.Account
 {
     #region Service Implementation
+    [Description("Robust UserAccount Connector")]
     public sealed class RobustAccountConnector : UserAccountServiceInterface, IPlugin
     {
         readonly string m_UserAccountURI;

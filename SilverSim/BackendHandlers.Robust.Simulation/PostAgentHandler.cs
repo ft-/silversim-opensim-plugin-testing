@@ -40,6 +40,7 @@ using SilverSim.Viewer.Messages.Agent;
 using SilverSim.Viewer.Messages.Circuit;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 using System.IO.Compression;
 using System.Net;
@@ -49,6 +50,7 @@ using ThreadedClasses;
 namespace SilverSim.BackendHandlers.Robust.Simulation
 {
     #region Service Implementation
+    [Description("OpenSim PostAgent Handler")]
     public class PostAgentHandler : IPlugin, IPluginShutdown
     {
         /* CAUTION! Never ever make a protocol version configurable */

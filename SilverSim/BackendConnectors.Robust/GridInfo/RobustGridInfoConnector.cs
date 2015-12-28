@@ -8,16 +8,14 @@ using SilverSim.Main.Common;
 using SilverSim.ServiceInterfaces.Grid;
 using SilverSim.Types;
 using SilverSim.Types.StructuredData.Json;
-using System;
-using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
-using System.Linq;
-using System.Text;
 using System.Web;
 
 namespace SilverSim.BackendConnectors.Robust.GridInfo
 {
     #region Service Implementation
+    [Description("Robust GridInfo Connector")]
     public class RobustGridInfoConnector : GridInfoServiceInterface, IPlugin
     {
         readonly string m_GridURI;

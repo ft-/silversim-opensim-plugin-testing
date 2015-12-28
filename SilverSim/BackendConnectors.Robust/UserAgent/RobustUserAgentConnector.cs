@@ -1,16 +1,19 @@
 ﻿// SilverSim is distributed under the terms of the
 // GNU Affero General Public License v3
 
+using SilverSim.Main.Common;
 using SilverSim.Main.Common.Rpc;
 using SilverSim.ServiceInterfaces.UserAgents;
 using SilverSim.Types;
 using SilverSim.Types.StructuredData.XmlRpc;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 
 namespace SilverSim.BackendConnectors.Robust.UserAgent
 {
-    public class RobustUserAgentConnector : UserAgentServiceInterface
+    [Description("Robust UserAgent Connector")]
+    public class RobustUserAgentConnector : UserAgentServiceInterface, IPlugin
     {
         public int TimeoutMs = 20000;
         readonly string m_Uri;
@@ -18,6 +21,11 @@ namespace SilverSim.BackendConnectors.Robust.UserAgent
         public RobustUserAgentConnector(string uri)
         {
             m_Uri = uri;
+        }
+
+        public void Startup(ConfigurationLoader loader)
+        {
+            /* no action needed */
         }
 
         public override void VerifyAgent(UUID sessionID, string token)

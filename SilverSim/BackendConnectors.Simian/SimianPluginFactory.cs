@@ -7,9 +7,11 @@ using SilverSim.ServiceInterfaces;
 using SilverSim.ServiceInterfaces.Asset;
 using SilverSim.ServiceInterfaces.Inventory;
 using SilverSim.Types;
+using System.ComponentModel;
 
 namespace SilverSim.BackendConnectors.Simian
 {
+    [Description("Simian Inventory Connector Factory")]
     public sealed class SimianInventoryPlugin : ServicePluginHelo, IInventoryServicePlugin, IPlugin
     {
         public SimianInventoryPlugin()
@@ -44,6 +46,7 @@ namespace SilverSim.BackendConnectors.Simian
         }
     }
 
+    [Description("Simian Asset Connector Factory")]
     public sealed class SimianAssetPlugin : ServicePluginHelo, IAssetServicePlugin, IPlugin
     {
         public SimianAssetPlugin()

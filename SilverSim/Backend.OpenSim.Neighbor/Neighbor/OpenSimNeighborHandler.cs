@@ -12,10 +12,12 @@ using SilverSim.Types.Grid;
 using System.IO;
 using System.Net;
 using System.Diagnostics.CodeAnalysis;
+using System.ComponentModel;
 
 namespace SilverSim.Backend.OpenSim.Neighbor.Neighbor
 {
     [SuppressMessage("Gendarme.Rules.Design", "TypesWithDisposableFieldsShouldBeDisposableRule")]
+    [Description("OpenSim Neighbor Protocol Handler")]
     public class OpenSimNeighborHandler : IPlugin
     {
         protected static readonly ILog m_Log = LogManager.GetLogger("OPENSIM NEIGHBOR HANDLER");

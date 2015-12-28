@@ -11,11 +11,13 @@ using SilverSim.Types;
 using SilverSim.Types.Grid;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 
 namespace SilverSim.BackendConnectors.Robust.Grid
 {
     #region Service Implementation
+    [Description("Robust Grid Connector")]
     public class RobustGridConnector : GridServiceInterface, IPlugin
     {
         readonly string m_GridURI;

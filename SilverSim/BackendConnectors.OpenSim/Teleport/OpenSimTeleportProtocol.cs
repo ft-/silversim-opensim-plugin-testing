@@ -1,24 +1,26 @@
 ﻿// SilverSim is distributed under the terms of the
 // GNU Affero General Public License v3
 
-using SilverSim.BackendConnectors.Robust.Common;
+using SilverSim.BackendConnectors.Robust.StructuredData.Agent;
 using SilverSim.Http.Client;
+using SilverSim.Main.Common;
 using SilverSim.Scene.Types.Agent;
 using SilverSim.Scene.Types.Neighbor;
 using SilverSim.ServiceInterfaces.Grid;
 using SilverSim.ServiceInterfaces.Teleport;
-using SilverSim.Types.StructuredData.Json;
 using SilverSim.Types;
 using SilverSim.Types.Agent;
 using SilverSim.Types.Grid;
+using SilverSim.Types.StructuredData.Json;
 using System;
+using System.ComponentModel;
 using System.IO;
 using System.IO.Compression;
-using SilverSim.BackendConnectors.Robust.StructuredData.Agent;
 
 namespace SilverSim.BackendConnectors.OpenSim.Teleport
 {
-    public class OpenSimTeleportProtocol : TeleportHandlerServiceInterface
+    [Description("OpenSim Teleport Protocol")]
+    public class OpenSimTeleportProtocol : TeleportHandlerServiceInterface, IPlugin
     {
         private static Random m_RandomNumber = new Random();
         private static object m_RandomNumberLock = new object();
@@ -45,6 +47,11 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
         public OpenSimTeleportProtocol()
         {
 
+        }
+
+        public void Startup(ConfigurationLoader loader)
+        {
+            /* no action needed */
         }
 
         public override GridType GridType

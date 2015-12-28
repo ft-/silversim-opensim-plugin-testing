@@ -11,6 +11,7 @@ using SilverSim.Types.Asset;
 using SilverSim.Types.StructuredData.AssetXml;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 using System.Net;
 using System.Text;
@@ -19,6 +20,7 @@ using System.Xml;
 namespace SilverSim.BackendHandlers.Robust.Asset
 {
     #region Service Implementation
+    [Description("Robust Asset Protocol Server")]
     public class RobustAssetServerHandler : IPlugin
     {
         protected static readonly ILog m_Log = LogManager.GetLogger("ROBUST ASSET HANDLER");

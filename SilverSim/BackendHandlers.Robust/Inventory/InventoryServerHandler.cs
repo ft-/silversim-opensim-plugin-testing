@@ -12,6 +12,7 @@ using SilverSim.Types.Inventory;
 using SilverSim.Types.StructuredData.REST;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Net;
 using System.Xml;
 
@@ -153,6 +154,7 @@ namespace SilverSim.BackendHandlers.Robust.Inventory
     #endregion
 
     #region Service Implementation
+    [Description("Robust Inventory Protocol Server")]
     public class RobustInventoryServerHandler : IPlugin
     {
         protected static readonly ILog m_Log = LogManager.GetLogger("ROBUST INVENTORY HANDLER");

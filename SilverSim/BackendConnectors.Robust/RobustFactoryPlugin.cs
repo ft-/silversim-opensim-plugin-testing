@@ -7,10 +7,12 @@ using SilverSim.ServiceInterfaces;
 using SilverSim.ServiceInterfaces.Asset;
 using SilverSim.ServiceInterfaces.Inventory;
 using SilverSim.ServiceInterfaces.UserAgents;
+using System.ComponentModel;
 
 namespace SilverSim.BackendConnectors.Robust
 {
     #region Inventory Plugin
+    [Description("Robust Inventory Connector Factory")]
     public class RobustInventoryPlugin : ServicePluginHelo, IInventoryServicePlugin, IPlugin
     {
         public RobustInventoryPlugin()
@@ -47,6 +49,7 @@ namespace SilverSim.BackendConnectors.Robust
     #endregion
 
     #region Asset plugin
+    [Description("Robust Asset Connector Factory")]
     public class RobustAssetPlugin : ServicePluginHelo, IAssetServicePlugin, IPlugin
     {
         public RobustAssetPlugin()
@@ -88,7 +91,8 @@ namespace SilverSim.BackendConnectors.Robust
     }
     #endregion
 
-    #region Asset plugin
+    #region UserAgent plugin
+    [Description("Robust UserAgent Connector Factory")]
     public class RobustUserAgentPlugin : ServicePluginHelo, IUserAgentServicePlugin, IPlugin
     {
         readonly string m_Name;

@@ -1,13 +1,16 @@
 ﻿// SilverSim is distributed under the terms of the
 // GNU Affero General Public License v3
 
+using SilverSim.Main.Common;
 using SilverSim.ServiceInterfaces.Profile;
 using System;
+using System.ComponentModel;
 using System.Runtime.Serialization;
 
 namespace SilverSim.BackendConnectors.OpenSim.Profile
 {
-    public partial class ProfileConnector : ProfileServiceInterface
+    [Description("OpenSim Profile Connector")]
+    public partial class ProfileConnector : ProfileServiceInterface, IPlugin
     {
         [Serializable]
         public class RpcFaultException : Exception
@@ -51,6 +54,11 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
             m_Notes = new AutoDetectNotesConnector(this, url);
             m_Preferences = new AutoDetectUserPreferencesConnector(this, url);
             m_Properties = new AutoDetectPropertiesConnector(this, url);
+        }
+
+        public void Startup(ConfigurationLoader loader)
+        {
+            /* no action needed */
         }
 
         public override ProfileServiceInterface.IClassifiedsInterface Classifieds

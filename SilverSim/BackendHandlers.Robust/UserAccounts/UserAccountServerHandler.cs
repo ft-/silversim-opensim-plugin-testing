@@ -10,6 +10,7 @@ using SilverSim.Types;
 using SilverSim.Types.Account;
 using SilverSim.Types.StructuredData.REST;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Net;
 using System.Xml;
 
@@ -45,6 +46,7 @@ namespace SilverSim.BackendHandlers.Robust.UserAccounts
         }
     }
 
+    [Description("Robust UserAccount Protocol Server")]
     public sealed class RobustUserAccountServerHandler : IPlugin
     {
         private static readonly ILog m_Log = LogManager.GetLogger("ROBUST USERACCOUNT HANDLER");

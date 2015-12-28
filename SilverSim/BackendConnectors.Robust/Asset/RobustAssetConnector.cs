@@ -11,6 +11,7 @@ using SilverSim.Types.Asset;
 using SilverSim.Types.StructuredData.AssetXml;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 using System.IO.Compression;
 using System.Net;
@@ -21,6 +22,7 @@ using System.Xml;
 namespace SilverSim.BackendConnectors.Robust.Asset
 {
     #region Service Implementation
+    [Description("Robust Asset Connector")]
     public class RobustAssetConnector : AssetServiceInterface, IPlugin
     {
         [Serializable]

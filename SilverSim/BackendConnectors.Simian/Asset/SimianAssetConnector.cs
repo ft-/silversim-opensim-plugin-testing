@@ -10,12 +10,14 @@ using SilverSim.Types;
 using SilverSim.Types.Asset;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Runtime.Serialization;
 using System.Text;
 
 namespace SilverSim.BackendConnectors.Simian.Asset
 {
     #region Service Implementation
+    [Description("Simian Asset Connector")]
     public sealed class SimianAssetConnector : AssetServiceInterface, IPlugin
     {
         [Serializable]

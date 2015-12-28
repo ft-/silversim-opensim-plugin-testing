@@ -8,12 +8,12 @@ using SilverSim.Scene.Types.Scene;
 using SilverSim.Types;
 using SilverSim.Types.StructuredData.XmlRpc;
 using System;
-using System.Collections;
-using System.Collections.Generic;
+using System.ComponentModel;
 
 namespace SilverSim.BackendHandlers.Robust.Simulation
 {
     #region Service Implementation
+    [Description("OpenSim PostAgent Direct HG Handler")]
     public class PostAgentHGDirectHandler : PostAgentHandler
     {
         private HttpXmlRpcHandler m_XmlRpcServer;

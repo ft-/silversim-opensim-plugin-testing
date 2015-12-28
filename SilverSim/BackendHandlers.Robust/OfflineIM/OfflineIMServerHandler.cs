@@ -1,17 +1,14 @@
 ﻿// SilverSim is distributed under the terms of the
 // GNU Affero General Public License v3
 
-using log4net;
 using Nini.Config;
 using SilverSim.Main.Common;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using System.ComponentModel;
 
 namespace SilverSim.BackendHandlers.Robust.OfflineIM
 {
     #region Service Implementation
+    [Description("Robust OfflineIM Protocol Server")]
     public sealed class RobustOfflineIMServerHandler : IPlugin
     {
         //private static readonly ILog m_Log = LogManager.GetLogger("ROBUST INVENTORY HANDLER");

@@ -1,16 +1,19 @@
 ﻿// SilverSim is distributed under the terms of the
 // GNU Affero General Public License v3
 
+using SilverSim.Main.Common;
 using SilverSim.Main.Common.Rpc;
 using SilverSim.ServiceInterfaces.IM;
 using SilverSim.Types;
 using SilverSim.Types.IM;
 using SilverSim.Types.StructuredData.XmlRpc;
 using System;
+using System.ComponentModel;
 
 namespace SilverSim.BackendConnectors.Robust.IM
 {
-    public class RobustIMConnector : IMServiceInterface
+    [Description("OpenSim IM Connector")]
+    public class RobustIMConnector : IMServiceInterface, IPlugin
     {
         public int TimeoutMs { get; set; }
 
@@ -20,6 +23,11 @@ namespace SilverSim.BackendConnectors.Robust.IM
         {
             TimeoutMs = 20000;
             m_IMUri = uri;
+        }
+
+        public void Startup(ConfigurationLoader loader)
+        {
+            /* no action needed */
         }
 
         public override void Send(GridInstantMessage im)

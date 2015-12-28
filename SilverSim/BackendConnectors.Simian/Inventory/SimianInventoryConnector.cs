@@ -11,10 +11,12 @@ using SilverSim.Types;
 using SilverSim.Types.Asset;
 using SilverSim.Types.Inventory;
 using System.Collections.Generic;
+using System.ComponentModel;
 
 namespace SilverSim.BackendConnectors.Simian.Inventory
 {
     #region Service Implementation
+    [Description("Simian Inventory Connector")]
     public sealed class SimianInventoryConnector : InventoryServiceInterface, IPlugin
     {
         readonly string m_InventoryURI;

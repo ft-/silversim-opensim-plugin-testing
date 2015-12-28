@@ -1,6 +1,7 @@
 ﻿// SilverSim is distributed under the terms of the
 // GNU Affero General Public License v3
 
+using SilverSim.Main.Common;
 using SilverSim.Main.Common.Rpc;
 using SilverSim.ServiceInterfaces.Presence;
 using SilverSim.Types;
@@ -8,12 +9,14 @@ using SilverSim.Types.Presence;
 using SilverSim.Types.StructuredData.XmlRpc;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 
 namespace SilverSim.BackendConnectors.Robust.Presence
 {
     [SuppressMessage("Gendarme.Rules.Exceptions", "DoNotThrowInUnexpectedLocationRule")]
-    public class RobustHGPresenceConnector : PresenceServiceInterface
+    [Description("Robust HGPresence Connector")]
+    public class RobustHGPresenceConnector : PresenceServiceInterface, IPlugin
     {
         public int TimeoutMs { get; set; }
         readonly string m_HomeURI;
@@ -25,6 +28,11 @@ namespace SilverSim.BackendConnectors.Robust.Presence
             TimeoutMs = 20000;
             m_LocalConnector = new RobustPresenceConnector(uri, homeuri);
             m_HomeURI = homeuri;
+        }
+
+        public void Startup(ConfigurationLoader loader)
+        {
+            /* no action needed */
         }
         #endregion
 

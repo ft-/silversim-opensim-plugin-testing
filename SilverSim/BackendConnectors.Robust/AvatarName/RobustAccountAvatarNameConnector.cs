@@ -10,11 +10,13 @@ using SilverSim.ServiceInterfaces.AvatarName;
 using SilverSim.Types;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 
 namespace SilverSim.BackendConnectors.Robust.AvatarName
 {
     #region Service Implementation
+    [Description("Robust UserAccount AvatarName Connector")]
     public sealed class RobustAccountAvatarNameConnector : AvatarNameServiceInterface, IPlugin
     {
         readonly string m_UserAccountURI;

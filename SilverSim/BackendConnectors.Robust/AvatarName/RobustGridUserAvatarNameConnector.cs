@@ -11,10 +11,12 @@ using SilverSim.Types;
 using System.Collections.Generic;
 using System.IO;
 using System;
+using System.ComponentModel;
 
 namespace SilverSim.BackendConnectors.Robust.AvatarName
 {
     #region Service Implementation
+    [Description("Robust GridUser AvatarName Connector")]
     public sealed class RobustGridUserAvatarNameConnector : AvatarNameServiceInterface, IPlugin
     {
         public int TimeoutMs { get; set; }

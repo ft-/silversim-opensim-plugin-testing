@@ -9,6 +9,7 @@ using SilverSim.Types;
 using SilverSim.Types.IM;
 using SilverSim.Types.StructuredData.XmlRpc;
 using System;
+using System.ComponentModel;
 using System.Threading;
 
 namespace SilverSim.BackendConnectors.Robust.IM
@@ -51,6 +52,7 @@ namespace SilverSim.BackendConnectors.Robust.IM
         }
     }
 
+    [Description("OpenSim InstantMessage Server")]
     public sealed class RobustIMHandler : IPlugin
     {
         readonly bool m_DisallowOfflineIM;

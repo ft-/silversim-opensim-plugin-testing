@@ -11,6 +11,7 @@ using SilverSim.Types.Grid;
 using SilverSim.Types.StructuredData.REST;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 using System.Net;
 using System.Xml;
@@ -18,6 +19,7 @@ using System.Xml;
 namespace SilverSim.BackendHandlers.Robust.Grid
 {
     #region Service Implementation
+    [Description("Robust Grid Protocol Server")]
     public sealed class RobustGridServerHandler : IPlugin
     {
         readonly string m_GridServiceName;
