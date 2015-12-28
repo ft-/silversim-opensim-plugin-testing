@@ -5,13 +5,15 @@ using Nini.Config;
 using SilverSim.Main.Common;
 using SilverSim.ServiceInterfaces;
 using SilverSim.ServiceInterfaces.Profile;
+using System.ComponentModel;
 
 namespace SilverSim.BackendConnectors.OpenSim
 {
-    public class ProfileInventoryPlugin : ServicePluginHelo, IProfileServicePlugin, IPlugin
+    [Description("OpenSim Profile Connector Factory")]
+    public class OpenSimProfilePlugin : ServicePluginHelo, IProfileServicePlugin, IPlugin
     {
         readonly string m_ProfileName;
-        public ProfileInventoryPlugin(string profileName)
+        public OpenSimProfilePlugin(string profileName)
         {
             m_ProfileName = profileName;
         }
@@ -40,7 +42,7 @@ namespace SilverSim.BackendConnectors.OpenSim
     {
         public IPlugin Initialize(ConfigurationLoader loader, IConfig ownSection)
         {
-            return new ProfileInventoryPlugin("opensim-robust");
+            return new OpenSimProfilePlugin("opensim-robust");
         }
     }
 
