@@ -39,10 +39,10 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
             {
                 try
                 {
-                    classified = new ProfileClassified();
                     Map m = new Map();
                     m["ClassifiedId"] = id;
                     Map reslist = (Map)RPC.DoJson20RpcRequest(m_Uri, "classifieds_info_query", (string)UUID.Random, m, m_Connector.TimeoutMs);
+                    classified = new ProfileClassified();
                     classified.ClassifiedID = id;
                     classified.Creator.ID = reslist["CreatorId"].AsUUID;
                     classified.CreationDate = Date.UnixTimeToDateTime(reslist["CreationDate"].AsULong);
@@ -86,25 +86,11 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
             {
                 get 
                 {
-                    ProfileClassified classified = new ProfileClassified();
-                    Map m = new Map();
-                    m["ClassifiedId"] = id;
-                    Map reslist = (Map)RPC.DoJson20RpcRequest(m_Uri, "classifieds_info_query", (string)UUID.Random, m, m_Connector.TimeoutMs);
-                    classified.ClassifiedID = id;
-                    classified.Creator.ID = reslist["CreatorId"].AsUUID;
-                    classified.CreationDate = Date.UnixTimeToDateTime(reslist["CreationDate"].AsULong);
-                    classified.ExpirationDate = Date.UnixTimeToDateTime(reslist["ExpirationDate"].AsULong);
-                    classified.Category = reslist["Category"].AsInt;
-                    classified.Name = reslist["Name"].ToString();
-                    classified.Description = reslist["Description"].ToString();
-                    classified.ParcelID = reslist["ParcelId"].AsUUID;
-                    classified.ParentEstate = reslist["ParentEstate"].AsInt;
-                    classified.SnapshotID = reslist["SnapshotId"].AsUUID;
-                    classified.SimName = reslist["SimName"].ToString();
-                    classified.GlobalPos = reslist["GlobalPos"].AsVector3;
-                    classified.ParcelName = reslist["ParcelName"].ToString();
-                    classified.Flags = (byte)reslist["Flags"].AsUInt;
-                    classified.Price = reslist["Price"].AsInt;
+                    ProfileClassified classified;
+                    if(!TryGetValue(user, id, out classified))
+                    {
+                        throw new KeyNotFoundException();
+                    }
                     return classified;
                 }
             }

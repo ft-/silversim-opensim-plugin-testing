@@ -220,19 +220,9 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
                 return classifieds;
             }
 
-            public bool TryGetValue(UUI user, UUID id, out ProfilePick pick)
+            ProfilePick ConvertToProfilePick(Map res)
             {
-                Map map = new Map();
-                map.Add("avatar_id", user.ID);
-                map.Add("pick_id", id);
-                IValue iv;
-                if(!TryOpenSimXmlRpcCall("pickinforequest", map, out iv))
-                {
-                    pick = default(ProfilePick);
-                    return false;
-                }
-                Map res = (Map)(((AnArray)iv)[0]);
-                pick = new ProfilePick();
+                ProfilePick pick = new ProfilePick();
                 pick.PickID = res["pickuuid"].AsUUID;
                 pick.Creator.ID = res["creatoruuid"].AsUUID;
                 pick.TopPick = Convert.ToBoolean(res["toppick"].ToString());
@@ -245,6 +235,21 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
                 pick.GlobalPosition = res["posglobal"].AsVector3;
                 pick.SortOrder = res["sortorder"].AsInt;
                 pick.Enabled = Convert.ToBoolean(res["enabled"].ToString());
+                return pick;
+            }
+            public bool TryGetValue(UUI user, UUID id, out ProfilePick pick)
+            {
+                Map map = new Map();
+                map.Add("avatar_id", user.ID);
+                map.Add("pick_id", id);
+                IValue iv;
+                if(!TryOpenSimXmlRpcCall("pickinforequest", map, out iv))
+                {
+                    pick = default(ProfilePick);
+                    return false;
+                }
+                Map res = (Map)(((AnArray)iv)[0]);
+                pick = ConvertToProfilePick(res);
                 return true;
             }
 
@@ -269,19 +274,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
                     map.Add("avatar_id", user.ID);
                     map.Add("pick_id", id);
                     Map res = (Map)(((AnArray)OpenSimXmlRpcCall("pickinforequest", map))[0]);
-                    ProfilePick pick = new ProfilePick();
-                    pick.PickID = res["pickuuid"].AsUUID;
-                    pick.Creator.ID = res["creatoruuid"].AsUUID;
-                    pick.TopPick = Convert.ToBoolean(res["toppick"].ToString());
-                    pick.ParcelID = res["parceluuid"].AsUUID;
-                    pick.Name = res["name"].ToString();
-                    pick.Description = res["description"].ToString();
-                    pick.SnapshotID = res["snapshotuuid"].AsUUID;
-                    pick.OriginalName = res["originalname"].ToString();
-                    pick.SimName = res["simname"].ToString();
-                    pick.GlobalPosition = res["posglobal"].AsVector3;
-                    pick.SortOrder = res["sortorder"].AsInt;
-                    pick.Enabled = Convert.ToBoolean(res["enabled"].ToString());
+                    ProfilePick pick = ConvertToProfilePick(res);
                     return pick;
                 }
             }
