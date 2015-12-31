@@ -29,7 +29,6 @@ namespace SilverSim.BackendHandlers.Robust.OfflineIM
         readonly string m_UserAccountServiceName;
         UserAccountServiceInterface m_UserAccountService;
 
-        //private static readonly ILog m_Log = LogManager.GetLogger("ROBUST OFFLINEIM HANDLER");
         public RobustOfflineIMServerHandler(string offlineIMServiceName, string userAccountServiceName)
         {
             m_OfflineIMServiceName = offlineIMServiceName;
