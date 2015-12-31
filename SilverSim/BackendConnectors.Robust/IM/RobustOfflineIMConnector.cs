@@ -39,18 +39,11 @@ namespace SilverSim.BackendConnectors.Robust.IM
             /* no action required */
         }
 
-        private static byte[] StringToByteArray(string hex)
-        {
-            return Enumerable.Range(0, hex.Length)
-                             .Where(x => x % 2 == 0)
-                             .Select(x => Convert.ToByte(hex.Substring(x, 2), 16))
-                             .ToArray();
-        }
         public override void StoreOfflineIM(GridInstantMessage im)
         {
             Dictionary<string, string> post = new Dictionary<string, string>();
             bool isFromGroup = im.IsFromGroup;
-            post["BinaryBucket"] = BitConverter.ToString(im.BinaryBucket).Replace("-", string.Empty);
+            post["BinaryBucket"] = im.BinaryBucket.ToHexString();
             post["Dialog"] = ((int)im.Dialog).ToString();
             post["FromAgentID"] = isFromGroup ? (string)im.FromGroup.ID : (string)im.FromAgent.ID;
             post["FromAgentName"] = im.FromAgent.FullName;
@@ -106,7 +99,7 @@ namespace SilverSim.BackendConnectors.Robust.IM
                 }
 
                 GridInstantMessage im = new GridInstantMessage();
-                im.BinaryBucket = StringToByteArray(m["BinaryBucket"].ToString());
+                im.BinaryBucket = m["BinaryBucket"].ToString().FromHexStringToByteArray();
                 im.Dialog = (GridInstantMessageDialog) m["Dialog"].AsInt;
                 im.FromAgent.ID = m["FromAgentID"].ToString();
                 im.FromAgent.FullName = m["FromAgentName"].ToString();
