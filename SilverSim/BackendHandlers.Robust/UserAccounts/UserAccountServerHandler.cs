@@ -141,50 +141,34 @@ namespace SilverSim.BackendHandlers.Robust.UserAccounts
             if(reqdata.ContainsKey("UserID"))
             {
                 UUID userID = reqdata.GetUUID("UserID");
-                try
+                if(!m_UserAccountService.TryGetValue(scopeID, userID, out ua))
                 {
-                    ua = m_UserAccountService[scopeID, userID];
-                }
-                catch
-                {
-
+                    ua = null;
                 }
             }
             else if(reqdata.ContainsKey("PrincipalID"))
             {
                 UUID userID = reqdata.GetUUID("PrincipalID");
-                try
+                if (!m_UserAccountService.TryGetValue(scopeID, userID, out ua))
                 {
-                    ua = m_UserAccountService[scopeID, userID];
-                }
-                catch
-                {
-
+                    ua = null;
                 }
             }
             else if(reqdata.ContainsKey("Email"))
             {
                 string email = reqdata.GetString("Email");
-                try
+                if(!m_UserAccountService.TryGetValue(scopeID, email, out ua))
                 {
-                    ua = m_UserAccountService[scopeID, email];
-                }
-                catch
-                {
-
+                    ua = null;
                 }
             }
             else if(reqdata.ContainsKey("FirstName") && reqdata.ContainsKey("LastName"))
             {
                 string firstName = reqdata.GetString("FirstName");
                 string lastName = reqdata.GetString("LastName");
-                try
+                if(!m_UserAccountService.TryGetValue(scopeID, firstName, lastName, out ua))
                 {
-                    ua = m_UserAccountService[scopeID, firstName, lastName];
-                }
-                catch
-                {
-
+                    ua = null;
                 }
             }
 
