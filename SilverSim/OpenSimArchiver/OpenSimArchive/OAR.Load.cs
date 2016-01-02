@@ -198,7 +198,7 @@ namespace SilverSim.OpenSimArchiver.RegionArchiver
                     GridVector baseLoc = new GridVector(0, 0);
                     if (scene != null)
                     {
-                        baseLoc = scene.RegionData.Location;
+                        baseLoc = scene.GridPosition;
                     }
 
                     GridVector regionSize = new GridVector(256, 256);

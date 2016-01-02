@@ -164,7 +164,7 @@ namespace SilverSim.Backend.OpenSim.Neighbor.Neighbor
             m = new Map();
             try
             {
-                if(fromRegion.ServerURI == scene.RegionData.ServerURI)
+                if(fromRegion.ServerURI == scene.ServerURI)
                 {
                     fromRegion.ProtocolVariant = RegionInfo.ProtocolVariantId.Local;
                 }

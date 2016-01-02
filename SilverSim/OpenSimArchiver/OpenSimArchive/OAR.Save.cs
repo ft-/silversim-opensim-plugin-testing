@@ -203,7 +203,7 @@ namespace SilverSim.OpenSimArchiver.RegionArchiver
                     writer.WriteFile("objects/" + kvp.Key, kvp.Value.Data);
                 }
 
-                writer.WriteFile("terrains/" + scene.RegionData.Name + ".r32", GenTerrainFile(scene.Terrain.AllPatches));
+                writer.WriteFile("terrains/" + scene.Name + ".r32", GenTerrainFile(scene.Terrain.AllPatches));
                 writer.WriteEndOfTar();
             }
         }
@@ -230,7 +230,8 @@ namespace SilverSim.OpenSimArchiver.RegionArchiver
                         writer.WriteStartElement("region_info");
                         {
                             writer.WriteNamedValue("is_megaregion", false);
-                            writer.WriteNamedValue("size_in_meters", scene.RegionData.Size.ToString());
+                            writer.WriteNamedValue("size_in_meters", 
+                                string.Format("{0},{1}", scene.SizeX, scene.SizeY));
                         }
                         writer.WriteEndElement();
                     }

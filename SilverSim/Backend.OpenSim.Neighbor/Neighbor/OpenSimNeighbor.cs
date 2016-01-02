@@ -97,7 +97,7 @@ namespace SilverSim.Backend.OpenSim.Neighbor.Neighbor
                 }
 
                 GridServiceInterface gridService = scene.GridService;
-                RegionInfo regionInfo = scene.RegionData;
+                RegionInfo regionInfo = scene.GetRegionInfo();
                 if (null == gridService)
                 {
                     continue;

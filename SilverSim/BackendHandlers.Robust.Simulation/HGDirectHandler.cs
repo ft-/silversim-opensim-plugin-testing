@@ -73,9 +73,9 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
                     if (m_ServerParams.GetBoolean(s.ID, "HGDirectEnabled"))
                     {
                         resdata.Add("uuid", s.ID);
-                        resdata.Add("handle", s.RegionData.Location.RegionHandle.ToString());
+                        resdata.Add("handle", s.GridPosition.RegionHandle.ToString());
                         resdata.Add("region_image", string.Empty);
-                        resdata.Add("external_name", s.RegionData.ServerURI + " " + s.RegionData.Name);
+                        resdata.Add("external_name", s.ServerURI + " " + s.Name);
                         resdata.Add("result", true);
                     }
                 }
@@ -103,15 +103,15 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
                 if (m_ServerParams.GetBoolean(s.ID, "HGDirectEnabled"))
                 {
                     resdata.Add("uuid", s.ID);
-                    resdata.Add("handle", s.RegionData.Location.RegionHandle.ToString());
-                    resdata.Add("x", s.RegionData.Location.X);
-                    resdata.Add("y", s.RegionData.Location.Y);
-                    resdata.Add("region_name", s.RegionData.Name);
-                    Uri serverURI = new Uri(s.RegionData.ServerURI);
+                    resdata.Add("handle", s.GridPosition.RegionHandle.ToString());
+                    resdata.Add("x", s.GridPosition.X);
+                    resdata.Add("y", s.GridPosition.Y);
+                    resdata.Add("region_name", s.Name);
+                    Uri serverURI = new Uri(s.ServerURI);
                     resdata.Add("hostname", serverURI.Host);
-                    resdata.Add("http_port", s.RegionData.ServerHttpPort);
-                    resdata.Add("internal_port", s.RegionData.ServerPort);
-                    resdata.Add("server_uri", s.RegionData.ServerURI);
+                    resdata.Add("http_port", s.ServerHttpPort);
+                    resdata.Add("internal_port", s.ServerUdpPort);
+                    resdata.Add("server_uri", s.ServerURI);
                     resdata.Add("result", true);
                 }
                 else

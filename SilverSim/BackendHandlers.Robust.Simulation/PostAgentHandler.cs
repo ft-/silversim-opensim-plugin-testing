@@ -1292,7 +1292,7 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
 
             if (success && 
                 0 == versionMajor && versionMinor < 3 &&
-                (scene.RegionData.Size.X > 256 || scene.RegionData.Size.Y > 256))
+                (scene.SizeX > 256 || scene.SizeY > 256))
             {
                 /* check region size 
                  * check both parameters. It seems rectangular vars are not that impossible to have.

@@ -72,14 +72,14 @@ namespace SilverSim.OpenSimArchiver.RegionArchiver
                                     switch(reader.ReadElementValueAsInt())
                                     {
                                         case 0:
-                                            scene.RegionData.Access = RegionAccess.PG;
+                                            scene.Access = RegionAccess.PG;
                                             break;
                                         case 1:
-                                            scene.RegionData.Access = RegionAccess.Mature;
+                                            scene.Access = RegionAccess.Mature;
                                             break;
                                         case 2:
                                         default:
-                                            scene.RegionData.Access = RegionAccess.Adult;
+                                            scene.Access = RegionAccess.Adult;
                                             break;
                                     }
                                     scene.ReregisterRegion();
