@@ -110,7 +110,7 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
                     Uri serverURI = new Uri(s.ServerURI);
                     resdata.Add("hostname", serverURI.Host);
                     resdata.Add("http_port", s.ServerHttpPort);
-                    resdata.Add("internal_port", s.ServerUdpPort);
+                    resdata.Add("internal_port", s.RegionPort);
                     resdata.Add("server_uri", s.ServerURI);
                     resdata.Add("result", true);
                 }
