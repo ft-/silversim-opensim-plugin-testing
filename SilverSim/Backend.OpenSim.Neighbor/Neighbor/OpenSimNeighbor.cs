@@ -7,6 +7,7 @@ using SilverSim.Scene.Management.Scene;
 using SilverSim.Scene.Types.Scene;
 using SilverSim.ServiceInterfaces.Grid;
 using SilverSim.ServiceInterfaces.Neighbor;
+using SilverSim.Threading;
 using SilverSim.Types;
 using SilverSim.Types.Grid;
 using System.Collections.Generic;
@@ -14,7 +15,6 @@ using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 using System.Timers;
-using ThreadedClasses;
 
 namespace SilverSim.Backend.OpenSim.Neighbor.Neighbor
 {

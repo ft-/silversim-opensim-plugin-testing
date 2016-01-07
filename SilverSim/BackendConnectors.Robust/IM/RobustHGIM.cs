@@ -6,6 +6,7 @@ using SilverSim.Main.Common;
 using SilverSim.Scene.Management.IM;
 using SilverSim.ServiceInterfaces.AvatarName;
 using SilverSim.ServiceInterfaces.Presence;
+using SilverSim.Threading;
 using SilverSim.Types;
 using SilverSim.Types.IM;
 using System;
@@ -13,7 +14,6 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Timers;
-using ThreadedClasses;
 
 namespace SilverSim.BackendConnectors.Robust.IM
 {

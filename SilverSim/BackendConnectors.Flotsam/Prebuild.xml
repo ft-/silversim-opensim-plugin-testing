@@ -22,7 +22,7 @@
   <Reference name="SilverSim.Main.Common" localCopy="false"/>
   <Reference name="SilverSim.Scene.Management" localCopy="false"/>
   <Reference name="Nini" path="../../bin/" localCopy="false"/>
-  <Reference name="ThreadedClasses" path="../../bin/" localCopy="false"/>
+  <Reference name="SilverSim.Threading" localCopy="false"/>
   <Files>
     <Match pattern="*.cs" recurse="true"/>
     <Match pattern="ProductAssemblyInfo.cs" path=".." recurse="false"/>

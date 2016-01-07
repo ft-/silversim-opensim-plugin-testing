@@ -29,6 +29,7 @@ using SilverSim.ServiceInterfaces.Presence;
 using SilverSim.ServiceInterfaces.Profile;
 using SilverSim.ServiceInterfaces.ServerParam;
 using SilverSim.ServiceInterfaces.UserAgents;
+using SilverSim.Threading;
 using SilverSim.Types;
 using SilverSim.Types.Agent;
 using SilverSim.Types.Asset.Format;
@@ -45,7 +46,6 @@ using System.IO;
 using System.IO.Compression;
 using System.Net;
 using System.Text;
-using ThreadedClasses;
 
 namespace SilverSim.BackendHandlers.Robust.Simulation
 {

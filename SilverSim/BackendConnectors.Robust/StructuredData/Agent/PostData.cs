@@ -1,6 +1,7 @@
 ﻿// SilverSim is distributed under the terms of the
 // GNU Affero General Public License v3
 
+using SilverSim.Threading;
 using SilverSim.Types;
 using SilverSim.Types.Account;
 using SilverSim.Types.Agent;
@@ -12,7 +13,6 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Runtime.Serialization;
-using ThreadedClasses;
 
 namespace SilverSim.BackendConnectors.Robust.StructuredData.Agent
 {
