@@ -190,7 +190,7 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
             {
                 item.Group.ID = map["GroupID"].AsUUID;
             }
-            item.IsGroupOwned = map["GroupOwned"].AsBoolean;
+            item.IsGroupOwned = map["GroupOwned"].ToString().ToLower() == "true";
             item.Permissions.Group = (InventoryPermissionsMask)map["GroupPermissions"].AsUInt;
             item.InventoryType = (InventoryType) map["InvType"].AsInt;
             item.Name = map["Name"].AsString.ToString();
