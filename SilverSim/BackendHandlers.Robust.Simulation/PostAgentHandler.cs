@@ -57,7 +57,6 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
         const string PROTOCOL_VERSION = "SIMULATION/0.3";
         protected static readonly ILog m_Log = LogManager.GetLogger("ROBUST AGENT HANDLER");
         private BaseHttpServer m_HttpServer;
-        protected ServerParamServiceInterface m_ServerParams;
         private Main.Common.Caps.CapsHttpRedirector m_CapsRedirector;
         readonly string m_DefaultGridUserServerURI = string.Empty;
         readonly string m_DefaultPresenceServerURI = string.Empty;
@@ -162,7 +161,6 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
         {
             m_Log.Info("Initializing agent post handler for " + m_AgentBaseURL);
             m_AuthorizationServices = loader.GetServicesByValue<AuthorizationServiceInterface>();
-            m_ServerParams = loader.GetServerParamStorage();
             m_HttpServer = loader.HttpServer;
             m_HttpServer.StartsWithUriHandlers.Add(m_AgentBaseURL, AgentPostHandler);
             foreach(IAssetServicePlugin plugin in loader.GetServicesByValue<IAssetServicePlugin>())

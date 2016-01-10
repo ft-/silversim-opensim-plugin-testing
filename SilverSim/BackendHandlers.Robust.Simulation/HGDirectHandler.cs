@@ -6,15 +6,19 @@ using SilverSim.Main.Common;
 using SilverSim.Main.Common.HttpServer;
 using SilverSim.Scene.Types.Scene;
 using SilverSim.Types;
+using SilverSim.ServiceInterfaces.ServerParam;
 using SilverSim.Types.StructuredData.XmlRpc;
 using System;
 using System.ComponentModel;
+using SilverSim.Threading;
 
 namespace SilverSim.BackendHandlers.Robust.Simulation
 {
     #region Service Implementation
     [Description("OpenSim PostAgent Direct HG Handler")]
-    public class PostAgentHGDirectHandler : PostAgentHandler
+    [ServerParam("DirectHGEnabled")]
+    [ServerParam("DefaultHGRegion")]
+    public class PostAgentHGDirectHandler : PostAgentHandler, IServerParamListener
     {
         private HttpXmlRpcHandler m_XmlRpcServer;
 
@@ -42,7 +46,7 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
 
         protected new void CheckScenePerms(UUID sceneID)
         {
-            if (!m_ServerParams.GetBoolean(sceneID, "HGDirectEnabled"))
+            if (!GetHGDirectEnabled(sceneID))
             {
                 throw new InvalidOperationException("No HG Direct access to scene");
             }
@@ -62,7 +66,7 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
             Map resdata = new Map();
             if (string.IsNullOrEmpty(region_name))
             {
-                region_name = m_ServerParams.GetString(UUID.Zero, "DefaultHGRegion", region_name);
+                region_name = m_DefaultHGRegion;
             }
 
             if(!string.IsNullOrEmpty(region_name))
@@ -70,7 +74,7 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
                 try
                 {
                     SceneInterface s = Scene.Management.Scene.SceneManager.Scenes[region_name];
-                    if (m_ServerParams.GetBoolean(s.ID, "HGDirectEnabled"))
+                    if (GetHGDirectEnabled(s.ID))
                     {
                         resdata.Add("uuid", s.ID);
                         resdata.Add("handle", s.GridPosition.RegionHandle.ToString());
@@ -100,7 +104,7 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
             try
             {
                 SceneInterface s = Scene.Management.Scene.SceneManager.Scenes[region_uuid];
-                if (m_ServerParams.GetBoolean(s.ID, "HGDirectEnabled"))
+                if (GetHGDirectEnabled(s.ID))
                 {
                     resdata.Add("uuid", s.ID);
                     resdata.Add("handle", s.GridPosition.RegionHandle.ToString());
@@ -126,6 +130,40 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
             XmlRpc.XmlRpcResponse res = new XmlRpc.XmlRpcResponse();
             res.ReturnValue = resdata;
             return res;
+        }
+
+        string m_DefaultHGRegion;
+        bool GetHGDirectEnabled(UUID regionID)
+        {
+            bool value;
+            if (m_HGDirectEnabled.TryGetValue(regionID, out value) ||
+                m_HGDirectEnabled.TryGetValue(UUID.Zero, out value))
+            {
+                return value;
+            }
+            return false;
+        }
+
+        readonly RwLockedDictionary<UUID, bool> m_HGDirectEnabled = new RwLockedDictionary<UUID, bool>();
+
+        public void TriggerParameterUpdated(UUID regionID, string parametername, string value)
+        {
+            if (parametername == "DirectHGEnabled")
+            {
+                bool intval;
+                if (value.Length == 0)
+                {
+                    m_HGDirectEnabled.Remove(regionID);
+                }
+                else if (bool.TryParse(value, out intval))
+                {
+                    m_HGDirectEnabled[regionID] = intval;
+                }
+            }
+            else if(parametername == "DefaultHGRegion")
+            {
+                m_DefaultHGRegion = value;
+            }
         }
     }
     #endregion
