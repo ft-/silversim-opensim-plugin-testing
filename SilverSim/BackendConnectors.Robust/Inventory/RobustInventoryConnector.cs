@@ -173,7 +173,7 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
             item.Permissions.Current = (InventoryPermissionsMask)map["CurrentPermissions"].AsUInt;
             item.Description = map["Description"].AsString.ToString();
             item.Permissions.EveryOne = (InventoryPermissionsMask)map["EveryOnePermissions"].AsUInt;
-            item.Flags = map["Flags"].AsUInt;
+            item.Flags = (InventoryFlags)map["Flags"].AsUInt;
             item.ParentFolderID = map["Folder"].AsUUID;
             if (groupsService != null)
             {

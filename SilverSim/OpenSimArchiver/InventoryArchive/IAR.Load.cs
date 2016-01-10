@@ -374,7 +374,7 @@ namespace SilverSim.OpenSimArchiver.InventoryArchiver
                                 break;
 
                             case "Flags":
-                                item.Flags = reader.ReadElementValueAsUInt();
+                                item.Flags = (InventoryFlags)reader.ReadElementValueAsUInt();
                                 break;
 
                             case "GroupID":

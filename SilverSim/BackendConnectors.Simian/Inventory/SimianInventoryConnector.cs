@@ -364,7 +364,7 @@ namespace SilverSim.BackendConnectors.Simian.Inventory
             Map extraData = map["ExtraData"] as Map;
             if (extraData != null && extraData.Count > 0)
             {
-                item.Flags = extraData["Flags"].AsUInt;
+                item.Flags = (InventoryFlags)extraData["Flags"].AsUInt;
                 if (groupsService != null)
                 {
                     try

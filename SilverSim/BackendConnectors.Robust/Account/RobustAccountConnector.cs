@@ -244,7 +244,7 @@ namespace SilverSim.BackendConnectors.Robust.Account
             ua.ScopeID = m["ScopeID"].ToString();
             ua.Created = Date.UnixTimeToDateTime(m["Created"].AsULong);
             ua.UserLevel = int.Parse(m["UserLevel"].ToString());
-            ua.UserFlags = int.Parse(m["UserFlags"].ToString());
+            ua.UserFlags = uint.Parse(m["UserFlags"].ToString());
             ua.IsLocalToGrid = true;
             string serviceURLs = string.Empty;
             if(m.ContainsKey("ServiceURLs"))

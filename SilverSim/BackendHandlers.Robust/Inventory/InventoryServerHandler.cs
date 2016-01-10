@@ -44,7 +44,7 @@ namespace SilverSim.BackendHandlers.Robust.Inventory
             item.IsGroupOwned = bool.Parse(dict.GetString("GroupOwned"));
             item.SaleInfo.Price = dict.GetInt("SalePrice");
             item.SaleInfo.Type = (InventoryItem.SaleInfoData.SaleType)dict.GetInt("SaleType");
-            item.Flags = dict.GetUInt("Flags");
+            item.Flags = (InventoryFlags)dict.GetUInt("Flags");
             item.CreationDate = Date.UnixTimeToDateTime(dict.GetULong("CreationDate"));
 
             return item;

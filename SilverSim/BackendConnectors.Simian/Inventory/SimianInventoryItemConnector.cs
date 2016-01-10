@@ -134,7 +134,7 @@ namespace SilverSim.BackendConnectors.Simian.Inventory
             perms.Add("OwnerMask", (uint)item.Permissions.Current);
 
             Map extraData = new Map();
-            extraData.Add("Flags", item.Flags);
+            extraData.Add("Flags", (uint)item.Flags);
             extraData["GroupID"] = item.Group.ID;
             extraData.Add("GroupOwned", item.IsGroupOwned);
             extraData.Add("SalePrice", item.SaleInfo.Price);
@@ -180,7 +180,7 @@ namespace SilverSim.BackendConnectors.Simian.Inventory
                         return;
                     }
                     List<UUID> gestures = new List<UUID>();
-                    if (item.Flags == 1)
+                    if ((uint)item.Flags == 1)
                     {
                         gestures.Add(item.ID);
                     }
@@ -188,7 +188,7 @@ namespace SilverSim.BackendConnectors.Simian.Inventory
                     bool updateNeeded = false;
                     foreach (IValue v in (AnArray)m["Gestures"])
                     {
-                        if(v.AsUUID == item.ID && item.Flags != 1)
+                        if(v.AsUUID == item.ID && (uint)item.Flags != 1)
                         {
                             updateNeeded = true;
                         }
