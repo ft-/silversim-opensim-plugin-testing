@@ -18,9 +18,11 @@ namespace SilverSim.BackendConnectors.Robust.IM
     public class RobustIMMessage : GridInstantMessage
     {
         Func<bool> SignalEvent;
+        readonly object m_Lock = new object();
+
         void IMProcessed(GridInstantMessage im, bool result)
         {
-            lock(this)
+            lock(m_Lock)
             {
                 im.ResultInfo = result;
                 if(SignalEvent != null)
@@ -32,7 +34,7 @@ namespace SilverSim.BackendConnectors.Robust.IM
 
         internal void ActivateIMEvent(Func<bool> e)
         {
-            lock(this)
+            lock(m_Lock)
             {
                 SignalEvent = e;
             }
@@ -40,7 +42,7 @@ namespace SilverSim.BackendConnectors.Robust.IM
 
         internal void DeactivateIMEvent()
         {
-            lock(this)
+            lock(m_Lock)
             {
                 SignalEvent = null;
             }
