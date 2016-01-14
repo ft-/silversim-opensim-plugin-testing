@@ -1,6 +1,7 @@
 ﻿// SilverSim is distributed under the terms of the
 // GNU Affero General Public License v3
 
+using SilverSim.Main.Common.CmdIO;
 using SilverSim.Main.Common.Tar;
 using SilverSim.OpenSimArchiver.Common;
 using SilverSim.Scene.Management.Scene;
@@ -186,11 +187,43 @@ namespace SilverSim.OpenSimArchiver.RegionArchiver
             sogs.Clear();
         }
 
+        enum CurrentOarLoadState
+        {
+            Unknown,
+            Assets,
+            Objects,
+            Terrain,
+            RegionSettings,
+            Parcels,
+            Region
+        }
+
+        static void ShowOarLoadState(ref CurrentOarLoadState currentState, CurrentOarLoadState newState, TTY io)
+        {
+            if(currentState != newState)
+            {
+                switch(newState)
+                {
+                    case CurrentOarLoadState.Assets: io.Write("Loading assets"); break;
+                    case CurrentOarLoadState.Objects: io.Write("Loading objects"); break;
+                    case CurrentOarLoadState.RegionSettings: io.Write("Loading region settings"); break;
+                    case CurrentOarLoadState.Terrain: io.Write("Loading terrain"); break;
+                    case CurrentOarLoadState.Region: io.Write("Loading region"); break;
+                    case CurrentOarLoadState.Parcels: io.Write("Loading parcels"); break;
+                    default: break;
+                }
+                currentState = newState;
+            }
+        }
+
         public static void Load(
             SceneInterface scene,
             LoadOptions options,
-            Stream inputFile)
+            Stream inputFile,
+            TTY io)
         {
+            CurrentOarLoadState currentLoadState = CurrentOarLoadState.Unknown;
+
             using (GZipStream gzipStream = new GZipStream(inputFile, CompressionMode.Decompress))
             {
                 using (TarArchiveReader reader = new TarArchiveReader(gzipStream))
@@ -249,6 +282,7 @@ namespace SilverSim.OpenSimArchiver.RegionArchiver
                             {
                                 if ((options & LoadOptions.NoAssets) == 0)
                                 {
+                                    ShowOarLoadState(ref currentLoadState, CurrentOarLoadState.Assets, io);
                                     /* Load asset */
                                     AssetData ad = reader.LoadAsset(header, scene.Owner);
                                     if (!scene.AssetService.Exists(ad.ID))
@@ -261,6 +295,7 @@ namespace SilverSim.OpenSimArchiver.RegionArchiver
                             {
                                 if (header.FileName.StartsWith("regions/"))
                                 {
+                                    ShowOarLoadState(ref currentLoadState, CurrentOarLoadState.Region, io);
                                     if ((options & LoadOptions.Merge) == 0 && scene != null)
                                     {
                                         scene.ClearObjects();
@@ -285,6 +320,7 @@ namespace SilverSim.OpenSimArchiver.RegionArchiver
 
                                 if (header.FileName.StartsWith("objects/"))
                                 {
+                                    ShowOarLoadState(ref currentLoadState, CurrentOarLoadState.Objects, io);
                                     /* Load objects */
                                     List<ObjectGroup> sogs;
                                     try
@@ -307,6 +343,7 @@ namespace SilverSim.OpenSimArchiver.RegionArchiver
                                 }
                                 else if (header.FileName.StartsWith("terrains/"))
                                 {
+                                    ShowOarLoadState(ref currentLoadState, CurrentOarLoadState.Terrain, io);
                                     /* Load terrains */
                                     if ((options & LoadOptions.Merge) == 0)
                                     {
@@ -315,6 +352,7 @@ namespace SilverSim.OpenSimArchiver.RegionArchiver
                                 }
                                 else if (header.FileName.StartsWith("landdata/"))
                                 {
+                                    ShowOarLoadState(ref currentLoadState, CurrentOarLoadState.Parcels, io);
                                     /* Load landdata */
                                     if ((options & LoadOptions.Merge) == 0)
                                     {
@@ -345,6 +383,7 @@ namespace SilverSim.OpenSimArchiver.RegionArchiver
                                 }
                                 else if (header.FileName.StartsWith("settings/") && ((options & LoadOptions.Merge) == 0))
                                 {
+                                    ShowOarLoadState(ref currentLoadState, CurrentOarLoadState.Parcels, io);
                                     /* Load settings */
                                     RegionSettingsLoader.LoadRegionSettings(new ObjectXmlStreamFilter(reader), scene);
                                 }

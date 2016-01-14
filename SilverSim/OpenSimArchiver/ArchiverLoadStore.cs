@@ -240,7 +240,7 @@ namespace SilverSim.OpenSimArchiver
                     HttpRequestHandler.DoStreamGetRequest(filename, null, 20000) :
                     new FileStream(filename, FileMode.Open, FileAccess.Read))
                 {
-                    RegionArchiver.OAR.Load(scene, options, s);
+                    RegionArchiver.OAR.Load(scene, options, s, io);
                 }
                 io.Write("OAR loaded successfully.");
             }
