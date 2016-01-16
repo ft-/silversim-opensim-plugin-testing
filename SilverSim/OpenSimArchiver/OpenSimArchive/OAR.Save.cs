@@ -29,6 +29,13 @@ namespace SilverSim.OpenSimArchiver.RegionArchiver
             Publish = 0x00000002,
         }
 
+        [Flags]
+        enum OarAccessFlags : uint
+        {
+            Access = 1,
+            Ban = 2,
+        }
+
         public static void Save(
             SceneInterface scene,
             SaveOptions options,
@@ -177,8 +184,27 @@ namespace SilverSim.OpenSimArchiver.RegionArchiver
                                 }
                                 xmlwriter.WriteNamedValue("OwnerID", pinfo.Owner.ID);
                                 xmlwriter.WriteStartElement("ParcelAccessList");
+                                if ((options & SaveOptions.Publish) == 0)
                                 {
-#warning Implement saving Parcel Access List
+                                    /* only serialize ParcelAccessEntry when not writing Publish OAR */
+                                    foreach (ParcelAccessEntry pae in scene.Parcels.WhiteList[scene.ID, pinfo.ID])
+                                    {
+                                        xmlwriter.WriteStartElement("ParcelAccessEntry");
+                                        xmlwriter.WriteNamedValue("AgentID", pae.Accessor.ID.ToString());
+                                        xmlwriter.WriteNamedValue("AgentData", pae.Accessor.CreatorData);
+                                        xmlwriter.WriteNamedValue("Time", pae.ExpiresAt.AsULong);
+                                        xmlwriter.WriteNamedValue("AccessList", (int)OarAccessFlags.Access);
+                                        xmlwriter.WriteEndElement();
+                                    }
+                                    foreach (ParcelAccessEntry pae in scene.Parcels.BlackList[scene.ID, pinfo.ID])
+                                    {
+                                        xmlwriter.WriteStartElement("ParcelAccessEntry");
+                                        xmlwriter.WriteNamedValue("AgentID", pae.Accessor.ID.ToString());
+                                        xmlwriter.WriteNamedValue("AgentData", pae.Accessor.CreatorData);
+                                        xmlwriter.WriteNamedValue("Time", pae.ExpiresAt.AsULong);
+                                        xmlwriter.WriteNamedValue("AccessList", (int)OarAccessFlags.Ban);
+                                        xmlwriter.WriteEndElement();
+                                    }
                                 }
                                 xmlwriter.WriteEndElement();
                                 xmlwriter.WriteNamedValue("PassHours", pinfo.PassHours);

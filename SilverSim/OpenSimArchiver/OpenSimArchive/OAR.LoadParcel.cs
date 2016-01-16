@@ -4,6 +4,7 @@
 using SilverSim.Types;
 using SilverSim.Types.Parcel;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Xml;
 
@@ -13,7 +14,118 @@ namespace SilverSim.OpenSimArchiver.RegionArchiver
     {
         static class ParcelLoader
         {
-            static void LoadParcelInner(XmlTextReader reader, ParcelInfo pinfo)
+            static void LoadParcelAccessListEntry(XmlTextReader reader, List<ParcelAccessEntry> whiteList, List<ParcelAccessEntry> blackList)
+            {
+                ParcelAccessEntry pae = new ParcelAccessEntry();
+                OarAccessFlags flags = 0;
+
+                for (;;)
+                {
+                    if (!reader.Read())
+                    {
+                        throw new OARFormatException();
+                    }
+
+                    switch (reader.NodeType)
+                    {
+                        case XmlNodeType.Element:
+                            switch (reader.Name)
+                            {
+                                case "AgentID":
+                                    pae.Accessor.ID = UUID.Parse(reader.ReadElementValueAsString());
+                                    break;
+
+                                case "AgentData":
+                                    pae.Accessor.CreatorData = reader.ReadElementValueAsString();
+                                    break;
+
+                                case "Expires":
+                                    pae.ExpiresAt = Date.UnixTimeToDateTime(reader.ReadElementValueAsULong());
+                                    break;
+
+                                case "AccessList":
+                                    flags = (OarAccessFlags)reader.ReadElementValueAsUInt();
+                                    break;
+
+                                default:
+                                    if (!reader.IsEmptyElement)
+                                    {
+                                        reader.Skip();
+                                    }
+                                    break;
+                            }
+                            break;
+
+                        case XmlNodeType.EndElement:
+                            if (reader.Name != "ParcelAccessEntry")
+                            {
+                                throw new OARFormatException();
+                            }
+                            if((flags & OarAccessFlags.Access) != 0)
+                            {
+                                whiteList.Add(pae);
+                            }
+                            if((flags & OarAccessFlags.Ban) != 0)
+                            {
+                                blackList.Add(pae);
+                            }
+                            return;
+
+                        default:
+                            break;
+                    }
+                }
+            }
+
+            static void LoadParcelAccessList(XmlTextReader reader, List<ParcelAccessEntry> whiteList, List<ParcelAccessEntry> blackList)
+            {
+                if(reader.IsEmptyElement)
+                {
+                    return;
+                }
+                for (;;)
+                {
+                    if (!reader.Read())
+                    {
+                        throw new OARFormatException();
+                    }
+
+                    switch (reader.NodeType)
+                    {
+                        case XmlNodeType.Element:
+                            switch (reader.Name)
+                            {
+                                case "ParcelAccessEntry":
+                                    if(reader.IsEmptyElement)
+                                    {
+                                        break;
+                                    }
+                                    LoadParcelAccessListEntry(reader, whiteList, blackList);
+                                    break;
+
+                                default:
+                                    if (!reader.IsEmptyElement)
+                                    {
+                                        reader.Skip();
+                                    }
+                                    break;
+                            }
+                            break;
+
+                        case XmlNodeType.EndElement:
+                            if (reader.Name != "ParcelAccessList")
+                            {
+                                throw new OARFormatException();
+                            }
+                            return;
+
+                        default:
+                            break;
+                    }
+                }
+            }
+
+            static void LoadParcelInner(XmlTextReader reader, ParcelInfo pinfo, List<ParcelAccessEntry> whiteList, List<ParcelAccessEntry> blackList)
             {
                 for(;;)
                 {
@@ -124,11 +236,7 @@ namespace SilverSim.OpenSimArchiver.RegionArchiver
                                     break;
 
                                 case "ParcelAccessList":
-                                    if(!reader.IsEmptyElement)
-                                    {
-#warning support parcel access list loading
-                                        reader.Skip();
-                                    }
+                                    LoadParcelAccessList(reader, whiteList, blackList);
                                     break;
 
                                 case "PassHours":
@@ -191,7 +299,7 @@ namespace SilverSim.OpenSimArchiver.RegionArchiver
                 }
             }
 
-            static ParcelInfo LoadParcel(XmlTextReader reader, GridVector regionSize)
+            static ParcelInfo LoadParcel(XmlTextReader reader, GridVector regionSize, List<ParcelAccessEntry> whiteList, List<ParcelAccessEntry> blackList)
             {
                 ParcelInfo pinfo = new ParcelInfo((int)regionSize.X / 4, (int)regionSize.Y / 4);
                 for(;;)
@@ -208,7 +316,7 @@ namespace SilverSim.OpenSimArchiver.RegionArchiver
                             {
                                 throw new OARFormatException();
                             }
-                            LoadParcelInner(reader, pinfo);
+                            LoadParcelInner(reader, pinfo, whiteList, blackList);
                             return pinfo;
 
                         default:
@@ -217,11 +325,11 @@ namespace SilverSim.OpenSimArchiver.RegionArchiver
                 }
             }
 
-            public static ParcelInfo LoadParcel(Stream s, GridVector regionSize)
+            public static ParcelInfo LoadParcel(Stream s, GridVector regionSize, List<ParcelAccessEntry> whiteList, List<ParcelAccessEntry> blackList)
             {
                 using(XmlTextReader reader = new XmlTextReader(s))
                 {
-                    return LoadParcel(reader, regionSize);
+                    return LoadParcel(reader, regionSize, whiteList, blackList);
                 }
             }
         }

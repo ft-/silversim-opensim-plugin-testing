@@ -361,7 +361,9 @@ namespace SilverSim.OpenSimArchiver.RegionArchiver
                                             scene.ClearParcels();
                                             parcelsCleared = true;
                                         }
-                                        ParcelInfo pinfo = ParcelLoader.LoadParcel(new ObjectXmlStreamFilter(reader), regionSize);
+                                        List<ParcelAccessEntry> whiteList = new List<ParcelAccessEntry>();
+                                        List<ParcelAccessEntry> blackList = new List<ParcelAccessEntry>();
+                                        ParcelInfo pinfo = ParcelLoader.LoadParcel(new ObjectXmlStreamFilter(reader), regionSize, whiteList, blackList);
                                         if (pinfo.Owner.ID == UUID.Zero)
                                         {
                                             pinfo.Owner = scene.Owner;
@@ -379,6 +381,16 @@ namespace SilverSim.OpenSimArchiver.RegionArchiver
                                             pinfo.ID = UUID.Random;
                                         }
                                         scene.AddParcel(pinfo);
+                                        scene.Parcels.WhiteList.Remove(scene.ID, pinfo.ID);
+                                        scene.Parcels.BlackList.Remove(scene.ID, pinfo.ID);
+                                        foreach(ParcelAccessEntry pae in whiteList)
+                                        {
+                                            scene.Parcels.WhiteList.Store(pae);
+                                        }
+                                        foreach(ParcelAccessEntry pae in blackList)
+                                        {
+                                            scene.Parcels.BlackList.Store(pae);
+                                        }
                                     }
                                 }
                                 else if (header.FileName.StartsWith("settings/") && ((options & LoadOptions.Merge) == 0))
