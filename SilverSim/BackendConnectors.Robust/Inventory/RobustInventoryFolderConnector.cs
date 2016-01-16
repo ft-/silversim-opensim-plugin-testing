@@ -11,7 +11,6 @@ using SilverSim.Types.Inventory;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
-using System;
 
 namespace SilverSim.BackendConnectors.Robust.Inventory
 {

@@ -64,7 +64,7 @@ namespace SilverSim.BackendConnectors.Robust.Friends
                 fInfo = new FriendInfo();
                 fInfo.User = user;
                 fInfo.Friend = friend;
-                fInfo.UserGivenFlags = res["Value"].AsInt;
+                fInfo.UserGivenFlags = (FriendRightFlags)res["Value"].AsInt;
                 return true;
             }
             fInfo = default(FriendInfo);

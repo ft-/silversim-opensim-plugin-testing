@@ -107,8 +107,8 @@ namespace SilverSim.BackendConnectors.Robust.Friends
                                 fi.Friend.FullName = friend;
                             }
 
-                            fi.UserGivenFlags = m["MyFlags"].AsInt;
-                            fi.FriendGivenFlags = m["TheirFlags"].AsInt;
+                            fi.UserGivenFlags = (FriendRightFlags)m["MyFlags"].AsInt;
+                            fi.FriendGivenFlags = (FriendRightFlags)m["TheirFlags"].AsInt;
                         }
                         catch
                         {
