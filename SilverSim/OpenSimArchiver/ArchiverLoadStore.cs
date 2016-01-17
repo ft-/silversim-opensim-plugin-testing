@@ -160,7 +160,7 @@ namespace SilverSim.OpenSimArchiver
             {
                 using (Stream s = new FileStream(filename, FileMode.Create, FileAccess.Write))
                 {
-                    RegionArchiver.OAR.Save(scene, options, s);
+                    RegionArchiver.OAR.Save(scene, options, s, io);
                 }
                 io.Write("OAR saved successfully.");
             }

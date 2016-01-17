@@ -7,6 +7,7 @@ using SilverSim.Scene.Types.Object;
 using SilverSim.Scene.Types.Scene;
 using SilverSim.Types;
 using SilverSim.Types.Asset;
+using SilverSim.Types.Grid;
 using SilverSim.Types.Parcel;
 using SilverSim.Viewer.Messages.LayerData;
 using System;
@@ -53,10 +54,19 @@ namespace SilverSim.OpenSimArchiver.RegionArchiver
                     xmloptions |= XmlSerializationOptions.WriteOwnerInfo;
                 }
 
+                if (console_io != null)
+                {
+                    console_io.Write("Saving archive info...");
+                }
+
                 writer.WriteFile("archive.xml", WriteArchiveXml08(scene, saveAssets));
 
                 Dictionary<string, AssetData> objectAssets = new Dictionary<string, AssetData>();
 
+                if (console_io != null)
+                {
+                    console_io.Write("Collecting object data...");
+                }
                 foreach (ObjectGroup sog in scene.Objects)
                 {
                     if (sog.IsTemporary || sog.IsAttached)
@@ -68,8 +78,13 @@ namespace SilverSim.OpenSimArchiver.RegionArchiver
                     objectAssets.Add(sog.Name + "_" + sog.GlobalPosition.X_String + "-" + sog.GlobalPosition.Y_String + "-" + sog.GlobalPosition.Z_String + "__" + sog.ID.ToString() + ".xml", data);
                 }
 
+                #region Save Assets
                 if (saveAssets)
                 {
+                    if (console_io != null)
+                    {
+                        console_io.Write("Saving asset data...");
+                    }
                     /* we only parse sim details when saving assets */
                     List<UUID> assetIDs = new List<UUID>();
                     AssetData data;
@@ -128,6 +143,86 @@ namespace SilverSim.OpenSimArchiver.RegionArchiver
                             console_io.WriteFormatted("Failed to parse asset {0}", assetID);
                         }
                     }
+                }
+                #endregion
+
+                #region Region Settings
+                if (console_io != null)
+                {
+                    console_io.Write("Saving region settings...");
+                }
+                using (MemoryStream ms = new MemoryStream())
+                {
+                    using (XmlTextWriter xmlwriter = ms.UTF8XmlTextWriter())
+                    {
+                        RegionSettings settings = scene.RegionSettings;
+                        xmlwriter.WriteStartElement("RegionSettings");
+                        {
+                            xmlwriter.WriteStartElement("General");
+                            {
+                                xmlwriter.WriteNamedValue("AllowDamage", settings.AllowDamage);
+                                xmlwriter.WriteNamedValue("AllowLandResell", settings.AllowLandResell);
+                                xmlwriter.WriteNamedValue("AllowLandJoinDivide", settings.AllowLandJoinDivide);
+                                xmlwriter.WriteNamedValue("BlockFly", settings.BlockFly);
+                                xmlwriter.WriteNamedValue("BlockFlyOver", settings.BlockFlyOver);
+                                xmlwriter.WriteNamedValue("BlockLandShowInSearch", settings.BlockShowInSearch);
+                                xmlwriter.WriteNamedValue("BlockTerraform", settings.BlockTerraform);
+                                xmlwriter.WriteNamedValue("DisableCollisions", settings.DisableCollisions);
+                                xmlwriter.WriteNamedValue("DisablePhysics", settings.DisablePhysics);
+                                xmlwriter.WriteNamedValue("DisableScripts", settings.DisableScripts);
+                                switch (scene.Access)
+                                {
+                                    case RegionAccess.PG: xmlwriter.WriteNamedValue("MaturityRating", 0); break;
+                                    case RegionAccess.Mature: xmlwriter.WriteNamedValue("MaturityRating", 1); break;
+                                    default:
+                                    case RegionAccess.Adult: xmlwriter.WriteNamedValue("MaturityRating", 2); break;
+                                }
+                                xmlwriter.WriteNamedValue("RestrictPushing", settings.RestrictPushing);
+                                xmlwriter.WriteNamedValue("AgentLimit", settings.AgentLimit);
+                                xmlwriter.WriteNamedValue("ObjectBonus", settings.ObjectBonus);
+                                xmlwriter.WriteNamedValue("ResetHomeOnTeleport", settings.ResetHomeOnTeleport);
+                                xmlwriter.WriteNamedValue("AllowLandmark", settings.AllowLandmark);
+                                xmlwriter.WriteNamedValue("AllowDirectTeleport", settings.AllowDirectTeleport);
+                            }
+                            xmlwriter.WriteEndElement();
+                            xmlwriter.WriteStartElement("GroundTextures");
+                            {
+                                xmlwriter.WriteNamedValue("Texture1", settings.TerrainTexture1);
+                                xmlwriter.WriteNamedValue("Texture2", settings.TerrainTexture2);
+                                xmlwriter.WriteNamedValue("Texture3", settings.TerrainTexture3);
+                                xmlwriter.WriteNamedValue("Texture4", settings.TerrainTexture4);
+                                xmlwriter.WriteNamedValue("ElevationLowSW", settings.Elevation1SW);
+                                xmlwriter.WriteNamedValue("ElevationLowNW", settings.Elevation1NW);
+                                xmlwriter.WriteNamedValue("ElevationLowSE", settings.Elevation1SE);
+                                xmlwriter.WriteNamedValue("ElevationLowNE", settings.Elevation1NE);
+                                xmlwriter.WriteNamedValue("ElevationHighSW", settings.Elevation2SW);
+                                xmlwriter.WriteNamedValue("ElevationHighNW", settings.Elevation2NW);
+                                xmlwriter.WriteNamedValue("ElevationHighSE", settings.Elevation2SE);
+                                xmlwriter.WriteNamedValue("ElevationHighNE", settings.Elevation2NE);
+                            }
+                            xmlwriter.WriteEndElement();
+                            xmlwriter.WriteStartElement("Terrain");
+                            {
+                                xmlwriter.WriteNamedValue("WaterHeight", settings.WaterHeight);
+                                xmlwriter.WriteNamedValue("TerrainRaiseLimit", settings.TerrainRaiseLimit);
+                                xmlwriter.WriteNamedValue("TerrainLowerLimit", settings.TerrainLowerLimit);
+                                xmlwriter.WriteNamedValue("UseEstateSun", settings.UseEstateSun);
+                                xmlwriter.WriteNamedValue("FixedSun", settings.IsSunFixed);
+                                xmlwriter.WriteNamedValue("SunPosition", settings.SunPosition + 6);
+                            }
+                            xmlwriter.WriteEndElement();
+#warning TODO: Telehub Object
+                        }
+                        xmlwriter.WriteEndElement();
+                    }
+                    writer.WriteFile("settings/" + scene.Name + ".xml", ms.GetBuffer());
+                }
+                #endregion
+
+                #region Saving parcels
+                if (console_io != null)
+                {
+                    console_io.Write("Saving parcel data...");
                 }
 
                 foreach (ParcelInfo pinfo in scene.Parcels)
@@ -223,13 +318,26 @@ namespace SilverSim.OpenSimArchiver.RegionArchiver
                         }
                     }
                 }
+                #endregion
 
+                #region Storing object data
+                if (console_io != null)
+                {
+                    console_io.Write("Storing object data...");
+                }
                 foreach (KeyValuePair<string, AssetData> kvp in objectAssets)
                 {
                     writer.WriteFile("objects/" + kvp.Key, kvp.Value.Data);
                 }
+                #endregion
 
+                #region Storing terrain
+                if (console_io != null)
+                {
+                    console_io.Write("Saving terrain data...");
+                }
                 writer.WriteFile("terrains/" + scene.Name + ".r32", GenTerrainFile(scene.Terrain.AllPatches));
+                #endregion
                 writer.WriteEndOfTar();
             }
         }

@@ -97,6 +97,26 @@ namespace SilverSim.OpenSimArchiver.RegionArchiver
                                     scene.RegionSettings.ObjectBonus = reader.ReadElementValueAsDouble();
                                     break;
 
+                                case "BlockFlyOver":
+                                    scene.RegionSettings.BlockFlyOver = reader.ReadElementValueAsBoolean();
+                                    break;
+
+                                case "ResetHomeOnTeleport":
+                                    scene.RegionSettings.ResetHomeOnTeleport = reader.ReadElementValueAsBoolean();
+                                    break;
+
+                                case "AllowLandmark":
+                                    scene.RegionSettings.AllowLandmark = reader.ReadElementValueAsBoolean();
+                                    break;
+
+                                case "AllowDirectTeleport":
+                                    scene.RegionSettings.AllowDirectTeleport = reader.ReadElementValueAsBoolean();
+                                    break;
+
+                                case "BlockDwell":
+                                    scene.RegionSettings.BlockDwell = reader.ReadElementValueAsBoolean();
+                                    break;
+
                                 default:
                                     if(!reader.IsEmptyElement)
                                     {
@@ -241,15 +261,15 @@ namespace SilverSim.OpenSimArchiver.RegionArchiver
                                     break;
 
                                 case "UseEstateSun":
-                                    reader.ReadElementValueAsBoolean();
+                                    scene.RegionSettings.UseEstateSun = reader.ReadElementValueAsBoolean();
                                     break;
 
                                 case "FixedSun":
-                                    reader.ReadElementValueAsBoolean();
+                                    scene.RegionSettings.IsSunFixed = reader.ReadElementValueAsBoolean();
                                     break;
 
                                 case "SunPosition":
-                                    reader.ReadElementValueAsDouble();
+                                    scene.RegionSettings.SunPosition = reader.ReadElementValueAsDouble() - 6;
                                     break;
 
                                 default:
