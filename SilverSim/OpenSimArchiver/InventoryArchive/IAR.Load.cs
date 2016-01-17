@@ -269,13 +269,6 @@ namespace SilverSim.OpenSimArchiver.InventoryArchiver
                                 item.Name = reader.ReadElementValueAsString();
                                 break;
 
-                            case "ID":
-                                if(!reader.IsEmptyElement)
-                                {
-                                    reader.Skip();
-                                }
-                                break;
-
                             case "InvType":
                                 item.InventoryType = (InventoryType)reader.ReadElementValueAsInt();
                                 break;
@@ -378,6 +371,7 @@ namespace SilverSim.OpenSimArchiver.InventoryArchiver
                                 item.IsGroupOwned = reader.ReadElementValueAsBoolean();
                                 break;
 
+                            case "ID":
                             case "Owner":
                             default:
                                 if(!reader.IsEmptyElement)
