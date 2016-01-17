@@ -80,6 +80,12 @@ namespace SilverSim.BackendConnectors.Robust.Asset
         }
         #endregion
 
+        public override bool IsSameServer(AssetServiceInterface other)
+        {
+            return other.GetType() == typeof(RobustAssetConnector) &&
+                (m_AssetURI == ((RobustAssetConnector)other).m_AssetURI);
+        }
+
         #region Exists methods
         public override bool Exists(UUID key)
         {
