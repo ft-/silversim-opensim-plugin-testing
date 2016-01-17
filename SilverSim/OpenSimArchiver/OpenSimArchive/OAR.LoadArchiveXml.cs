@@ -462,11 +462,7 @@ namespace SilverSim.OpenSimArchiver.RegionArchiver
                                 while (reader.MoveToNextAttribute());
                             }
 
-                            if(majorVersion == 0 && minorVersion == 0)
-                            {
-                                throw new OARFormatException();
-                            }
-                            else if(majorVersion == 0)
+                            if(majorVersion == 0 && minorVersion != 0)
                             {
                                 return LoadArchiveXmlVersion0(reader);
                             }
