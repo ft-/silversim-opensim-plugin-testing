@@ -334,13 +334,6 @@ namespace SilverSim.OpenSimArchiver.InventoryArchiver
                                 item.CreationDate = Date.UnixTimeToDateTime(reader.ReadElementValueAsULong());
                                 break;
 
-                            case "Owner":
-                                if(!reader.IsEmptyElement)
-                                {
-                                    reader.Skip();
-                                }
-                                break;
-
                             case "Description":
                                 item.Description = reader.ReadElementValueAsString();
                                 break;
@@ -385,6 +378,7 @@ namespace SilverSim.OpenSimArchiver.InventoryArchiver
                                 item.IsGroupOwned = reader.ReadElementValueAsBoolean();
                                 break;
 
+                            case "Owner":
                             default:
                                 if(!reader.IsEmptyElement)
                                 {
