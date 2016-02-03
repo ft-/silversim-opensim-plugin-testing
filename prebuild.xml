@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <Prebuild xmlns="http://dnpb.sourceforge.net/schemas/prebuild-1.10.xsd" version="1.10">
-  <Solution activeConfig="Release" name="SilverSim.OpenSim" path="./" version="0.8.0-$Rev$">
+  <Solution activeConfig="Release" name="SilverSim.OpenSim" path="./">
     <Configuration name="Release">
       <Options>
         <CompilerDefines>TRACE</CompilerDefines>
