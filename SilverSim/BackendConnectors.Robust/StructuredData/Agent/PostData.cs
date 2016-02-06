@@ -185,9 +185,16 @@ namespace SilverSim.BackendConnectors.Robust.StructuredData.Agent
             if (parms.ContainsKey("packed_appearance"))
             {
                 Map appearancePack = (Map)parms["packed_appearance"];
-                agentparams.Appearance.AvatarHeight = appearancePack["height"].AsReal;
-                agentparams.Appearance.Serial = (uint)appearancePack["serial"].AsInt;
+                if (appearancePack.ContainsKey("height"))
+                {
+                    agentparams.Appearance.AvatarHeight = appearancePack["height"].AsReal;
+                }
+                if (appearancePack.ContainsKey("serial"))
+                {
+                    agentparams.Appearance.Serial = (uint)appearancePack["serial"].AsInt;
+                }
 
+                if(appearancePack.ContainsKey("visualparams"))
                 {
                     AnArray vParams = (AnArray)appearancePack["visualparams"];
                     byte[] visualParams = new byte[vParams.Count];
@@ -200,6 +207,7 @@ namespace SilverSim.BackendConnectors.Robust.StructuredData.Agent
                     agentparams.Appearance.VisualParams = visualParams;
                 }
 
+                if(appearancePack.ContainsKey("textures"))
                 {
                     AnArray texArray = (AnArray)appearancePack["textures"];
                     int i;
