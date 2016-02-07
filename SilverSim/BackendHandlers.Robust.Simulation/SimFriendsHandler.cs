@@ -19,6 +19,8 @@ using SilverSim.Types.Asset;
 using SilverSim.ServiceInterfaces.Inventory;
 using SilverSim.Viewer.Messages.Friend;
 using Nini.Config;
+using SilverSim.Viewer.Messages.Inventory;
+using SilverSim.Types.Friends;
 
 namespace SilverSim.BackendHandlers.Robust.Simulation
 {
@@ -155,17 +157,29 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
                 return false;
             }
 
-            if (online)
+            FriendStatus fStat;
+            if (agent.KnownFriends.TryGetValue(fromID, out fStat))
             {
-                OnlineNotification m = new OnlineNotification();
-                m.AgentIDs.Add(fromID);
-                agent.SendMessageAlways(m, agentScene.ID);
-            }
-            else
-            {
-                OfflineNotification m = new OfflineNotification();
-                m.AgentIDs.Add(fromID);
-                agent.SendMessageAlways(m, agentScene.ID);
+                if (online)
+                {
+                    if (!fStat.IsOnline)
+                    {
+                        fStat.IsOnline = true;
+                        OnlineNotification m = new OnlineNotification();
+                        m.AgentIDs.Add(fromID);
+                        agent.SendMessageAlways(m, agentScene.ID);
+                    }
+                }
+                else
+                {
+                    if (fStat.IsOnline)
+                    {
+                        fStat.IsOnline = false;
+                        OfflineNotification m = new OfflineNotification();
+                        m.AgentIDs.Add(fromID);
+                        agent.SendMessageAlways(m, agentScene.ID);
+                    }
+                }
             }
 
             return true;
@@ -210,16 +224,21 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
                 return false;
             }
 
-            ChangeUserRights m = new ChangeUserRights();
-            m.AgentID = agent.Owner.ID;
-            m.SessionID = agent.Session.SessionID;
+            FriendStatus fi;
+            if(agent.KnownFriends.TryGetValue(fromID, out fi) && fi.Friend.EqualsGrid(gim.FromAgent))
+            {
+                fi.UserGivenFlags = (FriendRightFlags)newRights;
+                ChangeUserRights m = new ChangeUserRights();
+                m.AgentID = agent.Owner.ID;
+                m.SessionID = agent.Session.SessionID;
 
-            ChangeUserRights.RightsEntry r = new ChangeUserRights.RightsEntry();
-            r.AgentRelated = gim.FromAgent.ID;
-            r.RelatedRights = newRights;
-            m.Rights.Add(r);
+                ChangeUserRights.RightsEntry r = new ChangeUserRights.RightsEntry();
+                r.AgentRelated = gim.FromAgent.ID;
+                r.RelatedRights = newRights;
+                m.Rights.Add(r);
 
-            agent.SendMessageAlways(m, agentScene.ID);
+                agent.SendMessageAlways(m, agentScene.ID);
+            }
 
             return true;
         }
@@ -257,6 +276,8 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
             m.OtherID = fromID;
 
             agent.SendMessageAlways(m, agentScene.ID);
+
+            agent.KnownFriends.Remove(fromID);
 
             return true;
         }
@@ -368,6 +389,31 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
                 item.SaleInfo.Type = InventoryItem.SaleInfoData.SaleType.NoSale;
 
                 inventoryService.Item.Add(item);
+
+                UpdateCreateInventoryItem m = new UpdateCreateInventoryItem();
+                m.AgentID = toID;
+                m.SimApproved = true;
+                m.TransactionID = UUID.Zero;
+                m.AddItem(item, 0);
+                agent.SendMessageAlways(m, agentScene.ID);
+            }
+
+            if(null != agent.FriendsService)
+            {
+                FriendInfo fi;
+                if(agent.FriendsService.TryGetValue(gim.ToAgent, gim.FromAgent, out fi))
+                {
+                    FriendStatus fStat = new FriendStatus(fi);
+                    fStat.IsOnline = true;
+                    agent.KnownFriends[fromID] = fStat;
+
+                    if(fStat.UserGivenFlags.HasFlag(FriendRightFlags.SeeOnline))
+                    {
+                        OnlineNotification notification = new OnlineNotification();
+                        notification.AgentIDs.Add(fromID);
+                        agent.SendMessageAlways(notification, agentScene.ID);
+                    }
+                }
             }
 
             return agent.IMSend(gim);
