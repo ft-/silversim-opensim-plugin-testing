@@ -10,6 +10,7 @@ using SilverSim.Types.Friends;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
+using System;
 
 namespace SilverSim.BackendConnectors.Robust.Friends
 {
@@ -130,6 +131,16 @@ namespace SilverSim.BackendConnectors.Robust.Friends
         public void Startup(ConfigurationLoader loader)
         {
             /* no action needed */
+        }
+
+        public override void StoreRights(FriendInfo fi)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override void StoreOffer(FriendInfo fi)
+        {
+            throw new NotImplementedException();
         }
     }
 }

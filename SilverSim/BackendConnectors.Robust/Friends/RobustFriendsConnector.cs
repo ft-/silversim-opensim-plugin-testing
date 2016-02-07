@@ -12,6 +12,7 @@ using SilverSim.Types.Friends;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
+using System;
 
 namespace SilverSim.BackendConnectors.Robust.Friends
 {
@@ -19,16 +20,30 @@ namespace SilverSim.BackendConnectors.Robust.Friends
     public sealed class RobustFriendsConnector : FriendsServiceInterface, IPlugin
     {
         readonly string m_Uri;
+        readonly string m_HomeUri;
         public int TimeoutMs = 20000;
 
-        public RobustFriendsConnector(string uri)
+        public RobustFriendsConnector(string uri, string homeuri)
         {
-            if (!uri.EndsWith("/"))
-            {
-                uri += "/";
-            }
-            uri += "friends";
             m_Uri = uri;
+            if (!m_Uri.EndsWith("/"))
+            {
+                m_Uri += "/";
+            }
+            m_Uri += "friends";
+
+            if(homeuri.Length != 0)
+            {
+                m_HomeUri = homeuri;
+                if(!m_HomeUri.EndsWith("/"))
+                {
+                    m_HomeUri += "/";
+                }
+            }
+            else
+            {
+                m_HomeUri = string.Empty;
+            }
         }
 
         private void CheckResult(Map map)
@@ -122,20 +137,8 @@ namespace SilverSim.BackendConnectors.Robust.Friends
 
         public override void Store(FriendInfo fi)
         {
-            Dictionary<string, string> post = new Dictionary<string, string>();
-            post["METHOD"] = "storefriend";
-            post["PrincipalID"] = fi.User.ToString();
-            post["Friend"] = fi.Friend.ToString();
-            if(fi.Friend.HomeURI != null)
-            {
-                post["Friend"] += ";" + fi.Secret;
-            }
-            post["MyFlags"] = fi.UserGivenFlags.ToString();
-
-            using(Stream s = HttpRequestHandler.DoStreamPostRequest(m_Uri, null, post, false, TimeoutMs))
-            {
-                CheckResult(OpenSimResponse.Deserialize(s));
-            }
+            StoreEntry(fi.User, fi.Friend, fi.Secret, fi.UserGivenFlags);
+            StoreEntry(fi.Friend, fi.User, fi.Secret, fi.FriendGivenFlags);
         }
 
         public override void Delete(FriendInfo fi)
@@ -159,6 +162,39 @@ namespace SilverSim.BackendConnectors.Robust.Friends
         {
             /* no action needed */
         }
+
+        public override void StoreRights(FriendInfo fi)
+        {
+            StoreEntry(fi.User, fi.Friend, fi.Secret, fi.FriendGivenFlags);
+        }
+
+        void StoreEntry(UUI user, UUI friend, string secret, FriendRightFlags flags)
+        {
+            Dictionary<string, string> post = new Dictionary<string, string>();
+            post["METHOD"] = "storefriend";
+            post["PrincipalID"] = user.ToString();
+            if(user.HomeURI != null && user.HomeURI.ToString() != m_HomeUri)
+            {
+                post["PrincipalID"] += ";" + secret;
+            }
+            post["Friend"] = friend.ToString();
+            if (friend.HomeURI != null && friend.HomeURI.ToString() != m_HomeUri)
+            {
+                post["Friend"] += ";" + secret;
+            }
+            post["MyFlags"] = ((int)flags).ToString();
+
+            using (Stream s = HttpRequestHandler.DoStreamPostRequest(m_Uri, null, post, false, TimeoutMs))
+            {
+                CheckResult(OpenSimResponse.Deserialize(s));
+            }
+
+        }
+
+        public override void StoreOffer(FriendInfo fi)
+        {
+            StoreEntry(fi.Friend, fi.User, fi.Secret, 0);
+        }
     }
 
     #region Factory
@@ -178,7 +214,7 @@ namespace SilverSim.BackendConnectors.Robust.Friends
                 m_Log.FatalFormat("Missing 'URI' in section {0}", ownSection.Name);
                 throw new ConfigurationLoader.ConfigurationErrorException();
             }
-            return new RobustFriendsConnector(ownSection.GetString("URI"));
+            return new RobustFriendsConnector(ownSection.GetString("URI"), ownSection.GetString("HomeURI", string.Empty));
         }
     }
     #endregion

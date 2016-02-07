@@ -5,9 +5,11 @@ using Nini.Config;
 using SilverSim.Main.Common;
 using SilverSim.ServiceInterfaces;
 using SilverSim.ServiceInterfaces.Asset;
+using SilverSim.ServiceInterfaces.Friends;
 using SilverSim.ServiceInterfaces.Inventory;
 using SilverSim.ServiceInterfaces.UserAgents;
 using System.ComponentModel;
+using System;
 
 namespace SilverSim.BackendConnectors.Robust
 {
@@ -87,6 +89,35 @@ namespace SilverSim.BackendConnectors.Robust
         public IPlugin Initialize(ConfigurationLoader loader, IConfig ownSection)
         {
             return new RobustAssetPlugin();
+        }
+    }
+    #endregion
+
+    #region Friends plugin
+    [Description("Robust HGFriends Connector factory")]
+    public class RobustHGFriendsPlugin : ServicePluginHelo, IFriendsServicePlugin, IPlugin
+    {
+        public RobustHGFriendsPlugin()
+        {
+
+        }
+
+        public override string Name
+        {
+            get
+            {
+                return "opensim-robust";
+            }
+        }
+
+        public FriendsServiceInterface Instantiate(string url)
+        {
+            return new Friends.RobustFriendsConnector(url, string.Empty);
+        }
+
+        public void Startup(ConfigurationLoader loader)
+        {
+            /* intentionally left empty */
         }
     }
     #endregion
