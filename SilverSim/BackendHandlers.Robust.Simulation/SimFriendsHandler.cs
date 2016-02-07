@@ -286,7 +286,6 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
         {
             UUID fromID = UUID.Zero;
             UUID toID = UUID.Zero;
-            string fromName = string.Empty;
 
             if(!req.ContainsKey("FromID") || !req.ContainsKey("ToID"))
             {
@@ -329,7 +328,6 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
         {
             UUID fromID = UUID.Zero;
             UUID toID = UUID.Zero;
-            string fromName = string.Empty;
 
             if (!req.ContainsKey("FromID") || !req.ContainsKey("ToID"))
             {
