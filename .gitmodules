@@ -7,6 +7,3 @@
 [submodule "data"]
 	path = data
 	url = git@148.251.83.135:silversim-data-dev
-[submodule "tests"]
-	path = tests
-	url = git@148.251.83.135:silversim-testfiles-dev
