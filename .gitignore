@@ -16,7 +16,19 @@
 *.FileListAbsolute.txt
 *.suo
 *.dump.txt
+*.ini
+*.example
+*.log
 
 obj
+bin
 
 /.sonar
+singletests
+/testresults
+data/**/*.ini
+nls/en
+nls/de
+libraries
+data/dumps/**
+sonar-project.properties
