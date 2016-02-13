@@ -112,6 +112,7 @@ ${sonar.moduledeclarations}
 	
 	<target name="build" description="Runs msbuild/xbuild">
 		<call target="setup"/>
+		<call target="nls"/>
 		<if test="${platform::is-windows()}">
 			<exec program="windows/createcompile.bat">
 			</exec>
@@ -123,5 +124,28 @@ ${sonar.moduledeclarations}
 				<arg value="/p:Configuration=Debug" if="${property::exists('debug-build')}"/>
 			</exec>
 		</if>
+	</target>
+	
+	<target name="nls" description="Process language files">
+		<mkdir dir="bin/languages"/>
+		<foreach item="Folder" property="longfoldername">
+			<in>
+				<items basedir="nls">
+					<include name="*.src"/>
+				</items>
+			</in>
+			<do>
+				<property name="foldername" value="${path::get-file-name-without-extension(longfoldername)}"/>
+				<echo message="Processing language data for ${foldername}"/>
+				<mkdir dir="bin/languages/${foldername}" failonerror="false"/>
+				<foreach item="File" property="longfilename" in="nls/${foldername}.src">
+					<property name="filename" value="${path::get-file-name-without-extension(longfilename)}"/>
+					<exec program="resgen">
+						<arg path="nls/${foldername}.src/${filename}.txt"/>
+						<arg path="bin/languages/${foldername}/${filename}.resources"/>
+					</exec>
+				</foreach>
+			</do>
+		</foreach>
 	</target>
 </project>
