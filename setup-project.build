@@ -114,11 +114,11 @@ ${sonar.moduledeclarations}
 		<if test="${platform::is-windows()}">
 			<exec program="windows/createcompile.bat">
 			</exec>
-			<exec program="compile.bat" workingdir="build" basedir="build">
+			<exec program="compile.bat" workingdir="." basedir=".">
 			</exec>
 		</if>
 		<if test="${platform::is-unix()}">
-			<exec program="xbuild" workingdir="build">
+			<exec program="xbuild" workingdir=".">
 				<arg value="/p:Configuration=Debug" if="${property::exists('debug-build')}"/>
 			</exec>
 		</if>
