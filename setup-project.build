@@ -2,7 +2,7 @@
 <project name="project setup" default="setup">
 	<target name="setup">
 		<call target="setup-workspace" unless="${directory::exists('bin')}"/>
-		<call target="nuget-updates"/>
+		<call target="nuget-updates" unless="${file::exists('bin/.nuget-done')"/>
 		<call target="exe.config"/>
 		<call target="prebuild"/>
 		<call target="sonar-project"/>
@@ -30,6 +30,7 @@
 		<property name="silversim.package.C5.path" value="net40"/>
 		<property name="silversim.package.CSJ2K.path" value="net40"/>
 		<property name="silversim.package.log4net.path" value="net40-full"/>
+		<property name="silversim.package.log4net.version" value="2.0.5"/>
 		<property name="silversim.package.MySql.Data.path" value="net40"/>
 		<property name="silversim.package.Nini.path" value="net40"/>
 		
@@ -58,6 +59,7 @@
 				</fileset>
 			</copy>
 		</foreach>
+		<echo message="" output="bin/.nuget-done"/>
 	</target>
 	
 	<target name="exe.config">
