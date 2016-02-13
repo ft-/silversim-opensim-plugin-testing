@@ -108,4 +108,19 @@ sonar.modules=${sonar.modules}
 ${sonar.moduledeclarations}
 "/>
 	</target>
+	
+	<target name="build">
+		<call target="setup"/>
+		<if test="${platform::is-windows()}">
+			<exec program="windows/createcompile.bat">
+			</exec>
+			<exec program="compile.bat" workingdir="build" basedir="build">
+			</exec>
+		</if>
+		<if test="${platform::is-unix()}">
+			<exec program="xbuild" workingdir="build">
+				<arg value="/p:Configuration=Debug" if="${property::exists('debug-build')}"/>
+			</exec>
+		</if>
+	</target>
 </project>
