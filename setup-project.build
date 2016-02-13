@@ -5,10 +5,9 @@
 		<call target="nuget-updates" unless="${file::exists('bin/.nuget-done')}"/>
 		<call target="exe.config"/>
 		<call target="prebuild"/>
-		<call target="sonar-project"/>
 	</target>
 	
-	<target name="setup-workspace">
+	<target name="setup-workspace" description="Generates sym linked binaries storage">
 		<mkdir dir="../_silversim-binaries-dev_"/>
 		<exec program="windows/junction.exe" if="${platform::is-windows()}">
 			<arg path="bin"/>
@@ -21,7 +20,7 @@
 		</exec>
 	</target>
 	
-	<target name="nuget-updates">
+	<target name="nuget-updates" description="Updates packages from nuget">
 		<setenv name="PATH" path="${environment::get-variable('PATH')}:${project::get-base-directory()}/windows" if="${platform::is-windows()}"/>
 	
 		<property name="silversim-nuget.packages" value="C5,log4net,MySql.Data"/>
@@ -62,11 +61,11 @@
 		<echo message="nuget-updates processed" file="bin/.nuget-done"/>
 	</target>
 	
-	<target name="exe.config">
+	<target name="exe.config" description="Installs exe.config files">
 		<copy todir="bin" file="exe.config/SilverSim.Main.exe.config"/>
 	</target>
 	
-	<target name="prebuild">
+	<target name="prebuild" description="Runs prebuild.exe">
 		<if test="${platform::is-windows()}">
 			<exec program="Prebuild/Prebuild.exe">
 				<arg value="/target"/>
@@ -82,7 +81,7 @@
 		</if>
 	</target>
 	
-	<target name="sonar-project">
+	<target name="sonar-project" description="Creates sonar-project">
 		<property name="version" value="alpha" overwrite="false"/>
 		<property name="versionextra" value="" overwrite="false"/>
 		<property name="sonar.modules" value=""/>
@@ -111,7 +110,7 @@ ${sonar.moduledeclarations}
 "/>
 	</target>
 	
-	<target name="build">
+	<target name="build" description="Runs msbuild/xbuild">
 		<call target="setup"/>
 		<if test="${platform::is-windows()}">
 			<exec program="windows/createcompile.bat">
