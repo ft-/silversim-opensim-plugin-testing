@@ -59,7 +59,7 @@
 				</fileset>
 			</copy>
 		</foreach>
-		<echo message="" output="bin/.nuget-done"/>
+		<echo message="nuget-updates processed" file="bin/.nuget-done"/>
 	</target>
 	
 	<target name="exe.config">
