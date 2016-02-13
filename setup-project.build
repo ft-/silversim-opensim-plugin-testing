@@ -1,6 +1,7 @@
 <?xml version="1.0"?>
 <project name="project setup" default="setup">
 	<target name="setup">
+		<call target="setup-workspace" unless="${directory::exists('bin')}"/>
 		<call target="nuget-updates"/>
 		<call target="exe.config"/>
 		<call target="prebuild"/>
@@ -8,7 +9,7 @@
 	</target>
 	
 	<target name="setup-workspace">
-		<mkdir dir="../_silversim-binaries-dev_" overwrite="false"/>
+		<mkdir dir="../_silversim-binaries-dev_"/>
 		<exec program="windows/junction.exe" if="${platform::is-windows()}">
 			<arg path="bin"/>
 			<arg path="../_silversim-binaries-dev_"/>
