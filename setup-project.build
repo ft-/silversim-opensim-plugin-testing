@@ -2,7 +2,7 @@
 <project name="project setup" default="setup">
 	<target name="setup">
 		<call target="setup-workspace" unless="${directory::exists('bin')}"/>
-		<call target="nuget-updates" unless="${file::exists('bin/.nuget-done')"/>
+		<call target="nuget-updates" unless="${file::exists('bin/.nuget-done')}"/>
 		<call target="exe.config"/>
 		<call target="prebuild"/>
 		<call target="sonar-project"/>
