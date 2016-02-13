@@ -28,7 +28,7 @@ if defined ValueName (
     echo Value Type = %ValueType%
     echo Value Value = %ValueValue%
     echo Creating compile.bat
-    echo %ValueValue%\msbuild SilverSim.sln /p:Configuration=Release /p:Platform="Any CPU" > compile.bat
+    echo %ValueValue%\msbuild /p:Configuration=Release /p:Platform="Any CPU" > compile.bat
 ) else (
     echo %KEY_NAME%\%VALUE_NAME% not found.
     echo Not creating compile.bat
