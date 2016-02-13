@@ -7,6 +7,19 @@
 		<call target="sonar-project"/>
 	</target>
 	
+	<target name="setup-workspace">
+		<mkdir dir="../_silversim-binaries-dev_" overwrite="false"/>
+		<exec program="windows/junction.exe" if="${platform::is-windows()}">
+			<arg path="bin"/>
+			<arg path="../_silversim-binaries-dev_"/>
+		</exec>
+		<exec program="ln" unless="${platform::is-windows()}">
+			<arg path="-s"/>
+			<arg path="../_silversim-binaries-dev_"/>
+			<arg path="bin"/>
+		</exec>
+	</target>
+	
 	<target name="nuget-updates">
 		<setenv name="PATH" path="${environment::get-variable('PATH')}:${project::get-base-directory()}/windows" if="${platform::is-windows()}"/>
 	
