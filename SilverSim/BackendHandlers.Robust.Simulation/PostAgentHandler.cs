@@ -5,6 +5,7 @@ using log4net;
 using Nini.Config;
 using SilverSim.BackendConnectors.OpenSim.Teleport;
 using SilverSim.BackendConnectors.Robust.Asset;
+using SilverSim.BackendConnectors.Robust.Friends;
 using SilverSim.BackendConnectors.Robust.GridUser;
 using SilverSim.BackendConnectors.Robust.IM;
 using SilverSim.BackendConnectors.Robust.Inventory;
@@ -195,6 +196,7 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
                     map.AvatarServerURI = section.GetString("AvatarServerURI", string.Empty);
                     map.InventoryServerURI = section.GetString("InventoryServerURI");
                     map.OfflineIMServerURI = section.GetString("OfflineIMServerURI", string.Empty);
+                    map.FriendsServerURI = section.GetString("FriendsServerURI", string.Empty);
 
                     if (!Uri.IsWellFormedUriString(map.HomeURI, UriKind.Absolute))
                     {
@@ -209,6 +211,11 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
                     else if (map.GatekeeperURI.Length != 0 && !Uri.IsWellFormedUriString(map.GatekeeperURI, UriKind.Absolute))
                     {
                         m_Log.WarnFormat("Skipping section {0} for invalid URI in GatekeeperURI {1}", section.Name, map.GatekeeperURI);
+                        continue;
+                    }
+                    else if (map.FriendsServerURI.Length != 0 && !Uri.IsWellFormedUriString(map.FriendsServerURI, UriKind.Absolute))
+                    {
+                        m_Log.WarnFormat("Skipping section {0} for invalid URI in FriendsServerURI {1}", section.Name, map.FriendsServerURI);
                         continue;
                     }
                     else if (map.PresenceServerURI.Length != 0 && !Uri.IsWellFormedUriString(map.PresenceServerURI, UriKind.Absolute))
@@ -487,6 +494,10 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
                 if (!string.IsNullOrEmpty(gridparams.OfflineIMServerURI))
                 {
                     offlineIMService = new RobustOfflineIMConnector(gridparams.OfflineIMServerURI);
+                }
+                if(!string.IsNullOrEmpty(gridparams.FriendsServerURI))
+                {
+                    friendsService = new RobustFriendsConnector(gridparams.FriendsServerURI, gridparams.HomeURI);
                 }
             }
             else

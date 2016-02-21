@@ -172,16 +172,14 @@ namespace SilverSim.BackendConnectors.Robust.Friends
         {
             Dictionary<string, string> post = new Dictionary<string, string>();
             post["METHOD"] = "storefriend";
-            post["PrincipalID"] = user.ToString();
-            if(user.HomeURI != null && user.HomeURI.ToString() != m_HomeUri)
-            {
-                post["PrincipalID"] += ";" + secret;
-            }
-            post["Friend"] = friend.ToString();
-            if (friend.HomeURI != null && friend.HomeURI.ToString() != m_HomeUri)
-            {
-                post["Friend"] += ";" + secret;
-            }
+            post["PrincipalID"] = (user.HomeURI != null && !user.HomeURI.ToString().StartsWith(m_HomeUri)) ?
+                user.ToString() + ";" + secret :
+                user.ID.ToString();
+
+            post["Friend"] = (friend.HomeURI != null && !friend.HomeURI.ToString().StartsWith(m_HomeUri)) ?
+                friend.ToString() + ";" + secret :
+                friend.ID.ToString();
+
             post["MyFlags"] = ((int)flags).ToString();
 
             using (Stream s = HttpRequestHandler.DoStreamPostRequest(m_Uri, null, post, false, TimeoutMs))
