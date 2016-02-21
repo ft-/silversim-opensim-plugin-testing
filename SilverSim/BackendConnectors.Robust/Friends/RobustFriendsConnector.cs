@@ -12,7 +12,6 @@ using SilverSim.Types.Friends;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
-using System;
 
 namespace SilverSim.BackendConnectors.Robust.Friends
 {
