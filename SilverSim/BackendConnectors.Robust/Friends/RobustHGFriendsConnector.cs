@@ -102,9 +102,8 @@ namespace SilverSim.BackendConnectors.Robust.Friends
             post["PrincipalID"] = (string)fi.User.ID;
             post["Friend"] = fi.Friend.ToString();
             post["SECRET"] = fi.Secret;
-            post["MyFlags"] = fi.UserGivenFlags.ToString();
-            post["TheirFlags"] = fi.FriendGivenFlags.ToString();
-
+            post["MyFlags"] = ((int)fi.UserGivenFlags).ToString();
+            post["TheirFlags"] = ((int)fi.FriendGivenFlags).ToString();
 
             using(Stream s = HttpRequestHandler.DoStreamPostRequest(m_Uri, null, post, false, TimeoutMs))
             {
@@ -119,8 +118,8 @@ namespace SilverSim.BackendConnectors.Robust.Friends
             post["PrincipalID"] = (string)fi.User.ID;
             post["Friend"] = fi.Friend.ToString();
             post["SECRET"] = fi.Secret;
-            post["MyFlags"] = fi.UserGivenFlags.ToString();
-            post["TheirFlags"] = fi.FriendGivenFlags.ToString();
+            post["MyFlags"] = "0";
+            post["TheirFlags"] = "0";
 
             using(Stream s = HttpRequestHandler.DoStreamPostRequest(m_Uri, null, post, false, TimeoutMs))
             {
@@ -135,7 +134,18 @@ namespace SilverSim.BackendConnectors.Robust.Friends
 
         public override void StoreRights(FriendInfo fi)
         {
-            throw new NotImplementedException();
+            Dictionary<string, string> post = new Dictionary<string, string>();
+            post["METHOD"] = "grant_rights";
+            post["FromID"] = (string)fi.User.ID;
+            post["ToID"] = fi.Friend.ToString();
+            post["SECRET"] = fi.Secret;
+            post["UserFlags"] = "-1";
+            post["Rights"] = ((int)fi.UserGivenFlags).ToString();
+
+            using (Stream s = HttpRequestHandler.DoStreamPostRequest(m_Uri, null, post, false, TimeoutMs))
+            {
+                CheckResult(OpenSimResponse.Deserialize(s));
+            }
         }
 
         public override void StoreOffer(FriendInfo fi)
