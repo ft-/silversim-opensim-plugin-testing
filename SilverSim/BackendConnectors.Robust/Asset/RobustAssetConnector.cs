@@ -16,6 +16,7 @@ using System.IO;
 using System.IO.Compression;
 using System.Net;
 using System.Runtime.Serialization;
+using System.Text;
 using System.Web;
 using System.Xml;
 
@@ -191,18 +192,20 @@ namespace SilverSim.BackendConnectors.Robust.Asset
         public override Dictionary<UUID, bool> Exists(List<UUID> assets)
         {
             Dictionary<UUID, bool> res = new Dictionary<UUID,bool>();
-            string xmlreq = "<?xml version=\"1.0\"?>";
-            xmlreq += "<ArrayOfString xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\">";
+            StringBuilder xmlreq = new StringBuilder("<?xml version=\"1.0\"?>");
+            xmlreq.Append("<ArrayOfString>");
             foreach(UUID asset in assets)
             {
-                xmlreq += "<string>" + asset.ToString() + "</string>";
+                xmlreq.Append("<string>");
+                xmlreq.Append(asset.ToString());
+                xmlreq.Append("</string>");
             }
-            xmlreq += "</ArrayOfString>";
+            xmlreq.Append("</ArrayOfString>");
 
             
             try
             {
-                using (Stream xmlres = HttpRequestHandler.DoStreamRequest("POST", m_AssetURI + "get_assets_exist", null, "text/xml", xmlreq, false, TimeoutMs))
+                using (Stream xmlres = HttpRequestHandler.DoStreamRequest("POST", m_AssetURI + "get_assets_exist", null, "text/xml", xmlreq.ToString(), false, TimeoutMs))
                 {
                     try
                     {

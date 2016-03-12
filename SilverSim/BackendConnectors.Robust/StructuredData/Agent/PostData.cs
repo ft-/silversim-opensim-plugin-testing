@@ -13,6 +13,7 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Runtime.Serialization;
+using System.Text;
 
 namespace SilverSim.BackendConnectors.Robust.StructuredData.Agent
 {
@@ -296,15 +297,21 @@ namespace SilverSim.BackendConnectors.Robust.StructuredData.Agent
                 w.Write("{");
                 /*-----------------------------------------------------------------*/
                 /* SessionInfo */
-                WriteJSONString(w, "service_session_id", Session.ServiceSessionID); w.Write(",");
-                WriteJSONString(w, "session_id", Session.SessionID); w.Write(",");
-                WriteJSONString(w, "secure_session_id", Session.SecureSessionID); w.Write(",");
+                WriteJSONString(w, "service_session_id", Session.ServiceSessionID);
+                w.Write(",");
+                WriteJSONString(w, "session_id", Session.SessionID);
+                w.Write(",");
+                WriteJSONString(w, "secure_session_id", Session.SecureSessionID);
+                w.Write(",");
 
                 /*-----------------------------------------------------------------*/
                 /* Circuit Info */
-                WriteJSONString(w, "circuit_code", Circuit.CircuitCode.ToString()); w.Write(",");
-                WriteJSONString(w, "caps_path", Circuit.CapsPath); w.Write(",");
-                WriteJSONValue(w, "child", Circuit.IsChild); w.Write(",");
+                WriteJSONString(w, "circuit_code", Circuit.CircuitCode.ToString());
+                w.Write(",");
+                WriteJSONString(w, "caps_path", Circuit.CapsPath);
+                w.Write(",");
+                WriteJSONValue(w, "child", Circuit.IsChild);
+                w.Write(",");
                 w.Write("\"children_seeds\":[");
                 prefix = string.Empty;
                 foreach (KeyValuePair<UInt64, string> kvp in Circuit.ChildrenCapSeeds)
@@ -320,30 +327,44 @@ namespace SilverSim.BackendConnectors.Robust.StructuredData.Agent
 
                 /*-----------------------------------------------------------------*/
                 /* Destination */
-                WriteJSONString(w, "destination_uuid", Destination.ID); w.Write(",");
-                WriteJSONString(w, "destination_x", Destination.Location.X.ToString()); w.Write(",");
-                WriteJSONString(w, "destination_y", Destination.Location.Y.ToString()); w.Write(",");
-                WriteJSONString(w, "start_pos", Destination.Position.ToString()); w.Write(",");
+                WriteJSONString(w, "destination_uuid", Destination.ID);
+                w.Write(",");
+                WriteJSONString(w, "destination_x", Destination.Location.X.ToString());
+                w.Write(",");
+                WriteJSONString(w, "destination_y", Destination.Location.Y.ToString());
+                w.Write(",");
+                WriteJSONString(w, "start_pos", Destination.Position.ToString());
+                w.Write(",");
                 WriteJSONString(w, "teleport_flags", ((uint)Destination.TeleportFlags).ToString());
                 if (!Destination.LocalToGrid)
                 {
-                    WriteJSONString(w, "destination_serveruri", Destination.ServerURI); w.Write(",");
-                    WriteJSONString(w, "gatekeeper_serveruri", Destination.GatekeeperURI); w.Write(",");
+                    WriteJSONString(w, "destination_serveruri", Destination.ServerURI);
+                    w.Write(",");
+                    WriteJSONString(w, "gatekeeper_serveruri", Destination.GatekeeperURI);
+                    w.Write(",");
                 }
 
                 /*-----------------------------------------------------------------*/
                 /* Account */
-                WriteJSONString(w, "agent_id", Account.Principal.ID); w.Write(",");
-                WriteJSONString(w, "first_name", Account.Principal.FirstName); w.Write(",");
-                WriteJSONString(w, "last_name", Account.Principal.LastName); w.Write(",");
+                WriteJSONString(w, "agent_id", Account.Principal.ID);
+                w.Write(",");
+                WriteJSONString(w, "first_name", Account.Principal.FirstName);
+                w.Write(",");
+                WriteJSONString(w, "last_name", Account.Principal.LastName);
+                w.Write(",");
 
                 /*-----------------------------------------------------------------*/
                 /* Client Info */
-                WriteJSONString(w, "client_ip", Client.ClientIP); w.Write(",");
-                WriteJSONString(w, "viewer", Client.ClientVersion); w.Write(",");
-                WriteJSONString(w, "channel", Client.Channel); w.Write(",");
-                WriteJSONString(w, "mac", Client.Mac); w.Write(",");
-                WriteJSONString(w, "id0", Client.ID0); w.Write(",");
+                WriteJSONString(w, "client_ip", Client.ClientIP);
+                w.Write(",");
+                WriteJSONString(w, "viewer", Client.ClientVersion);
+                w.Write(",");
+                WriteJSONString(w, "channel", Client.Channel);
+                w.Write(",");
+                WriteJSONString(w, "mac", Client.Mac);
+                w.Write(",");
+                WriteJSONString(w, "id0", Client.ID0);
+                w.Write(",");
 
                 /*-----------------------------------------------------------------*/
                 /* Service URLs */
@@ -367,18 +388,21 @@ namespace SilverSim.BackendConnectors.Robust.StructuredData.Agent
                 w.Write("],");
 
                 w.Write("\"packed_appearance\":{");
-                WriteJSONValue(w, "height", Appearance.AvatarHeight); w.Write(",");
-                WriteJSONValue(w, "serial", Appearance.Serial); w.Write(",");
-                string vParams = string.Empty;
+                WriteJSONValue(w, "height", Appearance.AvatarHeight);
+                w.Write(",");
+                WriteJSONValue(w, "serial", Appearance.Serial);
+                w.Write(",");
+                StringBuilder vParams = new StringBuilder();
                 foreach (byte v in Appearance.VisualParams)
                 {
-                    if (!string.IsNullOrEmpty(vParams))
+                    if (vParams.Length != 0)
                     {
-                        vParams += ",";
+                        vParams.Append(',');
                     }
-                    vParams += v.ToString();
+                    vParams.Append(v.ToString());
                 }
-                WriteJSONString(w, "visualparams", vParams); w.Write(",");
+                WriteJSONString(w, "visualparams", vParams.ToString());
+                w.Write(",");
                 w.Write("\"textures\":[");
                 prefix = string.Empty;
                 {

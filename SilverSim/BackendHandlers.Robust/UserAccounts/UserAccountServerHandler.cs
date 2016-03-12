@@ -12,6 +12,7 @@ using SilverSim.Types.StructuredData.REST;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Net;
+using System.Text;
 using System.Xml;
 
 namespace SilverSim.BackendHandlers.Robust.UserAccounts
@@ -35,12 +36,15 @@ namespace SilverSim.BackendHandlers.Robust.UserAccounts
                 writer.WriteNamedValue("UserTitle", ua.UserTitle);
                 writer.WriteNamedValue("LocalToGrid", ua.IsLocalToGrid);
 
-                string str = string.Empty;
+                StringBuilder str = new StringBuilder();
                 foreach(KeyValuePair<string, string> kvp in ua.ServiceURLs)
                 {
-                    str += kvp.Key + "*" + (string.IsNullOrEmpty(kvp.Value) ? string.Empty : kvp.Value) + ";";
+                    str.Append(kvp.Key);
+                    str.Append("*");
+                    str.Append(string.IsNullOrEmpty(kvp.Value) ? string.Empty : kvp.Value);
+                    str.Append(";");
                 }
-                writer.WriteNamedValue("ServiceURLs", str);
+                writer.WriteNamedValue("ServiceURLs", str.ToString());
             }
             writer.WriteEndElement();
         }

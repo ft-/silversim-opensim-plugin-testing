@@ -172,10 +172,16 @@ namespace SilverSim.OpenSimArchiver.RegionArchiver
                                 xmlwriter.WriteNamedValue("DisableScripts", settings.DisableScripts);
                                 switch (scene.Access)
                                 {
-                                    case RegionAccess.PG: xmlwriter.WriteNamedValue("MaturityRating", 0); break;
-                                    case RegionAccess.Mature: xmlwriter.WriteNamedValue("MaturityRating", 1); break;
+                                    case RegionAccess.PG:
+                                        xmlwriter.WriteNamedValue("MaturityRating", 0);
+                                        break;
+                                    case RegionAccess.Mature:
+                                        xmlwriter.WriteNamedValue("MaturityRating", 1);
+                                        break;
                                     default:
-                                    case RegionAccess.Adult: xmlwriter.WriteNamedValue("MaturityRating", 2); break;
+                                    case RegionAccess.Adult:
+                                        xmlwriter.WriteNamedValue("MaturityRating", 2);
+                                        break;
                                 }
                                 xmlwriter.WriteNamedValue("RestrictPushing", settings.RestrictPushing);
                                 xmlwriter.WriteNamedValue("AgentLimit", settings.AgentLimit);

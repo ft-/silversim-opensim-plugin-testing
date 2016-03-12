@@ -15,6 +15,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Runtime.Serialization;
+using System.Text;
 using System.Xml;
 
 namespace SilverSim.OpenSimArchiver.InventoryArchiver
@@ -181,7 +182,7 @@ namespace SilverSim.OpenSimArchiver.InventoryArchiver
             path = path.Substring(10); /* Get Rid of inventory/ */
             path = path.Substring(0, path.LastIndexOf('/'));
             string[] pathcomps = path.Split('/');
-            string finalpath = string.Empty;
+            StringBuilder finalpath = new StringBuilder();
             UUID folderID = folders[string.Empty];
 
 
@@ -197,11 +198,11 @@ namespace SilverSim.OpenSimArchiver.InventoryArchiver
             {
                 if(finalpath.Length != 0)
                 {
-                    finalpath += "/";
+                    finalpath.Append("/");
                 }
                 string pname = pathcomps[pathidx].Substring(0, pathcomps[pathidx].Length - 38);
-                finalpath += pname;
-                if (!folders.TryGetValue(finalpath, out folderID))
+                finalpath.Append(pname);
+                if (!folders.TryGetValue(finalpath.ToString(), out folderID))
                 {
                     InventoryFolder folder = new InventoryFolder();
                     folder.Owner = principalID;
@@ -209,7 +210,7 @@ namespace SilverSim.OpenSimArchiver.InventoryArchiver
                     folder.Name = pname;
                     inventoryService.Folder.Add(folder);
                     folderID = folder.ID;
-                    folders[finalpath] = folderID;
+                    folders[finalpath.ToString()] = folderID;
                 }
             }
             return folderID;

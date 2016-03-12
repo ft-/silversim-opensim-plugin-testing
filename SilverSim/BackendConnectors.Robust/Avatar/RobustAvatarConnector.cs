@@ -14,6 +14,7 @@ using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Runtime.Serialization;
+using System.Text;
 using System.Web;
 using System.Xml;
 
@@ -147,23 +148,27 @@ namespace SilverSim.BackendConnectors.Robust.Avatar
                     throw new ArgumentException("value and itemKeys must have identical Count");
                 }
 
-                string outStr = "UserID=" + HttpUtility.UrlEncode((string)avatarID);
-                outStr += "&METHOD=setitems";
+                StringBuilder outStr = new StringBuilder("UserID=" + HttpUtility.UrlEncode((string)avatarID));
+                outStr.Append("&METHOD=setitems");
                 int i;
                 for(i = 0; i < itemKeys.Count; ++i)
                 {
-                    outStr += "&";
-                    outStr += HttpUtility.UrlEncode("Names[]") + "=" + HttpUtility.UrlEncode(itemKeys[i]);
+                    outStr.Append("&");
+                    outStr.Append(HttpUtility.UrlEncode("Names[]"));
+                    outStr.Append("=");
+                    outStr.Append(HttpUtility.UrlEncode(itemKeys[i]));
                 }
                 for (i = 0; i < itemKeys.Count; ++i)
                 {
-                    outStr += "&";
-                    outStr += HttpUtility.UrlEncode("Values[]") + "=" + HttpUtility.UrlEncode(value[i]);
+                    outStr.Append("&");
+                    outStr.Append(HttpUtility.UrlEncode("Values[]"));
+                    outStr.Append("=");
+                    outStr.Append(HttpUtility.UrlEncode(value[i]));
                 }
-                outStr += "&VERSIONMIN=0&VERSIONMAX=0";
+                outStr.Append("&VERSIONMIN=0&VERSIONMAX=1");
 
                 Map map;
-                using(Stream s = HttpRequestHandler.DoStreamRequest("POST", m_AvatarURI, null, "application/x-www-form-urlencoded", outStr, false, TimeoutMs))
+                using(Stream s = HttpRequestHandler.DoStreamRequest("POST", m_AvatarURI, null, "application/x-www-form-urlencoded", outStr.ToString(), false, TimeoutMs))
                 {
                     map = OpenSimResponse.Deserialize(s);
                 }

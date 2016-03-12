@@ -206,13 +206,26 @@ namespace SilverSim.OpenSimArchiver.RegionArchiver
                 {
                     switch (newState)
                     {
-                        case CurrentOarLoadState.Assets: io.Write("Loading assets"); break;
-                        case CurrentOarLoadState.Objects: io.Write("Loading objects"); break;
-                        case CurrentOarLoadState.RegionSettings: io.Write("Loading region settings"); break;
-                        case CurrentOarLoadState.Terrain: io.Write("Loading terrain"); break;
-                        case CurrentOarLoadState.Region: io.Write("Loading region"); break;
-                        case CurrentOarLoadState.Parcels: io.Write("Loading parcels"); break;
-                        default: break;
+                        case CurrentOarLoadState.Assets:
+                            io.Write("Loading assets");
+                            break;
+                        case CurrentOarLoadState.Objects:
+                            io.Write("Loading objects");
+                            break;
+                        case CurrentOarLoadState.RegionSettings:
+                            io.Write("Loading region settings");
+                            break;
+                        case CurrentOarLoadState.Terrain:
+                            io.Write("Loading terrain");
+                            break;
+                        case CurrentOarLoadState.Region:
+                            io.Write("Loading region");
+                            break;
+                        case CurrentOarLoadState.Parcels:
+                            io.Write("Loading parcels");
+                            break;
+                        default:
+                            break;
                     }
                 }
                 currentState = newState;
