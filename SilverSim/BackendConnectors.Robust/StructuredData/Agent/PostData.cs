@@ -318,7 +318,8 @@ namespace SilverSim.BackendConnectors.Robust.StructuredData.Agent
                 {
                     w.Write(prefix);
                     w.Write("{");
-                    WriteJSONString(w, "handle", kvp.Key.ToString()); w.Write(",");
+                    WriteJSONString(w, "handle", kvp.Key.ToString());
+                    w.Write(",");
                     WriteJSONString(w, "seed", kvp.Value.ToString());
                     w.Write("}");
                     prefix = ",";
