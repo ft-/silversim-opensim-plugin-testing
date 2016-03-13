@@ -526,7 +526,8 @@ namespace SilverSim.BackendHandlers.Robust.Grid
 
         void GetRegionByPosition(HttpRequest req, Dictionary<string, object> reqdata)
         {
-            uint x, y;
+            uint x;
+            uint y;
             if (!reqdata.ContainsKey("X") ||
                 !uint.TryParse(reqdata["X"].ToString(), out x))
             {
@@ -620,7 +621,9 @@ namespace SilverSim.BackendHandlers.Robust.Grid
 
         void GetRegionRange(HttpRequest req, Dictionary<string, object> reqdata)
         {
-            GridVector min = new GridVector(), max = new GridVector();
+            GridVector min = new GridVector();
+            GridVector max = new GridVector();
+
             if (!reqdata.ContainsKey("XMIN") ||
                 uint.TryParse(reqdata["XMIN"].ToString(), out min.X) ||
                 !reqdata.ContainsKey("YMIN") ||
