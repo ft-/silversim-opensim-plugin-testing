@@ -19,6 +19,7 @@ namespace SilverSim.BackendHandlers.Robust.Presence
 
         public void Startup(ConfigurationLoader loader)
         {
+            /* intentionally left empty */
         }
     }
     #endregion

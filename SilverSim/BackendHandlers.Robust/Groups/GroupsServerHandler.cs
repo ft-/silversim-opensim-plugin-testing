@@ -20,6 +20,7 @@ namespace SilverSim.BackendHandlers.Robust.Groups
 
         public void Startup(ConfigurationLoader loader)
         {
+            /* intentionally left empty */
         }
     }
     #endregion
