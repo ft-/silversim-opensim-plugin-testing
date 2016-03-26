@@ -14,7 +14,7 @@
 			<arg path="../_silversim-binaries-dev_"/>
 		</exec>
 		<exec program="ln" unless="${platform::is-windows()}">
-			<arg path="-s"/>
+			<arg value="-s"/>
 			<arg path="../_silversim-binaries-dev_"/>
 			<arg path="bin"/>
 		</exec>
