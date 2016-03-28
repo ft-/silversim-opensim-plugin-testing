@@ -62,7 +62,11 @@
 	</target>
 	
 	<target name="exe.config" description="Installs exe.config files">
-		<copy todir="bin" file="exe.config/SilverSim.Main.exe.config"/>
+		<copy todir="bin" if="${directory::exists('exe.config')}">
+			<fileset basedir="exe.config">
+				<include name="**/*.config"/>
+			</fileset>
+		</copy>
 	</target>
 	
 	<target name="prebuild" description="Runs prebuild.exe">
