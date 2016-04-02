@@ -22,12 +22,12 @@ namespace SilverSim.BackendConnectors.Simian.Inventory
         readonly string m_InventoryURI;
         readonly DefaultInventoryFolderContentService m_ContentService;
         readonly GroupsServiceInterface m_GroupsService;
-        private int m_TimeoutMs = 20000;
         readonly string m_InventoryCapability;
 
         #region Constructor
         public SimianInventoryConnector(string uri, string simCapability)
         {
+            TimeoutMs = 20000;
             if(!uri.EndsWith("/") && !uri.EndsWith("="))
             {
                 uri += "/";
@@ -39,6 +39,7 @@ namespace SilverSim.BackendConnectors.Simian.Inventory
 
         public SimianInventoryConnector(string uri, GroupsServiceInterface groupsService, string simCapability)
         {
+            TimeoutMs = 20000;
             m_InventoryCapability = simCapability;
             m_GroupsService = groupsService;
             if (!uri.EndsWith("/") && !uri.EndsWith("="))
@@ -65,17 +66,7 @@ namespace SilverSim.BackendConnectors.Simian.Inventory
         }
 
 
-        public int TimeoutMs
-        {
-            get
-            {
-                return m_TimeoutMs;
-            }
-            set
-            {
-                m_TimeoutMs = value;
-            }
-        }
+        public int TimeoutMs { get; set; }
 
         public override IInventoryFolderServiceInterface Folder
         {

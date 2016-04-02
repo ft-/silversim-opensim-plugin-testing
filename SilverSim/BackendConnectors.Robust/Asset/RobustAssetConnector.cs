@@ -37,18 +37,7 @@ namespace SilverSim.BackendConnectors.Robust.Asset
         }
 
         static int MAX_ASSET_BASE64_CONVERSION_SIZE = 9 * 1024; /* must be an integral multiple of 3 */
-        int m_TimeoutMs = 20000;
-        public int TimeoutMs
-        {
-            get
-            {
-                return m_TimeoutMs;
-            }
-            set
-            {
-                m_TimeoutMs = value;
-            }
-        }
+        public int TimeoutMs { get; set; }
         readonly string m_AssetURI;
         readonly DefaultAssetReferencesService m_ReferencesService;
         readonly bool m_EnableCompression;
@@ -58,6 +47,7 @@ namespace SilverSim.BackendConnectors.Robust.Asset
         #region Constructor
         public RobustAssetConnector(string uri, bool enableCompression = false, bool enableLocalStorage = false, bool enableTempStorage = false)
         {
+            TimeoutMs = 20000;
             if(!uri.EndsWith("/"))
             {
                 uri += "/";

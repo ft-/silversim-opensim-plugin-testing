@@ -25,12 +25,12 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
     {
         readonly string m_InventoryURI;
         readonly GroupsServiceInterface m_GroupsService;
-        private int m_TimeoutMs = 20000;
 
         #region Constructor
         public RobustInventoryConnector(string uri)
         {
-            if(!uri.EndsWith("/"))
+            TimeoutMs = 20000;
+            if (!uri.EndsWith("/"))
             {
                 uri += "/";
             }
@@ -40,6 +40,7 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
 
         public RobustInventoryConnector(string uri, GroupsServiceInterface groupsService)
         {
+            TimeoutMs = 20000;
             m_GroupsService = groupsService;
             if (!uri.EndsWith("/"))
             {
@@ -56,17 +57,7 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
         #endregion
 
         #region Accessors
-        public int TimeoutMs
-        {
-            get
-            {
-                return m_TimeoutMs;
-            }
-            set
-            {
-                m_TimeoutMs = value;
-            }
-        }
+        public int TimeoutMs { get; set; }
 
         public override IInventoryFolderServiceInterface Folder
         {

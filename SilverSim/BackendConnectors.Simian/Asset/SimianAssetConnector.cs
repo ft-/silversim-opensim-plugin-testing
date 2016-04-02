@@ -32,18 +32,7 @@ namespace SilverSim.BackendConnectors.Simian.Asset
             protected SimianAssetProtocolErrorException(SerializationInfo info, StreamingContext context) : base(info, context) { }
         }
 
-        private int m_TimeoutMs = 20000;
-        public int TimeoutMs
-        {
-            get
-            {
-                return m_TimeoutMs;
-            }
-            set
-            {
-                m_TimeoutMs = value;
-            }
-        }
+        public int TimeoutMs { get; set; }
         readonly string m_AssetURI;
         readonly DefaultAssetReferencesService m_ReferencesService;
         readonly bool m_EnableCompression;
@@ -54,6 +43,7 @@ namespace SilverSim.BackendConnectors.Simian.Asset
         #region Constructor
         public SimianAssetConnector(string uri, string capability, bool enableCompression = false, bool enableLocalStorage = false, bool enableTempStorage = false)
         {
+            TimeoutMs = 20000;
             m_AssetCapability = capability;
             if(!uri.EndsWith("/") && !uri.EndsWith("="))
             {
