@@ -17,18 +17,9 @@ using System;
 namespace SilverSim.BackendConnectors.Robust.Inventory
 {
     [SuppressMessage("Gendarme.Rules.Exceptions", "DoNotThrowInUnexpectedLocationRule")]
-    public sealed class RobustInventoryFolderContentConnector : InventoryFolderContentServiceInterface
+    public partial class RobustInventoryConnector : IInventoryFolderContentServiceInterface
     {
         bool m_IsMultipeServiceSupported = true;
-        readonly string m_InventoryURI;
-        public int TimeoutMs = 20000;
-        readonly GroupsServiceInterface m_GroupsService;
-
-        public RobustInventoryFolderContentConnector(string url, GroupsServiceInterface groupsService)
-        {
-            m_InventoryURI = url;
-            m_GroupsService = groupsService;
-        }
 
         #region Private duplicate (keeps InventoryFolderConnector from having a circular reference)
         InventoryFolder GetFolder(UUID principalID, UUID key)
@@ -57,11 +48,11 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
         }
         #endregion
 
-        public override bool TryGetValue(UUID principalID, UUID folderID, out InventoryFolderContent inventoryFolderContent)
+        bool IInventoryFolderContentServiceInterface.TryGetValue(UUID principalID, UUID folderID, out InventoryFolderContent inventoryFolderContent)
         {
             try
             {
-                inventoryFolderContent = this[principalID, folderID];
+                inventoryFolderContent = Folder.Content[principalID, folderID];
                 return true;
             }
             catch
@@ -71,7 +62,7 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
             }
         }
 
-        public override bool ContainsKey(UUID principalID, UUID folderID)
+        bool IInventoryFolderContentServiceInterface.ContainsKey(UUID principalID, UUID folderID)
         {
             Dictionary<string, string> post = new Dictionary<string, string>();
             post["PRINCIPAL"] = (string)principalID;
@@ -91,7 +82,7 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
             return (null != foldermap);
         }
 
-        public override InventoryFolderContent this[UUID principalID, UUID folderID]
+        InventoryFolderContent IInventoryFolderContentServiceInterface.this[UUID principalID, UUID folderID]
         {
             get 
             {
@@ -153,7 +144,28 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
             }
         }
 
-        public override List<InventoryFolderContent> this[UUID principalID, UUID[] folderIDs]
+        [SuppressMessage("Gendarme.Rules.Design", "AvoidMultidimensionalIndexerRule")]
+        [SuppressMessage("Gendarme.Rules.Exceptions", "DoNotSwallowErrorsCatchingNonSpecificExceptionsRule")]
+        List<InventoryFolderContent> GetContentInSingleRequests(UUID principalID, UUID[] folderIDs)
+        {
+            List<InventoryFolderContent> res = new List<InventoryFolderContent>();
+            foreach (UUID folder in folderIDs)
+            {
+                try
+                {
+                    res.Add(Folder.Content[principalID, folder]);
+                }
+                catch
+                {
+                    /* nothing that we should do here */
+                }
+            }
+
+            return res;
+        }
+
+
+        List<InventoryFolderContent> IInventoryFolderContentServiceInterface.this[UUID principalID, UUID[] folderIDs]
         {
             get
             {
@@ -165,7 +177,7 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
                 /* when the service failed for being not supported, we do not even try it again in that case */
                 if (!m_IsMultipeServiceSupported)
                 {
-                    return base[principalID, folderIDs];
+                    return GetContentInSingleRequests(principalID, folderIDs);
                 }
 
                 Dictionary<string, string> post = new Dictionary<string, string>();
@@ -184,18 +196,18 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
                 catch(HttpRequestHandler.BadHttpResponseException)
                 {
                     m_IsMultipeServiceSupported = false;
-                    return base[principalID, folderIDs];
+                    return GetContentInSingleRequests(principalID, folderIDs);
                 }
                 catch(HttpException e)
                 {
                     if(e.GetHttpCode() == (int)HttpStatusCode.BadGateway)
                     {
-                        return base[principalID, folderIDs];
+                        return GetContentInSingleRequests(principalID, folderIDs);
                     }
                     else
                     {
                         m_IsMultipeServiceSupported = false;
-                        return base[principalID, folderIDs];
+                        return GetContentInSingleRequests(principalID, folderIDs);
                     }
                 }
 
@@ -248,7 +260,7 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
                 if(contents.Count == 0)
                 {
                     /* try old method */
-                    contents = base[principalID, folderIDs];
+                    contents = GetContentInSingleRequests(principalID, folderIDs);
                     if(contents.Count > 0)
                     {
                         m_IsMultipeServiceSupported = false;

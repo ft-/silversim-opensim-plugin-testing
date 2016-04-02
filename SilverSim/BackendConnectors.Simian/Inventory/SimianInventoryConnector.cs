@@ -17,11 +17,10 @@ namespace SilverSim.BackendConnectors.Simian.Inventory
 {
     #region Service Implementation
     [Description("Simian Inventory Connector")]
-    public sealed class SimianInventoryConnector : InventoryServiceInterface, IPlugin
+    public sealed partial class SimianInventoryConnector : InventoryServiceInterface, IPlugin
     {
         readonly string m_InventoryURI;
-        readonly SimianInventoryFolderConnector m_FolderService;
-        readonly SimianInventoryItemConnector m_ItemService;
+        readonly DefaultInventoryFolderContentService m_ContentService;
         readonly GroupsServiceInterface m_GroupsService;
         private int m_TimeoutMs = 20000;
         readonly string m_InventoryCapability;
@@ -34,10 +33,7 @@ namespace SilverSim.BackendConnectors.Simian.Inventory
                 uri += "/";
             }
             m_InventoryURI = uri;
-            m_ItemService = new SimianInventoryItemConnector(uri, null, simCapability);
-            m_ItemService.TimeoutMs = m_TimeoutMs;
-            m_FolderService = new SimianInventoryFolderConnector(uri, null, simCapability);
-            m_FolderService.TimeoutMs = m_TimeoutMs;
+            m_ContentService = new DefaultInventoryFolderContentService(this);
             m_InventoryCapability = simCapability;
         }
 
@@ -50,10 +46,7 @@ namespace SilverSim.BackendConnectors.Simian.Inventory
                 uri += "/";
             }
             m_InventoryURI = uri;
-            m_ItemService = new SimianInventoryItemConnector(uri, m_GroupsService, simCapability);
-            m_ItemService.TimeoutMs = m_TimeoutMs;
-            m_FolderService = new SimianInventoryFolderConnector(uri, m_GroupsService, simCapability);
-            m_FolderService.TimeoutMs = m_TimeoutMs;
+            m_ContentService = new DefaultInventoryFolderContentService(this);
         }
 
         public void Startup(ConfigurationLoader loader)
@@ -63,6 +56,15 @@ namespace SilverSim.BackendConnectors.Simian.Inventory
         #endregion
 
         #region Accessors
+        IInventoryFolderContentServiceInterface IInventoryFolderServiceInterface.Content
+        {
+            get
+            {
+                return m_ContentService;
+            }
+        }
+
+
         public int TimeoutMs
         {
             get
@@ -72,24 +74,22 @@ namespace SilverSim.BackendConnectors.Simian.Inventory
             set
             {
                 m_TimeoutMs = value;
-                m_FolderService.TimeoutMs = value;
-                m_ItemService.TimeoutMs = value;
             }
         }
 
-        public override InventoryFolderServiceInterface Folder
+        public override IInventoryFolderServiceInterface Folder
         {
             get
             {
-                return m_FolderService;
+                return this;
             }
         }
 
-        public override InventoryItemServiceInterface Item
+        public override IInventoryItemServiceInterface Item
         {
             get
             {
-                return m_ItemService;
+                return this;
             }
         }
 

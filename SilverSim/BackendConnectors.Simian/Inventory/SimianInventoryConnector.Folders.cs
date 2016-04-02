@@ -13,26 +13,14 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace SilverSim.BackendConnectors.Simian.Inventory
 {
-    public sealed class SimianInventoryFolderConnector : InventoryFolderServiceInterface
+    public partial class SimianInventoryConnector : IInventoryFolderServiceInterface
     {
-        readonly string m_InventoryURI;
-        public int TimeoutMs = 20000;
-        readonly GroupsServiceInterface m_GroupsService;
         readonly string m_SimCapability;
 
-        #region Constructor
-        public SimianInventoryFolderConnector(string uri, GroupsServiceInterface groupsService, string simCapability)
-        {
-            m_SimCapability = simCapability;
-            m_GroupsService = groupsService;
-            m_InventoryURI = uri;
-        }
-        #endregion
-
         #region Accessors
-        public override bool TryGetValue(UUID principalID, UUID key, out InventoryFolder invfolder)
+        bool IInventoryFolderServiceInterface.TryGetValue(UUID principalID, UUID key, out InventoryFolder invfolder)
         {
-            List<InventoryFolder> folders = GetFolders(principalID, key);
+            List<InventoryFolder> folders = Folder.GetFolders(principalID, key);
             foreach (InventoryFolder folder in folders)
             {
                 if (folder.ID.Equals(key))
@@ -45,9 +33,9 @@ namespace SilverSim.BackendConnectors.Simian.Inventory
             return false;
         }
 
-        public override bool ContainsKey(UUID principalID, UUID key)
+        bool IInventoryFolderServiceInterface.ContainsKey(UUID principalID, UUID key)
         {
-            List<InventoryFolder> folders = GetFolders(principalID, key);
+            List<InventoryFolder> folders = Folder.GetFolders(principalID, key);
             foreach (InventoryFolder folder in folders)
             {
                 if (folder.ID.Equals(key))
@@ -59,12 +47,12 @@ namespace SilverSim.BackendConnectors.Simian.Inventory
         }
 
         [SuppressMessage("Gendarme.Rules.Exceptions", "DoNotThrowInUnexpectedLocationRule")]
-        public override InventoryFolder this[UUID principalID, UUID key]
+        InventoryFolder IInventoryFolderServiceInterface.this[UUID principalID, UUID key]
         {
             get
             {
                 InventoryFolder folder;
-                if(!TryGetValue(principalID, key, out folder))
+                if(!Folder.TryGetValue(principalID, key, out folder))
                 {
                     throw new InventoryInaccessibleException();
                 }
@@ -73,17 +61,17 @@ namespace SilverSim.BackendConnectors.Simian.Inventory
             }
         }
 
-        public override bool TryGetValue(UUID key, out InventoryFolder folder)
+        bool IInventoryFolderServiceInterface.TryGetValue(UUID key, out InventoryFolder folder)
         {
             throw new NotSupportedException();
         }
 
-        public override bool ContainsKey(UUID key)
+        bool IInventoryFolderServiceInterface.ContainsKey(UUID key)
         {
             throw new NotSupportedException();
         }
 
-        public override InventoryFolder this[UUID key]
+        InventoryFolder IInventoryFolderServiceInterface.this[UUID key]
         {
             get 
             { 
@@ -91,7 +79,7 @@ namespace SilverSim.BackendConnectors.Simian.Inventory
             }
         }
 
-        public override bool TryGetValue(UUID principalID, AssetType type, out InventoryFolder folder)
+        bool IInventoryFolderServiceInterface.TryGetValue(UUID principalID, AssetType type, out InventoryFolder folder)
         {
             Dictionary<string, string> post = new Dictionary<string, string>();
             if (type == AssetType.RootFolder)
@@ -127,7 +115,7 @@ namespace SilverSim.BackendConnectors.Simian.Inventory
             return false;
         }
 
-        public override bool ContainsKey(UUID principalID, AssetType type)
+        bool IInventoryFolderServiceInterface.ContainsKey(UUID principalID, AssetType type)
         {
             Dictionary<string, string> post = new Dictionary<string, string>();
             if (type == AssetType.RootFolder)
@@ -162,12 +150,12 @@ namespace SilverSim.BackendConnectors.Simian.Inventory
         }
 
         [SuppressMessage("Gendarme.Rules.Exceptions", "DoNotThrowInUnexpectedLocationRule")]
-        public override InventoryFolder this[UUID principalID, AssetType type]
+        InventoryFolder IInventoryFolderServiceInterface.this[UUID principalID, AssetType type]
         {
             get
             {
                 InventoryFolder folder;
-                if(!TryGetValue(principalID, type, out folder))
+                if(!Folder.TryGetValue(principalID, type, out folder))
                 {
                     throw new InventoryInaccessibleException();
                 }
@@ -175,7 +163,7 @@ namespace SilverSim.BackendConnectors.Simian.Inventory
             }
         }
 
-        public override List<InventoryFolder> GetFolders(UUID principalID, UUID key)
+        List<InventoryFolder> IInventoryFolderServiceInterface.GetFolders(UUID principalID, UUID key)
         {
             List<InventoryFolder> folders = new List<InventoryFolder>();
             Dictionary<string, string> post = new Dictionary<string, string>();
@@ -206,7 +194,7 @@ namespace SilverSim.BackendConnectors.Simian.Inventory
             throw new InventoryInaccessibleException();
         }
 
-        public override List<InventoryItem> GetItems(UUID principalID, UUID key)
+        List<InventoryItem> IInventoryFolderServiceInterface.GetItems(UUID principalID, UUID key)
         {
             List<InventoryItem> items = new List<InventoryItem>();
             Dictionary<string, string> post = new Dictionary<string, string>();
@@ -241,7 +229,7 @@ namespace SilverSim.BackendConnectors.Simian.Inventory
 
         #region Methods
 
-        public override void Add(InventoryFolder folder)
+        void IInventoryFolderServiceInterface.Add(InventoryFolder folder)
         {
             Dictionary<string, string> post = new Dictionary<string, string>();
             post["RequestMethod"] = "AddInventoryFolder";
@@ -257,27 +245,28 @@ namespace SilverSim.BackendConnectors.Simian.Inventory
                 throw new InventoryFolderNotStoredException(folder.ID);
             }
         }
-        public override void Update(InventoryFolder folder)
+
+        void IInventoryFolderServiceInterface.Update(InventoryFolder folder)
         {
-            Add(folder);
+            Folder.Add(folder);
         }
 
-        public override void IncrementVersion(UUID principalID, UUID folderID)
+        void IInventoryFolderServiceInterface.IncrementVersion(UUID principalID, UUID folderID)
         {
-            InventoryFolder folder = this[principalID, folderID];
+            InventoryFolder folder = Folder[principalID, folderID];
 #warning TODO: check whether Simian has a IncrementVersion check
             folder.Version += 1;
-            Update(folder);
+            Folder.Update(folder);
         }
 
-        public override void Move(UUID principalID, UUID folderID, UUID toFolderID)
+        void IInventoryFolderServiceInterface.Move(UUID principalID, UUID folderID, UUID toFolderID)
         {
-            InventoryFolder folder = this[principalID, folderID];
+            InventoryFolder folder = Folder[principalID, folderID];
             folder.ParentFolderID = toFolderID;
-            Add(folder);
+            Folder.Add(folder);
         }
 
-        public override void Delete(UUID principalID, UUID folderID)
+        void IInventoryFolderServiceInterface.Delete(UUID principalID, UUID folderID)
         {
             Dictionary<string, string> post = new Dictionary<string, string>();
             post["RequestMethod"] = "RemoveInventoryNode";
@@ -291,12 +280,12 @@ namespace SilverSim.BackendConnectors.Simian.Inventory
             }
         }
 
-        public override void Purge(UUID folderID)
+        void IInventoryFolderServiceInterface.Purge(UUID folderID)
         {
             throw new NotImplementedException();
         }
 
-        public override void Purge(UUID principalID, UUID folderID)
+        void IInventoryFolderServiceInterface.Purge(UUID principalID, UUID folderID)
         {
             Dictionary<string, string> post = new Dictionary<string, string>();
             post["RequestMethod"] = "PurgeInventoryFolder";
@@ -310,5 +299,25 @@ namespace SilverSim.BackendConnectors.Simian.Inventory
             }
         }
         #endregion
+
+        [SuppressMessage("Gendarme.Rules.Exceptions", "DoNotSwallowErrorsCatchingNonSpecificExceptionsRule")]
+        List<UUID> IInventoryFolderServiceInterface.Delete(UUID principalID, List<UUID> folderIDs)
+        {
+            List<UUID> deleted = new List<UUID>();
+            foreach (UUID id in folderIDs)
+            {
+                try
+                {
+                    Folder.Delete(principalID, id);
+                    deleted.Add(id);
+                }
+                catch
+                {
+                    /* nothing to do here */
+                }
+            }
+
+            return deleted;
+        }
     }
 }

@@ -21,11 +21,9 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
     #region Service Implementation
     [SuppressMessage("Gendarme.Rules.Exceptions", "DoNotThrowInUnexpectedLocationRule")]
     [Description("Robust Inventory Connector")]
-    public class RobustInventoryConnector : InventoryServiceInterface, IPlugin
+    public sealed partial class RobustInventoryConnector : InventoryServiceInterface, IPlugin
     {
         readonly string m_InventoryURI;
-        readonly RobustInventoryFolderConnector m_FolderService;
-        readonly RobustInventoryItemConnector m_ItemService;
         readonly GroupsServiceInterface m_GroupsService;
         private int m_TimeoutMs = 20000;
 
@@ -38,10 +36,6 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
             }
             uri += "xinventory";
             m_InventoryURI = uri;
-            m_ItemService = new RobustInventoryItemConnector(uri, null);
-            m_ItemService.TimeoutMs = m_TimeoutMs;
-            m_FolderService = new RobustInventoryFolderConnector(uri, null);
-            m_FolderService.TimeoutMs = m_TimeoutMs;
         }
 
         public RobustInventoryConnector(string uri, GroupsServiceInterface groupsService)
@@ -53,10 +47,6 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
             }
             uri += "xinventory";
             m_InventoryURI = uri;
-            m_ItemService = new RobustInventoryItemConnector(uri, m_GroupsService);
-            m_ItemService.TimeoutMs = m_TimeoutMs;
-            m_FolderService = new RobustInventoryFolderConnector(uri, m_GroupsService);
-            m_FolderService.TimeoutMs = m_TimeoutMs;
         }
 
         public void Startup(ConfigurationLoader loader)
@@ -75,24 +65,22 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
             set
             {
                 m_TimeoutMs = value;
-                m_FolderService.TimeoutMs = value;
-                m_ItemService.TimeoutMs = value;
             }
         }
 
-        public override InventoryFolderServiceInterface Folder
+        public override IInventoryFolderServiceInterface Folder
         {
             get
             {
-                return m_FolderService;
+                return this;
             }
         }
 
-        public override InventoryItemServiceInterface Item
+        public override IInventoryItemServiceInterface Item
         {
             get
             {
-                return m_ItemService;
+                return this;
             }
         }
 

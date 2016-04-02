@@ -10,37 +10,24 @@ using SilverSim.Types.Asset;
 using SilverSim.Types.Inventory;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 
 namespace SilverSim.BackendConnectors.Simian.Inventory
 {
-    public sealed class SimianInventoryItemConnector : InventoryItemServiceInterface
+    public partial class SimianInventoryConnector : IInventoryItemServiceInterface
     {
-        readonly string m_InventoryURI;
-        public int TimeoutMs = 20000;
-        readonly GroupsServiceInterface m_GroupsService;
-        readonly string m_InventoryCapability;
-
-        #region Constructor
-        public SimianInventoryItemConnector(string uri, GroupsServiceInterface groupsService, string simCapability)
-        {
-            m_InventoryCapability = simCapability;
-            m_GroupsService = groupsService;
-            m_InventoryURI = uri;
-        }
-        #endregion
-
         #region Accessors
-        public override bool TryGetValue(UUID key, out InventoryItem item)
+        bool IInventoryItemServiceInterface.TryGetValue(UUID key, out InventoryItem item)
         {
             throw new NotSupportedException();
         }
 
-        public override bool ContainsKey(UUID key)
+        bool IInventoryItemServiceInterface.ContainsKey(UUID key)
         {
             throw new NotSupportedException();
         }
 
-        public override InventoryItem this[UUID key]
+        InventoryItem IInventoryItemServiceInterface.this[UUID key]
         {
             get 
             { 
@@ -48,7 +35,7 @@ namespace SilverSim.BackendConnectors.Simian.Inventory
             }
         }
 
-        public override bool TryGetValue(UUID principalID, UUID key, out InventoryItem item)
+        bool IInventoryItemServiceInterface.TryGetValue(UUID principalID, UUID key, out InventoryItem item)
         {
             Dictionary<string, string> post = new Dictionary<string, string>();
             post["RequestMethod"] = "GetInventoryNode";
@@ -80,7 +67,7 @@ namespace SilverSim.BackendConnectors.Simian.Inventory
             return false;
         }
 
-        public override bool ContainsKey(UUID principalID, UUID key)
+        bool IInventoryItemServiceInterface.ContainsKey(UUID principalID, UUID key)
         {
             Dictionary<string, string> post = new Dictionary<string, string>();
             post["RequestMethod"] = "GetInventoryNode";
@@ -110,21 +97,43 @@ namespace SilverSim.BackendConnectors.Simian.Inventory
             return false;
         }
 
-        public override InventoryItem this[UUID principalID, UUID key]
+        InventoryItem IInventoryItemServiceInterface.this[UUID principalID, UUID key]
         {
             get
             {
                 InventoryItem item;
-                if (!TryGetValue(principalID, key, out item))
+                if (!Item.TryGetValue(principalID, key, out item))
                 {
                     throw new InventoryItemNotFoundException(key);
                 }
                 return item;
             }
         }
+
+        [SuppressMessage("Gendarme.Rules.Exceptions", "DoNotSwallowErrorsCatchingNonSpecificExceptionsRule")]
+        List<InventoryItem> IInventoryItemServiceInterface.this[UUID principalID, List<UUID> keys]
+        {
+            get
+            {
+                List<InventoryItem> res = new List<InventoryItem>();
+                foreach(UUID key in keys)
+                {
+                    try
+                    {
+                        res.Add(Item[principalID, key]);
+                    }
+                    catch
+                    {
+                        /* nothing to do here */
+                    }
+                }
+
+                return res;
+            }
+        }
         #endregion
 
-        public override void Add(InventoryItem item)
+        void IInventoryItemServiceInterface.Add(InventoryItem item)
         {
             Map perms = new Map();
             perms.Add("BaseMask", (uint)item.Permissions.Base);
@@ -229,12 +238,12 @@ namespace SilverSim.BackendConnectors.Simian.Inventory
             }
         }
 
-        public override void Update(InventoryItem item)
+        void IInventoryItemServiceInterface.Update(InventoryItem item)
         {
-            Add(item);
+            Item.Add(item);
         }
 
-        public override void Delete(UUID principalID, UUID id)
+        void IInventoryItemServiceInterface.Delete(UUID principalID, UUID id)
         {
             Dictionary<string, string> post = new Dictionary<string, string>();
             post["RequestMethod"] = "RemoveInventoryNode";
@@ -247,7 +256,7 @@ namespace SilverSim.BackendConnectors.Simian.Inventory
             }
         }
 
-        public override void Move(UUID principalID, UUID id, UUID newFolder)
+        void IInventoryItemServiceInterface.Move(UUID principalID, UUID id, UUID newFolder)
         {
             Dictionary<string, string> post = new Dictionary<string, string>();
             post["RequestMethod"] = "MoveInventoryNodes";
@@ -260,5 +269,25 @@ namespace SilverSim.BackendConnectors.Simian.Inventory
                 throw new InventoryItemNotStoredException(id);
             }
         }
+
+        [SuppressMessage("Gendarme.Rules.Exceptions", "DoNotSwallowErrorsCatchingNonSpecificExceptionsRule")]
+        List<UUID> IInventoryItemServiceInterface.Delete(UUID principalID, List<UUID> itemids)
+        {
+            List<UUID> deleted = new List<UUID>();
+            foreach (UUID id in itemids)
+            {
+                try
+                {
+                    Item.Delete(principalID, id);
+                    deleted.Add(id);
+                }
+                catch
+                {
+                    /* nothing else to do */
+                }
+            }
+            return deleted;
+        }
+
     }
 }

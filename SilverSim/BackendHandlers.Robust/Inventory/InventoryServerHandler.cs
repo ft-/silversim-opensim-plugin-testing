@@ -311,7 +311,7 @@ namespace SilverSim.BackendHandlers.Robust.Inventory
             List<InventoryFolder> folders;
             try
             {
-                folders = m_InventoryService.Folder.GetInventorySkeleton(principalID);
+                folders = m_InventoryService.GetInventorySkeleton(principalID);
             }
             catch
             {

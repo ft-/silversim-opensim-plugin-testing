@@ -16,23 +16,12 @@ using System.Web;
 namespace SilverSim.BackendConnectors.Robust.Inventory
 {
     [SuppressMessage("Gendarme.Rules.Exceptions", "DoNotThrowInUnexpectedLocationRule")]
-    public sealed class RobustInventoryItemConnector : InventoryItemServiceInterface
+    public partial class RobustInventoryConnector : IInventoryItemServiceInterface
     {
-        readonly string m_InventoryURI;
-        public int TimeoutMs = 20000;
-        readonly GroupsServiceInterface m_GroupsService;
         bool m_isMultipleSupported = true;
 
-        #region Constructor
-        public RobustInventoryItemConnector(string uri, GroupsServiceInterface groupsService)
-        {
-            m_GroupsService = groupsService;
-            m_InventoryURI = uri;
-        }
-        #endregion
-
         #region Accessors
-        public override bool TryGetValue(UUID key, out InventoryItem item)
+        bool IInventoryItemServiceInterface.TryGetValue(UUID key, out InventoryItem item)
         {
             Dictionary<string, string> post = new Dictionary<string, string>();
             post["ID"] = (string)key;
@@ -59,7 +48,7 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
             return true;
         }
 
-        public override bool ContainsKey(UUID key)
+        bool IInventoryItemServiceInterface.ContainsKey(UUID key)
         {
             Dictionary<string, string> post = new Dictionary<string, string>();
             post["ID"] = (string)key;
@@ -82,12 +71,12 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
             return true;
         }
 
-        public override InventoryItem this[UUID key]
+        InventoryItem IInventoryItemServiceInterface.this[UUID key]
         {
             get
             {
                 InventoryItem item;
-                if(!TryGetValue(key, out item))
+                if(!Item.TryGetValue(key, out item))
                 {
                     throw new InventoryInaccessibleException();
                 }
@@ -96,7 +85,7 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
         }
 
 
-        public override bool TryGetValue(UUID principalID, UUID key, out InventoryItem item)
+        bool IInventoryItemServiceInterface.TryGetValue(UUID principalID, UUID key, out InventoryItem item)
         {
             Dictionary<string, string> post = new Dictionary<string, string>();
             post["PRINCIPAL"] = (string)principalID;
@@ -125,7 +114,7 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
             return true;
         }
 
-        public override bool ContainsKey(UUID principalID, UUID key)
+        bool IInventoryItemServiceInterface.ContainsKey(UUID principalID, UUID key)
         {
             Dictionary<string, string> post = new Dictionary<string, string>();
             post["PRINCIPAL"] = (string)principalID;
@@ -146,7 +135,7 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
             return (null != itemmap);
         }
 
-        public override InventoryItem this[UUID principalID, UUID key]
+        InventoryItem IInventoryItemServiceInterface.this[UUID principalID, UUID key]
         {
             get
             {
@@ -169,7 +158,26 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
             }
         }
 
-        public override List<InventoryItem> this[UUID principalID, List<UUID> itemids]
+        [SuppressMessage("Gendarme.Rules.Exceptions", "DoNotSwallowErrorsCatchingNonSpecificExceptionsRule")]
+        List<InventoryItem> GetItemsBySingleRequests(UUID principalID, List<UUID> itemids)
+        {
+            List<InventoryItem> res = new List<InventoryItem>();
+            foreach(UUID itemid in itemids)
+            {
+                try
+                {
+                    res.Add(Item[principalID, itemid]);
+                }
+                catch
+                {
+                    /* nothing to do here */
+                }
+            }
+
+            return res;
+        }
+
+        List<InventoryItem> IInventoryItemServiceInterface.this[UUID principalID, List<UUID> itemids]
         {
             get
             {
@@ -181,7 +189,7 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
                 /* when the service failed for being not supported, we do not even try it again in that case */
                 if(!m_isMultipleSupported)
                 {
-                    return base[principalID, itemids];
+                    return GetItemsBySingleRequests(principalID, itemids);
                 }
 
                 Dictionary<string, string> post = new Dictionary<string, string>();
@@ -201,18 +209,18 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
                 catch (HttpRequestHandler.BadHttpResponseException)
                 {
                     m_isMultipleSupported = false;
-                    return base[principalID, itemids];
+                    return GetItemsBySingleRequests(principalID, itemids);
                 }
                 catch (HttpException e)
                 {
                     if (e.GetHttpCode() == (int)HttpStatusCode.BadGateway)
                     {
-                        return base[principalID, itemids];
+                        return GetItemsBySingleRequests(principalID, itemids);
                     }
                     else
                     {
                         m_isMultipleSupported = false;
-                        return base[principalID, itemids];
+                        return GetItemsBySingleRequests(principalID, itemids);
                     }
                 }
 
@@ -234,7 +242,7 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
                 /* check for fallback */
                 if(!anyResponse)
                 {
-                    items = base[principalID, itemids];
+                    items = GetItemsBySingleRequests(principalID, itemids);
                     if(items.Count > 0)
                     {
                         m_isMultipleSupported = false;
@@ -246,7 +254,7 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
         }
         #endregion
 
-        private Dictionary<string, string> SerializeItem(InventoryItem item)
+        Dictionary<string, string> SerializeItem(InventoryItem item)
         {
             Dictionary<string, string> post = new Dictionary<string,string>();
             post["ID"] = (string)item.ID;
@@ -274,7 +282,7 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
             return post;
         }
 
-        public override void Add(InventoryItem item)
+        void IInventoryItemServiceInterface.Add(InventoryItem item)
         {
             Dictionary<string, string> post = SerializeItem(item);
             post["METHOD"] = "ADDITEM";
@@ -289,7 +297,7 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
             }
         }
 
-        public override void Update(InventoryItem item)
+        void IInventoryItemServiceInterface.Update(InventoryItem item)
         {
             Dictionary<string, string> post = SerializeItem(item);
             post["METHOD"] = "UPDATEITEM";
@@ -304,7 +312,7 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
             }
         }
 
-        public override void Delete(UUID principalID, UUID id)
+        void IInventoryItemServiceInterface.Delete(UUID principalID, UUID id)
         {
             Dictionary<string, string> post = new Dictionary<string, string>();
             post["ITEMS[]"] = (string)id;
@@ -321,7 +329,7 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
             }
         }
 
-        public override void Move(UUID principalID, UUID id, UUID newFolder)
+        void IInventoryItemServiceInterface.Move(UUID principalID, UUID id, UUID newFolder)
         {
             Dictionary<string, string> post = new Dictionary<string, string>();
             post["IDLIST[]"] = (string)id;
@@ -337,6 +345,25 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
             {
                 throw new InventoryItemNotFoundException(id);
             }
+        }
+
+        [SuppressMessage("Gendarme.Rules.Exceptions", "DoNotSwallowErrorsCatchingNonSpecificExceptionsRule")]
+        List<UUID> IInventoryItemServiceInterface.Delete(UUID principalID, List<UUID> itemids)
+        {
+            List<UUID> deleted = new List<UUID>();
+            foreach (UUID id in itemids)
+            {
+                try
+                {
+                    Item.Delete(principalID, id);
+                    deleted.Add(id);
+                }
+                catch
+                {
+                    /* nothing else to do */
+                }
+            }
+            return deleted;
         }
     }
 }

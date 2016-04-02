@@ -15,32 +15,18 @@ using System.IO;
 namespace SilverSim.BackendConnectors.Robust.Inventory
 {
     [SuppressMessage("Gendarme.Rules.Exceptions", "DoNotThrowInUnexpectedLocationRule")]
-    public sealed class RobustInventoryFolderConnector : InventoryFolderServiceInterface
+    public partial class RobustInventoryConnector : IInventoryFolderServiceInterface
     {
-        readonly string m_InventoryURI;
-        public int TimeoutMs = 20000;
-        readonly GroupsServiceInterface m_GroupsService;
-        readonly RobustInventoryFolderContentConnector m_FolderContentService;
-
-        #region Constructor
-        public RobustInventoryFolderConnector(string uri, GroupsServiceInterface groupsService)
-        {
-            m_GroupsService = groupsService;
-            m_InventoryURI = uri;
-            m_FolderContentService = new RobustInventoryFolderContentConnector(uri, groupsService);
-        }
-        #endregion
-
         #region Accessors
-        public override InventoryFolderContentServiceInterface Content
+        IInventoryFolderContentServiceInterface IInventoryFolderServiceInterface.Content
         {
             get
             {
-                return m_FolderContentService;
+                return this;
             }
         }
 
-        public override bool TryGetValue(UUID key, out InventoryFolder folder)
+        bool IInventoryFolderServiceInterface.TryGetValue(UUID key, out InventoryFolder folder)
         {
             Dictionary<string, string> post = new Dictionary<string, string>();
             post["ID"] = (string)key;
@@ -67,7 +53,7 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
             return true;
         }
 
-        public override bool ContainsKey(UUID key)
+        bool IInventoryFolderServiceInterface.ContainsKey(UUID key)
         {
             Dictionary<string, string> post = new Dictionary<string, string>();
             post["ID"] = (string)key;
@@ -91,12 +77,12 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
             return true;
         }
 
-        public override InventoryFolder this[UUID key]
+        InventoryFolder IInventoryFolderServiceInterface.this[UUID key]
         {
             get
             {
                 InventoryFolder folder;
-                if(!TryGetValue(key, out folder))
+                if(!Folder.TryGetValue(key, out folder))
                 {
                     throw new InventoryInaccessibleException();
                 }
@@ -105,7 +91,7 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
             }
         }
 
-        public override bool TryGetValue(UUID principalID, UUID key, out InventoryFolder folder)
+        bool IInventoryFolderServiceInterface.TryGetValue(UUID principalID, UUID key, out InventoryFolder folder)
         {
             Dictionary<string, string> post = new Dictionary<string, string>();
             post["PRINCIPAL"] = (string)principalID;
@@ -133,7 +119,7 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
             return true;
         }
 
-        public override bool ContainsKey(UUID principalID, UUID key)
+        bool IInventoryFolderServiceInterface.ContainsKey(UUID principalID, UUID key)
         {
             Dictionary<string, string> post = new Dictionary<string, string>();
             post["PRINCIPAL"] = (string)principalID;
@@ -153,12 +139,12 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
             return (null != foldermap);
         }
 
-        public override InventoryFolder this[UUID principalID, UUID key]
+        InventoryFolder IInventoryFolderServiceInterface.this[UUID principalID, UUID key]
         {
             get
             {
                 InventoryFolder folder;
-                if(!TryGetValue(principalID, key, out folder))
+                if(!Folder.TryGetValue(principalID, key, out folder))
                 {
                     throw new InventoryInaccessibleException();
                 }
@@ -166,7 +152,7 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
             }
         }
 
-        public override bool TryGetValue(UUID principalID, AssetType type, out InventoryFolder folder)
+        bool IInventoryFolderServiceInterface.TryGetValue(UUID principalID, AssetType type, out InventoryFolder folder)
         {
             Dictionary<string, string> post = new Dictionary<string, string>();
             post["PRINCIPAL"] = (string)principalID;
@@ -196,7 +182,7 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
             return true;
         }
 
-        public override bool ContainsKey(UUID principalID, AssetType type)
+        bool IInventoryFolderServiceInterface.ContainsKey(UUID principalID, AssetType type)
         {
             Dictionary<string, string> post = new Dictionary<string, string>();
             post["PRINCIPAL"] = (string)principalID;
@@ -219,12 +205,12 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
             return (null != foldermap);
         }
 
-        public override InventoryFolder this[UUID principalID, AssetType type]
+        InventoryFolder IInventoryFolderServiceInterface.this[UUID principalID, AssetType type]
         {
             get
             {
                 InventoryFolder folder;
-                if(!TryGetValue(principalID, type, out folder))
+                if(!Folder.TryGetValue(principalID, type, out folder))
                 {
                     throw new InventoryInaccessibleException();
                 }
@@ -232,7 +218,7 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
             }
         }
 
-        public override List<InventoryFolder> GetFolders(UUID principalID, UUID key)
+        List<InventoryFolder> IInventoryFolderServiceInterface.GetFolders(UUID principalID, UUID key)
         {
             Dictionary<string, string> post = new Dictionary<string, string>();
             post["PRINCIPAL"] = (string)principalID;
@@ -262,7 +248,7 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
             return items;
         }
 
-        public override List<InventoryItem> GetItems(UUID principalID, UUID key)
+        List<InventoryItem> IInventoryFolderServiceInterface.GetItems(UUID principalID, UUID key)
         {
             Dictionary<string, string> post = new Dictionary<string, string>();
             post["PRINCIPAL"] = (string)principalID;
@@ -306,7 +292,7 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
             return post;
         }
 
-        public override void Add(InventoryFolder folder)
+        void IInventoryFolderServiceInterface.Add(InventoryFolder folder)
         {
             Dictionary<string, string> post = SerializeFolder(folder);
             post["METHOD"] = "ADDFOLDER";
@@ -320,7 +306,8 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
                 throw new InventoryFolderNotStoredException(folder.ID);
             }
         }
-        public override void Update(InventoryFolder folder)
+
+        void IInventoryFolderServiceInterface.Update(InventoryFolder folder)
         {
             Dictionary<string, string> post = SerializeFolder(folder);
             post["METHOD"] = "UPDATEFOLDER";
@@ -335,7 +322,7 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
             }
         }
 
-        public override void Move(UUID principalID, UUID folderID, UUID toFolderID)
+        void IInventoryFolderServiceInterface.Move(UUID principalID, UUID folderID, UUID toFolderID)
         {
             Dictionary<string, string> post = new Dictionary<string,string>();
             post["ParentID"] = (string)toFolderID;
@@ -353,16 +340,16 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
             }
         }
 
-        public override void IncrementVersion(UUID principalID, UUID folderID)
+        void IInventoryFolderServiceInterface.IncrementVersion(UUID principalID, UUID folderID)
         {
 #warning TODO: race condition here with FolderVersion, needs a checkup against Robust HTTP API xinventory
-            InventoryFolder folder = this[principalID, folderID];
+            InventoryFolder folder = Folder[principalID, folderID];
             folder.Version += 1;
-            Update(folder);
+            Folder.Update(folder);
         }
 
 
-        public override void Delete(UUID principalID, UUID folderID)
+        void IInventoryFolderServiceInterface.Delete(UUID principalID, UUID folderID)
         {
             Dictionary<string, string> post = new Dictionary<string, string>();
             post["FOLDERS[]"] = (string)folderID;
@@ -379,7 +366,7 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
             }
         }
 
-        public override void Purge(UUID folderID)
+        void IInventoryFolderServiceInterface.Purge(UUID folderID)
         {
             Dictionary<string, string> post = new Dictionary<string, string>();
             post["ID"] = (string)folderID;
@@ -395,7 +382,7 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
             }
         }
 
-        public override void Purge(UUID principalID, UUID folderID)
+        void IInventoryFolderServiceInterface.Purge(UUID principalID, UUID folderID)
         {
             Dictionary<string, string> post = new Dictionary<string, string>();
             post["ID"] = (string)folderID;
@@ -412,5 +399,25 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
             }
         }
         #endregion
+
+        [SuppressMessage("Gendarme.Rules.Exceptions", "DoNotSwallowErrorsCatchingNonSpecificExceptionsRule")]
+        List<UUID> IInventoryFolderServiceInterface.Delete(UUID principalID, List<UUID> folderIDs)
+        {
+            List<UUID> deleted = new List<UUID>();
+            foreach (UUID id in folderIDs)
+            {
+                try
+                {
+                    Folder.Delete(principalID, id);
+                    deleted.Add(id);
+                }
+                catch
+                {
+                    /* nothing to do here */
+                }
+            }
+
+            return deleted;
+        }
     }
 }
