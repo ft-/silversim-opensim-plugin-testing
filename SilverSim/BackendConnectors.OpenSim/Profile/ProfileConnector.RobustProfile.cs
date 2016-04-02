@@ -10,18 +10,18 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
 {
     public partial class ProfileConnector
     {
-        public class RobustClassifiedsConnector : IClassifiedsInterface
+        public class RobustProfileConnector : IProfileConnectorImplementation
         {
             readonly string m_Uri;
             readonly ProfileConnector m_Connector;
 
-            public RobustClassifiedsConnector(ProfileConnector connector, string uri)
+            public RobustProfileConnector(ProfileConnector connector, string uri)
             {
                 m_Connector = connector;
                 m_Uri = uri;
             }
 
-            public Dictionary<UUID, string> GetClassifieds(UUI user)
+            Dictionary<UUID, string> IClassifiedsInterface.GetClassifieds(UUI user)
             {
                 Dictionary<UUID, string> data = new Dictionary<UUID, string>();
                 Map m = new Map();
@@ -35,7 +35,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
                 return data;
             }
 
-            public bool TryGetValue(UUI user, UUID id, out ProfileClassified classified)
+            bool IClassifiedsInterface.TryGetValue(UUI user, UUID id, out ProfileClassified classified)
             {
                 try
                 {
@@ -67,7 +67,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
                 }
             }
 
-            public bool ContainsKey(UUI user, UUID id)
+            bool IClassifiedsInterface.ContainsKey(UUI user, UUID id)
             {
                 try
                 {
@@ -82,12 +82,12 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
                 }
             }
 
-            public ProfileClassified this[UUI user, UUID id]
+            ProfileClassified IClassifiedsInterface.this[UUI user, UUID id]
             {
                 get 
                 {
                     ProfileClassified classified;
-                    if(!TryGetValue(user, id, out classified))
+                    if (!((IClassifiedsInterface)this).TryGetValue(user, id, out classified))
                     {
                         throw new KeyNotFoundException();
                     }
@@ -96,7 +96,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
             }
 
 
-            public void Update(ProfileClassified classified)
+            void IClassifiedsInterface.Update(ProfileClassified classified)
             {
                 Map m = new Map();
                 m.Add("ClassifiedId", classified.ClassifiedID);
@@ -118,26 +118,14 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
                 RPC.DoJson20RpcRequest(m_Uri, "classified_update", (string)UUID.Random, m, m_Connector.TimeoutMs);
             }
 
-            public void Delete(UUID id)
+            void IClassifiedsInterface.Delete(UUID id)
             {
                 Map m = new Map();
                 m["ClassifiedId"] = id;
                 RPC.DoJson20RpcRequest(m_Uri, "classified_delete", (string)UUID.Random, m, m_Connector.TimeoutMs);
             }
-        }
 
-        public class RobustPicksConnector : IPicksInterface
-        {
-            readonly string m_Uri;
-            readonly ProfileConnector m_Connector;
-
-            public RobustPicksConnector(ProfileConnector connector, string uri)
-            {
-                m_Uri = uri;
-                m_Connector = connector;
-            }
-
-            public Dictionary<UUID, string> GetPicks(UUI user)
+            Dictionary<UUID, string> IPicksInterface.GetPicks(UUI user)
             {
                 Dictionary<UUID, string> data = new Dictionary<UUID, string>();
                 Map m = new Map();
@@ -151,7 +139,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
                 return data;
             }
 
-            public bool TryGetValue(UUI user, UUID id, out ProfilePick pick)
+            bool IPicksInterface.TryGetValue(UUI user, UUID id, out ProfilePick pick)
             {
                 try
                 {
@@ -188,7 +176,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
 
             }
 
-            public bool ContainsKey(UUI user, UUID id)
+            bool IPicksInterface.ContainsKey(UUI user, UUID id)
             {
                 try
                 {
@@ -205,7 +193,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
 
             }
 
-            public ProfilePick this[UUI user, UUID id]
+            ProfilePick IPicksInterface.this[UUI user, UUID id]
             {
                 get
                 {
@@ -237,7 +225,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
             }
 
 
-            public void Update(ProfilePick pick)
+            void IPicksInterface.Update(ProfilePick pick)
             {
                 Map m = new Map();
                 m.Add("PickId", pick.PickID);
@@ -257,26 +245,14 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
                 RPC.DoJson20RpcRequest(m_Uri, "picks_update", (string)UUID.Random, m, m_Connector.TimeoutMs);
             }
 
-            public void Delete(UUID id)
+            void IPicksInterface.Delete(UUID id)
             {
                 Map m = new Map();
                 m["pickId"] = id;
                 RPC.DoJson20RpcRequest(m_Uri, "picks_delete", (string)UUID.Random, m, m_Connector.TimeoutMs);
             }
-        }
 
-        public class RobustNotesConnector : INotesInterface
-        {
-            readonly string m_Uri;
-            readonly ProfileConnector m_Connector;
-
-            public RobustNotesConnector(ProfileConnector connector, string uri)
-            {
-                m_Uri = uri;
-                m_Connector = connector;
-            }
-
-            public bool TryGetValue(UUI user, UUI target, out string notes)
+            bool INotesInterface.TryGetValue(UUI user, UUI target, out string notes)
             {
                 try
                 {
@@ -294,7 +270,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
                 }
             }
 
-            public bool ContainsKey(UUI user, UUI target)
+            bool INotesInterface.ContainsKey(UUI user, UUI target)
             {
                 try
                 {
@@ -310,7 +286,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
                 }
             }
 
-            public string this[UUI user, UUI target]
+            string INotesInterface.this[UUI user, UUI target]
             {
                 get
                 {
@@ -329,20 +305,8 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
                     RPC.DoJson20RpcRequest(m_Uri, "avatar_notes_update", (string)UUID.Random, m, m_Connector.TimeoutMs);
                 }
             }
-        }
 
-        public class RobustUserPreferencesConnector : IUserPreferencesInterface
-        {
-            readonly string m_Uri;
-            readonly ProfileConnector m_Connector;
-
-            public RobustUserPreferencesConnector(ProfileConnector connector, string uri)
-            {
-                m_Uri = uri;
-                m_Connector = connector;
-            }
-
-            public bool TryGetValue(UUI user, out ProfilePreferences prefs)
+            bool IUserPreferencesInterface.TryGetValue(UUI user, out ProfilePreferences prefs)
             {
                 try
                 {
@@ -362,7 +326,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
                 }
             }
 
-            public bool ContainsKey(UUI user)
+            bool IUserPreferencesInterface.ContainsKey(UUI user)
             {
                 try
                 {
@@ -377,7 +341,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
                 }
             }
 
-            public ProfilePreferences this[UUI user]
+            ProfilePreferences IUserPreferencesInterface.this[UUI user]
             {
                 get
                 {
@@ -399,20 +363,8 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
                     RPC.DoJson20RpcRequest(m_Uri, "user_preferences_update", (string)UUID.Random, m, m_Connector.TimeoutMs);
                 }
             }
-        }
 
-        public class RobustPropertiesConnector : IPropertiesInterface
-        {
-            readonly string m_Uri;
-            readonly ProfileConnector m_Connector;
-
-            public RobustPropertiesConnector(ProfileConnector connector, string uri)
-            {
-                m_Connector = connector;
-                m_Uri = uri;
-            }
-
-            public ProfileProperties this[UUI user]
+            ProfileProperties IPropertiesInterface.this[UUI user]
             {
                 get
                 {
@@ -441,7 +393,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
                 }
             }
 
-            public ProfileProperties this[UUI user, PropertiesUpdateFlags flags] 
+            ProfileProperties IPropertiesInterface.this[UUI user, PropertiesUpdateFlags flags] 
             { 
                 set
                 {

@@ -12,6 +12,11 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
     [Description("OpenSim Profile Connector")]
     public partial class ProfileConnector : ProfileServiceInterface, IPlugin
     {
+        public interface IProfileConnectorImplementation : IClassifiedsInterface, IPicksInterface, INotesInterface, IUserPreferencesInterface, IPropertiesInterface
+        {
+
+        }
+
         [Serializable]
         public class RpcFaultException : Exception
         {
@@ -39,21 +44,13 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
             }
         }
 
-        internal IClassifiedsInterface m_Classifieds;
-        internal IPicksInterface m_Picks;
-        internal INotesInterface m_Notes;
-        internal IUserPreferencesInterface m_Preferences;
-        internal IPropertiesInterface m_Properties;
+        internal IProfileConnectorImplementation m_ConnectorImplementation;
         public int TimeoutMs { get; set; }
 
         public ProfileConnector(string url)
         {
             TimeoutMs = 20000;
-            m_Classifieds = new AutoDetectClassifiedsConnector(this, url);
-            m_Picks = new AutoDetectPicksConnector(this, url);
-            m_Notes = new AutoDetectNotesConnector(this, url);
-            m_Preferences = new AutoDetectUserPreferencesConnector(this, url);
-            m_Properties = new AutoDetectPropertiesConnector(this, url);
+            m_ConnectorImplementation = new AutoDetectProfileConnector(this, url);
         }
 
         public void Startup(ConfigurationLoader loader)
@@ -65,7 +62,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
         {
             get 
             {
-                return m_Classifieds; 
+                return m_ConnectorImplementation; 
             }
         }
 
@@ -73,7 +70,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
         {
             get 
             {
-                return m_Picks;
+                return m_ConnectorImplementation;
             }
         }
 
@@ -81,7 +78,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
         {
             get
             {
-                return m_Notes;
+                return m_ConnectorImplementation;
             }
         }
 
@@ -89,7 +86,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
         {
             get 
             {
-                return m_Preferences;
+                return m_ConnectorImplementation;
             }
         }
 
@@ -97,7 +94,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
         {
             get 
             {
-                return m_Properties;
+                return m_ConnectorImplementation;
             }
         }
     }

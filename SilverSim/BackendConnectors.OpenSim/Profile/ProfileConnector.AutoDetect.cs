@@ -42,26 +42,26 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
             }
         }
 
-        public class AutoDetectClassifiedsConnector : IClassifiedsInterface
+        public class AutoDetectProfileConnector : IProfileConnectorImplementation
         {
-            readonly OpenSimClassifiedsConnector m_OpenSim;
-            readonly RobustClassifiedsConnector m_Robust;
+            readonly OpenSimProfileConnector m_OpenSim;
+            readonly RobustProfileConnector m_Robust;
             readonly ProfileConnector m_Connector;
             
-            public AutoDetectClassifiedsConnector(ProfileConnector connector, string url)
+            public AutoDetectProfileConnector(ProfileConnector connector, string url)
             {
                 m_Connector = connector;
-                m_OpenSim = new OpenSimClassifiedsConnector(connector, url);
-                m_Robust = new RobustClassifiedsConnector(connector, url);
+                m_OpenSim = new OpenSimProfileConnector(connector, url);
+                m_Robust = new RobustProfileConnector(connector, url);
             }
 
-            public Dictionary<UUID, string> GetClassifieds(UUI user)
+            Dictionary<UUID, string> IClassifiedsInterface.GetClassifieds(UUI user)
             {
                 Dictionary<UUID, string> res;
                 try
                 {
-                    res = m_OpenSim.GetClassifieds(user);
-                    m_Connector.m_Classifieds = m_OpenSim;
+                    res = ((IClassifiedsInterface)m_OpenSim).GetClassifieds(user);
+                    m_Connector.m_ConnectorImplementation = m_OpenSim;
                     return res;
                 }
                 catch
@@ -76,8 +76,8 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
                 }
                 try
                 {
-                    res = m_Robust.GetClassifieds(user);
-                    m_Connector.m_Classifieds = m_Robust;
+                    res = ((IClassifiedsInterface)m_Robust).GetClassifieds(user);
+                    m_Connector.m_ConnectorImplementation = m_Robust;
                     return res;
                 }
                 catch
@@ -93,13 +93,13 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
                 throw new ProfileAutoDetectFailedException();
             }
 
-            public bool TryGetValue(UUI user, UUID id, out ProfileClassified classified)
+            bool IClassifiedsInterface.TryGetValue(UUI user, UUID id, out ProfileClassified classified)
             {
                 try
                 {
-                    if (m_OpenSim.TryGetValue(user, id, out classified))
+                    if (((IClassifiedsInterface)m_OpenSim).TryGetValue(user, id, out classified))
                     {
-                        m_Connector.m_Classifieds = m_OpenSim;
+                        m_Connector.m_ConnectorImplementation = m_OpenSim;
                         return true;
                     }
                 }
@@ -115,9 +115,9 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
                 }
                 try
                 {
-                    if (m_Robust.TryGetValue(user, id, out classified))
+                    if (((IClassifiedsInterface)m_Robust).TryGetValue(user, id, out classified))
                     {
-                        m_Connector.m_Classifieds = m_Robust;
+                        m_Connector.m_ConnectorImplementation = m_Robust;
                         return true;
                     }
                 }
@@ -135,13 +135,13 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
                 return false;
             }
 
-            public bool ContainsKey(UUI user, UUID id)
+            bool IClassifiedsInterface.ContainsKey(UUI user, UUID id)
             {
                 try
                 {
-                    if (m_OpenSim.ContainsKey(user, id))
+                    if (((IClassifiedsInterface)m_OpenSim).ContainsKey(user, id))
                     {
-                        m_Connector.m_Classifieds = m_OpenSim;
+                        m_Connector.m_ConnectorImplementation = m_OpenSim;
                         return true;
                     }
                 }
@@ -157,9 +157,9 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
                 }
                 try
                 {
-                    if (m_Robust.ContainsKey(user, id))
+                    if (((IClassifiedsInterface)m_Robust).ContainsKey(user, id))
                     {
-                        m_Connector.m_Classifieds = m_Robust;
+                        m_Connector.m_ConnectorImplementation = m_Robust;
                         return true;
                     }
                 }
@@ -176,15 +176,15 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
                 return false;
             }
 
-            public ProfileClassified this[UUI user, UUID id]
+            ProfileClassified IClassifiedsInterface.this[UUI user, UUID id]
             {
                 get 
                 {
                     ProfileClassified res;
                     try
                     {
-                        res = m_OpenSim[user, id];
-                        m_Connector.m_Classifieds = m_OpenSim;
+                        res = ((IClassifiedsInterface)m_OpenSim)[user, id];
+                        m_Connector.m_ConnectorImplementation = m_OpenSim;
                         return res;
                     }
                     catch
@@ -199,8 +199,8 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
                     }
                     try
                     {
-                        res = m_Robust[user, id];
-                        m_Connector.m_Classifieds = m_Robust;
+                        res = ((IClassifiedsInterface)m_Robust)[user, id];
+                        m_Connector.m_ConnectorImplementation = m_Robust;
                         return res;
                     }
                     catch
@@ -218,12 +218,12 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
             }
 
 
-            public void Update(ProfileClassified classified)
+            void IClassifiedsInterface.Update(ProfileClassified classified)
             {
                 try
                 {
-                    m_OpenSim.Update(classified);
-                    m_Connector.m_Classifieds = m_OpenSim;
+                    ((IClassifiedsInterface)m_OpenSim).Update(classified);
+                    m_Connector.m_ConnectorImplementation = m_OpenSim;
                     return;
                 }
                 catch
@@ -238,8 +238,8 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
                 }
                 try
                 {
-                    m_Robust.Update(classified);
-                    m_Connector.m_Classifieds = m_Robust;
+                    ((IClassifiedsInterface)m_Robust).Update(classified);
+                    m_Connector.m_ConnectorImplementation = m_Robust;
                     return;
                 }
                 catch
@@ -255,12 +255,12 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
                 throw new ProfileAutoDetectFailedException();
             }
 
-            public void Delete(UUID id)
+            void IClassifiedsInterface.Delete(UUID id)
             {
                 try
                 {
-                    m_OpenSim.Delete(id);
-                    m_Connector.m_Classifieds = m_OpenSim;
+                    ((IClassifiedsInterface)m_OpenSim).Delete(id);
+                    m_Connector.m_ConnectorImplementation = m_OpenSim;
                     return;
                 }
                 catch
@@ -275,8 +275,8 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
                 }
                 try
                 {
-                    m_Robust.Delete(id);
-                    m_Connector.m_Classifieds = m_Robust;
+                    ((IClassifiedsInterface)m_Robust).Delete(id);
+                    m_Connector.m_ConnectorImplementation = m_Robust;
                     return;
                 }
                 catch
@@ -291,28 +291,14 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
                 }
                 throw new ProfileAutoDetectFailedException();
             }
-        }
 
-        public class AutoDetectPicksConnector : IPicksInterface
-        {
-            readonly OpenSimPicksConnector m_OpenSim;
-            readonly RobustPicksConnector m_Robust;
-            readonly ProfileConnector m_Connector;
-
-            public AutoDetectPicksConnector(ProfileConnector connector, string url)
-            {
-                m_Connector = connector;
-                m_OpenSim = new OpenSimPicksConnector(connector, url);
-                m_Robust = new RobustPicksConnector(connector, url);
-            }
-
-            public Dictionary<UUID, string> GetPicks(UUI user)
+            Dictionary<UUID, string> IPicksInterface.GetPicks(UUI user)
             {
                 Dictionary<UUID, string> res;
                 try
                 {
-                    res = m_OpenSim.GetPicks(user);
-                    m_Connector.m_Picks = m_OpenSim;
+                    res = ((IPicksInterface)m_OpenSim).GetPicks(user);
+                    m_Connector.m_ConnectorImplementation = m_OpenSim;
                     return res;
                 }
                 catch
@@ -327,8 +313,8 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
                 }
                 try
                 {
-                    res = m_Robust.GetPicks(user);
-                    m_Connector.m_Picks = m_Robust;
+                    res = ((IPicksInterface)m_Robust).GetPicks(user);
+                    m_Connector.m_ConnectorImplementation = m_Robust;
                     return res;
                 }
                 catch
@@ -344,13 +330,13 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
                 throw new ProfileAutoDetectFailedException();
             }
 
-            public bool TryGetValue(UUI user, UUID id, out ProfilePick pick)
+            bool IPicksInterface.TryGetValue(UUI user, UUID id, out ProfilePick pick)
             {
                 try
                 {
-                    if (m_OpenSim.TryGetValue(user, id, out pick))
+                    if (((IPicksInterface)m_OpenSim).TryGetValue(user, id, out pick))
                     {
-                        m_Connector.m_Picks = m_OpenSim;
+                        m_Connector.m_ConnectorImplementation = m_OpenSim;
                         return true;
                     }
                 }
@@ -366,9 +352,9 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
                 }
                 try
                 {
-                    if (m_Robust.TryGetValue(user, id, out pick))
+                    if (((IPicksInterface)m_Robust).TryGetValue(user, id, out pick))
                     {
-                        m_Connector.m_Picks = m_Robust;
+                        m_Connector.m_ConnectorImplementation = m_Robust;
                         return true;
                     }
                 }
@@ -387,13 +373,13 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
                 return false;
             }
 
-            public bool ContainsKey(UUI user, UUID id)
+            bool IPicksInterface.ContainsKey(UUI user, UUID id)
             {
                 try
                 {
-                    if (m_OpenSim.ContainsKey(user, id))
+                    if (((IPicksInterface)m_OpenSim).ContainsKey(user, id))
                     {
-                        m_Connector.m_Picks = m_OpenSim;
+                        m_Connector.m_ConnectorImplementation = m_OpenSim;
                         return true;
                     }
                 }
@@ -409,9 +395,9 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
                 }
                 try
                 {
-                    if (m_Robust.ContainsKey(user, id))
+                    if (((IPicksInterface)m_Robust).ContainsKey(user, id))
                     {
-                        m_Connector.m_Picks = m_Robust;
+                        m_Connector.m_ConnectorImplementation = m_Robust;
                         return true;
                     }
                 }
@@ -429,15 +415,15 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
                 return false;
             }
 
-            public ProfilePick this[UUI user, UUID id]
+            ProfilePick IPicksInterface.this[UUI user, UUID id]
             {
                 get 
                 {
                     ProfilePick res;
                     try
                     {
-                        res = m_OpenSim[user, id];
-                        m_Connector.m_Picks = m_OpenSim;
+                        res = ((IPicksInterface)m_OpenSim)[user, id];
+                        m_Connector.m_ConnectorImplementation = m_OpenSim;
                         return res;
                     }
                     catch
@@ -452,8 +438,8 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
                     }
                     try
                     {
-                        res = m_Robust[user, id];
-                        m_Connector.m_Picks = m_Robust;
+                        res = ((IPicksInterface)m_Robust)[user, id];
+                        m_Connector.m_ConnectorImplementation = m_Robust;
                         return res;
                     }
                     catch
@@ -471,12 +457,12 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
             }
 
 
-            public void Update(ProfilePick pick)
+            void IPicksInterface.Update(ProfilePick pick)
             {
                 try
                 {
-                    m_OpenSim.Update(pick);
-                    m_Connector.m_Picks = m_OpenSim;
+                    ((IPicksInterface)m_OpenSim).Update(pick);
+                    m_Connector.m_ConnectorImplementation = m_OpenSim;
                     return;
                 }
                 catch
@@ -491,8 +477,8 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
                 }
                 try
                 {
-                    m_Robust.Update(pick);
-                    m_Connector.m_Picks = m_Robust;
+                    ((IPicksInterface)m_Robust).Update(pick);
+                    m_Connector.m_ConnectorImplementation = m_Robust;
                     return;
                 }
                 catch
@@ -508,12 +494,12 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
                 throw new ProfileAutoDetectFailedException();
             }
 
-            public void Delete(UUID id)
+            void IPicksInterface.Delete(UUID id)
             {
                 try
                 {
-                    m_OpenSim.Delete(id);
-                    m_Connector.m_Picks = m_OpenSim;
+                    ((IPicksInterface)m_OpenSim).Delete(id);
+                    m_Connector.m_ConnectorImplementation = m_OpenSim;
                     return;
                 }
                 catch
@@ -528,8 +514,8 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
                 }
                 try
                 {
-                    m_Robust.Delete(id);
-                    m_Connector.m_Picks = m_Robust;
+                    ((IPicksInterface)m_Robust).Delete(id);
+                    m_Connector.m_ConnectorImplementation = m_Robust;
                     return;
                 }
                 catch
@@ -544,28 +530,14 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
                 }
                 throw new ProfileAutoDetectFailedException();
             }
-        }
 
-        public class AutoDetectNotesConnector : INotesInterface
-        {
-            readonly ProfileConnector m_Connector;
-            readonly OpenSimNotesConnector m_OpenSim;
-            readonly RobustNotesConnector m_Robust;
-
-            public AutoDetectNotesConnector(ProfileConnector connector, string url)
-            {
-                m_Connector = connector;
-                m_OpenSim = new OpenSimNotesConnector(connector, url);
-                m_Robust = new RobustNotesConnector(connector, url);
-            }
-
-            public bool TryGetValue(UUI user, UUI target, out string notes)
+            bool INotesInterface.TryGetValue(UUI user, UUI target, out string notes)
             {
                 try
                 {
-                    if (m_OpenSim.TryGetValue(user, target, out notes))
+                    if (((INotesInterface)m_OpenSim).TryGetValue(user, target, out notes))
                     {
-                        m_Connector.m_Notes = m_OpenSim;
+                        m_Connector.m_ConnectorImplementation = m_OpenSim;
                         return true;
                     }
                 }
@@ -581,9 +553,9 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
                 }
                 try
                 {
-                    if (m_Robust.TryGetValue(user, target, out notes))
+                    if (((INotesInterface)m_Robust).TryGetValue(user, target, out notes))
                     {
-                        m_Connector.m_Notes = m_Robust;
+                        m_Connector.m_ConnectorImplementation = m_Robust;
                         return true;
                     }
                 }
@@ -602,13 +574,13 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
                 return false;
             }
 
-            public bool ContainsKey(UUI user, UUI target)
+            bool INotesInterface.ContainsKey(UUI user, UUI target)
             {
                 try
                 {
-                    if (m_OpenSim.ContainsKey(user, target))
+                    if (((INotesInterface)m_OpenSim).ContainsKey(user, target))
                     {
-                        m_Connector.m_Notes = m_OpenSim;
+                        m_Connector.m_ConnectorImplementation = m_OpenSim;
                         return true;
                     }
                 }
@@ -624,9 +596,9 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
                 }
                 try
                 {
-                    if (m_Robust.ContainsKey(user, target))
+                    if (((INotesInterface)m_Robust).ContainsKey(user, target))
                     {
-                        m_Connector.m_Notes = m_Robust;
+                        m_Connector.m_ConnectorImplementation = m_Robust;
                         return true;
                     }
                 }
@@ -644,15 +616,15 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
                 return false;
             }
 
-            public string this[UUI user, UUI target]
+            string INotesInterface.this[UUI user, UUI target]
             {
                 get
                 {
                     string res;
                     try
                     {
-                        res = m_OpenSim[user, target];
-                        m_Connector.m_Notes = m_OpenSim;
+                        res = ((INotesInterface)m_OpenSim)[user, target];
+                        m_Connector.m_ConnectorImplementation = m_OpenSim;
                         return res;
                     }
                     catch
@@ -667,8 +639,8 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
                     }
                     try
                     {
-                        res = m_Robust[user, target];
-                        m_Connector.m_Notes = m_Robust;
+                        res = ((INotesInterface)m_Robust)[user, target];
+                        m_Connector.m_ConnectorImplementation = m_Robust;
                         return res;
                     }
                     catch
@@ -687,8 +659,8 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
                 {
                     try
                     {
-                        m_OpenSim[user, target] = value;
-                        m_Connector.m_Notes = m_OpenSim;
+                        ((INotesInterface)m_OpenSim)[user, target] = value;
+                        m_Connector.m_ConnectorImplementation = m_OpenSim;
                         return;
                     }
                     catch
@@ -703,8 +675,8 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
                     }
                     try
                     {
-                        m_Robust[user, target] = value;
-                        m_Connector.m_Notes = m_Robust;
+                        ((INotesInterface)m_Robust)[user, target] = value;
+                        m_Connector.m_ConnectorImplementation = m_Robust;
                         return;
                     }
                     catch
@@ -720,28 +692,14 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
                     throw new ProfileAutoDetectFailedException();
                 }
             }
-        }
 
-        public class AutoDetectUserPreferencesConnector : IUserPreferencesInterface
-        {
-            readonly ProfileConnector m_Connector;
-            readonly OpenSimUserPreferencesConnector m_OpenSim;
-            readonly RobustUserPreferencesConnector m_Robust;
-
-            public AutoDetectUserPreferencesConnector(ProfileConnector connector, string url)
-            {
-                m_Connector = connector;
-                m_OpenSim = new OpenSimUserPreferencesConnector(connector, url);
-                m_Robust = new RobustUserPreferencesConnector(connector, url);
-            }
-
-            public bool TryGetValue(UUI user, out ProfilePreferences prefs)
+            bool IUserPreferencesInterface.TryGetValue(UUI user, out ProfilePreferences prefs)
             {
                 try
                 {
-                    if (m_OpenSim.TryGetValue(user, out prefs))
+                    if (((IUserPreferencesInterface)m_OpenSim).TryGetValue(user, out prefs))
                     {
-                        m_Connector.m_Preferences = m_OpenSim;
+                        m_Connector.m_ConnectorImplementation = m_OpenSim;
                         return true;
                     }
                 }
@@ -757,9 +715,9 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
                 }
                 try
                 {
-                    if (m_Robust.TryGetValue(user, out prefs))
+                    if (((IUserPreferencesInterface)m_Robust).TryGetValue(user, out prefs))
                     {
-                        m_Connector.m_Preferences = m_Robust;
+                        m_Connector.m_ConnectorImplementation = m_Robust;
                         return true;
                     }
                 }
@@ -778,15 +736,57 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
                 return false;
             }
 
-            public ProfilePreferences this[UUI user]
+            bool IUserPreferencesInterface.ContainsKey(UUI user)
+            {
+                try
+                {
+                    if (((IUserPreferencesInterface)m_OpenSim).ContainsKey(user))
+                    {
+                        m_Connector.m_ConnectorImplementation = m_OpenSim;
+                        return true;
+                    }
+                }
+                catch
+#if DEBUG
+                        (Exception e)
+#endif
+                {
+                    /* no action needed */
+#if DEBUG
+                    m_Log.Debug("Preferences.ContainsKey(UUI, UUI, out ProfilePreferences): OpenSimProfile", e);
+#endif
+                }
+                try
+                {
+                    if (((IUserPreferencesInterface)m_Robust).ContainsKey(user))
+                    {
+                        m_Connector.m_ConnectorImplementation = m_Robust;
+                        return true;
+                    }
+                }
+                catch
+#if DEBUG
+                        (Exception e)
+#endif
+                {
+                    /* no action needed */
+#if DEBUG
+                    m_Log.Debug("Preferences.ContainsKey(UUI, UUI, out ProfilePreferences): CoreProfile", e);
+#endif
+                }
+
+                return false;
+            }
+
+            ProfilePreferences IUserPreferencesInterface.this[UUI user]
             {
                 get
                 {
                     ProfilePreferences res;
                     try
                     {
-                        res = m_OpenSim[user];
-                        m_Connector.m_Preferences = m_OpenSim;
+                        res = ((IUserPreferencesInterface)m_OpenSim)[user];
+                        m_Connector.m_ConnectorImplementation = m_OpenSim;
                         return res;
                     }
                     catch
@@ -801,8 +801,8 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
                     }
                     try
                     {
-                        res = m_Robust[user];
-                        m_Connector.m_Preferences = m_Robust;
+                        res = ((IUserPreferencesInterface)m_Robust)[user];
+                        m_Connector.m_ConnectorImplementation = m_Robust;
                         return res;
                     }
                     catch
@@ -821,8 +821,8 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
                 {
                     try
                     {
-                        m_OpenSim[user] = value;
-                        m_Connector.m_Preferences = m_OpenSim;
+                        ((IUserPreferencesInterface)m_OpenSim)[user] = value;
+                        m_Connector.m_ConnectorImplementation = m_OpenSim;
                         return;
                     }
                     catch
@@ -837,8 +837,8 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
                     }
                     try
                     {
-                        m_Robust[user] = value;
-                        m_Connector.m_Preferences = m_Robust;
+                        ((IUserPreferencesInterface)m_Robust)[user] = value;
+                        m_Connector.m_ConnectorImplementation = m_Robust;
                         return;
                     }
                     catch
@@ -854,30 +854,16 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
                     throw new ProfileAutoDetectFailedException();
                 }
             }
-        }
 
-        public class AutoDetectPropertiesConnector : IPropertiesInterface
-        {
-            readonly ProfileConnector m_Connector;
-            readonly OpenSimPropertiesConnector m_OpenSim;
-            readonly RobustPropertiesConnector m_Robust;
-
-            public AutoDetectPropertiesConnector(ProfileConnector connector, string url)
-            {
-                m_Connector = connector;
-                m_OpenSim = new OpenSimPropertiesConnector(connector, url);
-                m_Robust = new RobustPropertiesConnector(connector, url);
-            }
-
-            public ProfileProperties this[UUI user]
+            ProfileProperties IPropertiesInterface.this[UUI user]
             {
                 get
                 {
                     ProfileProperties res;
                     try
                     {
-                        res = m_OpenSim[user];
-                        m_Connector.m_Properties = m_OpenSim;
+                        res = ((IPropertiesInterface)m_OpenSim)[user];
+                        m_Connector.m_ConnectorImplementation = m_OpenSim;
                         return res;
                     }
                     catch
@@ -892,8 +878,8 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
                     }
                     try
                     {
-                        res = m_Robust[user];
-                        m_Connector.m_Properties = m_Robust;
+                        res = ((IPropertiesInterface)m_Robust)[user];
+                        m_Connector.m_ConnectorImplementation = m_Robust;
                         return res;
                     }
                     catch
@@ -909,14 +895,15 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
                     throw new ProfileAutoDetectFailedException();
                 }
             }
-            public ProfileProperties this[UUI user, PropertiesUpdateFlags flags] 
+
+            ProfileProperties IPropertiesInterface.this[UUI user, PropertiesUpdateFlags flags] 
             { 
                 set
                 {
                     try
                     {
-                        m_OpenSim[user, flags] = value;
-                        m_Connector.m_Properties = m_OpenSim;
+                        ((IPropertiesInterface)m_OpenSim)[user, flags] = value;
+                        m_Connector.m_ConnectorImplementation = m_OpenSim;
                         return;
                     }
                     catch
@@ -931,8 +918,8 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
                     }
                     try
                     {
-                        m_Robust[user, flags] = value;
-                        m_Connector.m_Properties = m_Robust;
+                        ((IPropertiesInterface)m_Robust)[user, flags] = value;
+                        m_Connector.m_ConnectorImplementation = m_Robust;
                         return;
                     }
                     catch
