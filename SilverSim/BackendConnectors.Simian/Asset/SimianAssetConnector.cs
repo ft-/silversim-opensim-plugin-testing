@@ -4,6 +4,7 @@
 using log4net;
 using Nini.Config;
 using SilverSim.BackendConnectors.Simian.Common;
+using SilverSim.Http.Client;
 using SilverSim.Main.Common;
 using SilverSim.ServiceInterfaces.Asset;
 using SilverSim.Types;
@@ -11,6 +12,8 @@ using SilverSim.Types.Asset;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics.CodeAnalysis;
+using System.IO;
 using System.Runtime.Serialization;
 using System.Text;
 
@@ -18,7 +21,7 @@ namespace SilverSim.BackendConnectors.Simian.Asset
 {
     #region Service Implementation
     [Description("Simian Asset Connector")]
-    public sealed class SimianAssetConnector : AssetServiceInterface, IPlugin
+    public sealed class SimianAssetConnector : AssetServiceInterface, IPlugin, AssetMetadataServiceInterface, AssetDataServiceInterface
     {
         [Serializable]
         public class SimianAssetProtocolErrorException : Exception
@@ -38,14 +41,11 @@ namespace SilverSim.BackendConnectors.Simian.Asset
             }
             set
             {
-                m_MetadataService.TimeoutMs = value;
                 m_TimeoutMs = value;
             }
         }
         readonly string m_AssetURI;
-        readonly SimianAssetMetadataConnector m_MetadataService;
         readonly DefaultAssetReferencesService m_ReferencesService;
-        readonly SimianAssetDataConnector m_DataService;
         readonly bool m_EnableCompression;
         readonly bool m_EnableLocalStorage;
         readonly bool m_EnableTempStorage;
@@ -61,10 +61,7 @@ namespace SilverSim.BackendConnectors.Simian.Asset
             }
 
             m_AssetURI = uri;
-            m_DataService = new SimianAssetDataConnector(uri);
-            m_MetadataService = new SimianAssetMetadataConnector(uri, m_AssetCapability);
             m_ReferencesService = new DefaultAssetReferencesService(this);
-            m_MetadataService.TimeoutMs = m_TimeoutMs;
             m_EnableCompression = enableCompression;
             m_EnableLocalStorage = enableLocalStorage;
             m_EnableTempStorage = enableTempStorage;
@@ -154,7 +151,51 @@ namespace SilverSim.BackendConnectors.Simian.Asset
         {
             get
             {
-                return m_MetadataService;
+                return this;
+            }
+        }
+
+        bool AssetMetadataServiceInterface.TryGetValue(UUID key, out AssetMetadata metadata)
+        {
+            Dictionary<string, string> para = new Dictionary<string, string>();
+            para["RequestMethod"] = "xGetAssetMetadata";
+            para["ID"] = (string)key;
+            Map m = SimianGrid.PostToService(m_AssetURI, m_AssetCapability, para, TimeoutMs);
+            if (!m["Success"].AsBoolean)
+            {
+                metadata = default(AssetMetadata);
+                return false;
+            }
+            metadata = new AssetMetadata();
+            metadata.ID = key;
+            metadata.Name = string.Empty;
+            metadata.ContentType = m["ContentType"].ToString();
+            metadata.Creator.FullName = m["CreatorID"].ToString();
+            metadata.Local = false;
+            metadata.Temporary = m["Temporary"].AsBoolean;
+
+            string lastModifiedStr = m["Last-Modified"].ToString();
+            if (!string.IsNullOrEmpty(lastModifiedStr))
+            {
+                DateTime lastModified;
+                if (DateTime.TryParse(lastModifiedStr, out lastModified))
+                {
+                    metadata.CreateTime = new Date(lastModified);
+                }
+            }
+            return true;
+        }
+
+        AssetMetadata AssetMetadataServiceInterface.this[UUID key]
+        {
+            get
+            {
+                AssetMetadata metadata;
+                if (!Metadata.TryGetValue(key, out metadata))
+                {
+                    throw new AssetNotFoundException(key);
+                }
+                return metadata;
             }
         }
         #endregion
@@ -174,7 +215,39 @@ namespace SilverSim.BackendConnectors.Simian.Asset
         {
             get
             {
-                return m_DataService;
+                return this;
+            }
+        }
+
+        bool AssetDataServiceInterface.TryGetValue(UUID key, out Stream s)
+        {
+            try
+            {
+                s = HttpRequestHandler.DoStreamGetRequest(m_AssetURI + "assets/" + key.ToString() + "/data", null, TimeoutMs);
+                return true;
+            }
+            catch
+            {
+                s = null;
+                return false;
+            }
+
+        }
+
+        [SuppressMessage("Gendarme.Rules.Correctness", "EnsureLocalDisposalRule")]
+        Stream AssetDataServiceInterface.this[UUID key]
+        {
+            get
+            {
+                Stream s;
+                if (Data.TryGetValue(key, out s))
+                {
+                    return s;
+                }
+                else
+                {
+                    throw new AssetNotFoundException(key);
+                }
             }
         }
         #endregion

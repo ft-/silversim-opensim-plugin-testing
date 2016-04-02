@@ -12,6 +12,7 @@ using SilverSim.Types.StructuredData.AssetXml;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.IO.Compression;
 using System.Net;
@@ -24,7 +25,7 @@ namespace SilverSim.BackendConnectors.Robust.Asset
 {
     #region Service Implementation
     [Description("Robust Asset Connector")]
-    public class RobustAssetConnector : AssetServiceInterface, IPlugin
+    public class RobustAssetConnector : AssetServiceInterface, IPlugin, AssetMetadataServiceInterface, AssetDataServiceInterface
     {
         [Serializable]
         public class RobustAssetProtocolErrorException : Exception
@@ -45,14 +46,11 @@ namespace SilverSim.BackendConnectors.Robust.Asset
             }
             set
             {
-                m_MetadataService.TimeoutMs = value;
                 m_TimeoutMs = value;
             }
         }
         readonly string m_AssetURI;
-        readonly RobustAssetMetadataConnector m_MetadataService;
         readonly DefaultAssetReferencesService m_ReferencesService;
-        readonly RobustAssetDataConnector m_DataService;
         readonly bool m_EnableCompression;
         readonly bool m_EnableLocalStorage;
         readonly bool m_EnableTempStorage;
@@ -66,10 +64,7 @@ namespace SilverSim.BackendConnectors.Robust.Asset
             }
 
             m_AssetURI = uri;
-            m_DataService = new RobustAssetDataConnector(uri);
-            m_MetadataService = new RobustAssetMetadataConnector(uri);
             m_ReferencesService = new DefaultAssetReferencesService(this);
-            m_MetadataService.TimeoutMs = m_TimeoutMs;
             m_EnableCompression = enableCompression;
             m_EnableLocalStorage = enableLocalStorage;
             m_EnableTempStorage = enableTempStorage;
@@ -281,7 +276,41 @@ namespace SilverSim.BackendConnectors.Robust.Asset
         {
             get
             {
-                return m_MetadataService;
+                return this;
+            }
+        }
+
+        bool AssetMetadataServiceInterface.TryGetValue(UUID key, out AssetMetadata metadata)
+        {
+            try
+            {
+                using (Stream stream = HttpRequestHandler.DoStreamGetRequest(m_AssetURI + "assets/" + key.ToString() + "/metadata", null, TimeoutMs))
+                {
+                    metadata = AssetXml.ParseAssetMetadata(stream);
+                    return true;
+                }
+            }
+            catch (HttpException e)
+            {
+                if (e.GetHttpCode() == (int)HttpStatusCode.NotFound)
+                {
+                    metadata = default(AssetData);
+                    return false;
+                }
+                throw;
+            }
+        }
+
+        AssetMetadata AssetMetadataServiceInterface.this[UUID key]
+        {
+            get
+            {
+                AssetMetadata metadata;
+                if (!Metadata.TryGetValue(key, out metadata))
+                {
+                    throw new AssetNotFoundException(key);
+                }
+                return metadata;
             }
         }
         #endregion
@@ -301,7 +330,35 @@ namespace SilverSim.BackendConnectors.Robust.Asset
         {
             get
             {
-                return m_DataService;
+                return this;
+            }
+        }
+
+        bool AssetDataServiceInterface.TryGetValue(UUID key, out Stream s)
+        {
+            try
+            {
+                s = HttpRequestHandler.DoStreamGetRequest(m_AssetURI + "assets/" + key.ToString() + "/data", null, TimeoutMs);
+                return true;
+            }
+            catch
+            {
+                s = null;
+                return false;
+            }
+        }
+
+        [SuppressMessage("Gendarme.Rules.Correctness", "EnsureLocalDisposalRule")]
+        Stream AssetDataServiceInterface.this[UUID key]
+        {
+            get
+            {
+                Stream s;
+                if (!Data.TryGetValue(key, out s))
+                {
+                    throw new AssetNotFoundException(key);
+                }
+                return s;
             }
         }
         #endregion
