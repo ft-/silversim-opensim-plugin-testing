@@ -25,7 +25,7 @@ namespace SilverSim.BackendConnectors.Robust.Asset
 {
     #region Service Implementation
     [Description("Robust Asset Connector")]
-    public class RobustAssetConnector : AssetServiceInterface, IPlugin, AssetMetadataServiceInterface, AssetDataServiceInterface
+    public class RobustAssetConnector : AssetServiceInterface, IPlugin, IAssetMetadataServiceInterface, IAssetDataServiceInterface
     {
         [Serializable]
         public class RobustAssetProtocolErrorException : Exception
@@ -272,7 +272,7 @@ namespace SilverSim.BackendConnectors.Robust.Asset
         #endregion
 
         #region Metadata interface
-        public override AssetMetadataServiceInterface Metadata
+        public override IAssetMetadataServiceInterface Metadata
         {
             get
             {
@@ -280,7 +280,7 @@ namespace SilverSim.BackendConnectors.Robust.Asset
             }
         }
 
-        bool AssetMetadataServiceInterface.TryGetValue(UUID key, out AssetMetadata metadata)
+        bool IAssetMetadataServiceInterface.TryGetValue(UUID key, out AssetMetadata metadata)
         {
             try
             {
@@ -301,7 +301,7 @@ namespace SilverSim.BackendConnectors.Robust.Asset
             }
         }
 
-        AssetMetadata AssetMetadataServiceInterface.this[UUID key]
+        AssetMetadata IAssetMetadataServiceInterface.this[UUID key]
         {
             get
             {
@@ -326,7 +326,7 @@ namespace SilverSim.BackendConnectors.Robust.Asset
         #endregion
 
         #region Data interface
-        public override AssetDataServiceInterface Data
+        public override IAssetDataServiceInterface Data
         {
             get
             {
@@ -334,7 +334,7 @@ namespace SilverSim.BackendConnectors.Robust.Asset
             }
         }
 
-        bool AssetDataServiceInterface.TryGetValue(UUID key, out Stream s)
+        bool IAssetDataServiceInterface.TryGetValue(UUID key, out Stream s)
         {
             try
             {
@@ -349,7 +349,7 @@ namespace SilverSim.BackendConnectors.Robust.Asset
         }
 
         [SuppressMessage("Gendarme.Rules.Correctness", "EnsureLocalDisposalRule")]
-        Stream AssetDataServiceInterface.this[UUID key]
+        Stream IAssetDataServiceInterface.this[UUID key]
         {
             get
             {

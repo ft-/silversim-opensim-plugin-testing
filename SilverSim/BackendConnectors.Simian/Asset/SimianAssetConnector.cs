@@ -21,7 +21,7 @@ namespace SilverSim.BackendConnectors.Simian.Asset
 {
     #region Service Implementation
     [Description("Simian Asset Connector")]
-    public sealed class SimianAssetConnector : AssetServiceInterface, IPlugin, AssetMetadataServiceInterface, AssetDataServiceInterface
+    public sealed class SimianAssetConnector : AssetServiceInterface, IPlugin, IAssetMetadataServiceInterface, IAssetDataServiceInterface
     {
         [Serializable]
         public class SimianAssetProtocolErrorException : Exception
@@ -147,7 +147,7 @@ namespace SilverSim.BackendConnectors.Simian.Asset
         #endregion
 
         #region Metadata interface
-        public override AssetMetadataServiceInterface Metadata
+        public override IAssetMetadataServiceInterface Metadata
         {
             get
             {
@@ -155,7 +155,7 @@ namespace SilverSim.BackendConnectors.Simian.Asset
             }
         }
 
-        bool AssetMetadataServiceInterface.TryGetValue(UUID key, out AssetMetadata metadata)
+        bool IAssetMetadataServiceInterface.TryGetValue(UUID key, out AssetMetadata metadata)
         {
             Dictionary<string, string> para = new Dictionary<string, string>();
             para["RequestMethod"] = "xGetAssetMetadata";
@@ -186,7 +186,7 @@ namespace SilverSim.BackendConnectors.Simian.Asset
             return true;
         }
 
-        AssetMetadata AssetMetadataServiceInterface.this[UUID key]
+        AssetMetadata IAssetMetadataServiceInterface.this[UUID key]
         {
             get
             {
@@ -211,7 +211,7 @@ namespace SilverSim.BackendConnectors.Simian.Asset
         #endregion
 
         #region Data interface
-        public override AssetDataServiceInterface Data
+        public override IAssetDataServiceInterface Data
         {
             get
             {
@@ -219,7 +219,7 @@ namespace SilverSim.BackendConnectors.Simian.Asset
             }
         }
 
-        bool AssetDataServiceInterface.TryGetValue(UUID key, out Stream s)
+        bool IAssetDataServiceInterface.TryGetValue(UUID key, out Stream s)
         {
             try
             {
@@ -235,7 +235,7 @@ namespace SilverSim.BackendConnectors.Simian.Asset
         }
 
         [SuppressMessage("Gendarme.Rules.Correctness", "EnsureLocalDisposalRule")]
-        Stream AssetDataServiceInterface.this[UUID key]
+        Stream IAssetDataServiceInterface.this[UUID key]
         {
             get
             {
