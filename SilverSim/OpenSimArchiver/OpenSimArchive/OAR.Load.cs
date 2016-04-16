@@ -233,6 +233,7 @@ namespace SilverSim.OpenSimArchiver.RegionArchiver
         }
 
         public static void Load(
+            SceneList scenes,
             SceneInterface scene,
             LoadOptions options,
             Stream inputFile,
@@ -330,7 +331,7 @@ namespace SilverSim.OpenSimArchiver.RegionArchiver
                                     string regionname = pcomps[1];
                                     header.FileName = pcomps[2];
                                     regionSize = regionMapping[regionname].RegionSize;
-                                    scene = SceneManager.Scenes[regionMapping[regionname].ID];
+                                    scene = scenes[regionMapping[regionname].ID];
                                     parcelsCleared = false;
                                 }
 

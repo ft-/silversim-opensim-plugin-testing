@@ -14,6 +14,7 @@ using SilverSim.BackendConnectors.Robust.StructuredData.Agent;
 using SilverSim.BackendConnectors.Robust.UserAgent;
 using SilverSim.Http.Client;
 using SilverSim.Main.Common;
+using SilverSim.Main.Common.CmdIO;
 using SilverSim.Main.Common.HttpServer;
 using SilverSim.Scene.Management.Scene;
 using SilverSim.Scene.Types.Agent;
@@ -66,6 +67,8 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
         readonly Dictionary<string, IProfileServicePlugin> m_ProfileServicePlugins = new Dictionary<string, IProfileServicePlugin>();
         List<IProtocolExtender> m_PacketHandlerPlugins = new List<IProtocolExtender>();
         List<AuthorizationServiceInterface> m_AuthorizationServices;
+        protected SceneList m_Scenes { get; private set; }
+        protected CommandRegistry m_Commands { get; private set; }
 
         sealed class GridParameterMap : ICloneable
         {
@@ -160,6 +163,8 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
 
         public virtual void Startup(ConfigurationLoader loader)
         {
+            m_Scenes = loader.Scenes;
+            m_Commands = loader.CommandRegistry;
             m_Log.Info("Initializing agent post handler for " + m_AgentBaseURL);
             m_AuthorizationServices = loader.GetServicesByValue<AuthorizationServiceInterface>();
             m_HttpServer = loader.HttpServer;
@@ -444,7 +449,7 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
             }
 
             SceneInterface scene;
-            if (!Scene.Management.Scene.SceneManager.Scenes.TryGetValue(agentPost.Destination.ID, out scene))
+            if (!m_Scenes.TryGetValue(agentPost.Destination.ID, out scene))
             {
                 m_Log.InfoFormat("No destination for agent {0}", req.RawUrl);
                 req.ErrorResponse(HttpStatusCode.NotFound, "Not Found");
@@ -636,6 +641,7 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
             serviceList.Add(new OpenSimTeleportProtocol());
 
             ViewerAgent agent = new ViewerAgent(
+                m_Scenes,
                 agentPost.Account.Principal.ID,
                 agentPost.Account.Principal.FirstName,
                 agentPost.Account.Principal.LastName,
@@ -663,6 +669,7 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
             UDPCircuitsManager udpServer = (UDPCircuitsManager)scene.UDPServer;
 
             AgentCircuit circuit = new AgentCircuit(
+                m_Commands,
                 agent,
                 udpServer,
                 agentPost.Circuit.CircuitCode,
@@ -1032,7 +1039,7 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
                  */
 
                 SceneInterface scene;
-                if (SceneManager.Scenes.TryGetValue(childAgentData.RegionLocation.RegionHandle, out scene))
+                if (m_Scenes.TryGetValue(childAgentData.RegionLocation.RegionHandle, out scene))
                 {
                     IAgent agent;
                     
@@ -1090,7 +1097,7 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
                 /* Far and Throttles are extra in opensim so we have to cope with these on sending */
 
                 SceneInterface scene;
-                if (Scene.Management.Scene.SceneManager.Scenes.TryGetValue(childAgentPosition.RegionLocation.RegionHandle, out scene))
+                if (m_Scenes.TryGetValue(childAgentPosition.RegionLocation.RegionHandle, out scene))
                 {
                     IAgent agent;
                     if(!scene.Agents.TryGetValue(childAgentPosition.AgentID, out agent))
@@ -1143,7 +1150,7 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
             SceneInterface scene;
             try
             {
-                scene = SceneManager.Scenes[regionID];
+                scene = m_Scenes[regionID];
             }
             catch
             {
@@ -1221,7 +1228,7 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
             SceneInterface scene;
             try
             {
-                scene = SceneManager.Scenes[regionID];
+                scene = m_Scenes[regionID];
             }
             catch
             {

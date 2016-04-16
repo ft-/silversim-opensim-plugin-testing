@@ -12,7 +12,6 @@ using SilverSim.Types;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Diagnostics.CodeAnalysis;
 using System.IO;
 
 namespace SilverSim.OpenSimArchiver
@@ -21,6 +20,7 @@ namespace SilverSim.OpenSimArchiver
     public sealed class ArchiverLoadStore : IPlugin
     {
         private static readonly ILog m_Log = LogManager.GetLogger("IAR/OAR ARCHIVER");
+        SceneList m_Scenes;
 
         public ArchiverLoadStore()
         {
@@ -29,9 +29,10 @@ namespace SilverSim.OpenSimArchiver
 
         public void Startup(ConfigurationLoader loader)
         {
-            CommandRegistry.LoadCommands.Add("oar", LoadOarCommand);
-            CommandRegistry.SaveCommands.Add("oar", SaveOarCommand);
-            CommandRegistry.LoadCommands.Add("osassets", LoadAssetsCommand);
+            m_Scenes = loader.Scenes;
+            loader.CommandRegistry.LoadCommands.Add("oar", LoadOarCommand);
+            loader.CommandRegistry.SaveCommands.Add("oar", SaveOarCommand);
+            loader.CommandRegistry.LoadCommands.Add("osassets", LoadAssetsCommand);
         }
 
         #region Load Assets
@@ -66,7 +67,7 @@ namespace SilverSim.OpenSimArchiver
                 {
                     try
                     {
-                        SceneInterface scene = SceneManager.Scenes[selectedScene];
+                        SceneInterface scene = m_Scenes[selectedScene];
                         assetService = scene.AssetService;
                         owner = scene.Owner;
                     }
@@ -127,7 +128,7 @@ namespace SilverSim.OpenSimArchiver
             {
                 try
                 {
-                    scene = SceneManager.Scenes[selectedScene];
+                    scene = m_Scenes[selectedScene];
                 }
                 catch
                 {
@@ -195,7 +196,7 @@ namespace SilverSim.OpenSimArchiver
             {
                 try
                 {
-                    scene = SceneManager.Scenes[selectedScene];
+                    scene = m_Scenes[selectedScene];
                 }
                 catch
                 {
@@ -240,7 +241,7 @@ namespace SilverSim.OpenSimArchiver
                     HttpRequestHandler.DoStreamGetRequest(filename, null, 20000) :
                     new FileStream(filename, FileMode.Open, FileAccess.Read))
                 {
-                    RegionArchiver.OAR.Load(scene, options, s, io);
+                    RegionArchiver.OAR.Load(m_Scenes, scene, options, s, io);
                 }
                 io.Write("OAR loaded successfully.");
             }

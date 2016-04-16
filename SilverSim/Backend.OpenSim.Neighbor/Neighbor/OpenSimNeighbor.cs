@@ -31,6 +31,7 @@ namespace SilverSim.Backend.OpenSim.Neighbor.Neighbor
         readonly System.Timers.Timer m_Timer = new System.Timers.Timer(3600000);
 
         readonly BlockingQueue<UUID> m_NeighborNotifyRequestQueue = new BlockingQueue<UUID>();
+        SceneList m_Scenes;
 
         public OpenSimNeighbor()
         {
@@ -55,6 +56,7 @@ namespace SilverSim.Backend.OpenSim.Neighbor.Neighbor
 
         public void Startup(ConfigurationLoader loader)
         {
+            m_Scenes = loader.Scenes;
             new Thread(RequestThread).Start();
             m_Timer.Elapsed += UpdateTimer;
             m_Timer.Start();
@@ -91,7 +93,7 @@ namespace SilverSim.Backend.OpenSim.Neighbor.Neighbor
                 }
 
                 SceneInterface scene;
-                if (!SceneManager.Scenes.TryGetValue(localRegionID, out scene))
+                if (!m_Scenes.TryGetValue(localRegionID, out scene))
                 {
                     continue;
                 }
@@ -141,7 +143,7 @@ namespace SilverSim.Backend.OpenSim.Neighbor.Neighbor
 
         public override void NotifyNeighborStatus(RegionInfo fromRegion)
         {
-            if(SceneManager.Scenes.ContainsKey(fromRegion.ID))
+            if(m_Scenes.ContainsKey(fromRegion.ID))
             {
                 if ((fromRegion.Flags & RegionFlags.RegionOnline) != 0)
                 {
@@ -165,7 +167,7 @@ namespace SilverSim.Backend.OpenSim.Neighbor.Neighbor
         public void NotifyRemoteNeighborStatus(RegionInfo fromRegion, UUID toRegionID)
         {
             SceneInterface scene;
-            if(SceneManager.Scenes.TryGetValue(toRegionID, out scene))
+            if(m_Scenes.TryGetValue(toRegionID, out scene))
             {
                 /* some matching request validate that it is really a neighbor and not some wannabe */
                 RegionInfo rinfo;

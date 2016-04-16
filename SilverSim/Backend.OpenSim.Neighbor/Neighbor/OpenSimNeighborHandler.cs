@@ -23,6 +23,7 @@ namespace SilverSim.Backend.OpenSim.Neighbor.Neighbor
         protected static readonly ILog m_Log = LogManager.GetLogger("OPENSIM NEIGHBOR HANDLER");
         BaseHttpServer m_HttpServer;
         readonly OpenSimNeighbor m_NeighborHandler;
+        SceneList m_Scenes;
 
         public OpenSimNeighborHandler(OpenSimNeighbor neighborHandler)
         {
@@ -31,6 +32,7 @@ namespace SilverSim.Backend.OpenSim.Neighbor.Neighbor
 
         public void Startup(ConfigurationLoader loader)
         {
+            m_Scenes = loader.Scenes;
             m_Log.Info("Initializing handler for /region");
             m_HttpServer = loader.HttpServer;
             m_HttpServer.StartsWithUriHandlers.Add("/region", RegionPostHandler);
@@ -144,7 +146,7 @@ namespace SilverSim.Backend.OpenSim.Neighbor.Neighbor
 
             try
             {
-                scene = SceneManager.Scenes[new GridVector(m["destination_handle"].AsULong)];
+                scene = m_Scenes[new GridVector(m["destination_handle"].AsULong)];
             }
             catch
             {

@@ -27,6 +27,7 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
     public class SimFriendsHandler : IPlugin, IPluginShutdown
     {
         BaseHttpServer m_HttpServer;
+        SceneList m_Scenes;
 
         public SimFriendsHandler()
         {
@@ -49,6 +50,7 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
 
         public void Startup(ConfigurationLoader loader)
         {
+            m_Scenes = loader.Scenes;
             m_HttpServer = loader.HttpServer;
             m_HttpServer.StartsWithUriHandlers.Add("/friends", FriendsHandler);
         }
@@ -465,7 +467,7 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
         {
             agent = null;
             agentScene = null;
-            foreach (SceneInterface scene in SceneManager.Scenes.Values)
+            foreach (SceneInterface scene in m_Scenes.Values)
             {
                 if (scene.RootAgents.TryGetValue(agentID, out agent))
                 {
