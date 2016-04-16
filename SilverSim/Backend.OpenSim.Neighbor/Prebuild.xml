@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<Project frameworkVersion="v4_0" name="SilverSim.Backend.OpenSim.Neighbor" path="SilverSim/Backend.OpenSim.Neighbor" type="Library">
+<Project frameworkVersion="v4_5" name="SilverSim.Backend.OpenSim.Neighbor" path="SilverSim/Backend.OpenSim.Neighbor" type="Library">
   <Configuration name="Release">
     <Options>
       <OutputPath>../../bin/plugins/</OutputPath>

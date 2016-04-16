@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<Project frameworkVersion="v4_0" name="SilverSim.BackendConnectors.Robust" path="SilverSim/BackendConnectors.Robust" type="Library">
+<Project frameworkVersion="v4_5" name="SilverSim.BackendConnectors.Robust" path="SilverSim/BackendConnectors.Robust" type="Library">
   <Configuration name="Release">
     <Options>
       <OutputPath>../../bin/plugins/</OutputPath>

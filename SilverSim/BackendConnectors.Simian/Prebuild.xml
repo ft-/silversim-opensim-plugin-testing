@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<Project frameworkVersion="v4_0" name="SilverSim.BackendConnectors.Simian" path="SilverSim/BackendConnectors.Simian" type="Library">
+<Project frameworkVersion="v4_5" name="SilverSim.BackendConnectors.Simian" path="SilverSim/BackendConnectors.Simian" type="Library">
   <Configuration name="Release">
     <Options>
       <OutputPath>../../bin/plugins/</OutputPath>

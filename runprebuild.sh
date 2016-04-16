@@ -18,13 +18,13 @@ case "$1" in
 
   'vs2010')
   
-    mono Prebuild/Prebuild.exe /target vs2010
+    mono Prebuild/Prebuild.exe /target vs2013
   
   ;;
 
   *)
 
-    mono Prebuild/Prebuild.exe /target vs2010
+    mono Prebuild/Prebuild.exe /target vs2013
 
   ;;
 

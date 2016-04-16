@@ -1,3 +1,3 @@
 @echo OFF
 
-Prebuild\Prebuild.exe /target vs2010
+Prebuild\Prebuild.exe /target vs2013
