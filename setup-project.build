@@ -80,6 +80,9 @@
 	</target>
 	
 	<target name="prebuild" description="Runs prebuild.exe">
+		<foreach item="Folder" in="SilverSim" property="modulefolder">
+			<delete dir="${modulefolder}/obj" failonerror="false"/>
+		</foreach>
 		<if test="${platform::is-windows()}">
 			<exec program="Prebuild/Prebuild.exe">
 				<arg value="/target"/>
