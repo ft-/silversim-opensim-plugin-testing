@@ -3,7 +3,6 @@
 
 using SilverSim.BackendConnectors.Robust.Common;
 using SilverSim.Http.Client;
-using SilverSim.ServiceInterfaces.Groups;
 using SilverSim.ServiceInterfaces.Inventory;
 using SilverSim.Types;
 using SilverSim.Types.Inventory;
@@ -12,7 +11,6 @@ using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Net;
 using System.Web;
-using System;
 
 namespace SilverSim.BackendConnectors.Robust.Inventory
 {

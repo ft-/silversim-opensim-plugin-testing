@@ -3,7 +3,6 @@
 
 using SilverSim.BackendConnectors.Robust.Common;
 using SilverSim.Http.Client;
-using SilverSim.ServiceInterfaces.Groups;
 using SilverSim.ServiceInterfaces.Inventory;
 using SilverSim.Types;
 using SilverSim.Types.Asset;
