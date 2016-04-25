@@ -30,6 +30,7 @@ namespace SilverSim.BackendConnectors.Robust.IM
         PresenceServiceInterface m_PresenceService;
         readonly string m_PresenceServiceName;
         readonly Timer m_Timer;
+        IMRouter m_IMRouter;
 
         public RobustHGIM(List<string> avatarNameServiceNames, string presenceServiceName)
         {
@@ -99,8 +100,8 @@ namespace SilverSim.BackendConnectors.Robust.IM
             }
             */
 
-            KeyValuePair<int, IM.RobustIMConnector> kvp;
-            IM.RobustIMConnector imservice;
+            KeyValuePair<int, RobustIMConnector> kvp;
+            RobustIMConnector imservice;
             if (!m_IMUrlCache.TryGetValue(resolved.HomeURI.ToString(), out kvp))
             {
                 string imurl;
@@ -139,12 +140,13 @@ namespace SilverSim.BackendConnectors.Robust.IM
     
         public void Startup(ConfigurationLoader loader)
         {
+            m_IMRouter = loader.IMRouter;
             foreach (string servicename in m_AvatarNameServiceNames)
             {
                 m_AvatarNameServices.Add(loader.GetService<AvatarNameServiceInterface>(servicename));
             }
             m_PresenceService = loader.GetService<PresenceServiceInterface>(m_PresenceServiceName);
-            IMRouter.GridIM.Add(Send);
+            m_IMRouter.GridIM.Add(Send);
         }
 
         public ShutdownOrder ShutdownOrder
@@ -157,7 +159,10 @@ namespace SilverSim.BackendConnectors.Robust.IM
 
         public void Shutdown()
         {
-            IMRouter.GridIM.Remove(Send);
+            if (null != m_IMRouter)
+            {
+                m_IMRouter.GridIM.Remove(Send);
+            }
             m_Timer.Stop();
         }
     }
