@@ -22,7 +22,7 @@
 	</target>
 	
 	<target name="additional-bin" description="Copy local binaries">
-		<copy todir="bin" if="${directory::exists('additional-bin')}">
+		<copy todir="bin" if="${directory::exists('additional-bin')}" overwrite="true">
 			<fileset basedir="additional-bin">
 				<include name="**/*.dll"/>
 				<include name="**/*.so"/>
