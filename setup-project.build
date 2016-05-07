@@ -25,6 +25,7 @@
 		<copy todir="bin" if="${directory::exists('additional-bin')}">
 			<fileset basedir="additional-bin">
 				<include name="**/*.dll"/>
+				<include name="**/*.so"/>
 				<include name="**/*.config"/>
 			</fileset>
 		</copy>
