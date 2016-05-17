@@ -25,7 +25,7 @@
   <Reference name="SilverSim.Threading" localCopy="false"/>
   <Files>
     <Match pattern="*.cs" recurse="true">
-        <Exclude pattern="^obj/.*$"/>
+        <Exclude pattern="TemporaryGeneratedFile"/>
     </Match>
     <Match pattern="ProductAssemblyInfo.cs" path=".." recurse="false"/>
     <Match pattern="Prebuild.xml" recurse="false" buildAction="None"/>
