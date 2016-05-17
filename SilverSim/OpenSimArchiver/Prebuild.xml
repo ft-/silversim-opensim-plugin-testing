@@ -25,7 +25,9 @@
   <Reference name="Nini" path="../../bin/" localCopy="false"/>
   <Reference name="SilverSim.Threading" localCopy="false"/>
   <Files>
-    <Match pattern="*.cs" recurse="true"/>
+    <Match pattern="*.cs" recurse="true">
+        <Exclude pattern="^obj/.*$"/>
+    </Match>
     <Match pattern="ProductAssemblyInfo.cs" path=".." recurse="false"/>
     <Match pattern="Prebuild.xml" recurse="false" buildAction="None"/>
     <Match pattern="Product.licenseheader" path=".." recurse="false" buildAction="None"/>
