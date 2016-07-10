@@ -533,6 +533,9 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
                 userAccountConnector.VerifyAgent(agentPost.Session.SessionID, agentPost.Session.ServiceSessionID);
             }
             catch
+#if DEBUG
+                (Exception e)
+#endif
             {
                 DoAgentResponse(req, "Failed to verify agent at Home Grid", false);
                 return;
@@ -543,6 +546,9 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
                 userAccountConnector.VerifyClient(agentPost.Session.SessionID, agentPost.Client.ClientIP);
             }
             catch
+#if DEBUG
+                (Exception e)
+#endif
             {
                 DoAgentResponse(req, "Failed to verify client at Home Grid", false);
                 return;
@@ -812,317 +818,327 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
             string msgType = param["messageType"].ToString();
             if (msgType == "AgentData")
             {
-                ChildAgentUpdate childAgentData = new ChildAgentUpdate();
-
-                childAgentData.RegionID = param["region_id"].AsUUID;
-                childAgentData.ViewerCircuitCode = param["circuit_code"].AsUInt;
-                childAgentData.AgentID = param["agent_uuid"].AsUUID;
-                childAgentData.SessionID = param["session_uuid"].AsUUID;
-                childAgentData.AgentPosition = param["position"].AsVector3;
-                childAgentData.AgentVelocity = param["velocity"].AsVector3;
-                childAgentData.Center = param["center"].AsVector3;
-                childAgentData.Size = param["size"].AsVector3;
-                childAgentData.AtAxis = param["at_axis"].AsVector3;
-                childAgentData.LeftAxis = param["left_axis"].AsVector3;
-                childAgentData.UpAxis = param["up_axis"].AsVector3;
-                /*
-
-
-        if (args.ContainsKey("wait_for_root") && args["wait_for_root"] != null)
-            SenderWantsToWaitForRoot = args["wait_for_root"].AsBoolean();
-                 */
-
-                childAgentData.Far = param["far"].AsReal;
-                childAgentData.Aspect = param["aspect"].AsReal;
-                //childAgentData.Throttles = param["throttles"];
-                childAgentData.LocomotionState = param["locomotion_state"].AsUInt;
-                childAgentData.HeadRotation = param["head_rotation"].AsQuaternion;
-                childAgentData.BodyRotation = param["body_rotation"].AsQuaternion;
-                childAgentData.ControlFlags = (ControlFlags)param["control_flags"].AsUInt;
-                childAgentData.EnergyLevel = param["energy_level"].AsReal;
-                childAgentData.GodLevel = (byte)param["god_level"].AsUInt;
-                childAgentData.AlwaysRun = param["always_run"].AsBoolean;
-                childAgentData.PreyAgent = param["prey_agent"].AsUUID;
-                childAgentData.AgentAccess = (byte)param["agent_access"].AsUInt;
-                childAgentData.ActiveGroupID = param["active_group_id"].AsUUID;
-
-                if (param.ContainsKey("groups"))
-                {
-                    AnArray groups = param["groups"] as AnArray;
-                    if (groups != null)
-                    {
-                        foreach (IValue gval in groups)
-                        {
-                            Map group = (Map)gval;
-                            ChildAgentUpdate.GroupDataEntry g = new ChildAgentUpdate.GroupDataEntry();
-                            g.AcceptNotices = group["accept_notices"].AsBoolean;
-                            UInt64 groupPowers;
-                            if (UInt64.TryParse(group["group_powers"].ToString(), out groupPowers))
-                            {
-                                g.GroupPowers = (GroupPowers)groupPowers;
-                                g.GroupID = group["group_id"].AsUUID;
-                                childAgentData.GroupData.Add(g);
-                            }
-                        }
-                    }
-                }
-
-                if (param.ContainsKey("animations"))
-                {
-                    AnArray anims = param["animations"] as AnArray;
-                    if (anims != null)
-                    {
-                        foreach (IValue aval in anims)
-                        {
-                            Map anim = (Map)aval;
-                            ChildAgentUpdate.AnimationDataEntry a = new ChildAgentUpdate.AnimationDataEntry();
-                            a.Animation = anim["animation"].AsUUID;
-                            a.ObjectID = anim["object_id"].AsUUID;
-                            childAgentData.AnimationData.Add(a);
-                        }
-                    }
-                }
-                /*
-
-        if (args["default_animation"] != null)
-        {
-            try
-            {
-                DefaultAnim = new Animation((OSDMap)args["default_animation"]);
-            }
-            catch
-            {
-                DefaultAnim = null;
-            }
-        }
-
-        if (args["animation_state"] != null)
-        {
-            try
-            {
-                AnimState = new Animation((OSDMap)args["animation_state"]);
-            }
-            catch
-            {
-                AnimState = null;
-            }
-        }
-                 * */
-
-                /*-----------------------------------------------------------------*/
-                /* Appearance */
-                Map appearancePack = (Map)param["packed_appearance"];
-                AppearanceInfo Appearance = new AppearanceInfo();
-                Appearance.AvatarHeight = appearancePack["height"].AsReal;
-
-                {
-                    AnArray vParams = (AnArray)appearancePack["visualparams"];
-                    byte[] visualParams = new byte[vParams.Count];
-
-                    int i;
-                    for (i = 0; i < vParams.Count; ++i)
-                    {
-                        visualParams[i] = (byte)vParams[i].AsUInt;
-                    }
-                    Appearance.VisualParams = visualParams;
-                }
-
-                {
-                    AnArray texArray = (AnArray)appearancePack["textures"];
-                    int i;
-                    for (i = 0; i < AppearanceInfo.AvatarTextureData.TextureCount; ++i)
-                    {
-                        Appearance.AvatarTextures[i] = texArray[i].AsUUID;
-                    }
-                }
-
-                {
-                    int i;
-                    uint n;
-                    AnArray wearables = (AnArray)appearancePack["wearables"];
-                    for (i = 0; i < (int)WearableType.NumWearables; ++i)
-                    {
-                        AnArray ar;
-                        try
-                        {
-                            ar = (AnArray)wearables[i];
-                        }
-                        catch
-                        {
-                            continue;
-                        }
-                        n = 0;
-                        foreach (IValue val in ar)
-                        {
-                            Map wp = (Map)val;
-                            AgentWearables.WearableInfo wi = new AgentWearables.WearableInfo();
-                            wi.ItemID = wp["item"].AsUUID;
-                            wi.AssetID = wp.ContainsKey("asset") ? wp["Asset"].AsUUID : UUID.Zero;
-                            WearableType type = (WearableType)i;
-                            Appearance.Wearables[type, n++] = wi;
-                        }
-                    }
-                }
-
-                {
-                    foreach (IValue apv in (AnArray)appearancePack["attachments"])
-                    {
-                        Map ap = (Map)apv;
-                        uint apid;
-                        if (uint.TryParse(ap["point"].ToString(), out apid))
-                        {
-                            Appearance.Attachments[(AttachmentPoint)apid][ap["item"].AsUUID] = UUID.Zero;
-                        }
-                    }
-                }
-                Appearance.Serial = appearancePack["serial"].AsUInt;
-
-                /*
-        if ((args["controllers"] != null) && (args["controllers"]).Type == OSDType.Array)
-        {
-            OSDArray controls = (OSDArray)(args["controllers"]);
-            Controllers = new ControllerData[controls.Count];
-            int i = 0;
-            foreach (OSD o in controls)
-            {
-                if (o.Type == OSDType.Map)
-                {
-                    Controllers[i++] = new ControllerData((OSDMap)o);
-                 * 
-                    public void UnpackUpdateMessage(OSDMap args)
-                    {
-                        if (args["object"] != null)
-                            ObjectID = args["object"].AsUUID();
-                        if (args["item"] != null)
-                            ItemID = args["item"].AsUUID();
-                        if (args["ignore"] != null)
-                            IgnoreControls = (uint)args["ignore"].AsInteger();
-                        if (args["event"] != null)
-                            EventControls = (uint)args["event"].AsInteger();
-                    }
-                                 * 
-                }
-            }
-        }
-                 */
-
-                /*
-        if (args["callback_uri"] != null)
-            CallbackURI = args["callback_uri"].AsString();
-                 * */
-
-                /*
-        // Attachment objects
-        if (args["attach_objects"] != null && args["attach_objects"].Type == OSDType.Array)
-        {
-            OSDArray attObjs = (OSDArray)(args["attach_objects"]);
-            AttachmentObjects = new List<ISceneObject>();
-            AttachmentObjectStates = new List<string>();
-            foreach (OSD o in attObjs)
-            {
-                if (o.Type == OSDType.Map)
-                {
-                    OSDMap info = (OSDMap)o;
-                    ISceneObject so = scene.DeserializeObject(info["sog"].AsString());
-                    so.ExtraFromXmlString(info["extra"].AsString());
-                    so.HasGroupChanged = info["modified"].AsBoolean();
-                    AttachmentObjects.Add(so);
-                    AttachmentObjectStates.Add(info["state"].AsString());
-                }
-            }
-        }
-
-        if (args["parent_part"] != null)
-            ParentPart = args["parent_part"].AsUUID();
-        if (args["sit_offset"] != null)
-            Vector3.TryParse(args["sit_offset"].AsString(), out SitOffset);
-                 */
-
-                SceneInterface scene;
-                if (m_Scenes.TryGetValue(childAgentData.RegionLocation.RegionHandle, out scene))
-                {
-                    IAgent agent;
-                    
-                    try
-                    {
-                        agent = scene.Agents[childAgentData.AgentID];
-                    }
-                    catch
-                    {
-                        req.ErrorResponse(HttpStatusCode.BadRequest, "Unknown message type");
-                        return;
-                    }
-
-                    try
-                    {
-                        agent.HandleMessage(childAgentData);
-                        using(HttpResponse res = req.BeginResponse())
-                        {
-
-                        }
-                    }
-                    catch
-                    {
-                        req.ErrorResponse(HttpStatusCode.BadRequest, "Unknown message type");
-                        return;
-                    }
-                }
-                else
-                {
-                    req.ErrorResponse(HttpStatusCode.UnsupportedMediaType, "Unknown message type");
-                }
+                AgentPostHandler_PUT_AgentData(req, agentID, regionID, action, param);
             }
             else if (msgType == "AgentPosition")
             {
-                ChildAgentPositionUpdate childAgentPosition = new ChildAgentPositionUpdate();
+                AgentPostHandler_PUT_AgentPosition(req, agentID, regionID, action, param);
+            }
+            else
+            {
+                req.ErrorResponse(HttpStatusCode.BadRequest, "Unknown message type");
+            }
+        }
 
-                UInt64 regionHandle;
-                if(!UInt64.TryParse(param["region_handle"].ToString(), out regionHandle))
+        void AgentPostHandler_PUT_AgentData(HttpRequest req, UUID agentID, UUID regionID, string action, Map param)
+        {
+            ChildAgentUpdate childAgentData = new ChildAgentUpdate();
+
+            childAgentData.RegionID = param["region_id"].AsUUID;
+            childAgentData.ViewerCircuitCode = param["circuit_code"].AsUInt;
+            childAgentData.AgentID = param["agent_uuid"].AsUUID;
+            childAgentData.SessionID = param["session_uuid"].AsUUID;
+            childAgentData.AgentPosition = param["position"].AsVector3;
+            childAgentData.AgentVelocity = param["velocity"].AsVector3;
+            childAgentData.Center = param["center"].AsVector3;
+            childAgentData.Size = param["size"].AsVector3;
+            childAgentData.AtAxis = param["at_axis"].AsVector3;
+            childAgentData.LeftAxis = param["left_axis"].AsVector3;
+            childAgentData.UpAxis = param["up_axis"].AsVector3;
+            /*
+
+
+    if (args.ContainsKey("wait_for_root") && args["wait_for_root"] != null)
+        SenderWantsToWaitForRoot = args["wait_for_root"].AsBoolean();
+             */
+
+            childAgentData.Far = param["far"].AsReal;
+            childAgentData.Aspect = param["aspect"].AsReal;
+            //childAgentData.Throttles = param["throttles"];
+            childAgentData.LocomotionState = param["locomotion_state"].AsUInt;
+            childAgentData.HeadRotation = param["head_rotation"].AsQuaternion;
+            childAgentData.BodyRotation = param["body_rotation"].AsQuaternion;
+            childAgentData.ControlFlags = (ControlFlags)param["control_flags"].AsUInt;
+            childAgentData.EnergyLevel = param["energy_level"].AsReal;
+            childAgentData.GodLevel = (byte)param["god_level"].AsUInt;
+            childAgentData.AlwaysRun = param["always_run"].AsBoolean;
+            childAgentData.PreyAgent = param["prey_agent"].AsUUID;
+            childAgentData.AgentAccess = (byte)param["agent_access"].AsUInt;
+            childAgentData.ActiveGroupID = param["active_group_id"].AsUUID;
+
+            if (param.ContainsKey("groups"))
+            {
+                AnArray groups = param["groups"] as AnArray;
+                if (groups != null)
+                {
+                    foreach (IValue gval in groups)
+                    {
+                        Map group = (Map)gval;
+                        ChildAgentUpdate.GroupDataEntry g = new ChildAgentUpdate.GroupDataEntry();
+                        g.AcceptNotices = group["accept_notices"].AsBoolean;
+                        UInt64 groupPowers;
+                        if (UInt64.TryParse(group["group_powers"].ToString(), out groupPowers))
+                        {
+                            g.GroupPowers = (GroupPowers)groupPowers;
+                            g.GroupID = group["group_id"].AsUUID;
+                            childAgentData.GroupData.Add(g);
+                        }
+                    }
+                }
+            }
+
+            if (param.ContainsKey("animations"))
+            {
+                AnArray anims = param["animations"] as AnArray;
+                if (anims != null)
+                {
+                    foreach (IValue aval in anims)
+                    {
+                        Map anim = (Map)aval;
+                        ChildAgentUpdate.AnimationDataEntry a = new ChildAgentUpdate.AnimationDataEntry();
+                        a.Animation = anim["animation"].AsUUID;
+                        a.ObjectID = anim["object_id"].AsUUID;
+                        childAgentData.AnimationData.Add(a);
+                    }
+                }
+            }
+            /*
+
+    if (args["default_animation"] != null)
+    {
+        try
+        {
+            DefaultAnim = new Animation((OSDMap)args["default_animation"]);
+        }
+        catch
+        {
+            DefaultAnim = null;
+        }
+    }
+
+    if (args["animation_state"] != null)
+    {
+        try
+        {
+            AnimState = new Animation((OSDMap)args["animation_state"]);
+        }
+        catch
+        {
+            AnimState = null;
+        }
+    }
+             * */
+
+            /*-----------------------------------------------------------------*/
+            /* Appearance */
+            Map appearancePack = (Map)param["packed_appearance"];
+            AppearanceInfo Appearance = new AppearanceInfo();
+            Appearance.AvatarHeight = appearancePack["height"].AsReal;
+
+            {
+                AnArray vParams = (AnArray)appearancePack["visualparams"];
+                byte[] visualParams = new byte[vParams.Count];
+
+                int i;
+                for (i = 0; i < vParams.Count; ++i)
+                {
+                    visualParams[i] = (byte)vParams[i].AsUInt;
+                }
+                Appearance.VisualParams = visualParams;
+            }
+
+            {
+                AnArray texArray = (AnArray)appearancePack["textures"];
+                int i;
+                for (i = 0; i < AppearanceInfo.AvatarTextureData.TextureCount; ++i)
+                {
+                    Appearance.AvatarTextures[i] = texArray[i].AsUUID;
+                }
+            }
+
+            {
+                int i;
+                uint n;
+                AnArray wearables = (AnArray)appearancePack["wearables"];
+                for (i = 0; i < (int)WearableType.NumWearables; ++i)
+                {
+                    AnArray ar;
+                    try
+                    {
+                        ar = (AnArray)wearables[i];
+                    }
+                    catch
+                    {
+                        continue;
+                    }
+                    n = 0;
+                    foreach (IValue val in ar)
+                    {
+                        Map wp = (Map)val;
+                        AgentWearables.WearableInfo wi = new AgentWearables.WearableInfo();
+                        wi.ItemID = wp["item"].AsUUID;
+                        wi.AssetID = wp.ContainsKey("asset") ? wp["Asset"].AsUUID : UUID.Zero;
+                        WearableType type = (WearableType)i;
+                        Appearance.Wearables[type, n++] = wi;
+                    }
+                }
+            }
+
+            {
+                foreach (IValue apv in (AnArray)appearancePack["attachments"])
+                {
+                    Map ap = (Map)apv;
+                    uint apid;
+                    if (uint.TryParse(ap["point"].ToString(), out apid))
+                    {
+                        Appearance.Attachments[(AttachmentPoint)apid][ap["item"].AsUUID] = UUID.Zero;
+                    }
+                }
+            }
+            Appearance.Serial = appearancePack["serial"].AsUInt;
+
+            /*
+    if ((args["controllers"] != null) && (args["controllers"]).Type == OSDType.Array)
+    {
+        OSDArray controls = (OSDArray)(args["controllers"]);
+        Controllers = new ControllerData[controls.Count];
+        int i = 0;
+        foreach (OSD o in controls)
+        {
+            if (o.Type == OSDType.Map)
+            {
+                Controllers[i++] = new ControllerData((OSDMap)o);
+             * 
+                public void UnpackUpdateMessage(OSDMap args)
+                {
+                    if (args["object"] != null)
+                        ObjectID = args["object"].AsUUID();
+                    if (args["item"] != null)
+                        ItemID = args["item"].AsUUID();
+                    if (args["ignore"] != null)
+                        IgnoreControls = (uint)args["ignore"].AsInteger();
+                    if (args["event"] != null)
+                        EventControls = (uint)args["event"].AsInteger();
+                }
+                             * 
+            }
+        }
+    }
+             */
+
+            /*
+    if (args["callback_uri"] != null)
+        CallbackURI = args["callback_uri"].AsString();
+             * */
+
+            /*
+    // Attachment objects
+    if (args["attach_objects"] != null && args["attach_objects"].Type == OSDType.Array)
+    {
+        OSDArray attObjs = (OSDArray)(args["attach_objects"]);
+        AttachmentObjects = new List<ISceneObject>();
+        AttachmentObjectStates = new List<string>();
+        foreach (OSD o in attObjs)
+        {
+            if (o.Type == OSDType.Map)
+            {
+                OSDMap info = (OSDMap)o;
+                ISceneObject so = scene.DeserializeObject(info["sog"].AsString());
+                so.ExtraFromXmlString(info["extra"].AsString());
+                so.HasGroupChanged = info["modified"].AsBoolean();
+                AttachmentObjects.Add(so);
+                AttachmentObjectStates.Add(info["state"].AsString());
+            }
+        }
+    }
+
+    if (args["parent_part"] != null)
+        ParentPart = args["parent_part"].AsUUID();
+    if (args["sit_offset"] != null)
+        Vector3.TryParse(args["sit_offset"].AsString(), out SitOffset);
+             */
+
+            SceneInterface scene;
+            if (m_Scenes.TryGetValue(childAgentData.RegionLocation.RegionHandle, out scene))
+            {
+                IAgent agent;
+
+                try
+                {
+                    agent = scene.Agents[childAgentData.AgentID];
+                }
+                catch
                 {
                     req.ErrorResponse(HttpStatusCode.BadRequest, "Unknown message type");
                     return;
                 }
-                childAgentPosition.RegionLocation.RegionHandle = regionHandle;
-                childAgentPosition.ViewerCircuitCode = param["circuit_code"].AsUInt;
-                childAgentPosition.AgentID = param["agent_uuid"].AsUUID;
-                childAgentPosition.SessionID = param["session_uuid"].AsUUID;
-                childAgentPosition.AgentPosition = param["position"].AsVector3;
-                childAgentPosition.AgentVelocity = param["velocity"].AsVector3;
-                childAgentPosition.Center = param["center"].AsVector3;
-                childAgentPosition.Size = param["size"].AsVector3;
-                childAgentPosition.AtAxis = param["at_axis"].AsVector3;
-                childAgentPosition.LeftAxis = param["left_axis"].AsVector3;
-                childAgentPosition.UpAxis = param["up_axis"].AsVector3;
-                childAgentPosition.ChangedGrid = param["changed_grid"].AsBoolean;
-                /* Far and Throttles are extra in opensim so we have to cope with these on sending */
 
-                SceneInterface scene;
-                if (m_Scenes.TryGetValue(childAgentPosition.RegionLocation.RegionHandle, out scene))
+                try
                 {
-                    IAgent agent;
-                    if(!scene.Agents.TryGetValue(childAgentPosition.AgentID, out agent))
+                    agent.HandleMessage(childAgentData);
+                    using (HttpResponse res = req.BeginResponse())
                     {
-                        req.ErrorResponse(HttpStatusCode.BadRequest, "Unknown message type");
-                        return;
-                    }
 
-                    try
-                    {
-                        agent.HandleMessage(childAgentPosition);
-                        using(HttpResponse res = req.BeginResponse())
-                        {
-
-                        }
-                    }
-                    catch
-                    {
-                        req.ErrorResponse(HttpStatusCode.BadRequest, "Unknown message type");
-                        return;
                     }
                 }
-                else
+                catch
                 {
                     req.ErrorResponse(HttpStatusCode.BadRequest, "Unknown message type");
+                    return;
+                }
+            }
+            else
+            {
+                req.ErrorResponse(HttpStatusCode.UnsupportedMediaType, "Unknown message type");
+            }
+        }
+
+        void AgentPostHandler_PUT_AgentPosition(HttpRequest req, UUID agentID, UUID regionID, string action, Map param)
+        {
+            ChildAgentPositionUpdate childAgentPosition = new ChildAgentPositionUpdate();
+
+            UInt64 regionHandle;
+            if (!UInt64.TryParse(param["region_handle"].ToString(), out regionHandle))
+            {
+                req.ErrorResponse(HttpStatusCode.BadRequest, "Unknown message type");
+                return;
+            }
+            childAgentPosition.RegionLocation.RegionHandle = regionHandle;
+            childAgentPosition.ViewerCircuitCode = param["circuit_code"].AsUInt;
+            childAgentPosition.AgentID = param["agent_uuid"].AsUUID;
+            childAgentPosition.SessionID = param["session_uuid"].AsUUID;
+            childAgentPosition.AgentPosition = param["position"].AsVector3;
+            childAgentPosition.AgentVelocity = param["velocity"].AsVector3;
+            childAgentPosition.Center = param["center"].AsVector3;
+            childAgentPosition.Size = param["size"].AsVector3;
+            childAgentPosition.AtAxis = param["at_axis"].AsVector3;
+            childAgentPosition.LeftAxis = param["left_axis"].AsVector3;
+            childAgentPosition.UpAxis = param["up_axis"].AsVector3;
+            childAgentPosition.ChangedGrid = param["changed_grid"].AsBoolean;
+            /* Far and Throttles are extra in opensim so we have to cope with these on sending */
+
+            SceneInterface scene;
+            if (m_Scenes.TryGetValue(childAgentPosition.RegionLocation.RegionHandle, out scene))
+            {
+                IAgent agent;
+                if (!scene.Agents.TryGetValue(childAgentPosition.AgentID, out agent))
+                {
+                    req.ErrorResponse(HttpStatusCode.BadRequest, "Unknown message type");
+                    return;
+                }
+
+                try
+                {
+                    agent.HandleMessage(childAgentPosition);
+                    using (HttpResponse res = req.BeginResponse())
+                    {
+
+                    }
+                }
+                catch
+                {
+                    req.ErrorResponse(HttpStatusCode.BadRequest, "Unknown message type");
+                    return;
                 }
             }
             else
@@ -1353,12 +1369,9 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
             }
 
             response.Add("success", success);
-            _result.Add("success", success);
-            _result.Add("reason", reason);
-            _result.Add("Message", reason);
+            response.Add("reason", reason);
             /* CAUTION! never ever make version parameters a configuration parameter */
-            _result.Add("version", PROTOCOL_VERSION);
-            response.Add("_Result", _result);
+            response.Add("version", PROTOCOL_VERSION);
             using(HttpResponse res = req.BeginResponse(HttpStatusCode.OK, "OK"))
             {
                 using(Stream s = res.GetOutputStream())
