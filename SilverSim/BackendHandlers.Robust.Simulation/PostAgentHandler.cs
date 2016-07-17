@@ -110,11 +110,13 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
         readonly RwLockedList<GridParameterMap> m_GridParameterMap = new RwLockedList<GridParameterMap>();
 
         readonly string m_AgentBaseURL = "/agent/";
+        bool m_UnsafeOpenSimCompatibility = false;
 
         public PostAgentHandler(IConfig ownSection)
         {
             m_DefaultGridUserServerURI = ownSection.GetString("DefaultGridUserServerURI", string.Empty);
             m_DefaultPresenceServerURI = ownSection.GetString("DefaultPresenceServerURI", string.Empty);
+            m_UnsafeOpenSimCompatibility = ownSection.GetBoolean("UnsafeOpensimCompatibility", false);
         }
 
         protected PostAgentHandler(string agentBaseURL, IConfig ownSection)
@@ -528,17 +530,24 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
             }
 
             UserAgentServiceInterface userAccountConnector = new RobustUserAgentConnector(agentPost.Account.ServiceURLs["HomeURI"]);
-            try
+            if (!string.IsNullOrEmpty(agentPost.Session.ServiceSessionID) || !m_UnsafeOpenSimCompatibility)
             {
-                userAccountConnector.VerifyAgent(agentPost.Session.SessionID, agentPost.Session.ServiceSessionID);
-            }
-            catch
+                try
+                {
+                    userAccountConnector.VerifyAgent(agentPost.Session.SessionID, agentPost.Session.ServiceSessionID);
+                }
+                catch
 #if DEBUG
                 (Exception e)
 #endif
+                {
+                    DoAgentResponse(req, "Failed to verify agent at Home Grid", false);
+                    return;
+                }
+            }
+            else
             {
-                DoAgentResponse(req, "Failed to verify agent at Home Grid", false);
-                return;
+                m_Log.WarnFormat("Unsafe OpenSim protocol in use for agent {0}.", agentPost.Account.Principal.FullName);
             }
 
             try
