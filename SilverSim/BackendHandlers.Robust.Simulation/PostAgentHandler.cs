@@ -511,7 +511,7 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
             {
                 presenceService = string.IsNullOrEmpty(m_DefaultPresenceServerURI) ?
                     (PresenceServiceInterface)new RobustHGOnlyPresenceConnector(agentPost.Account.Principal.HomeURI.ToString()) :
-                    (PresenceServiceInterface)new RobustHGPresenceConnector(m_DefaultPresenceServerURI, agentPost.Account.Principal.HomeURI.ToString());
+                    new RobustHGPresenceConnector(m_DefaultPresenceServerURI, agentPost.Account.Principal.HomeURI.ToString());
             }
             userAgentService = new RobustUserAgentConnector(agentPost.Account.Principal.HomeURI.ToString());
 
@@ -824,7 +824,8 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
             }
 
             Map param = (Map)json;
-            string msgType = param["messageType"].ToString();
+            string msgType;
+            msgType = param.ContainsKey("message_type") ? param["message_type"].ToString() : "AgentData";
             if (msgType == "AgentData")
             {
                 AgentPostHandler_PUT_AgentData(req, agentID, regionID, action, param);
@@ -843,17 +844,40 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
         {
             ChildAgentUpdate childAgentData = new ChildAgentUpdate();
 
+            UUID destinationRegionID = param["destination_uuid"].AsUUID;
+
             childAgentData.RegionID = param["region_id"].AsUUID;
             childAgentData.ViewerCircuitCode = param["circuit_code"].AsUInt;
             childAgentData.AgentID = param["agent_uuid"].AsUUID;
             childAgentData.SessionID = param["session_uuid"].AsUUID;
-            childAgentData.AgentPosition = param["position"].AsVector3;
-            childAgentData.AgentVelocity = param["velocity"].AsVector3;
-            childAgentData.Center = param["center"].AsVector3;
-            childAgentData.Size = param["size"].AsVector3;
-            childAgentData.AtAxis = param["at_axis"].AsVector3;
-            childAgentData.LeftAxis = param["left_axis"].AsVector3;
-            childAgentData.UpAxis = param["up_axis"].AsVector3;
+            if (param.ContainsKey("position"))
+            {
+                childAgentData.AgentPosition = param["position"].AsVector3;
+            }
+            if (param.ContainsKey("velocity"))
+            {
+                childAgentData.AgentVelocity = param["velocity"].AsVector3;
+            }
+            if (param.ContainsKey("center"))
+            {
+                childAgentData.Center = param["center"].AsVector3;
+            }
+            if (param.ContainsKey("size"))
+            {
+                childAgentData.Size = param["size"].AsVector3;
+            }
+            if (param.ContainsKey("at_axis"))
+            {
+                childAgentData.AtAxis = param["at_axis"].AsVector3;
+            }
+            if (param.ContainsKey("left_axis"))
+            {
+                childAgentData.LeftAxis = param["left_axis"].AsVector3;
+            }
+            if (param.ContainsKey("up_axis"))
+            {
+                childAgentData.UpAxis = param["up_axis"].AsVector3;
+            }
             /*
 
 
@@ -861,19 +885,52 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
         SenderWantsToWaitForRoot = args["wait_for_root"].AsBoolean();
              */
 
-            childAgentData.Far = param["far"].AsReal;
-            childAgentData.Aspect = param["aspect"].AsReal;
+            if (param.ContainsKey("far"))
+            {
+                childAgentData.Far = param["far"].AsReal;
+            }
+            if (param.ContainsKey("aspect"))
+            {
+                childAgentData.Aspect = param["aspect"].AsReal;
+            }
             //childAgentData.Throttles = param["throttles"];
             childAgentData.LocomotionState = param["locomotion_state"].AsUInt;
-            childAgentData.HeadRotation = param["head_rotation"].AsQuaternion;
-            childAgentData.BodyRotation = param["body_rotation"].AsQuaternion;
-            childAgentData.ControlFlags = (ControlFlags)param["control_flags"].AsUInt;
-            childAgentData.EnergyLevel = param["energy_level"].AsReal;
-            childAgentData.GodLevel = (byte)param["god_level"].AsUInt;
-            childAgentData.AlwaysRun = param["always_run"].AsBoolean;
-            childAgentData.PreyAgent = param["prey_agent"].AsUUID;
-            childAgentData.AgentAccess = (byte)param["agent_access"].AsUInt;
-            childAgentData.ActiveGroupID = param["active_group_id"].AsUUID;
+            if (param.ContainsKey("head_rotation"))
+            {
+                childAgentData.HeadRotation = param["head_rotation"].AsQuaternion;
+            }
+            if (param.ContainsKey("body_rotation"))
+            {
+                childAgentData.BodyRotation = param["body_rotation"].AsQuaternion;
+            }
+            if (param.ContainsKey("control_flags"))
+            {
+                childAgentData.ControlFlags = (ControlFlags)param["control_flags"].AsUInt;
+            }
+            if (param.ContainsKey("energy_level"))
+            {
+                childAgentData.EnergyLevel = param["energy_level"].AsReal;
+            }
+            if (param.ContainsKey("god_level"))
+            {
+                childAgentData.GodLevel = (byte)param["god_level"].AsUInt;
+            }
+            if (param.ContainsKey("always_run"))
+            {
+                childAgentData.AlwaysRun = param["always_run"].AsBoolean;
+            }
+            if (param.ContainsKey("prey_agent"))
+            {
+                childAgentData.PreyAgent = param["prey_agent"].AsUUID;
+            }
+            if (param.ContainsKey("agent_access"))
+            {
+                childAgentData.AgentAccess = (byte)param["agent_access"].AsUInt;
+            }
+            if (param.ContainsKey("active_group_id"))
+            {
+                childAgentData.ActiveGroupID = param["active_group_id"].AsUUID;
+            }
 
             if (param.ContainsKey("groups"))
             {
@@ -986,7 +1043,7 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
                         Map wp = (Map)val;
                         AgentWearables.WearableInfo wi = new AgentWearables.WearableInfo();
                         wi.ItemID = wp["item"].AsUUID;
-                        wi.AssetID = wp.ContainsKey("asset") ? wp["Asset"].AsUUID : UUID.Zero;
+                        wi.AssetID = wp.ContainsKey("asset") ? wp["asset"].AsUUID : UUID.Zero;
                         WearableType type = (WearableType)i;
                         Appearance.Wearables[type, n++] = wi;
                     }
@@ -1068,7 +1125,7 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
              */
 
             SceneInterface scene;
-            if (m_Scenes.TryGetValue(childAgentData.RegionLocation.RegionHandle, out scene))
+            if (m_Scenes.TryGetValue(destinationRegionID, out scene))
             {
                 IAgent agent;
 
@@ -1098,13 +1155,14 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
             }
             else
             {
-                req.ErrorResponse(HttpStatusCode.UnsupportedMediaType, "Unknown message type");
+                req.ErrorResponse(HttpStatusCode.BadRequest, "Scene not found");
             }
         }
 
         void AgentPostHandler_PUT_AgentPosition(HttpRequest req, UUID agentID, UUID regionID, string action, Map param)
         {
             ChildAgentPositionUpdate childAgentPosition = new ChildAgentPositionUpdate();
+            UUID destinationRegionID = param["destination_uuid"].AsUUID;
 
             UInt64 regionHandle;
             if (!UInt64.TryParse(param["region_handle"].ToString(), out regionHandle))
@@ -1127,7 +1185,7 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
             /* Far and Throttles are extra in opensim so we have to cope with these on sending */
 
             SceneInterface scene;
-            if (m_Scenes.TryGetValue(childAgentPosition.RegionLocation.RegionHandle, out scene))
+            if (m_Scenes.TryGetValue(destinationRegionID, out scene))
             {
                 IAgent agent;
                 if (!scene.Agents.TryGetValue(childAgentPosition.AgentID, out agent))
@@ -1152,7 +1210,7 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
             }
             else
             {
-                req.ErrorResponse(HttpStatusCode.BadRequest, "Unknown message type");
+                req.ErrorResponse(HttpStatusCode.BadRequest, "Scene not found");
             }
         }
 
