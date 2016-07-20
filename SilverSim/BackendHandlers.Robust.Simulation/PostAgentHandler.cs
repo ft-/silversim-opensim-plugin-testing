@@ -1135,27 +1135,73 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
                 }
                 catch
                 {
-                    req.ErrorResponse(HttpStatusCode.BadRequest, "Unknown message type");
+                    using (HttpResponse res = req.BeginResponse())
+                    {
+                        using (StreamWriter s = res.GetOutputStream().UTF8StreamWriter())
+                        {
+                            s.Write(false.ToString());
+                        }
+                    }
                     return;
+                }
+
+                bool waitForRoot = param.ContainsKey("wait_for_root") && param["wait_for_root"].AsBoolean;
+                if (waitForRoot)
+                {
+                    /* we attach the responder to the agent */
+                    agent.AddWaitForRoot(scene, AgentPostHandler_PUT_WaitForRoot_Handler, req);
+                }
+
+                if(param.ContainsKey("callback_uri"))
+                {
+                    agent.AddWaitForRoot(scene, AgentPostHandler_PUT_WaitForRoot_CallbackURI, param["callback_uri"].ToString());
                 }
 
                 try
                 {
                     agent.HandleMessage(childAgentData);
-                    using (HttpResponse res = req.BeginResponse())
-                    {
-
-                    }
                 }
                 catch
                 {
                     req.ErrorResponse(HttpStatusCode.BadRequest, "Unknown message type");
                     return;
                 }
+
+                if (!waitForRoot)
+                {
+                    using (HttpResponse res = req.BeginResponse())
+                    {
+                        using (StreamWriter s = res.GetOutputStream().UTF8StreamWriter())
+                        {
+                            s.Write(true.ToString());
+                        }
+                    }
+                }
             }
             else
             {
                 req.ErrorResponse(HttpStatusCode.BadRequest, "Scene not found");
+            }
+        }
+
+        void AgentPostHandler_PUT_WaitForRoot_Handler(object o, bool success)
+        {
+            HttpRequest req = (HttpRequest)o;
+            req.SetConnectionClose();
+            using (HttpResponse res = req.BeginResponse())
+            {
+                using (StreamWriter s = res.GetOutputStream().UTF8StreamWriter())
+                {
+                    s.Write(success.ToString());
+                }
+            }
+        }
+
+        void AgentPostHandler_PUT_WaitForRoot_CallbackURI(object o, bool success)
+        {
+            if (success)
+            {
+                HttpRequestHandler.DoRequest("DELETE", (string)o, null, string.Empty, string.Empty, false, 10000);
             }
         }
 
@@ -1190,7 +1236,13 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
                 IAgent agent;
                 if (!scene.Agents.TryGetValue(childAgentPosition.AgentID, out agent))
                 {
-                    req.ErrorResponse(HttpStatusCode.BadRequest, "Unknown message type");
+                    using (HttpResponse res = req.BeginResponse())
+                    {
+                        using (StreamWriter s = res.GetOutputStream().UTF8StreamWriter())
+                        {
+                            s.Write(false.ToString());
+                        }
+                    }
                     return;
                 }
 
@@ -1199,7 +1251,10 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
                     agent.HandleMessage(childAgentPosition);
                     using (HttpResponse res = req.BeginResponse())
                     {
-
+                        using (StreamWriter s = res.GetOutputStream().UTF8StreamWriter())
+                        {
+                            s.Write(true.ToString());
+                        }
                     }
                 }
                 catch
