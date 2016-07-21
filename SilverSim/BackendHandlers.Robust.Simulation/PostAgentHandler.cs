@@ -1153,11 +1153,6 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
                 }
 
                 bool waitForRoot = param.ContainsKey("wait_for_root") && param["wait_for_root"].AsBoolean;
-                if (waitForRoot)
-                {
-                    /* we attach the responder to the agent */
-                    agent.AddWaitForRoot(scene, AgentPostHandler_PUT_WaitForRoot_Handler, req);
-                }
 
                 if(param.ContainsKey("callback_uri"))
                 {
@@ -1174,52 +1169,24 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
                     return;
                 }
 
-                if (!waitForRoot)
+                using (HttpResponse res = req.BeginResponse())
                 {
-                    using (HttpResponse res = req.BeginResponse())
+                    using (StreamWriter s = res.GetOutputStream().UTF8StreamWriter())
                     {
-                        using (StreamWriter s = res.GetOutputStream().UTF8StreamWriter())
+                        if (waitForRoot)
+                        {
+                            s.Write(agent.IsInScene(scene).ToString());
+                        }
+                        else
                         {
                             s.Write(true.ToString());
                         }
                     }
                 }
-                else
-                {
-                    throw new HttpResponse.DisconnectFromThreadException();
-                }
             }
             else
             {
                 req.ErrorResponse(HttpStatusCode.BadRequest, "Scene not found");
-            }
-        }
-
-        void AgentPostHandler_PUT_WaitForRoot_Handler(object o, bool success)
-        {
-            HttpRequest req = (HttpRequest)o;
-            req.SetConnectionClose();
-            try
-            {
-                using (HttpResponse res = req.BeginResponse())
-                {
-                    using (StreamWriter s = res.GetOutputStream().UTF8StreamWriter())
-                    {
-                        s.Write(success.ToString());
-                    }
-                }
-            }
-            catch
-            {
-                /* we need to ignore eventual exceptions since we are not running inside HttpServer context */
-            }
-            try
-            {
-                req.Close();
-            }
-            catch
-            {
-                /* we need to ignore eventual exceptions since we are not running inside HttpServer context */
             }
         }
 
