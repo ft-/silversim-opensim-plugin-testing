@@ -1206,7 +1206,14 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
             {
                 /* we need to ignore eventual exceptions since we are not running inside HttpServer context */
             }
-            req.Close();
+            try
+            {
+                req.Close();
+            }
+            catch
+            {
+                /* we need to ignore eventual exceptions since we are not running inside HttpServer context */
+            }
         }
 
         void AgentPostHandler_PUT_WaitForRoot_CallbackURI(object o, bool success)
