@@ -1177,6 +1177,10 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
                         }
                     }
                 }
+                else
+                {
+                    throw new HttpResponse.DisconnectFromThreadException();
+                }
             }
             else
             {
@@ -1188,13 +1192,21 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
         {
             HttpRequest req = (HttpRequest)o;
             req.SetConnectionClose();
-            using (HttpResponse res = req.BeginResponse())
+            try
             {
-                using (StreamWriter s = res.GetOutputStream().UTF8StreamWriter())
+                using (HttpResponse res = req.BeginResponse())
                 {
-                    s.Write(success.ToString());
+                    using (StreamWriter s = res.GetOutputStream().UTF8StreamWriter())
+                    {
+                        s.Write(success.ToString());
+                    }
                 }
             }
+            catch
+            {
+                /* we need to ignore eventual exceptions since we are not running inside HttpServer context */
+            }
+            req.Close();
         }
 
         void AgentPostHandler_PUT_WaitForRoot_CallbackURI(object o, bool success)
