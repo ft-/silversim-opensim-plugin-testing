@@ -963,7 +963,10 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
                         Map anim = (Map)aval;
                         ChildAgentUpdate.AnimationDataEntry a = new ChildAgentUpdate.AnimationDataEntry();
                         a.Animation = anim["animation"].AsUUID;
-                        a.ObjectID = anim["object_id"].AsUUID;
+                        if (anim.ContainsKey("object_id"))
+                        {
+                            a.ObjectID = anim["object_id"].AsUUID;
+                        }
                         childAgentData.AnimationData.Add(a);
                     }
                 }
@@ -1061,7 +1064,11 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
                     }
                 }
             }
-            Appearance.Serial = appearancePack["serial"].AsUInt;
+
+            if (appearancePack.ContainsKey("serial"))
+            {
+                Appearance.Serial = appearancePack["serial"].AsUInt;
+            }
 
             /*
     if ((args["controllers"] != null) && (args["controllers"]).Type == OSDType.Array)
