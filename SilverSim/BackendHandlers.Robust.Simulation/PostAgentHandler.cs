@@ -1154,6 +1154,12 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
 
                 bool waitForRoot = param.ContainsKey("wait_for_root") && param["wait_for_root"].AsBoolean;
 
+                if(waitForRoot)
+                {
+                    req.SetConnectionClose();
+                    agent.AddWaitForRoot(scene, AgentPostHandler_PUT_WaitForRoot_HttpResponse, req);
+                }
+
                 if(param.ContainsKey("callback_uri"))
                 {
                     agent.AddWaitForRoot(scene, AgentPostHandler_PUT_WaitForRoot_CallbackURI, param["callback_uri"].ToString());
@@ -1169,19 +1175,19 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
                     return;
                 }
 
-                using (HttpResponse res = req.BeginResponse())
+                if (!waitForRoot)
                 {
-                    using (StreamWriter s = res.GetOutputStream().UTF8StreamWriter())
+                    using (HttpResponse res = req.BeginResponse())
                     {
-                        if (waitForRoot)
-                        {
-                            s.Write(agent.IsInScene(scene).ToString());
-                        }
-                        else
+                        using (StreamWriter s = res.GetOutputStream().UTF8StreamWriter())
                         {
                             s.Write(true.ToString());
                         }
                     }
+                }
+                else
+                {
+                    throw new HttpResponse.DisconnectFromThreadException();
                 }
             }
             else
@@ -1190,11 +1196,41 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
             }
         }
 
+        void AgentPostHandler_PUT_WaitForRoot_HttpResponse(object o, bool success)
+        {
+#if DEBUG
+            m_Log.DebugFormat("respond to WaitForRoot PUT agent with {0}", success.ToString());
+#endif
+            HttpRequest req = (HttpRequest)o;
+            try
+            {
+                using (HttpResponse res = req.BeginResponse())
+                {
+                    using (StreamWriter s = res.GetOutputStream().UTF8StreamWriter())
+                    {
+                        s.Write(success.ToString());
+                    }
+                }
+            }
+            catch
+            {
+                /* we are outside of HTTP Server context so we have to catch */
+            }
+        }
+
         void AgentPostHandler_PUT_WaitForRoot_CallbackURI(object o, bool success)
         {
             if (success)
             {
-                HttpRequestHandler.DoRequest("DELETE", (string)o, null, string.Empty, string.Empty, false, 10000);
+                try
+                {
+                    HttpRequestHandler.DoRequest("DELETE", (string)o, null, string.Empty, string.Empty, false, 10000);
+                }
+                catch(Exception e)
+                {
+                    /* do not pass the exceptions */
+                    m_Log.WarnFormat("Exception encountered when calling CallbackURI: {0}: {1}", e.GetType().FullName, e.Message);
+                }
             }
         }
 
