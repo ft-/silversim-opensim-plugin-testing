@@ -243,8 +243,34 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
             agent.ActiveChilds.Remove(regionInfo.ID);
         }
 
+        #region Teleport Initiators
         public virtual new bool TeleportHome(SceneInterface sceneInterface, IAgent agent)
         {
+            lock (m_TeleportThreadLock)
+            {
+                if (null == m_TeleportThread)
+                {
+                    m_TeleportThread = new Thread(delegate ()
+                    {
+                        try
+                        {
+                            DestinationInfo dInfo = agent.UserAgentService.GetHomeRegion(agent.Owner);
+                            TeleportTo_Step2(sceneInterface, agent, dInfo, dInfo.Position, dInfo.LookAt, TeleportFlags.ViaHome);
+                        }
+                        catch (TeleportFailedException e)
+                        {
+                            agent.SendAlertMessage(e.Message, sceneInterface.ID);
+                        }
+                        finally
+                        {
+                            agent.RemoveActiveTeleportService(this);
+                        }
+                    });
+                    agent.ActiveTeleportService = this;
+                    m_TeleportThread.Start();
+                    return true;
+                }
+            }
             return false;
         }
 
@@ -399,7 +425,9 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
             }
             return false;
         }
+        #endregion
 
+        #region Teleport variations setup
         void TeleportTo_Step1_RegionNameLookup(SceneInterface sceneInterface, IAgent agent, string regionName, Vector3 position, Vector3 lookAt, TeleportFlags flags)
         {
             DestinationInfo dInfo = null;
@@ -540,6 +568,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
             agent.SendAlertMessage(this.GetLanguageString(agent.CurrentCulture, "TeleportNotSupported", "Teleport via location not supported into HG"), sceneInterface.ID);
             agent.RemoveActiveTeleportService(this);
         }
+        #endregion
 
         void TeleportTo_Step2(SceneInterface scene, IAgent agent, DestinationInfo dInfo, Vector3 position, Vector3 lookAt, TeleportFlags flags)
         {
@@ -586,15 +615,15 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
             dInfo.LocalToGrid = false;
             if (response.ContainsKey("x"))
             {
-                dInfo.Location.GridX = (ushort)response["x"].AsUInt;
+                dInfo.Location.X = (ushort)response["x"].AsUInt;
             }
             if (response.ContainsKey("y"))
             {
-                dInfo.Location.GridY = (ushort)response["y"].AsUInt;
+                dInfo.Location.Y = (ushort)response["y"].AsUInt;
             }
             if(response.ContainsKey("size_x"))
             {
-                dInfo.Size.GridX = (ushort)response["size_x"].AsUInt;
+                dInfo.Size.X = (ushort)response["size_x"].AsUInt;
             }
             else
             {
@@ -602,7 +631,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
             }
             if (response.ContainsKey("size_y"))
             {
-                dInfo.Size.GridY = (ushort)response["size_y"].AsUInt;
+                dInfo.Size.Y = (ushort)response["size_y"].AsUInt;
             }
             else
             {
