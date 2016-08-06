@@ -5,6 +5,7 @@ using SilverSim.Main.Common;
 using SilverSim.Main.Common.Rpc;
 using SilverSim.ServiceInterfaces.UserAgents;
 using SilverSim.Types;
+using SilverSim.Types.Grid;
 using SilverSim.Types.StructuredData.XmlRpc;
 using System;
 using System.Collections.Generic;
@@ -166,6 +167,11 @@ namespace SilverSim.BackendConnectors.Robust.UserAgent
             }
 
             throw new KeyNotFoundException();
+        }
+
+        public override DestinationInfo GetHomeRegion(UUI user)
+        {
+            throw new NotSupportedException();
         }
 
         void DoXmlRpcWithBoolResponse(string method, Map reqparams)
