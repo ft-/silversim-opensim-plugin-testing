@@ -1177,11 +1177,14 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
 
                 if (!waitForRoot)
                 {
-                    using (HttpResponse res = req.BeginResponse())
+                    string resultStr = true.ToString();
+                    byte[] resultBytes = resultStr.ToUTF8Bytes();
+
+                    using (HttpResponse res = req.BeginResponse("text/plain"))
                     {
-                        using (StreamWriter s = res.GetOutputStream().UTF8StreamWriter())
+                        using (Stream s = res.GetOutputStream(resultBytes.Length))
                         {
-                            s.Write(true.ToString());
+                            s.Write(resultBytes, 0, resultBytes.Length);
                         }
                     }
                 }
@@ -1204,13 +1207,23 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
             HttpRequest req = (HttpRequest)o;
             try
             {
-                using (HttpResponse res = req.BeginResponse())
+                string resultStr = success.ToString();
+                byte[] resultBytes = resultStr.ToUTF8Bytes();
+                using (HttpResponse res = req.BeginResponse("text/plain"))
                 {
-                    using (StreamWriter s = res.GetOutputStream().UTF8StreamWriter())
+                    using (Stream s = res.GetOutputStream(resultBytes.Length))
                     {
-                        s.Write(success.ToString());
+                        s.Write(resultBytes, 0, resultBytes.Length);
                     }
                 }
+            }
+            catch
+            {
+                /* we are outside of HTTP Server context so we have to catch */
+            }
+            try
+            {
+                req.Close();
             }
             catch
             {
