@@ -1005,7 +1005,7 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
             Appearance.AvatarHeight = appearancePack["height"].AsReal;
 
             {
-                AnArray vParams = (AnArray)appearancePack["visualparams"];
+                AnArray vParams = (AnArray)appearancePack["visual_params"];
                 byte[] visualParams = new byte[vParams.Count];
 
                 int i;

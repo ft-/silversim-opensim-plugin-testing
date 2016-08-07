@@ -25,6 +25,8 @@
   <Reference name="SilverSim.Scene.Management" localCopy="false"/>
   <Reference name="Nini" path="../../bin/" localCopy="false"/>
   <Reference name="SilverSim.Threading" localCopy="false"/>
+  <Reference name="SilverSim.Viewer.Messages" localCopy="false"/>
+  <Reference name="SilverSim.Viewer.Core" localCopy="false"/>
   <Files>
     <Match pattern="*.cs" recurse="true">
         <Exclude pattern="TemporaryGeneratedFile"/>
