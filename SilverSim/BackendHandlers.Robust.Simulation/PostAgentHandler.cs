@@ -693,6 +693,7 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
                 agent.ServiceURLs,
                 gatekeeperURI,
                 m_PacketHandlerPlugins);
+            circuit.LastTeleportFlags = agentPost.Destination.TeleportFlags;
             IPAddress ipAddr;
             if(!IPAddress.TryParse(agentPost.Client.ClientIP, out ipAddr))
             {

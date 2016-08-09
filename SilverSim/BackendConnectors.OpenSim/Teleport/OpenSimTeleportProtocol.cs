@@ -693,11 +693,11 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
                     AgentChildInfo childInfo;
                     ViewerAgent vagent = (ViewerAgent)agent;
                     AgentCircuit circ = vagent.Circuits[sceneID];
-
+                    AgentCircuit targetCircuit;
                     if (!neighbors.TryGetValue(dInfo.ID, out childInfo))
                     {
                         string seedUri = NewCapsURL(dInfo.ServerURI);
-                        AgentCircuit circuit = new AgentCircuit(
+                        targetCircuit = new AgentCircuit(
                             m_Commands,
                             vagent,
                             (UDPCircuitsManager)scene.UDPServer,
@@ -708,11 +708,12 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
                             dInfo.GatekeeperURI,
                             m_PacketHandlerPlugins);
                         IPEndPoint ep = new IPEndPoint(((IPEndPoint)circ.RemoteEndPoint).Address, 0);
-                        circuit.RemoteEndPoint = ep;
-                        circuit.Agent = vagent;
-                        circuit.AgentID = vagent.ID;
-                        circuit.SessionID = vagent.Session.SessionID;
-                        vagent.Circuits.Add(circuit.CircuitCode, circuit.Scene.ID, circuit);
+                        targetCircuit.RemoteEndPoint = ep;
+                        targetCircuit.Agent = vagent;
+                        targetCircuit.AgentID = vagent.ID;
+                        targetCircuit.SessionID = vagent.Session.SessionID;
+                        targetCircuit.LastTeleportFlags = flags;
+                        vagent.Circuits.Add(targetCircuit.CircuitCode, targetCircuit.Scene.ID, targetCircuit);
 
                         SendTeleportProgress(agent, sceneID, this.GetLanguageString(agent.CurrentCulture, "TransferingToDestination", "Transfering to destination"), flags);
 
@@ -729,8 +730,14 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
                         teleFinish.RegionSize = dInfo.Size;
                         agent.SendMessageIfRootAgent(teleFinish, scene.ID);
                     }
+                    else if(!vagent.Circuits.TryGetValue(dInfo.ID, out targetCircuit))
+                    {
+                        throw new TeleportFailedException(this.GetLanguageString(agent.CurrentCulture, "LocalTeleportDestinationNotAvailable", "Local teleport destination not available"));
+                    }
                     else
                     {
+                        targetCircuit.LastTeleportFlags = flags;
+
                         SendTeleportProgress(agent, sceneID, this.GetLanguageString(agent.CurrentCulture, "TransferingToDestination", "Transfering to destination"), flags);
 
                         /* the moment we send this, there is no way to get the viewer back if something fails and the viewer connected successfully on other side */
