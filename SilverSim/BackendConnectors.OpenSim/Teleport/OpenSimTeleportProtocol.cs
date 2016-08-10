@@ -1,6 +1,7 @@
 ﻿// SilverSim is distributed under the terms of the
 // GNU Affero General Public License v3
 
+using log4net;
 using SilverSim.BackendConnectors.Robust.StructuredData.Agent;
 using SilverSim.Http.Client;
 using SilverSim.Main.Common;
@@ -29,13 +30,13 @@ using System.IO.Compression;
 using System.Net;
 using System.Runtime.Serialization;
 using System.Threading;
-using static SilverSim.Types.Agent.AgentWearables;
 
 namespace SilverSim.BackendConnectors.OpenSim.Teleport
 {
     [Description("OpenSim Teleport Protocol")]
     public class OpenSimTeleportProtocol : TeleportHandlerServiceInterface, IPlugin
     {
+        protected static readonly ILog m_Log = LogManager.GetLogger("OPENSIM TELEPORT PROTOCOL");
         private static Random m_RandomNumber = new Random();
         private static object m_RandomNumberLock = new object();
         public int TimeoutMs = 30000;
@@ -285,12 +286,14 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
         }
 
         #region Teleport Initiators
-        public virtual new bool TeleportHome(SceneInterface sceneInterface, IAgent agent)
+        public override bool TeleportHome(SceneInterface sceneInterface, IAgent agent)
         {
             lock (m_TeleportThreadLock)
             {
                 if (null == m_TeleportThread)
                 {
+                    m_Log.DebugFormat("Teleport home requested for {0}", agent.Owner.FullName);
+
                     m_TeleportThread = new Thread(delegate ()
                     {
                         try
@@ -311,17 +314,23 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
                     m_TeleportThread.Start();
                     return true;
                 }
+                else
+                {
+                    m_Log.DebugFormat("Teleport home requested for {0} not possible", agent.Owner.FullName);
+                }
             }
             return false;
         }
 
-        public virtual new bool TeleportTo(SceneInterface sceneInterface, IAgent agent, string regionName, Vector3 position, Vector3 lookAt, TeleportFlags flags)
+        public override bool TeleportTo(SceneInterface sceneInterface, IAgent agent, string regionName, Vector3 position, Vector3 lookAt, TeleportFlags flags)
         {
             /* foreign grid */
             lock (m_TeleportThreadLock)
             {
                 if (null == m_TeleportThread)
                 {
+                    m_Log.DebugFormat("Teleport to {0} requested for {1}", regionName, agent.Owner.FullName);
+
                     m_TeleportThread = new Thread(delegate ()
                     {
                         DestinationInfo dInfo;
@@ -358,19 +367,25 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
                     m_TeleportThread.Start();
                     return true;
                 }
+                else
+                {
+                    m_Log.DebugFormat("Teleport to {0} requested for {1} not possible", regionName, agent.Owner.FullName);
+                }
             }
             return false;
         }
 
-        public virtual new bool TeleportTo(SceneInterface sceneInterface, IAgent agent, string gatekeeperURI, GridVector location, Vector3 position, Vector3 lookAt, TeleportFlags flags)
+        public override bool TeleportTo(SceneInterface sceneInterface, IAgent agent, string gatekeeperURI, GridVector location, Vector3 position, Vector3 lookAt, TeleportFlags flags)
         {
             if (gatekeeperURI == sceneInterface.GatekeeperURI)
             {
                 /* same grid */
                 lock (m_TeleportThreadLock)
                 {
-                    if (null == m_TeleportThreadLock)
+                    if (null == m_TeleportThread)
                     {
+                        m_Log.DebugFormat("Teleport to this grid at {0} requested for {1}", location.ToString(), agent.Owner.FullName);
+
                         m_TeleportThread = new Thread(delegate ()
                         {
                             DestinationInfo dInfo;
@@ -407,6 +422,10 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
                         m_TeleportThread.Start();
                         return true;
                     }
+                    else
+                    {
+                        m_Log.DebugFormat("Teleport to this grid at {0} requested for {1} not possible", location.ToString(), agent.Owner.FullName);
+                    }
                 }
             }
             else
@@ -414,8 +433,10 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
                 /* foreign grid */
                 lock (m_TeleportThreadLock)
                 {
-                    if (null == m_TeleportThreadLock)
+                    if (null == m_TeleportThread)
                     {
+                        m_Log.DebugFormat("Teleport to grid {2} at {0} requested for {1}", location.ToString(), agent.Owner.FullName, gatekeeperURI);
+
                         m_TeleportThread = new Thread(delegate ()
                         {
                             DestinationInfo dInfo;
@@ -452,12 +473,16 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
                         m_TeleportThread.Start();
                         return true;
                     }
+                    else
+                    {
+                        m_Log.DebugFormat("Teleport to grid {2} at {0} requested for {1} not possible", location.ToString(), agent.Owner.FullName, gatekeeperURI);
+                    }
                 }
             }
             return false;
         }
 
-        public virtual new bool TeleportTo(SceneInterface sceneInterface, IAgent agent, string gatekeeperURI, UUID regionID, Vector3 position, Vector3 lookAt, TeleportFlags flags)
+        public override bool TeleportTo(SceneInterface sceneInterface, IAgent agent, string gatekeeperURI, UUID regionID, Vector3 position, Vector3 lookAt, TeleportFlags flags)
         {
             if (gatekeeperURI == sceneInterface.GatekeeperURI)
             {
@@ -466,6 +491,8 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
                 {
                     if (null == m_TeleportThread)
                     {
+                        m_Log.DebugFormat("Teleport to region {0} at this grid requested for {1}", regionID.ToString(), agent.Owner.FullName);
+
                         m_TeleportThread = new Thread(delegate ()
                         {
                             DestinationInfo dInfo;
@@ -502,6 +529,10 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
                         m_TeleportThread.Start();
                         return true;
                     }
+                    else
+                    {
+                        m_Log.DebugFormat("Teleport to region {0} at this grid requested for {1} not possible", regionID.ToString(), agent.Owner.FullName);
+                    }
                 }
             }
             else
@@ -511,6 +542,8 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
                 {
                     if (null == m_TeleportThread)
                     {
+                        m_Log.DebugFormat("Teleport to region {0} at grid {2} requested for {1}", regionID.ToString(), agent.Owner.FullName, gatekeeperURI);
+
                         m_TeleportThread = new Thread(delegate ()
                         {
                             try
@@ -529,6 +562,10 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
                         agent.ActiveTeleportService = this;
                         m_TeleportThread.Start();
                         return true;
+                    }
+                    else
+                    {
+                        m_Log.DebugFormat("Teleport to region {0} at grid {2} requested for {1} not possible", regionID.ToString(), agent.Owner.FullName, gatekeeperURI);
                     }
                 }
             }
@@ -1108,9 +1145,9 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
                     {
                         continue;
                     }
-                    List<WearableInfo> wearablesList = appearance.Wearables[(WearableType)i];
+                    List<AgentWearables.WearableInfo> wearablesList = appearance.Wearables[(WearableType)i];
                     AnArray wearablesBlock = new AnArray();
-                    foreach(WearableInfo wearable in wearablesList)
+                    foreach(AgentWearables.WearableInfo wearable in wearablesList)
                     {
                         Map wp = new Map();
                         wp.Add("item", wearable.ItemID);
