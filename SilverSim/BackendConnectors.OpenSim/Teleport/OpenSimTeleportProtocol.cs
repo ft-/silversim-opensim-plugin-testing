@@ -7,6 +7,7 @@ using SilverSim.Http.Client;
 using SilverSim.Main.Common;
 using SilverSim.Main.Common.CmdIO;
 using SilverSim.Main.Common.Rpc;
+using SilverSim.Scene.Management.Scene;
 using SilverSim.Scene.Types.Agent;
 using SilverSim.Scene.Types.Neighbor;
 using SilverSim.Scene.Types.Object;
@@ -21,6 +22,7 @@ using SilverSim.Types.Grid;
 using SilverSim.Types.StructuredData.Json;
 using SilverSim.Types.StructuredData.XmlRpc;
 using SilverSim.Viewer.Core;
+using SilverSim.Viewer.Messages.Circuit;
 using SilverSim.Viewer.Messages.Teleport;
 using System;
 using System.Collections.Generic;
@@ -45,6 +47,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
         protected CommandRegistry m_Commands { get; private set; }
         Main.Common.Caps.CapsHttpRedirector m_CapsRedirector;
         List<IProtocolExtender> m_PacketHandlerPlugins = new List<IProtocolExtender>();
+        SceneList m_Scenes;
 
         private uint NewCircuitCode
         {
@@ -86,9 +89,9 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
             }
         }
 
-        private string NewCapsURL(string serverURI)
+        private string NewCapsURL(string serverURI, UUID uuid)
         {
-            return serverURI + "CAPS/" + UUID.Random.ToString() + "0000/";
+            return serverURI + "CAPS/" + uuid.ToString() + "0000/";
         }
 
         public OpenSimTeleportProtocol()
@@ -96,11 +99,24 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
 
         }
 
+        public OpenSimTeleportProtocol(
+            CommandRegistry commandRegistry,
+            Main.Common.Caps.CapsHttpRedirector capsRedirector,
+            List<IProtocolExtender> packetHandlerPlugins,
+            SceneList scenes)
+        {
+            m_Commands = commandRegistry;
+            m_CapsRedirector = capsRedirector;
+            m_PacketHandlerPlugins = packetHandlerPlugins;
+            m_Scenes = scenes;
+        }
+
         public void Startup(ConfigurationLoader loader)
         {
             m_Commands = loader.CommandRegistry;
             m_CapsRedirector = loader.GetService<Main.Common.Caps.CapsHttpRedirector>("CapsRedirector");
             m_PacketHandlerPlugins = loader.GetServicesByValue<IProtocolExtender>();
+            m_Scenes = loader.Scenes;
         }
 
         public override GridType GridType
@@ -164,7 +180,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
 
             agentPostData.Circuit = new CircuitInfo();
             agentPostData.Circuit.CircuitCode = NewCircuitCode;
-            agentPostData.Circuit.CapsPath = NewCapsURL(destinationRegion.ServerURI);
+            agentPostData.Circuit.CapsPath = UUID.Random.ToString();
             agentPostData.Circuit.IsChild = true;
 
             agentPostData.Client = agent.Client;
@@ -258,7 +274,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
             }
 
             circuitCode = agentPostData.Circuit.CircuitCode;
-            capsPath = agentPostData.Circuit.CapsPath;
+            capsPath = NewCapsURL(destinationRegion.ServerURI, agentPostData.Circuit.CapsPath);
         }
 
         public override void EnableSimulator(UUID fromSceneID, IAgent agent, DestinationInfo destinationRegion)
@@ -303,7 +319,13 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
                         }
                         catch (TeleportFailedException e)
                         {
+                            m_Log.DebugFormat("Teleport Failed: {0}: {1}\n{2}", e.GetType().FullName, e.Message, e.StackTrace);
                             agent.SendAlertMessage(e.Message, sceneInterface.ID);
+                        }
+                        catch (Exception e)
+                        {
+                            m_Log.DebugFormat("Teleport Failed: {0}: {1}\n{2}", e.GetType().FullName, e.Message, e.StackTrace);
+                            throw;
                         }
                         finally
                         {
@@ -340,8 +362,14 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
                         }
                         catch (TeleportFailedException e)
                         {
+                            m_Log.DebugFormat("Teleport Failed: {0}: {1}\n{2}", e.GetType().FullName, e.Message, e.StackTrace);
                             agent.SendAlertMessage(e.Message, sceneInterface.ID);
                             return;
+                        }
+                        catch (Exception e)
+                        {
+                            m_Log.DebugFormat("Teleport Failed: {0}: {1}\n{2}", e.GetType().FullName, e.Message, e.StackTrace);
+                            throw;
                         }
                         finally
                         {
@@ -353,6 +381,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
                         }
                         catch (Exception e)
                         {
+                            m_Log.DebugFormat("Teleport Failed: {0}: {1}\n{2}", e.GetType().FullName, e.Message, e.StackTrace);
                             TeleportFailed failedMsg = new TeleportFailed();
                             failedMsg.AgentID = agent.ID;
                             failedMsg.Reason = e.Message;
@@ -384,7 +413,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
                 {
                     if (null == m_TeleportThread)
                     {
-                        m_Log.DebugFormat("Teleport to this grid at {0} requested for {1}", location.ToString(), agent.Owner.FullName);
+                        m_Log.DebugFormat("Teleport to this grid at {0},{1} requested for {2}", location.GridX, location.GridY, agent.Owner.FullName);
 
                         m_TeleportThread = new Thread(delegate ()
                         {
@@ -395,8 +424,14 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
                             }
                             catch (TeleportFailedException e)
                             {
+                                m_Log.DebugFormat("Teleport Failed: {0}: {1}\n{2}", e.GetType().FullName, e.Message, e.StackTrace);
                                 agent.SendAlertMessage(e.Message, sceneInterface.ID);
                                 return;
+                            }
+                            catch (Exception e)
+                            {
+                                m_Log.DebugFormat("Teleport Failed: {0}: {1}\n{2}", e.GetType().FullName, e.Message, e.StackTrace);
+                                throw;
                             }
                             finally
                             {
@@ -408,6 +443,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
                             }
                             catch (Exception e)
                             {
+                                m_Log.DebugFormat("Teleport Failed: {0}: {1}\n{2}", e.GetType().FullName, e.Message, e.StackTrace);
                                 TeleportFailed failedMsg = new TeleportFailed();
                                 failedMsg.AgentID = agent.ID;
                                 failedMsg.Reason = e.Message;
@@ -424,7 +460,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
                     }
                     else
                     {
-                        m_Log.DebugFormat("Teleport to this grid at {0} requested for {1} not possible", location.ToString(), agent.Owner.FullName);
+                        m_Log.DebugFormat("Teleport to this grid at {0},{1} requested for {2} not possible", location.GridX, location.GridY, agent.Owner.FullName);
                     }
                 }
             }
@@ -435,7 +471,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
                 {
                     if (null == m_TeleportThread)
                     {
-                        m_Log.DebugFormat("Teleport to grid {2} at {0} requested for {1}", location.ToString(), agent.Owner.FullName, gatekeeperURI);
+                        m_Log.DebugFormat("Teleport to grid {3} at {0},{1} requested for {2}", location.GridX, location.GridY, agent.Owner.FullName, gatekeeperURI);
 
                         m_TeleportThread = new Thread(delegate ()
                         {
@@ -446,8 +482,14 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
                             }
                             catch (TeleportFailedException e)
                             {
+                                m_Log.DebugFormat("Teleport Failed: {0}: {1}\n{2}", e.GetType().FullName, e.Message, e.StackTrace);
                                 agent.SendAlertMessage(e.Message, sceneInterface.ID);
                                 return;
+                            }
+                            catch (Exception e)
+                            {
+                                m_Log.DebugFormat("Teleport Failed: {0}: {1}\n{2}", e.GetType().FullName, e.Message, e.StackTrace);
+                                throw;
                             }
                             finally
                             {
@@ -459,6 +501,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
                             }
                             catch (Exception e)
                             {
+                                m_Log.DebugFormat("Teleport Failed: {0}: {1}\n{2}", e.GetType().FullName, e.Message, e.StackTrace);
                                 TeleportFailed failedMsg = new TeleportFailed();
                                 failedMsg.AgentID = agent.ID;
                                 failedMsg.Reason = e.Message;
@@ -475,7 +518,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
                     }
                     else
                     {
-                        m_Log.DebugFormat("Teleport to grid {2} at {0} requested for {1} not possible", location.ToString(), agent.Owner.FullName, gatekeeperURI);
+                        m_Log.DebugFormat("Teleport to grid {3} at {0},{1} requested for {2} not possible", location.GridX, location.GridY, agent.Owner.FullName, gatekeeperURI);
                     }
                 }
             }
@@ -502,8 +545,14 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
                             }
                             catch (TeleportFailedException e)
                             {
+                                m_Log.DebugFormat("Teleport Failed: {0}: {1}\n{2}", e.GetType().FullName, e.Message, e.StackTrace);
                                 agent.SendAlertMessage(e.Message, sceneInterface.ID);
                                 return;
+                            }
+                            catch (Exception e)
+                            {
+                                m_Log.DebugFormat("Teleport Failed: {0}: {1}\n{2}", e.GetType().FullName, e.Message, e.StackTrace);
+                                throw;
                             }
                             finally
                             {
@@ -515,6 +564,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
                             }
                             catch (Exception e)
                             {
+                                m_Log.DebugFormat("Teleport Failed: {0}: {1}\n{2}", e.GetType().FullName, e.Message, e.StackTrace);
                                 TeleportFailed failedMsg = new TeleportFailed();
                                 failedMsg.AgentID = agent.ID;
                                 failedMsg.Reason = e.Message;
@@ -552,7 +602,13 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
                             }
                             catch (TeleportFailedException e)
                             {
+                                m_Log.DebugFormat("Teleport Failed: {0}: {1}\n{2}", e.GetType().FullName, e.Message, e.StackTrace);
                                 agent.SendAlertMessage(e.Message, sceneInterface.ID);
+                            }
+                            catch (Exception e)
+                            {
+                                m_Log.DebugFormat("Teleport Failed: {0}: {1}\n{2}", e.GetType().FullName, e.Message, e.StackTrace);
+                                throw;
                             }
                             finally
                             {
@@ -577,6 +633,10 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
         DestinationInfo TeleportTo_Step1_RegionNameLookup(SceneInterface sceneInterface, IAgent agent, string regionName, TeleportFlags flags)
         {
             DestinationInfo dInfo = null;
+            TeleportStart teleStart = new TeleportStart();
+            teleStart.TeleportFlags = flags;
+            agent.SendMessageIfRootAgent(teleStart, sceneInterface.ID);
+
             if (regionName.StartsWith("http://") || regionName.StartsWith("https://"))
             {
                 /* URI style HG location */
@@ -654,6 +714,10 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
         DestinationInfo TeleportTo_Step1_ThisGrid(SceneInterface sceneInterface, IAgent agent, string gatekeeperURI, UUID regionID, TeleportFlags flags)
         {
             GridServiceInterface gridService = sceneInterface.GridService;
+            TeleportStart teleStart = new TeleportStart();
+            teleStart.TeleportFlags = flags;
+            agent.SendMessageIfRootAgent(teleStart, sceneInterface.ID);
+
             if (null == gridService)
             {
                 throw new TeleportFailedException("No grid service");
@@ -678,12 +742,20 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
 
         DestinationInfo TeleportTo_Step1_ForeignGrid(SceneInterface sceneInterface, IAgent agent, string gatekeeperURI, UUID regionID, TeleportFlags flags)
         {
+            TeleportStart teleStart = new TeleportStart();
+            teleStart.TeleportFlags = flags;
+            agent.SendMessageIfRootAgent(teleStart, sceneInterface.ID);
+
             return GetRegionById(gatekeeperURI, agent, regionID);
         }
 
         DestinationInfo TeleportTo_Step1_ThisGrid(SceneInterface sceneInterface, IAgent agent, string gatekeeperURI, GridVector location, TeleportFlags flags)
         {
             GridServiceInterface gridService = sceneInterface.GridService;
+            TeleportStart teleStart = new TeleportStart();
+            teleStart.TeleportFlags = flags;
+            agent.SendMessageIfRootAgent(teleStart, sceneInterface.ID);
+
             if (null == gridService)
             {
                 throw new TeleportFailedException("No grid service");
@@ -708,6 +780,10 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
 
         DestinationInfo TeleportTo_Step1_ForeignGrid(SceneInterface sceneInterface, IAgent agent, string gatekeeperURI, GridVector location, TeleportFlags flags)
         {
+            TeleportStart teleStart = new TeleportStart();
+            teleStart.TeleportFlags = flags;
+            agent.SendMessageIfRootAgent(teleStart, sceneInterface.ID);
+
             throw new TeleportFailedException(this.GetLanguageString(agent.CurrentCulture, "TeleportNotSupported", "Teleport via location not supported into HG"));
         }
         #endregion
@@ -715,9 +791,6 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
         void TeleportTo_Step2(SceneInterface scene, IAgent agent, DestinationInfo dInfo, Vector3 position, Vector3 lookAt, TeleportFlags flags)
         {
             UUID sceneID = scene.ID;
-            TeleportStart teleStart = new TeleportStart();
-            teleStart.TeleportFlags = flags;
-            agent.SendMessageIfRootAgent(teleStart, sceneID);
 
             SendTeleportProgress(agent, sceneID, this.GetLanguageString(agent.CurrentCulture, "ConnectDestinationSimulator", "Connecting to destination simulator"), flags);
 
@@ -725,72 +798,85 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
             {
                 if (dInfo.ServerURI == scene.ServerURI)
                 {
+                    SceneInterface targetScene;
                     /* it is us, so we can go for a simplified local protocol */
-                    RwLockedDictionary<UUID, AgentChildInfo> neighbors = agent.ActiveChilds;
-                    AgentChildInfo childInfo;
-                    ViewerAgent vagent = (ViewerAgent)agent;
-                    AgentCircuit circ = vagent.Circuits[sceneID];
-                    AgentCircuit targetCircuit;
-                    if (!neighbors.TryGetValue(dInfo.ID, out childInfo))
+                    if (m_Scenes.TryGetValue(dInfo.ID, out targetScene))
                     {
-                        string seedUri = NewCapsURL(dInfo.ServerURI);
-                        targetCircuit = new AgentCircuit(
-                            m_Commands,
-                            vagent,
-                            (UDPCircuitsManager)scene.UDPServer,
-                            NewCircuitCode,
-                            m_CapsRedirector,
-                            seedUri,
-                            vagent.ServiceURLs,
-                            dInfo.GatekeeperURI,
-                            m_PacketHandlerPlugins);
-                        IPEndPoint ep = new IPEndPoint(((IPEndPoint)circ.RemoteEndPoint).Address, 0);
-                        targetCircuit.RemoteEndPoint = ep;
-                        targetCircuit.Agent = vagent;
-                        targetCircuit.AgentID = vagent.ID;
-                        targetCircuit.SessionID = vagent.Session.SessionID;
-                        targetCircuit.LastTeleportFlags = flags;
-                        vagent.Circuits.Add(targetCircuit.CircuitCode, targetCircuit.Scene.ID, targetCircuit);
+                        RwLockedDictionary<UUID, AgentChildInfo> neighbors = agent.ActiveChilds;
+                        AgentChildInfo childInfo;
+                        ViewerAgent vagent = (ViewerAgent)agent;
+                        AgentCircuit circ = vagent.Circuits[sceneID];
+                        AgentCircuit targetCircuit;
+                        if (!neighbors.TryGetValue(dInfo.ID, out childInfo))
+                        {
+                            UUID seedId = UUID.Random;
+                            string seedUri = NewCapsURL(dInfo.ServerURI, seedId);
+                            targetCircuit = new AgentCircuit(
+                                m_Commands,
+                                vagent,
+                                (UDPCircuitsManager)targetScene.UDPServer,
+                                NewCircuitCode,
+                                m_CapsRedirector,
+                                seedId,
+                                vagent.ServiceURLs,
+                                dInfo.GatekeeperURI,
+                                m_PacketHandlerPlugins);
+                            IPEndPoint ep = new IPEndPoint(((IPEndPoint)circ.RemoteEndPoint).Address, 0);
+                            targetCircuit.RemoteEndPoint = ep;
+                            targetCircuit.Agent = vagent;
+                            targetCircuit.AgentID = vagent.ID;
+                            targetCircuit.SessionID = vagent.Session.SessionID;
+                            targetCircuit.LastTeleportFlags = flags;
+                            vagent.Circuits.Add(targetCircuit.CircuitCode, targetCircuit.Scene.ID, targetCircuit);
 
-                        SendTeleportProgress(agent, sceneID, this.GetLanguageString(agent.CurrentCulture, "TransferingToDestination", "Transfering to destination"), flags);
+                            SendTeleportProgress(agent, sceneID, this.GetLanguageString(agent.CurrentCulture, "TransferingToDestination", "Transfering to destination"), flags);
 
-                        /* the moment we send this, there is no way to get the viewer back if something fails and the viewer connected successfully on other side */
-                        TeleportFinish teleFinish = new TeleportFinish();
-                        teleFinish.AgentID = agent.ID;
-                        teleFinish.LocationID = 0;
-                        teleFinish.SimIP = ((IPEndPoint)dInfo.SimIP).Address;
-                        teleFinish.SimPort = (ushort)dInfo.ServerPort;
-                        teleFinish.GridPosition = dInfo.Location;
-                        teleFinish.SeedCapability = seedUri;
-                        teleFinish.SimAccess = dInfo.Access;
-                        teleFinish.TeleportFlags = flags;
-                        teleFinish.RegionSize = dInfo.Size;
-                        agent.SendMessageIfRootAgent(teleFinish, scene.ID);
-                    }
-                    else if(!vagent.Circuits.TryGetValue(dInfo.ID, out targetCircuit))
-                    {
-                        throw new TeleportFailedException(this.GetLanguageString(agent.CurrentCulture, "LocalTeleportDestinationNotAvailable", "Local teleport destination not available"));
+                            /* the moment we send this, there is no way to get the viewer back if something fails and the viewer connected successfully on other side */
+                            TeleportFinish teleFinish = new TeleportFinish();
+                            teleFinish.AgentID = agent.ID;
+                            teleFinish.LocationID = 4;
+                            teleFinish.SimIP = ((IPEndPoint)dInfo.SimIP).Address;
+                            teleFinish.SimPort = (ushort)dInfo.ServerPort;
+                            teleFinish.GridPosition = dInfo.Location;
+                            teleFinish.SeedCapability = seedUri;
+                            teleFinish.SimAccess = dInfo.Access;
+                            teleFinish.TeleportFlags = flags;
+                            teleFinish.RegionSize = dInfo.Size;
+                            agent.SendMessageIfRootAgent(teleFinish, scene.ID);
+
+                            targetCircuit.LogIncomingAgent(m_Log, false);
+                        }
+                        else if (!vagent.Circuits.TryGetValue(dInfo.ID, out targetCircuit))
+                        {
+                            throw new TeleportFailedException(this.GetLanguageString(agent.CurrentCulture, "LocalTeleportDestinationNotAvailable", "Local teleport destination not available"));
+                        }
+                        else
+                        {
+                            targetCircuit.LastTeleportFlags = flags;
+
+                            SendTeleportProgress(agent, sceneID, this.GetLanguageString(agent.CurrentCulture, "TransferingToDestination", "Transfering to destination"), flags);
+
+                            /* the moment we send this, there is no way to get the viewer back if something fails and the viewer connected successfully on other side */
+                            TeleportFinish teleFinish = new TeleportFinish();
+                            teleFinish.AgentID = agent.ID;
+                            teleFinish.LocationID = 4;
+                            teleFinish.SimIP = ((IPEndPoint)dInfo.SimIP).Address;
+                            teleFinish.SimPort = (ushort)dInfo.ServerPort;
+                            teleFinish.GridPosition = dInfo.Location;
+                            teleFinish.SeedCapability = childInfo.SeedCapability;
+                            teleFinish.SimAccess = dInfo.Access;
+                            teleFinish.TeleportFlags = flags;
+                            teleFinish.RegionSize = dInfo.Size;
+                            agent.SendMessageIfRootAgent(teleFinish, scene.ID);
+
+                            targetCircuit.LogIncomingAgent(m_Log, false);
+                        }
+                        /* we just finished the teleport code. Most stuff handles straight through UDP handling as we share the agent instance through all scenes */
                     }
                     else
                     {
-                        targetCircuit.LastTeleportFlags = flags;
-
-                        SendTeleportProgress(agent, sceneID, this.GetLanguageString(agent.CurrentCulture, "TransferingToDestination", "Transfering to destination"), flags);
-
-                        /* the moment we send this, there is no way to get the viewer back if something fails and the viewer connected successfully on other side */
-                        TeleportFinish teleFinish = new TeleportFinish();
-                        teleFinish.AgentID = agent.ID;
-                        teleFinish.LocationID = 0;
-                        teleFinish.SimIP = ((IPEndPoint)dInfo.SimIP).Address;
-                        teleFinish.SimPort = (ushort)dInfo.ServerPort;
-                        teleFinish.GridPosition = dInfo.Location;
-                        teleFinish.SeedCapability = childInfo.SeedCapability;
-                        teleFinish.SimAccess = dInfo.Access;
-                        teleFinish.TeleportFlags = flags;
-                        teleFinish.RegionSize = dInfo.Size;
-                        agent.SendMessageIfRootAgent(teleFinish, scene.ID);
+                        throw new TeleportFailedException(this.GetLanguageString(agent.CurrentCulture, "RegionNotFound", "Region not found"));
                     }
-                    /* we just finished the teleport code. Most stuff handles straight through UDP handling as we share the agent instance through all scenes */
                 }
                 else
                 {
@@ -834,7 +920,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
                     /* the moment we send this, there is no way to get the viewer back if something fails and the viewer connected successfully on other side */
                     TeleportFinish teleFinish = new TeleportFinish();
                     teleFinish.AgentID = agent.ID;
-                    teleFinish.LocationID = 0;
+                    teleFinish.LocationID = 4;
                     teleFinish.SimIP = ((IPEndPoint)dInfo.SimIP).Address;
                     teleFinish.SimPort = (ushort)dInfo.ServerPort;
                     teleFinish.GridPosition = dInfo.Location;
@@ -868,8 +954,6 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
             {
                 throw new TeleportFailedException("Not yet implemented");
             }
-
-            throw new TeleportFailedException("Not yet implemented");
         }
 
         static void SendTeleportProgress(IAgent agent, UUID sceneID, string message, TeleportFlags flags)

@@ -653,7 +653,11 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
             serviceList.Add(gridUserService);
             serviceList.Add(gridService);
             serviceList.Add(offlineIMService);
-            serviceList.Add(new OpenSimTeleportProtocol());
+            serviceList.Add(new OpenSimTeleportProtocol(
+                m_Commands,
+                m_CapsRedirector,
+                m_PacketHandlerPlugins,
+                m_Scenes));
 
             ViewerAgent agent = new ViewerAgent(
                 m_Scenes,
@@ -757,16 +761,7 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
             {
                 m_Log.Warn("Could not contact PresenceService", e);
             }
-            m_Log.InfoFormat("Agent post request {0} {1} (Grid {2}, UUID {3}) TeleportFlags ({4}) Client IP {5} Caps {6} Circuit {7} Type {8}",
-                agentPost.Account.Principal.FirstName,
-                agentPost.Account.Principal.LastName,
-                agentPost.Account.Principal.HomeURI,
-                agentPost.Account.Principal.ID,
-                agentPost.Destination.TeleportFlags.ToString(),
-                agentPost.Client.ClientIP,
-                agentPost.Circuit.CapsPath,
-                agentPost.Circuit.CircuitCode,
-                agentPost.Circuit.IsChild ? "Child" : "Root");
+            circuit.LogIncomingAgent(m_Log, agentPost.Circuit.IsChild);
             DoAgentResponse(req, "authorized", true);
         }
 
