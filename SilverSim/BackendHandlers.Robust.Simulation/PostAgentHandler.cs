@@ -673,7 +673,6 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
                 serviceList);
             agent.ServiceURLs = agentPost.Account.ServiceURLs;
 
-            agent.TeleportFlags = agentPost.Destination.TeleportFlags;
             agent.Appearance = agentPost.Appearance;
             try
             {
