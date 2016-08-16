@@ -155,7 +155,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
                 agentURL += "/";
             }
 
-            return agentURL + "agent/" + agent.ID.ToString() + "/" + extra;
+            return agentURL + "agent/" + agent.ID.ToString() + "/" + destinationRegion.ID.ToString() + "/" + extra;
         }
 
         public override void ReleaseAgent(UUID fromSceneID, IAgent agent, RegionInfo regionInfo)
@@ -334,6 +334,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
                         }
                         finally
                         {
+                            m_TeleportThread = null;
                             agent.RemoveActiveTeleportService(this);
                         }
                     });
@@ -360,40 +361,40 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
 
                     m_TeleportThread = new Thread(delegate ()
                     {
-                        DestinationInfo dInfo;
                         try
                         {
-                            dInfo = TeleportTo_Step1_RegionNameLookup(sceneInterface, agent, regionName, flags);
-                        }
-                        catch (TeleportFailedException e)
-                        {
-                            m_Log.DebugFormat("Teleport Failed: {0}: {1}\n{2}", e.GetType().FullName, e.Message, e.StackTrace);
-                            agent.SendAlertMessage(e.Message, sceneInterface.ID);
-                            return;
-                        }
-                        catch (Exception e)
-                        {
-                            m_Log.DebugFormat("Teleport Failed: {0}: {1}\n{2}", e.GetType().FullName, e.Message, e.StackTrace);
-                            throw;
+                            DestinationInfo dInfo;
+                            try
+                            {
+                                dInfo = TeleportTo_Step1_RegionNameLookup(sceneInterface, agent, regionName, flags);
+                            }
+                            catch (TeleportFailedException e)
+                            {
+                                m_Log.DebugFormat("Teleport Failed: {0}: {1}\n{2}", e.GetType().FullName, e.Message, e.StackTrace);
+                                agent.SendAlertMessage(e.Message, sceneInterface.ID);
+                                return;
+                            }
+                            catch (Exception e)
+                            {
+                                m_Log.DebugFormat("Teleport Failed: {0}: {1}\n{2}", e.GetType().FullName, e.Message, e.StackTrace);
+                                throw;
+                            }
+                            try
+                            {
+                                TeleportTo_Step2(sceneInterface, agent, dInfo, position, lookAt, flags);
+                            }
+                            catch (Exception e)
+                            {
+                                m_Log.DebugFormat("Teleport Failed: {0}: {1}\n{2}", e.GetType().FullName, e.Message, e.StackTrace);
+                                TeleportFailed failedMsg = new TeleportFailed();
+                                failedMsg.AgentID = agent.ID;
+                                failedMsg.Reason = e.Message;
+                                agent.SendMessageIfRootAgent(failedMsg, sceneInterface.ID);
+                            }
                         }
                         finally
                         {
-                            agent.RemoveActiveTeleportService(this);
-                        }
-                        try
-                        {
-                            TeleportTo_Step2(sceneInterface, agent, dInfo, position, lookAt, flags);
-                        }
-                        catch (Exception e)
-                        {
-                            m_Log.DebugFormat("Teleport Failed: {0}: {1}\n{2}", e.GetType().FullName, e.Message, e.StackTrace);
-                            TeleportFailed failedMsg = new TeleportFailed();
-                            failedMsg.AgentID = agent.ID;
-                            failedMsg.Reason = e.Message;
-                            agent.SendMessageIfRootAgent(failedMsg, sceneInterface.ID);
-                        }
-                        finally
-                        {
+                            m_TeleportThread = null;
                             agent.RemoveActiveTeleportService(this);
                         }
                     });
@@ -422,41 +423,41 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
 
                         m_TeleportThread = new Thread(delegate ()
                         {
-                            DestinationInfo dInfo;
                             try
                             {
-                                dInfo = TeleportTo_Step1_ThisGrid(sceneInterface, agent, gatekeeperURI, location, flags);
-                            }
-                            catch (TeleportFailedException e)
-                            {
-                                m_Log.DebugFormat("Teleport Failed: {0}: {1}\n{2}", e.GetType().FullName, e.Message, e.StackTrace);
-                                agent.SendAlertMessage(e.Message, sceneInterface.ID);
-                                return;
-                            }
-                            catch (Exception e)
-                            {
-                                m_Log.DebugFormat("Teleport Failed: {0}: {1}\n{2}", e.GetType().FullName, e.Message, e.StackTrace);
-                                throw;
+                                DestinationInfo dInfo;
+                                try
+                                {
+                                    dInfo = TeleportTo_Step1_ThisGrid(sceneInterface, agent, gatekeeperURI, location, flags);
+                                }
+                                catch (TeleportFailedException e)
+                                {
+                                    m_Log.DebugFormat("Teleport Failed: {0}: {1}\n{2}", e.GetType().FullName, e.Message, e.StackTrace);
+                                    agent.SendAlertMessage(e.Message, sceneInterface.ID);
+                                    return;
+                                }
+                                catch (Exception e)
+                                {
+                                    m_Log.DebugFormat("Teleport Failed: {0}: {1}\n{2}", e.GetType().FullName, e.Message, e.StackTrace);
+                                    throw;
+                                }
+                                try
+                                {
+                                    TeleportTo_Step2(sceneInterface, agent, dInfo, position, lookAt, flags);
+                                }
+                                catch (Exception e)
+                                {
+                                    m_Log.DebugFormat("Teleport Failed: {0}: {1}\n{2}", e.GetType().FullName, e.Message, e.StackTrace);
+                                    TeleportFailed failedMsg = new TeleportFailed();
+                                    failedMsg.AgentID = agent.ID;
+                                    failedMsg.Reason = e.Message;
+                                    agent.SendMessageIfRootAgent(failedMsg, sceneInterface.ID);
+                                }
                             }
                             finally
                             {
                                 agent.RemoveActiveTeleportService(this);
-                            }
-                            try
-                            {
-                                TeleportTo_Step2(sceneInterface, agent, dInfo, position, lookAt, flags);
-                            }
-                            catch (Exception e)
-                            {
-                                m_Log.DebugFormat("Teleport Failed: {0}: {1}\n{2}", e.GetType().FullName, e.Message, e.StackTrace);
-                                TeleportFailed failedMsg = new TeleportFailed();
-                                failedMsg.AgentID = agent.ID;
-                                failedMsg.Reason = e.Message;
-                                agent.SendMessageIfRootAgent(failedMsg, sceneInterface.ID);
-                            }
-                            finally
-                            {
-                                agent.RemoveActiveTeleportService(this);
+                                m_TeleportThread = null;
                             }
                         });
                         agent.ActiveTeleportService = this;
@@ -480,40 +481,40 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
 
                         m_TeleportThread = new Thread(delegate ()
                         {
-                            DestinationInfo dInfo;
                             try
                             {
-                                dInfo = TeleportTo_Step1_ForeignGrid(sceneInterface, agent, gatekeeperURI, location, flags);
-                            }
-                            catch (TeleportFailedException e)
-                            {
-                                m_Log.DebugFormat("Teleport Failed: {0}: {1}\n{2}", e.GetType().FullName, e.Message, e.StackTrace);
-                                agent.SendAlertMessage(e.Message, sceneInterface.ID);
-                                return;
-                            }
-                            catch (Exception e)
-                            {
-                                m_Log.DebugFormat("Teleport Failed: {0}: {1}\n{2}", e.GetType().FullName, e.Message, e.StackTrace);
-                                throw;
+                                DestinationInfo dInfo;
+                                try
+                                {
+                                    dInfo = TeleportTo_Step1_ForeignGrid(sceneInterface, agent, gatekeeperURI, location, flags);
+                                }
+                                catch (TeleportFailedException e)
+                                {
+                                    m_Log.DebugFormat("Teleport Failed: {0}: {1}\n{2}", e.GetType().FullName, e.Message, e.StackTrace);
+                                    agent.SendAlertMessage(e.Message, sceneInterface.ID);
+                                    return;
+                                }
+                                catch (Exception e)
+                                {
+                                    m_Log.DebugFormat("Teleport Failed: {0}: {1}\n{2}", e.GetType().FullName, e.Message, e.StackTrace);
+                                    throw;
+                                }
+                                try
+                                {
+                                    TeleportTo_Step2(sceneInterface, agent, dInfo, position, lookAt, flags);
+                                }
+                                catch (Exception e)
+                                {
+                                    m_Log.DebugFormat("Teleport Failed: {0}: {1}\n{2}", e.GetType().FullName, e.Message, e.StackTrace);
+                                    TeleportFailed failedMsg = new TeleportFailed();
+                                    failedMsg.AgentID = agent.ID;
+                                    failedMsg.Reason = e.Message;
+                                    agent.SendMessageIfRootAgent(failedMsg, sceneInterface.ID);
+                                }
                             }
                             finally
                             {
-                                agent.RemoveActiveTeleportService(this);
-                            }
-                            try
-                            {
-                                TeleportTo_Step2(sceneInterface, agent, dInfo, position, lookAt, flags);
-                            }
-                            catch (Exception e)
-                            {
-                                m_Log.DebugFormat("Teleport Failed: {0}: {1}\n{2}", e.GetType().FullName, e.Message, e.StackTrace);
-                                TeleportFailed failedMsg = new TeleportFailed();
-                                failedMsg.AgentID = agent.ID;
-                                failedMsg.Reason = e.Message;
-                                agent.SendMessageIfRootAgent(failedMsg, sceneInterface.ID);
-                            }
-                            finally
-                            {
+                                m_TeleportThread = null;
                                 agent.RemoveActiveTeleportService(this);
                             }
                         });
@@ -543,40 +544,40 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
 
                         m_TeleportThread = new Thread(delegate ()
                         {
-                            DestinationInfo dInfo;
                             try
                             {
-                                dInfo = TeleportTo_Step1_ThisGrid(sceneInterface, agent, gatekeeperURI, regionID, flags);
-                            }
-                            catch (TeleportFailedException e)
-                            {
-                                m_Log.DebugFormat("Teleport Failed: {0}: {1}\n{2}", e.GetType().FullName, e.Message, e.StackTrace);
-                                agent.SendAlertMessage(e.Message, sceneInterface.ID);
-                                return;
-                            }
-                            catch (Exception e)
-                            {
-                                m_Log.DebugFormat("Teleport Failed: {0}: {1}\n{2}", e.GetType().FullName, e.Message, e.StackTrace);
-                                throw;
+                                DestinationInfo dInfo;
+                                try
+                                {
+                                    dInfo = TeleportTo_Step1_ThisGrid(sceneInterface, agent, gatekeeperURI, regionID, flags);
+                                }
+                                catch (TeleportFailedException e)
+                                {
+                                    m_Log.DebugFormat("Teleport Failed: {0}: {1}\n{2}", e.GetType().FullName, e.Message, e.StackTrace);
+                                    agent.SendAlertMessage(e.Message, sceneInterface.ID);
+                                    return;
+                                }
+                                catch (Exception e)
+                                {
+                                    m_Log.DebugFormat("Teleport Failed: {0}: {1}\n{2}", e.GetType().FullName, e.Message, e.StackTrace);
+                                    throw;
+                                }
+                                try
+                                {
+                                    TeleportTo_Step2(sceneInterface, agent, dInfo, position, lookAt, flags);
+                                }
+                                catch (Exception e)
+                                {
+                                    m_Log.DebugFormat("Teleport Failed: {0}: {1}\n{2}", e.GetType().FullName, e.Message, e.StackTrace);
+                                    TeleportFailed failedMsg = new TeleportFailed();
+                                    failedMsg.AgentID = agent.ID;
+                                    failedMsg.Reason = e.Message;
+                                    agent.SendMessageIfRootAgent(failedMsg, sceneInterface.ID);
+                                }
                             }
                             finally
                             {
-                                agent.RemoveActiveTeleportService(this);
-                            }
-                            try
-                            {
-                                TeleportTo_Step2(sceneInterface, agent, dInfo, position, lookAt, flags);
-                            }
-                            catch (Exception e)
-                            {
-                                m_Log.DebugFormat("Teleport Failed: {0}: {1}\n{2}", e.GetType().FullName, e.Message, e.StackTrace);
-                                TeleportFailed failedMsg = new TeleportFailed();
-                                failedMsg.AgentID = agent.ID;
-                                failedMsg.Reason = e.Message;
-                                agent.SendMessageIfRootAgent(failedMsg, sceneInterface.ID);
-                            }
-                            finally
-                            {
+                                m_TeleportThread = null;
                                 agent.RemoveActiveTeleportService(this);
                             }
                         });
@@ -617,6 +618,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
                             }
                             finally
                             {
+                                m_TeleportThread = null;
                                 agent.RemoveActiveTeleportService(this);
                             }
                         });
@@ -982,7 +984,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
             agent.SendMessageIfRootAgent(progressMsg, sceneID);
         }
 
-#region Query Access
+        #region Query Access
         struct ProtocolVersion
         {
             public uint Major;
@@ -1042,9 +1044,9 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
             }
             return protoVersion;
         }
-#endregion
+        #endregion
 
-#region Gatekeeper connector
+        #region Gatekeeper connector
         DestinationInfo GetRegionByName(string gatekeeperuri, IAgent agent, string name)
         {
             UUID regionId;
@@ -1148,9 +1150,9 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
 
             return hash;
         }
-#endregion
+        #endregion
 
-#region PutAgent Handler
+        #region PutAgent Handler
         bool PutAgent(UUID fromSceneID, RegionInfo dInfo, IAgent agent, bool waitForRoot = false, string callbackUri = "")
         {
             string uri = BuildAgentUri(dInfo, agent);
@@ -1428,6 +1430,6 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
                 throw new TeleportFailedException("Protocol Error");
             }
         }
-#endregion
+        #endregion
     }
 }
