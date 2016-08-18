@@ -423,7 +423,7 @@ namespace SilverSim.BackendConnectors.Robust.Asset
                         WriteAssetDataAsBase64(gz, asset);
                         gz.Write(footer, 0, footer.Length);
                     }
-                    compressedAsset = ms.GetBuffer();
+                    compressedAsset = ms.ToArray();
                 }
                 HttpRequestHandler.DoRequest("POST", m_AssetURI + "assets",
                     null, "text/xml", compressedAsset.Length, delegate(Stream st)

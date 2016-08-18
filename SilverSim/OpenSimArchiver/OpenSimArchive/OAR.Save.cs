@@ -221,7 +221,7 @@ namespace SilverSim.OpenSimArchiver.RegionArchiver
                         }
                         xmlwriter.WriteEndElement();
                     }
-                    writer.WriteFile("settings/" + scene.Name + ".xml", ms.GetBuffer());
+                    writer.WriteFile("settings/" + scene.Name + ".xml", ms.ToArray());
                 }
                 #endregion
 
@@ -320,7 +320,7 @@ namespace SilverSim.OpenSimArchiver.RegionArchiver
                             xmlwriter.WriteEndElement();
                             xmlwriter.Flush();
 
-                            writer.WriteFile("landdata/" + pinfo.ID.ToString() + ".xml", ms.GetBuffer());
+                            writer.WriteFile("landdata/" + pinfo.ID.ToString() + ".xml", ms.ToArray());
                         }
                     }
                 }
@@ -378,7 +378,7 @@ namespace SilverSim.OpenSimArchiver.RegionArchiver
                     writer.WriteEndElement();
                     writer.Flush();
 
-                    return ms.GetBuffer();
+                    return ms.ToArray();
                 }
             }
         }
@@ -423,7 +423,7 @@ namespace SilverSim.OpenSimArchiver.RegionArchiver
                         bs.Write(f);
                     }
                     bs.Flush();
-                    return output.GetBuffer();
+                    return output.ToArray();
                 }
             }
         }

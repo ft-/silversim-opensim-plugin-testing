@@ -200,7 +200,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
             using (MemoryStream ms = new MemoryStream())
             {
                 agentPostData.Serialize(ms);
-                uncompressed_postdata = ms.GetBuffer();
+                uncompressed_postdata = ms.ToArray();
             }
 
             Map result;
@@ -224,7 +224,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
                         using (GZipStream gz = new GZipStream(ms, CompressionMode.Compress))
                         {
                             gz.Write(uncompressed_postdata, 0, uncompressed_postdata.Length);
-                            compressed_postdata = ms.GetBuffer();
+                            compressed_postdata = ms.ToArray();
                         }
                     }
                     using (Stream o = HttpRequestHandler.DoStreamRequest("POST", agentURL, null, "application/x-gzip", compressed_postdata.Length, delegate (Stream ws)
@@ -1020,7 +1020,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
             {
                 throw new TeleportFailedException(this.GetLanguageString(agent.CurrentCulture, "TeleportProtocolError", "Teleport Protocol Error"));
             }
-            if (!jsonres["result"].AsBoolean)
+            if (!jsonres["success"].AsBoolean)
             {
                 throw new TeleportFailedException(jsonres["reason"].ToString());
             }
@@ -1352,7 +1352,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
             using (MemoryStream ms = new MemoryStream())
             {
                 Json.Serialize(req, ms);
-                uncompressed_postdata = ms.GetBuffer();
+                uncompressed_postdata = ms.ToArray();
             }
 
             string resultStr;
@@ -1380,7 +1380,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
                         using (GZipStream gz = new GZipStream(ms, CompressionMode.Compress))
                         {
                             gz.Write(uncompressed_postdata, 0, uncompressed_postdata.Length);
-                            compressed_postdata = ms.GetBuffer();
+                            compressed_postdata = ms.ToArray();
                         }
                     }
                     using (Stream o = HttpRequestHandler.DoStreamRequest("POST", uri, null, "application/x-gzip", compressed_postdata.Length, delegate (Stream ws)
