@@ -1293,6 +1293,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
                     }
                     wearables.Add(wearablesBlock);
                 }
+                appearancePack.Add("wearables", wearables);
             }
 
             {
