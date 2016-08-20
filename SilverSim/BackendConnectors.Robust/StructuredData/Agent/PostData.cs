@@ -292,7 +292,7 @@ namespace SilverSim.BackendConnectors.Robust.StructuredData.Agent
         public void Serialize(Stream output)
         {
             string prefix;
-            using (TextWriter w = output.UTF8StreamWriter())
+            using (TextWriter w = output.UTF8StreamWriterLeaveOpen())
             {
                 w.Write("{");
                 /*-----------------------------------------------------------------*/
@@ -337,6 +337,7 @@ namespace SilverSim.BackendConnectors.Robust.StructuredData.Agent
                 WriteJSONString(w, "start_pos", Destination.Position.ToString());
                 w.Write(",");
                 WriteJSONString(w, "teleport_flags", ((uint)Destination.TeleportFlags).ToString());
+                w.Write(",");
                 if (!Destination.LocalToGrid)
                 {
                     WriteJSONString(w, "destination_serveruri", Destination.ServerURI);
@@ -369,7 +370,7 @@ namespace SilverSim.BackendConnectors.Robust.StructuredData.Agent
 
                 /*-----------------------------------------------------------------*/
                 /* Service URLs */
-                w.Write("serviceurls:{");
+                w.Write("\"serviceurls\":{");
                 prefix = string.Empty;
                 foreach (KeyValuePair<string, string> kvp in Account.ServiceURLs)
                 {
@@ -378,7 +379,7 @@ namespace SilverSim.BackendConnectors.Robust.StructuredData.Agent
                     prefix = ",";
                 }
                 w.Write("},");
-                w.Write("service_urls:[");
+                w.Write("\"service_urls\":[");
                 prefix = string.Empty;
                 foreach (KeyValuePair<string, string> kvp in Account.ServiceURLs)
                 {
