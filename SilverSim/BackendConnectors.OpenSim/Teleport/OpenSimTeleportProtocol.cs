@@ -819,7 +819,8 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
                         RwLockedDictionary<UUID, AgentChildInfo> neighbors = agent.ActiveChilds;
                         AgentChildInfo childInfo;
                         AgentCircuit targetCircuit;
-                        if (!neighbors.TryGetValue(dInfo.ID, out childInfo))
+                        if (!neighbors.TryGetValue(dInfo.ID, out childInfo) &&
+                            !vagent.Circuits.TryGetValue(dInfo.ID, out targetCircuit))
                         {
                             UUID seedId = UUID.Random;
                             string seedUri = NewCapsURL(dInfo.ServerURI, seedId);
@@ -840,6 +841,28 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
                             targetCircuit.SessionID = vagent.Session.SessionID;
                             targetCircuit.LastTeleportFlags = flags;
                             vagent.Circuits.Add(targetCircuit.Scene.ID, targetCircuit);
+
+                            try
+                            {
+                                scene.Add(agent);
+                                try
+                                {
+                                    ((UDPCircuitsManager)targetScene.UDPServer).AddCircuit(targetCircuit);
+                                }
+                                catch(Exception e)
+                                {
+                                    m_Log.Debug("Failed agent add", e);
+                                    scene.Remove(agent);
+                                    throw new TeleportFailedException(this.GetLanguageString(agent.CurrentCulture, "AddAgentFailed", "Adding agent failed"));
+                                }
+                            }
+                            catch (Exception e)
+                            {
+                                m_Log.Debug("Failed agent add", e);
+                                vagent.Circuits.Remove(targetScene.ID);
+                                throw new TeleportFailedException(this.GetLanguageString(agent.CurrentCulture, "AddAgentFailed", "Adding agent failed"));
+                            }
+
 
                             SendTeleportProgress(agent, sceneID, this.GetLanguageString(agent.CurrentCulture, "TransferingToDestination", "Transfering to destination"), flags);
 
