@@ -172,6 +172,9 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
 
         void PostAgent(UUID fromSceneID, IAgent agent, DestinationInfo destinationRegion, uint newCircuitCode, UUID capsId, out uint circuitCode, out string capsPath)
         {
+            ViewerAgent vagent = (ViewerAgent)agent;
+            AgentCircuit acirc = vagent.Circuits[fromSceneID];
+
             PostData agentPostData = new PostData();
 
             AgentChildInfo childInfo = new AgentChildInfo();
@@ -184,7 +187,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
             agentPostData.Appearance = agent.Appearance;
 
             agentPostData.Circuit = new CircuitInfo();
-            agentPostData.Circuit.CircuitCode = newCircuitCode;
+            agentPostData.Circuit.CircuitCode = acirc.CircuitCode;
             agentPostData.Circuit.CapsPath = capsId.ToString();
             agentPostData.Circuit.IsChild = true;
 
@@ -798,6 +801,10 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
         void TeleportTo_Step2(SceneInterface scene, IAgent agent, DestinationInfo dInfo, Vector3 position, Vector3 lookAt, TeleportFlags flags)
         {
             UUID sceneID = scene.ID;
+            uint actualCircuitCode;
+            ViewerAgent vagent = (ViewerAgent)agent;
+            AgentCircuit circ = vagent.Circuits[sceneID];
+            actualCircuitCode = circ.CircuitCode;
 
             SendTeleportProgress(agent, sceneID, this.GetLanguageString(agent.CurrentCulture, "ConnectDestinationSimulator", "Connecting to destination simulator"), flags);
 
@@ -811,8 +818,6 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
                     {
                         RwLockedDictionary<UUID, AgentChildInfo> neighbors = agent.ActiveChilds;
                         AgentChildInfo childInfo;
-                        ViewerAgent vagent = (ViewerAgent)agent;
-                        AgentCircuit circ = vagent.Circuits[sceneID];
                         AgentCircuit targetCircuit;
                         if (!neighbors.TryGetValue(dInfo.ID, out childInfo))
                         {
@@ -822,7 +827,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
                                 m_Commands,
                                 vagent,
                                 (UDPCircuitsManager)targetScene.UDPServer,
-                                NewCircuitCode,
+                                actualCircuitCode,
                                 m_CapsRedirector,
                                 seedId,
                                 vagent.ServiceURLs,
@@ -834,7 +839,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
                             targetCircuit.AgentID = vagent.ID;
                             targetCircuit.SessionID = vagent.Session.SessionID;
                             targetCircuit.LastTeleportFlags = flags;
-                            vagent.Circuits.Add(targetCircuit.CircuitCode, targetCircuit.Scene.ID, targetCircuit);
+                            vagent.Circuits.Add(targetCircuit.Scene.ID, targetCircuit);
 
                             SendTeleportProgress(agent, sceneID, this.GetLanguageString(agent.CurrentCulture, "TransferingToDestination", "Transfering to destination"), flags);
 
@@ -939,7 +944,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
                     /* the moment we send this, there is no way to get the viewer back if something fails and the viewer connected successfully on other side */
                     TeleportFinish teleFinish = new TeleportFinish();
                     teleFinish.AgentID = agent.ID;
-                    teleFinish.LocationID = 4;
+                    teleFinish.LocationID = 0;
                     teleFinish.SimIP = ((IPEndPoint)dInfo.SimIP).Address;
                     teleFinish.SimPort = (ushort)dInfo.ServerPort;
                     teleFinish.GridPosition = dInfo.Location;
@@ -951,11 +956,11 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
 
                     if (protoVersion.Major == 0 && protoVersion.Minor < 2)
                     {
-                        PutAgent(sceneID, dInfo, agent, false, BuildAgentUri(scene.GetRegionInfo(), agent, "/release"));
+                        PutAgent(sceneID, dInfo, agent, circuitCode, false, BuildAgentUri(scene.GetRegionInfo(), agent, "/release"));
                     }
                     else
                     {
-                        if (!PutAgent(sceneID, dInfo, agent, true))
+                        if (!PutAgent(sceneID, dInfo, agent, circuitCode, true))
                         {
                             /* TODO: check if there is any possibility to know whether viewer is still with us */
                             throw new TeleportFailedException(this.GetLanguageString(agent.CurrentCulture, "FailedToEstablishViewerConnectionOnRemote", "Failed to establish viewer connection on remote simulator"));
@@ -1153,7 +1158,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
         #endregion
 
         #region PutAgent Handler
-        bool PutAgent(UUID fromSceneID, RegionInfo dInfo, IAgent agent, bool waitForRoot = false, string callbackUri = "")
+        bool PutAgent(UUID fromSceneID, RegionInfo dInfo, IAgent agent, uint circuitcode, bool waitForRoot = false, string callbackUri = "")
         {
             string uri = BuildAgentUri(dInfo, agent);
 
@@ -1165,7 +1170,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
             req.Add("message_type", "AgentData");
             req.Add("region_id", fromSceneID);
 
-            //req.Add("circuit_code", );
+            req.Add("circuit_code", circuitcode.ToString());
             req.Add("agent_uuid", agent.ID);
             req.Add("session_uuid", agent.Session.SessionID);
             req.Add("position", agent.GlobalPosition.ToString());
@@ -1188,7 +1193,10 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
             //req.Add("always_run", )
             //req.Add("prey_agent", );
             //req.Add("agent_access", );
-            req.Add("active_group_id", agent.Group.ID);
+            if (null != agent.Group)
+            {
+                req.Add("active_group_id", agent.Group.ID);
+            }
             //req.Add("groups", new AnArray());
             /*
             if ((Anims != null) && (Anims.Length > 0))

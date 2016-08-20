@@ -708,7 +708,7 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
             circuit.Agent = agent;
             circuit.AgentID = agentPost.Account.Principal.ID;
             circuit.SessionID = agentPost.Session.SessionID;
-            agent.Circuits.Add(circuit.CircuitCode, circuit.Scene.ID, circuit);
+            agent.Circuits.Add(circuit.Scene.ID, circuit);
 
             try
             {
