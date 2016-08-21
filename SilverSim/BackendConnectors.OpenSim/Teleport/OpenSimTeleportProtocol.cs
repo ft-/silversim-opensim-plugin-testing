@@ -1277,6 +1277,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
                     }
                     catch
                     {
+                        wearables.Add(new AnArray());
                         continue;
                     }
                     List<AgentWearables.WearableInfo> wearablesList = appearance.Wearables[(WearableType)i];
@@ -1387,11 +1388,16 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
                 uncompressed_postdata = ms.ToArray();
             }
 
+            using (FileStream w = new FileStream("putagent.json", FileMode.Create))
+            {
+                w.Write(uncompressed_postdata, 0, uncompressed_postdata.Length);
+            }
+
             string resultStr;
 
             try
             {
-                using (Stream o = HttpRequestHandler.DoStreamRequest("POST", uri, null, "application/json", uncompressed_postdata.Length, delegate (Stream ws)
+                using (Stream o = HttpRequestHandler.DoStreamRequest("PUT", uri, null, "application/json", uncompressed_postdata.Length, delegate (Stream ws)
                 {
                     ws.Write(uncompressed_postdata, 0, uncompressed_postdata.Length);
                 }, true, TimeoutMs))
@@ -1415,7 +1421,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
                             compressed_postdata = ms.ToArray();
                         }
                     }
-                    using (Stream o = HttpRequestHandler.DoStreamRequest("POST", uri, null, "application/x-gzip", compressed_postdata.Length, delegate (Stream ws)
+                    using (Stream o = HttpRequestHandler.DoStreamRequest("PUT", uri, null, "application/x-gzip", compressed_postdata.Length, delegate (Stream ws)
                     {
                         ws.Write(compressed_postdata, 0, compressed_postdata.Length);
                     }, false, TimeoutMs))
@@ -1430,7 +1436,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
                 {
                     try
                     {
-                        using (Stream o = HttpRequestHandler.DoStreamRequest("POST", uri, null, "application/json", uncompressed_postdata.Length, delegate (Stream ws)
+                        using (Stream o = HttpRequestHandler.DoStreamRequest("PUT", uri, null, "application/json", uncompressed_postdata.Length, delegate (Stream ws)
                         {
                             ws.Write(uncompressed_postdata, 0, uncompressed_postdata.Length);
                         }, false, TimeoutMs))

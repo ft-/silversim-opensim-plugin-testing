@@ -232,6 +232,7 @@ namespace SilverSim.BackendConnectors.Robust.StructuredData.Agent
                         }
                         catch
                         {
+                            wearables.Add(new AnArray());
                             continue;
                         }
                         n = 0;
