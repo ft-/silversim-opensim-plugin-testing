@@ -165,12 +165,12 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
             agent.ActiveChilds.Remove(regionInfo.ID);
         }
 
-        void PostAgent(UUID fromSceneID, IAgent agent, DestinationInfo destinationRegion, out uint circuitCode, out string capsPath)
+        void PostAgent(UUID fromSceneID, IAgent agent, DestinationInfo destinationRegion, int maxAllowedWearables, out uint circuitCode, out string capsPath)
         {
-            PostAgent(fromSceneID, agent, destinationRegion, NewCircuitCode, UUID.Random, out circuitCode, out capsPath);
+            PostAgent(fromSceneID, agent, destinationRegion, NewCircuitCode, UUID.Random, maxAllowedWearables, out circuitCode, out capsPath);
         }
 
-        void PostAgent(UUID fromSceneID, IAgent agent, DestinationInfo destinationRegion, uint newCircuitCode, UUID capsId, out uint circuitCode, out string capsPath)
+        void PostAgent(UUID fromSceneID, IAgent agent, DestinationInfo destinationRegion, uint newCircuitCode, UUID capsId, int maxAllowedWearables, out uint circuitCode, out string capsPath)
         {
             ViewerAgent vagent = (ViewerAgent)agent;
             AgentCircuit acirc = vagent.Circuits[fromSceneID];
@@ -202,16 +202,25 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
             byte[] uncompressed_postdata;
             using (MemoryStream ms = new MemoryStream())
             {
-                agentPostData.Serialize(ms);
+                agentPostData.Serialize(ms, maxAllowedWearables);
                 uncompressed_postdata = ms.ToArray();
             }
 
             Map result;
+            byte[] compressed_postdata;
+            using (MemoryStream ms = new MemoryStream())
+            {
+                using (GZipStream gz = new GZipStream(ms, CompressionMode.Compress))
+                {
+                    gz.Write(uncompressed_postdata, 0, uncompressed_postdata.Length);
+                    compressed_postdata = ms.ToArray();
+                }
+            }
             try
             {
-                using (Stream o = HttpRequestHandler.DoStreamRequest("POST", agentURL, null, "application/json", uncompressed_postdata.Length, delegate (Stream ws)
+                using (Stream o = HttpRequestHandler.DoStreamRequest("POST", agentURL, null, "application/json", compressed_postdata.Length, delegate (Stream ws)
                 {
-                    ws.Write(uncompressed_postdata, 0, uncompressed_postdata.Length);
+                    ws.Write(compressed_postdata, 0, compressed_postdata.Length);
                 }, true, TimeoutMs))
                 {
                     result = (Map)Json.Deserialize(o);
@@ -221,15 +230,6 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
             {
                 try
                 {
-                    byte[] compressed_postdata;
-                    using (MemoryStream ms = new MemoryStream())
-                    {
-                        using (GZipStream gz = new GZipStream(ms, CompressionMode.Compress))
-                        {
-                            gz.Write(uncompressed_postdata, 0, uncompressed_postdata.Length);
-                            compressed_postdata = ms.ToArray();
-                        }
-                    }
                     using (Stream o = HttpRequestHandler.DoStreamRequest("POST", agentURL, null, "application/x-gzip", compressed_postdata.Length, delegate (Stream ws)
                     {
                         ws.Write(compressed_postdata, 0, compressed_postdata.Length);
@@ -291,7 +291,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
             string capsPath;
             try
             {
-                PostAgent(fromSceneID, agent, destinationRegion, out circuitCode, out capsPath);
+                PostAgent(fromSceneID, agent, destinationRegion, 15, out circuitCode, out capsPath);
             }
             catch
             {
@@ -926,13 +926,18 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
                     {
                         throw new TeleportFailedException("Older teleport variant not yet implemented");
                     }
+                    int maxWearables = (int)WearableType.NumWearables;
+                    if(protoVersion.Major == 0 && protoVersion.Minor < 4)
+                    {
+                        maxWearables = 15;
+                    }
 
                     if (neighbors.TryGetValue(dInfo.ID, out childInfo))
                     {
                         /* we have to use PostAgent for TeleportFlags essentially */
                         try
                         {
-                            PostAgent(scene.ID, agent, dInfo, childInfo.CircuitCode, childInfo.SeedCapsID, out circuitCode, out capsPath);
+                            PostAgent(scene.ID, agent, dInfo, childInfo.CircuitCode, childInfo.SeedCapsID, maxWearables, out circuitCode, out capsPath);
                         }
                         catch (Exception e)
                         {
@@ -949,7 +954,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
                         /* no child connection, so we need a new one */
                         try
                         {
-                            PostAgent(scene.ID, agent, dInfo, out circuitCode, out capsPath);
+                            PostAgent(scene.ID, agent, dInfo, maxWearables, out circuitCode, out capsPath);
                         }
                         catch (Exception e)
                         {
@@ -979,11 +984,11 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
 
                     if (protoVersion.Major == 0 && protoVersion.Minor < 2)
                     {
-                        PutAgent(sceneID, dInfo, agent, circuitCode, false, BuildAgentUri(scene.GetRegionInfo(), agent, "/release"));
+                        PutAgent(sceneID, dInfo, agent, circuitCode, maxWearables, false, BuildAgentUri(scene.GetRegionInfo(), agent, "/release"));
                     }
                     else
                     {
-                        if (!PutAgent(sceneID, dInfo, agent, circuitCode, true))
+                        if (!PutAgent(sceneID, dInfo, agent, circuitCode, maxWearables, true))
                         {
                             /* TODO: check if there is any possibility to know whether viewer is still with us */
                             throw new TeleportFailedException(this.GetLanguageString(agent.CurrentCulture, "FailedToEstablishViewerConnectionOnRemote", "Failed to establish viewer connection on remote simulator"));
@@ -1181,7 +1186,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
         #endregion
 
         #region PutAgent Handler
-        bool PutAgent(UUID fromSceneID, RegionInfo dInfo, IAgent agent, uint circuitcode, bool waitForRoot = false, string callbackUri = "")
+        bool PutAgent(UUID fromSceneID, RegionInfo dInfo, IAgent agent, uint circuitcode, int maxAllowedWearables, bool waitForRoot = false, string callbackUri = "")
         {
             string uri = BuildAgentUri(dInfo, agent);
 
@@ -1268,7 +1273,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
             {
                 int i;
                 AnArray wearables = new AnArray();
-                for (i = 0; i < (int)WearableType.NumWearables; ++i)
+                for (i = 0; i < (int)WearableType.NumWearables && i < maxAllowedWearables; ++i)
                 {
                     AnArray ar;
                     try
@@ -1395,11 +1400,20 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
 
             string resultStr;
 
+            byte[] compressed_postdata;
+            using (MemoryStream ms = new MemoryStream())
+            {
+                using (GZipStream gz = new GZipStream(ms, CompressionMode.Compress))
+                {
+                    gz.Write(uncompressed_postdata, 0, uncompressed_postdata.Length);
+                    compressed_postdata = ms.ToArray();
+                }
+            }
             try
             {
-                using (Stream o = HttpRequestHandler.DoStreamRequest("PUT", uri, null, "application/json", uncompressed_postdata.Length, delegate (Stream ws)
+                using (Stream o = HttpRequestHandler.DoStreamRequest("PUT", uri, null, "application/json", compressed_postdata.Length, delegate (Stream ws)
                 {
-                    ws.Write(uncompressed_postdata, 0, uncompressed_postdata.Length);
+                    ws.Write(compressed_postdata, 0, compressed_postdata.Length);
                 }, true, TimeoutMs))
                 {
                     using (StreamReader reader = o.UTF8StreamReader())
@@ -1412,15 +1426,6 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
             {
                 try
                 {
-                    byte[] compressed_postdata;
-                    using (MemoryStream ms = new MemoryStream())
-                    {
-                        using (GZipStream gz = new GZipStream(ms, CompressionMode.Compress))
-                        {
-                            gz.Write(uncompressed_postdata, 0, uncompressed_postdata.Length);
-                            compressed_postdata = ms.ToArray();
-                        }
-                    }
                     using (Stream o = HttpRequestHandler.DoStreamRequest("PUT", uri, null, "application/x-gzip", compressed_postdata.Length, delegate (Stream ws)
                     {
                         ws.Write(compressed_postdata, 0, compressed_postdata.Length);

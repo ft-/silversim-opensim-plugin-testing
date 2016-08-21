@@ -289,7 +289,7 @@ namespace SilverSim.BackendConnectors.Robust.StructuredData.Agent
             w.Write(string.Format("\"{0}\":{1}", Json.SerializeString(name), value ? "true" : "false"));
         }
 
-        public void Serialize(Stream output)
+        public void Serialize(Stream output, int maxAllowedWearables)
         {
             string prefix;
             using (TextWriter w = output.UTF8StreamWriterLeaveOpen())
@@ -419,7 +419,7 @@ namespace SilverSim.BackendConnectors.Robust.StructuredData.Agent
                 w.Write("],\"wearables\":[");
                 {
                     uint i;
-                    for (i = 0; i < (uint)WearableType.NumWearables; ++i)
+                    for (i = 0; i < (uint)WearableType.NumWearables && i < (uint)maxAllowedWearables; ++i)
                     {
                         if (i != 0)
                         {
