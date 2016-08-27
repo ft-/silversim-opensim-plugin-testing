@@ -146,24 +146,24 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
 
         readonly RwLockedDictionary<UUID, bool> m_HGDirectEnabled = new RwLockedDictionary<UUID, bool>();
 
-        public void TriggerParameterUpdated(UUID regionID, string parametername, string value)
+        [ServerParam("DirectHGEnabled")]
+        public void DirectHGEnabledUpdated(UUID regionID, string parametername, string value)
         {
-            if (parametername == "DirectHGEnabled")
+            bool intval;
+            if (value.Length == 0)
             {
-                bool intval;
-                if (value.Length == 0)
-                {
-                    m_HGDirectEnabled.Remove(regionID);
-                }
-                else if (bool.TryParse(value, out intval))
-                {
-                    m_HGDirectEnabled[regionID] = intval;
-                }
+                m_HGDirectEnabled.Remove(regionID);
             }
-            else if(parametername == "DefaultHGRegion")
+            else if (bool.TryParse(value, out intval))
             {
-                m_DefaultHGRegion = value;
+                m_HGDirectEnabled[regionID] = intval;
             }
+        }
+
+        [ServerParam("DefaultHGRegion")]
+        public void DefaultHGRegion_Updated(UUID regionID, string value)
+        {
+            m_DefaultHGRegion = value;
         }
     }
     #endregion
