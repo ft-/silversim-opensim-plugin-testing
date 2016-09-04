@@ -18,6 +18,7 @@
   <Reference name="SilverSim.Types" localCopy="false"/>
   <Reference name="SilverSim.Http" localCopy="false"/>
   <Reference name="SilverSim.Scene.Types" localCopy="false"/>
+  <Reference name="SilverSim.Scene.Agent" localCopy="false"/>
   <Reference name="SilverSim.Scene.ServiceInterfaces" localCopy="false"/>
   <Reference name="SilverSim.ServiceInterfaces" localCopy="false"/>
   <Reference name="SilverSim.Main.Common" localCopy="false"/>
