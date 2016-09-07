@@ -88,14 +88,14 @@
 		<if test="${platform::is-windows()}">
 			<exec program="Prebuild/Prebuild.exe">
 				<arg value="/target"/>
-				<arg value="vs2013"/>
+				<arg value="vs2015"/>
 			</exec>
 		</if>
 		<if test="${not platform::is-windows()}">
 			<exec program="mono">
 				<arg path="Prebuild/Prebuild.exe"/>
 				<arg value="/target"/>
-				<arg value="vs2013"/>
+				<arg value="vs2015"/>
 			</exec>
 		</if>
 	</target>
