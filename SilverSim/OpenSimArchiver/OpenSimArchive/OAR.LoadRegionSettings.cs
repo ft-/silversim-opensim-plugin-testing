@@ -356,6 +356,10 @@ namespace SilverSim.OpenSimArchiver.RegionArchiver
 
             static void LoadRegionSettingsInner(XmlTextReader reader, SceneInterface scene)
             {
+                /* reset telehub on load */
+                scene.RegionSettings.TelehubObject = UUID.Zero;
+                scene.SpawnPoints.Clear();
+
                 for(;;)
                 {
                     if(!reader.Read())
