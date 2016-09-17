@@ -4,6 +4,7 @@
 using SilverSim.Scene.Types.Scene;
 using SilverSim.Types;
 using SilverSim.Types.Grid;
+using System.Globalization;
 using System.IO;
 using System.Xml;
 
@@ -300,7 +301,57 @@ namespace SilverSim.OpenSimArchiver.RegionArchiver
                 {
                     return;
                 }
-                reader.Skip();
+                for (;;)
+                {
+                    if (!reader.Read())
+                    {
+                        throw new OARFormatException();
+                    }
+
+                    switch (reader.NodeType)
+                    {
+                        case XmlNodeType.Element:
+                            switch (reader.Name)
+                            {
+                                case "TelehubObject":
+                                    scene.RegionSettings.TelehubObject = UUID.Parse(reader.ReadElementValueAsString());
+                                    break;
+
+                                case "SpawnPoint":
+                                    string spawnpointstr = reader.ReadElementValueAsString();
+                                    string[] sp_parts = spawnpointstr.Split(',');
+                                    double yaw = double.Parse(sp_parts[0], NumberStyles.Float, CultureInfo.InvariantCulture);
+                                    double pitch = float.Parse(sp_parts[1], NumberStyles.Float, CultureInfo.InvariantCulture);
+                                    double distance = float.Parse(sp_parts[2], NumberStyles.Float, CultureInfo.InvariantCulture);
+
+                                    Quaternion y = Quaternion.CreateFromEulers(0, 0, yaw);
+                                    Quaternion p = Quaternion.CreateFromEulers(0, pitch, 0);
+
+                                    Vector3 dir = new Vector3(distance, 0, 0) * p * y;
+
+                                    scene.SpawnPoints.Add(dir);
+                                    break;
+
+                                default:
+                                    if (!reader.IsEmptyElement)
+                                    {
+                                        reader.Skip();
+                                    }
+                                    break;
+                            }
+                            break;
+
+                        case XmlNodeType.EndElement:
+                            if (reader.Name != "Telehub")
+                            {
+                                throw new OARFormatException();
+                            }
+                            return;
+
+                        default:
+                            break;
+                    }
+                }
             }
 
             static void LoadRegionSettingsInner(XmlTextReader reader, SceneInterface scene)

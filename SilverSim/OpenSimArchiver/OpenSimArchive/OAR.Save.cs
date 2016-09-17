@@ -13,6 +13,7 @@ using SilverSim.Viewer.Messages.LayerData;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
 using System.IO;
 using System.IO.Compression;
 using System.Xml;
@@ -217,7 +218,32 @@ namespace SilverSim.OpenSimArchiver.RegionArchiver
                                 xmlwriter.WriteNamedValue("SunPosition", settings.SunPosition + 6);
                             }
                             xmlwriter.WriteEndElement();
-#warning TODO: Telehub Object
+                            if(settings.TelehubObject != UUID.Zero)
+                            {
+                                xmlwriter.WriteStartElement("Telehub");
+                                {
+                                    xmlwriter.WriteNamedValue("TelehubObject", settings.TelehubObject);
+                                    // yes, OpenSim likes to convert around data
+                                    double yaw;
+                                    double pitch;
+                                    double distance;
+                                    foreach(Vector3 sp in scene.SpawnPoints)
+                                    {
+                                        distance = sp.Length;
+
+                                        Vector3 dir = sp.Normalize();
+
+                                        // Get the bearing of the spawn point
+                                        yaw = (float)Math.Atan2(dir.Y, dir.X);
+
+                                        // Get the elevation of the spawn point
+                                        pitch = (float)-Math.Atan2(dir.Z, Math.Sqrt(dir.X * dir.X + dir.Y * dir.Y));
+
+                                        xmlwriter.WriteNamedValue("SpawnPoint", string.Format(CultureInfo.InvariantCulture, "{0},{1},{2}", yaw, pitch, distance));
+                                    }
+                                }
+                                xmlwriter.WriteEndElement();
+                            }
                         }
                         xmlwriter.WriteEndElement();
                     }
