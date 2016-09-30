@@ -11,6 +11,7 @@ using SilverSim.ServiceInterfaces.Inventory;
 using SilverSim.Types;
 using SilverSim.Types.Asset;
 using SilverSim.Types.Inventory;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
@@ -73,6 +74,11 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
             {
                 return this;
             }
+        }
+
+        public override void Remove(UUID scopeID, UUID accountID)
+        {
+            throw new NotSupportedException("Remove");
         }
 
         public override void CheckInventory(UUID principalID)

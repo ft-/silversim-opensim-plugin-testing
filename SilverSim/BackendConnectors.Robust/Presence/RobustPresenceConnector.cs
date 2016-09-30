@@ -234,6 +234,16 @@ namespace SilverSim.BackendConnectors.Robust.Presence
                 throw new PresenceLogoutRegionFailedException();
             }
         }
+
+        public override List<PresenceInfo> GetPresencesInRegion(UUID regionId)
+        {
+            throw new NotSupportedException("GetPresencesInRegion");
+        }
+
+        public override void Remove(UUID scopeID, UUID accountID)
+        {
+            throw new NotSupportedException("Remove");
+        }
     }
     #endregion
 

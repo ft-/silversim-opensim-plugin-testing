@@ -15,6 +15,13 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
 #if DEBUG
         static readonly ILog m_Log = LogManager.GetLogger("PROFILE AUTO-DETECT HANDLER");
 #endif
+
+        public override void Remove(UUID scopeID, UUID accountID)
+        {
+            throw new NotSupportedException("Remove");
+        }
+
+
         [Serializable]
         public class ProfileAutoDetectFailedException : Exception
         {
