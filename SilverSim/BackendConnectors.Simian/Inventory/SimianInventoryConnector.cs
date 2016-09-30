@@ -12,6 +12,7 @@ using SilverSim.Types.Asset;
 using SilverSim.Types.Inventory;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System;
 
 namespace SilverSim.BackendConnectors.Simian.Inventory
 {
@@ -23,6 +24,11 @@ namespace SilverSim.BackendConnectors.Simian.Inventory
         readonly DefaultInventoryFolderContentService m_ContentService;
         readonly GroupsServiceInterface m_GroupsService;
         readonly string m_InventoryCapability;
+
+        public override void Remove(UUID scopeID, UUID accountID)
+        {
+            throw new NotSupportedException("Remove");
+        }
 
         #region Constructor
         public SimianInventoryConnector(string uri, string simCapability)
