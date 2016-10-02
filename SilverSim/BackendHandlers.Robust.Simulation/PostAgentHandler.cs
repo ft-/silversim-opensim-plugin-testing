@@ -350,19 +350,16 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
 
         public void DoAgentResponse(HttpRequest req, string reason, bool success)
         {
-            string success_str = success ? "true" : "false";
-            string caller = req.CallerIP;
-            string fmt = "{" + string.Format("\"reason\":\"{0}\",\"success\":{1},\"your_ip\":\"{2}\"",
-                reason,
-                success_str,
-                caller) + "}";
+            Map resmap = new Map();
+            resmap.Add("reason", reason);
+            resmap.Add("success", success);
+            resmap.Add("your_ip", req.CallerIP);
             using (HttpResponse res = req.BeginResponse())
             {
                 res.ContentType = "application/json";
                 using (Stream o = res.GetOutputStream())
                 {
-                    byte[] b = Encoding.UTF8.GetBytes(fmt);
-                    o.Write(b, 0, b.Length);
+                    Json.Serialize(resmap, o);
                 }
             }
         }
@@ -540,6 +537,7 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
                 (Exception e)
 #endif
                 {
+                    m_Log.InfoFormat("Failed to verify agent {0} at Home Grid", agentPost.Account.Principal.FullName);
                     DoAgentResponse(req, "Failed to verify agent at Home Grid", false);
                     return;
                 }
@@ -558,6 +556,7 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
                 (Exception e)
 #endif
             {
+                m_Log.InfoFormat("Failed to verify client {0} at Home Grid", agentPost.Account.Principal.FullName);
                 DoAgentResponse(req, "Failed to verify client at Home Grid", false);
                 return;
             }
@@ -679,6 +678,7 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
             }
             catch(Exception e)
             {
+                m_Log.InfoFormat("Failed to determine initial location for agent {0}: {1}: {2}", agentPost.Account.Principal.FullName, e.GetType().FullName, e.Message);
                 DoAgentResponse(req, e.Message, false);
                 return;
             }
@@ -699,6 +699,7 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
             IPAddress ipAddr;
             if(!IPAddress.TryParse(agentPost.Client.ClientIP, out ipAddr))
             {
+                m_Log.InfoFormat("Invalid IP address for agent {0}", agentPost.Account.Principal.FullName);
                 DoAgentResponse(req, "Invalid IP address", false);
                 return;
             }
