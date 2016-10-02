@@ -525,12 +525,11 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
                 }
             }
 
-            UserAgentServiceInterface userAccountConnector = new RobustUserAgentConnector(agentPost.Account.ServiceURLs["HomeURI"]);
             if (!string.IsNullOrEmpty(agentPost.Session.ServiceSessionID) || !m_UnsafeOpenSimCompatibility)
             {
                 try
                 {
-                    userAccountConnector.VerifyAgent(agentPost.Session.SessionID, agentPost.Session.ServiceSessionID);
+                    userAgentService.VerifyAgent(agentPost.Session.SessionID, agentPost.Session.ServiceSessionID);
                 }
                 catch
 #if DEBUG
@@ -549,7 +548,7 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
 
             try
             {
-                userAccountConnector.VerifyClient(agentPost.Session.SessionID, agentPost.Client.ClientIP);
+                userAgentService.VerifyClient(agentPost.Session.SessionID, agentPost.Client.ClientIP);
             }
             catch
 #if DEBUG
