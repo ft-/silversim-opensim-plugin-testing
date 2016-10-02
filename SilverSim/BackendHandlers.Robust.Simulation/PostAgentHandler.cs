@@ -29,6 +29,7 @@ using SilverSim.ServiceInterfaces.IM;
 using SilverSim.ServiceInterfaces.Inventory;
 using SilverSim.ServiceInterfaces.Presence;
 using SilverSim.ServiceInterfaces.Profile;
+using SilverSim.ServiceInterfaces.ServerParam;
 using SilverSim.ServiceInterfaces.UserAgents;
 using SilverSim.Threading;
 using SilverSim.Types;
@@ -52,7 +53,8 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
 {
     #region Service Implementation
     [Description("OpenSim PostAgent Handler")]
-    public class PostAgentHandler : IPlugin, IPluginShutdown
+    [ServerParam("UnsecureOpenSimProtocolCompatibility")]
+    public class PostAgentHandler : IPlugin, IPluginShutdown, IServerParamListener
     {
         /* CAUTION! Never ever make a protocol version configurable */
         const string PROTOCOL_VERSION = "SIMULATION/0.3";
@@ -109,13 +111,48 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
         readonly RwLockedList<GridParameterMap> m_GridParameterMap = new RwLockedList<GridParameterMap>();
 
         readonly string m_AgentBaseURL = "/agent/";
-        bool m_UnsafeOpenSimCompatibility = false;
+
+        readonly RwLockedDictionary<UUID, bool> m_UnsecureOpenSimProtocolCompatibilityParams = new RwLockedDictionary<UUID, bool>();
+
+        [ServerParam("UnsecureOpenSimProtocolCompatibility")]
+        public void UnsecureOpenSimProtocolCompatibilityUpdated(UUID regionId, string value)
+        {
+            bool boolval;
+            if(value == string.Empty)
+            {
+                m_UnsecureOpenSimProtocolCompatibilityParams.Remove(regionId);
+            }
+            else if(bool.TryParse(value, out boolval))
+            {
+                m_UnsecureOpenSimProtocolCompatibilityParams[regionId] = boolval;
+            }
+            else
+            {
+                m_UnsecureOpenSimProtocolCompatibilityParams[regionId] = false;
+            }
+        }
+
+        bool GetUnsecureOpenSimProtocolCompatibility(UUID regionId)
+        {
+            bool boolval;
+            if(m_UnsecureOpenSimProtocolCompatibilityParams.TryGetValue(regionId, out boolval))
+            {
+                return boolval;
+            }
+            else if(m_UnsecureOpenSimProtocolCompatibilityParams.TryGetValue(UUID.Zero, out boolval))
+            {
+                return boolval;
+            }
+            else
+            {
+                return false;
+            }
+        }
 
         public PostAgentHandler(IConfig ownSection)
         {
             m_DefaultGridUserServerURI = ownSection.GetString("DefaultGridUserServerURI", string.Empty);
             m_DefaultPresenceServerURI = ownSection.GetString("DefaultPresenceServerURI", string.Empty);
-            m_UnsafeOpenSimCompatibility = ownSection.GetBoolean("UnsafeOpensimCompatibility", false);
         }
 
         protected PostAgentHandler(string agentBaseURL, IConfig ownSection)
@@ -525,7 +562,7 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
                 }
             }
 
-            if (!string.IsNullOrEmpty(agentPost.Session.ServiceSessionID) || !m_UnsafeOpenSimCompatibility)
+            if (!string.IsNullOrEmpty(agentPost.Session.ServiceSessionID) || !GetUnsecureOpenSimProtocolCompatibility(agentPost.Destination.ID))
             {
                 try
                 {
@@ -536,14 +573,14 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
                 (Exception e)
 #endif
                 {
-                    m_Log.InfoFormat("Failed to verify agent {0} at Home Grid", agentPost.Account.Principal.FullName);
-                    DoAgentResponse(req, "Failed to verify agent at Home Grid", false);
+                    m_Log.InfoFormat("Failed to verify agent {0} at Home Grid (Code 1)", agentPost.Account.Principal.FullName);
+                    DoAgentResponse(req, "Failed to verify agent at Home Grid (Code 1)", false);
                     return;
                 }
             }
             else
             {
-                m_Log.WarnFormat("Unsafe OpenSim protocol in use for agent {0}.", agentPost.Account.Principal.FullName);
+                m_Log.WarnFormat("Unsecure OpenSim protocol in use for agent {0}.", agentPost.Account.Principal.FullName);
             }
 
             try
@@ -555,8 +592,8 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
                 (Exception e)
 #endif
             {
-                m_Log.InfoFormat("Failed to verify client {0} at Home Grid", agentPost.Account.Principal.FullName);
-                DoAgentResponse(req, "Failed to verify client at Home Grid", false);
+                m_Log.InfoFormat("Failed to verify client {0} at Home Grid (Code 2)", agentPost.Account.Principal.FullName);
+                DoAgentResponse(req, "Failed to verify client at Home Grid (Code 2)", false);
                 return;
             }
 
