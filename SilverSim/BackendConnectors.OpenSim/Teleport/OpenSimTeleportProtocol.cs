@@ -1257,7 +1257,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
                 {
                     vParams.Add(vp);
                 }
-                appearancePack.Add("visual_params", vParams);
+                appearancePack.Add("visualparams", vParams);
             }
 
             {
