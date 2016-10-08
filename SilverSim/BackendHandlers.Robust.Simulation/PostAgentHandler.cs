@@ -53,7 +53,7 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
 {
     #region Service Implementation
     [Description("OpenSim PostAgent Handler")]
-    [ServerParam("UnsecureOpenSimProtocolCompatibility")]
+    [ServerParam("OpenSimProtocolCompatibility")]
     public class PostAgentHandler : IPlugin, IPluginShutdown, IServerParamListener
     {
         /* CAUTION! Never ever make a protocol version configurable */
@@ -112,34 +112,34 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
 
         readonly string m_AgentBaseURL = "/agent/";
 
-        readonly RwLockedDictionary<UUID, bool> m_UnsecureOpenSimProtocolCompatibilityParams = new RwLockedDictionary<UUID, bool>();
+        readonly RwLockedDictionary<UUID, bool> m_OpenSimProtocolCompatibilityParams = new RwLockedDictionary<UUID, bool>();
 
-        [ServerParam("UnsecureOpenSimProtocolCompatibility")]
-        public void UnsecureOpenSimProtocolCompatibilityUpdated(UUID regionId, string value)
+        [ServerParam("OpenSimProtocolCompatibility")]
+        public void OpenSimProtocolCompatibilityUpdated(UUID regionId, string value)
         {
             bool boolval;
             if(value == string.Empty)
             {
-                m_UnsecureOpenSimProtocolCompatibilityParams.Remove(regionId);
+                m_OpenSimProtocolCompatibilityParams.Remove(regionId);
             }
             else if(bool.TryParse(value, out boolval))
             {
-                m_UnsecureOpenSimProtocolCompatibilityParams[regionId] = boolval;
+                m_OpenSimProtocolCompatibilityParams[regionId] = boolval;
             }
             else
             {
-                m_UnsecureOpenSimProtocolCompatibilityParams[regionId] = false;
+                m_OpenSimProtocolCompatibilityParams[regionId] = false;
             }
         }
 
-        bool GetUnsecureOpenSimProtocolCompatibility(UUID regionId)
+        bool GetOpenSimProtocolCompatibility(UUID regionId)
         {
             bool boolval;
-            if(m_UnsecureOpenSimProtocolCompatibilityParams.TryGetValue(regionId, out boolval))
+            if(m_OpenSimProtocolCompatibilityParams.TryGetValue(regionId, out boolval))
             {
                 return boolval;
             }
-            else if(m_UnsecureOpenSimProtocolCompatibilityParams.TryGetValue(UUID.Zero, out boolval))
+            else if(m_OpenSimProtocolCompatibilityParams.TryGetValue(UUID.Zero, out boolval))
             {
                 return boolval;
             }
@@ -562,7 +562,7 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
                 }
             }
 
-            if (!string.IsNullOrEmpty(agentPost.Session.ServiceSessionID) || !GetUnsecureOpenSimProtocolCompatibility(agentPost.Destination.ID))
+            if (!string.IsNullOrEmpty(agentPost.Session.ServiceSessionID) || !GetOpenSimProtocolCompatibility(agentPost.Destination.ID))
             {
                 try
                 {
@@ -580,7 +580,7 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
             }
             else
             {
-                m_Log.WarnFormat("Unsecure OpenSim protocol in use for agent {0}.", agentPost.Account.Principal.FullName);
+                m_Log.WarnFormat("OpenSim protocol in use for agent {0}.", agentPost.Account.Principal.FullName);
             }
 
             try
