@@ -721,6 +721,14 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
 
             UDPCircuitsManager udpServer = (UDPCircuitsManager)scene.UDPServer;
 
+            IPAddress ipAddr;
+            if (!IPAddress.TryParse(agentPost.Client.ClientIP, out ipAddr))
+            {
+                m_Log.InfoFormat("Invalid IP address for agent {0}", agentPost.Account.Principal.FullName);
+                DoAgentResponse(req, "Invalid IP address", false);
+                return;
+            }
+            IPEndPoint ep = new IPEndPoint(ipAddr, 0);
             AgentCircuit circuit = new AgentCircuit(
                 m_Commands,
                 agent,
@@ -730,17 +738,9 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
                 agentPost.Circuit.CapsPath,
                 agent.ServiceURLs,
                 gatekeeperURI,
-                m_PacketHandlerPlugins);
+                m_PacketHandlerPlugins,
+                ep);
             circuit.LastTeleportFlags = agentPost.Destination.TeleportFlags;
-            IPAddress ipAddr;
-            if(!IPAddress.TryParse(agentPost.Client.ClientIP, out ipAddr))
-            {
-                m_Log.InfoFormat("Invalid IP address for agent {0}", agentPost.Account.Principal.FullName);
-                DoAgentResponse(req, "Invalid IP address", false);
-                return;
-            }
-            IPEndPoint ep = new IPEndPoint(ipAddr, 0);
-            circuit.RemoteEndPoint = ep;
             circuit.Agent = agent;
             circuit.AgentID = agentPost.Account.Principal.ID;
             circuit.SessionID = agentPost.Session.SessionID;

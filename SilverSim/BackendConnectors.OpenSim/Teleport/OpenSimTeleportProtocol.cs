@@ -824,6 +824,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
                         {
                             UUID seedId = UUID.Random;
                             string seedUri = NewCapsURL(dInfo.ServerURI, seedId);
+                            IPEndPoint ep = new IPEndPoint(((IPEndPoint)circ.RemoteEndPoint).Address, 0);
                             targetCircuit = new AgentCircuit(
                                 m_Commands,
                                 vagent,
@@ -833,9 +834,8 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
                                 seedId,
                                 vagent.ServiceURLs,
                                 dInfo.GatekeeperURI,
-                                m_PacketHandlerPlugins);
-                            IPEndPoint ep = new IPEndPoint(((IPEndPoint)circ.RemoteEndPoint).Address, 0);
-                            targetCircuit.RemoteEndPoint = ep;
+                                m_PacketHandlerPlugins,
+                                ep);
                             targetCircuit.Agent = vagent;
                             targetCircuit.AgentID = vagent.ID;
                             targetCircuit.SessionID = vagent.Session.SessionID;
