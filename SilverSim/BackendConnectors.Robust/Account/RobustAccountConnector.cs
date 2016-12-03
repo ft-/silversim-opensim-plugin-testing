@@ -246,6 +246,7 @@ namespace SilverSim.BackendConnectors.Robust.Account
             ua.UserLevel = int.Parse(m["UserLevel"].ToString());
             ua.UserFlags = uint.Parse(m["UserFlags"].ToString());
             ua.IsLocalToGrid = true;
+            ua.IsEverLoggedIn = true;
             string serviceURLs = string.Empty;
             if(m.ContainsKey("ServiceURLs"))
             {
@@ -275,6 +276,11 @@ namespace SilverSim.BackendConnectors.Robust.Account
         }
 
         public override void Remove(UUID scopeID, UUID accountID)
+        {
+            throw new NotSupportedException();
+        }
+
+        public override void SetEverLoggedIn(UUID scopeID, UUID accountID)
         {
             throw new NotSupportedException();
         }
