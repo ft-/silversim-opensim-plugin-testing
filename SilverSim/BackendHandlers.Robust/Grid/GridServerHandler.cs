@@ -6,6 +6,7 @@ using Nini.Config;
 using SilverSim.Main.Common;
 using SilverSim.Main.Common.HttpServer;
 using SilverSim.ServiceInterfaces.Grid;
+using SilverSim.ServiceInterfaces.ServerParam;
 using SilverSim.Types;
 using SilverSim.Types.Grid;
 using SilverSim.Types.StructuredData.REST;
@@ -20,7 +21,8 @@ namespace SilverSim.BackendHandlers.Robust.Grid
 {
     #region Service Implementation
     [Description("Robust Grid Protocol Server")]
-    public sealed class RobustGridServerHandler : IPlugin
+    [ServerParam("GridName", ParameterType = typeof(Uri), Type = ServerParamType.GlobalOnly)]
+    public sealed class RobustGridServerHandler : IPlugin, IServerParamListener
     {
         readonly string m_GridServiceName;
         GridServiceInterface m_GridService;
@@ -31,12 +33,23 @@ namespace SilverSim.BackendHandlers.Robust.Grid
         {
             m_GridServiceName = gridServiceName;
             m_ExtraFeatures["ExportSupported"] = "true";
+            m_ExtraFeatures["gridname"] = string.Empty;
         }
 
         public void Startup(ConfigurationLoader loader)
         {
             m_GridService = loader.GetService<GridServiceInterface>(m_GridServiceName);
             loader.HttpServer.StartsWithUriHandlers.Add("/grid", GridAccessHandler);
+        }
+
+        [ServerParam("GridName")]
+        public void HandleGridName(UUID regionid, string value)
+        {
+            if (regionid != UUID.Zero)
+            {
+                return;
+            }
+            m_ExtraFeatures["gridname"] = value;
         }
 
         void SuccessResult(HttpRequest req, RegionInfo rInfo)
