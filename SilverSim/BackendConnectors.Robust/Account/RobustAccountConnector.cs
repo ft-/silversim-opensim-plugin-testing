@@ -282,7 +282,7 @@ namespace SilverSim.BackendConnectors.Robust.Account
 
         public override void SetEverLoggedIn(UUID scopeID, UUID accountID)
         {
-            throw new NotSupportedException();
+            /* intentionally left empty */
         }
     }
     #endregion
