@@ -8,6 +8,7 @@ using SilverSim.Main.Common;
 using SilverSim.Main.Common.CmdIO;
 using SilverSim.Main.Common.Rpc;
 using SilverSim.Scene.Management.Scene;
+using SilverSim.Scene.ServiceInterfaces.Teleport;
 using SilverSim.Scene.Types.Agent;
 using SilverSim.Scene.Types.Neighbor;
 using SilverSim.Scene.Types.Object;
@@ -16,6 +17,7 @@ using SilverSim.ServiceInterfaces.Grid;
 using SilverSim.ServiceInterfaces.Teleport;
 using SilverSim.Threading;
 using SilverSim.Types;
+using SilverSim.Types.Account;
 using SilverSim.Types.Agent;
 using SilverSim.Types.Asset.Format;
 using SilverSim.Types.Grid;
@@ -49,7 +51,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
         List<IProtocolExtender> m_PacketHandlerPlugins = new List<IProtocolExtender>();
         SceneList m_Scenes;
 
-        private uint NewCircuitCode
+        internal static uint NewCircuitCode
         {
             get
             {
@@ -89,7 +91,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
             }
         }
 
-        private string NewCapsURL(string serverURI, UUID uuid)
+        internal static string NewCapsURL(string serverURI, UUID uuid)
         {
             return serverURI + "CAPS/" + uuid.ToString() + "0000/";
         }
@@ -146,7 +148,12 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
         {
         }
 
-        static string BuildAgentUri(RegionInfo destinationRegion, IAgent agent, string extra = "")
+        internal static string BuildAgentUri(RegionInfo destinationRegion, IAgent agent, string extra = "")
+        {
+            return BuildAgentUri(destinationRegion, agent.ID, extra);
+        }
+
+        internal static string BuildAgentUri(RegionInfo destinationRegion, UUID agentID, string extra = "")
         {
             string agentURL = destinationRegion.ServerURI;
 
@@ -155,7 +162,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
                 agentURL += "/";
             }
 
-            return agentURL + "agent/" + agent.ID.ToString() + "/" + destinationRegion.ID.ToString() + "/" + extra;
+            return agentURL + "agent/" + agentID.ToString() + "/" + destinationRegion.ID.ToString() + "/" + extra;
         }
 
         public override void ReleaseAgent(UUID fromSceneID, IAgent agent, RegionInfo regionInfo)
@@ -1018,7 +1025,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
         }
 
         #region Query Access
-        struct ProtocolVersion
+        internal struct ProtocolVersion
         {
             public uint Major;
             public uint Minor;
