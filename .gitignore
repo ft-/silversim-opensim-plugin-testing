@@ -16,7 +16,6 @@
 *.FileListAbsolute.txt
 *.suo
 *.dump.txt
-*.ini
 *.example
 *.log
 

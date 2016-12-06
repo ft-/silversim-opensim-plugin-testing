@@ -26,6 +26,7 @@
 			<fileset basedir="additional-bin">
 				<include name="**/*.dll"/>
 				<include name="**/*.so"/>
+				<include name="**/*.dylib"/>
 				<include name="**/*.config"/>
 			</fileset>
 		</copy>
