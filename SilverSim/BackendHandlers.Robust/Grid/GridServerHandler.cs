@@ -842,9 +842,9 @@ namespace SilverSim.BackendHandlers.Robust.Grid
             }
         }
     }
-#endregion
+    #endregion
 
-#region Factory
+    #region Factory
     [PluginName("GridHandler")]
     public sealed class RobustGridHandlerFactory : IPluginFactory
     {
@@ -858,5 +858,5 @@ namespace SilverSim.BackendHandlers.Robust.Grid
             return new RobustGridServerHandler(ownSection.GetString("GridService", "GridService"));
         }
     }
-#endregion
+    #endregion
 }

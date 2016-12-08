@@ -20,7 +20,7 @@ namespace SilverSim.BackendConnectors.Robust.AvatarName
     public sealed class RobustAccountAvatarNameConnector : AvatarNameServiceInterface, IPlugin
     {
         readonly string m_UserAccountURI;
-        readonly string m_HomeURI;
+        string m_HomeURI;
         readonly UUID m_ScopeID;
         public int TimeoutMs { get; set; }
 
@@ -40,7 +40,8 @@ namespace SilverSim.BackendConnectors.Robust.AvatarName
 
         public void Startup(ConfigurationLoader loader)
         {
-            /* no action needed */
+            /* only called when initialized by ConfigurationLoader */
+            m_HomeURI = loader.HomeURI;
         }
         #endregion
 
@@ -197,12 +198,7 @@ namespace SilverSim.BackendConnectors.Robust.AvatarName
                 m_Log.FatalFormat("Missing 'URI' in section {0}", ownSection.Name);
                 throw new ConfigurationLoader.ConfigurationErrorException();
             }
-            if (!ownSection.Contains("HomeURI"))
-            {
-                m_Log.FatalFormat("Missing 'HomeURI' in section {0}", ownSection.Name);
-                throw new ConfigurationLoader.ConfigurationErrorException();
-            }
-            return new RobustAccountAvatarNameConnector(ownSection.GetString("URI"), ownSection.GetString("HomeURI"), ownSection.GetString("ScopeID", (string)UUID.Zero));
+            return new RobustAccountAvatarNameConnector(ownSection.GetString("URI"), string.Empty, ownSection.GetString("ScopeID", (string)UUID.Zero));
         }
     }
     #endregion

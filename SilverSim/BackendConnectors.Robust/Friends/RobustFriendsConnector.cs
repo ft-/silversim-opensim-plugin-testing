@@ -19,7 +19,7 @@ namespace SilverSim.BackendConnectors.Robust.Friends
     public sealed class RobustFriendsConnector : FriendsServiceInterface, IPlugin
     {
         readonly string m_Uri;
-        readonly string m_HomeUri;
+        string m_HomeUri;
         public int TimeoutMs = 20000;
 
         public RobustFriendsConnector(string uri, string homeuri)
@@ -159,7 +159,8 @@ namespace SilverSim.BackendConnectors.Robust.Friends
 
         public void Startup(ConfigurationLoader loader)
         {
-            /* no action needed */
+            /* only called when initialized by ConfigurationLoader */
+            m_HomeUri = loader.HomeURI;
         }
 
         public override void StoreRights(FriendInfo fi)
@@ -211,7 +212,7 @@ namespace SilverSim.BackendConnectors.Robust.Friends
                 m_Log.FatalFormat("Missing 'URI' in section {0}", ownSection.Name);
                 throw new ConfigurationLoader.ConfigurationErrorException();
             }
-            return new RobustFriendsConnector(ownSection.GetString("URI"), ownSection.GetString("HomeURI", string.Empty));
+            return new RobustFriendsConnector(ownSection.GetString("URI"), string.Empty);
         }
     }
     #endregion

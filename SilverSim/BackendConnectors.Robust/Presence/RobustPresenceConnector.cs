@@ -259,29 +259,14 @@ namespace SilverSim.BackendConnectors.Robust.Presence
 
         public IPlugin Initialize(ConfigurationLoader loader, IConfig ownSection)
         {
-            if (!ownSection.Contains("URI") || !ownSection.Contains("HomeURI"))
+            if (!ownSection.Contains("URI"))
             {
-                if (!ownSection.Contains("URI"))
-                {
-                    m_Log.FatalFormat("Missing 'URI' in section {0}", ownSection.Name);
-                }
-
-                if (!ownSection.Contains("HomeURI"))
-                {
-                    m_Log.FatalFormat("Missing 'HomeURI' in section {0}", ownSection.Name);
-                }
+                m_Log.FatalFormat("Missing 'URI' in section {0}", ownSection.Name);
 
                 throw new ConfigurationLoader.ConfigurationErrorException();
             }
 
-            string homeURI = ownSection.GetString("HomeURI");
-            if(!Uri.IsWellFormedUriString(homeURI, UriKind.Absolute))
-            {
-                m_Log.FatalFormat("Invalid 'HomeURI' in section {0}", ownSection.Name);
-                throw new ConfigurationLoader.ConfigurationErrorException();
-            }
-
-            return new RobustPresenceConnector(ownSection.GetString("URI"), homeURI);
+            return new RobustPresenceConnector(ownSection.GetString("URI"), string.Empty);
         }
     }
     #endregion
