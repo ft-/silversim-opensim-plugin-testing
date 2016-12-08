@@ -5,6 +5,7 @@ using Nini.Config;
 using SilverSim.Main.Common;
 using SilverSim.Main.Common.HttpServer;
 using SilverSim.ServiceInterfaces.Account;
+using SilverSim.ServiceInterfaces.AuthInfo;
 using SilverSim.ServiceInterfaces.Friends;
 using SilverSim.ServiceInterfaces.Grid;
 using SilverSim.ServiceInterfaces.GridUser;
@@ -32,12 +33,15 @@ namespace SilverSim.BackendHandlers.Robust.UserAccounts
         UserAccountServiceInterface m_UserAccountService;
         PresenceServiceInterface m_PresenceService;
         TravelingDataServiceInterface m_TravelingDataService;
+        AuthInfoServiceInterface m_AuthInfoService;
 
         readonly string m_GridServiceName;
         readonly string m_GridUserServiceName;
         readonly string m_UserAccountServiceName;
         readonly string m_PresenceServiceName;
         readonly string m_TravelingDataServiceName;
+        readonly string m_AuthInfoServiceName;
+
         readonly Dictionary<string, string> m_ServiceURLs = new Dictionary<string, string>();
         static readonly string[] m_RequiredURLs = new string[] { "AssetServerURI", "InventoryServerURI", "IMServerURI", "FriendsServerURI", "ProfileServerURI" };
 
@@ -48,7 +52,8 @@ namespace SilverSim.BackendHandlers.Robust.UserAccounts
             m_UserAccountServiceName = ownConfig.GetString("UserAccountService", "UserAccountService");
             m_PresenceServiceName = ownConfig.GetString("PresenceService", "PresenceService");
             m_TravelingDataServiceName = ownConfig.GetString("TravelingDataService", "TravelingDataService");
-            foreach(string key in ownConfig.GetKeys())
+            m_AuthInfoServiceName = ownConfig.GetString("AuthInfoService", "AuthInfoService");
+            foreach (string key in ownConfig.GetKeys())
             {
                 if(key.StartsWith("SRV_"))
                 {
@@ -75,6 +80,7 @@ namespace SilverSim.BackendHandlers.Robust.UserAccounts
             xmlRpc.XmlRpcMethods.Add("get_server_urls", GetServerURLs);
             xmlRpc.XmlRpcMethods.Add("get_home_region", GetHomeRegion);
             xmlRpc.XmlRpcMethods.Add("get_user_info", GetUserInfo);
+            xmlRpc.XmlRpcMethods.Add("logout_agent", LogoutAgent);
             try
             {
                 m_GridService = loader.GetService<GridServiceInterface>(m_GridServiceName);
@@ -95,6 +101,52 @@ namespace SilverSim.BackendHandlers.Robust.UserAccounts
             m_UserAccountService = loader.GetService<UserAccountServiceInterface>(m_UserAccountServiceName);
             m_PresenceService = loader.GetService<PresenceServiceInterface>(m_PresenceServiceName);
             m_TravelingDataService = loader.GetService<TravelingDataServiceInterface>(m_TravelingDataServiceName);
+            m_AuthInfoService = loader.GetService<AuthInfoServiceInterface>(m_AuthInfoServiceName);
+        }
+
+        public XmlRpc.XmlRpcResponse LogoutAgent(XmlRpc.XmlRpcRequest req)
+        {
+            Map reqdata;
+            if (!req.Params.TryGetValue(0, out reqdata))
+            {
+                throw new XmlRpc.XmlRpcFaultException(-32602, "invalid method parameters");
+            }
+
+            UUID sessionId;
+            if (!reqdata.TryGetValue("sessionID", out sessionId))
+            {
+                throw new XmlRpc.XmlRpcFaultException(-32602, "invalid method parameters");
+            }
+            UUID userId;
+            if (!reqdata.TryGetValue("userID", out userId))
+            {
+                throw new XmlRpc.XmlRpcFaultException(-32602, "invalid method parameters");
+            }
+
+            Map respdata = new Map();
+            try
+            {
+                TravelingDataInfo travelingInfo = m_TravelingDataService.GetTravelingData(sessionId);
+                if(travelingInfo.UserID == userId)
+                {
+                    m_TravelingDataService.Remove(sessionId);
+                }
+                try
+                {
+                    m_GridUserService.LoggedOut(new UUI(userId), UUID.Zero, Vector3.Zero, Vector3.Zero);
+                }
+                catch
+                {
+                    /* ignore exception */
+                }
+                m_AuthInfoService.ReleaseTokenBySession(userId, sessionId);
+                respdata.Add("result", "true");
+            }
+            catch
+            {
+                respdata.Add("result", "false");
+            }
+            return new XmlRpc.XmlRpcResponse() { ReturnValue = respdata };
         }
 
         public XmlRpc.XmlRpcResponse VerifyClient(XmlRpc.XmlRpcRequest req)
