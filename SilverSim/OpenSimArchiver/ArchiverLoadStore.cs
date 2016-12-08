@@ -30,9 +30,9 @@ namespace SilverSim.OpenSimArchiver
         public void Startup(ConfigurationLoader loader)
         {
             m_Scenes = loader.Scenes;
-            loader.CommandRegistry.LoadCommands.Add("oar", LoadOarCommand);
-            loader.CommandRegistry.SaveCommands.Add("oar", SaveOarCommand);
-            loader.CommandRegistry.LoadCommands.Add("osassets", LoadAssetsCommand);
+            loader.CommandRegistry.AddLoadCommand("oar", LoadOarCommand);
+            loader.CommandRegistry.AddSaveCommand("oar", SaveOarCommand);
+            loader.CommandRegistry.AddLoadCommand("osassets", LoadAssetsCommand);
         }
 
         #region Load Assets
