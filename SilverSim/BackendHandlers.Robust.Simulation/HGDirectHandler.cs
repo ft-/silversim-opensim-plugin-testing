@@ -25,7 +25,10 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
         public PostAgentHGDirectHandler(IConfig ownSection)
             : base("/foreignagent/", ownSection)
         {
-
+            if(ownSection.GetBoolean("DirectHGEnabledByDefault", false))
+            {
+                m_HGDirectEnabled[UUID.Zero] = true;
+            }
         }
 
         public override void Startup(ConfigurationLoader loader)
