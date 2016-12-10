@@ -25,13 +25,16 @@ namespace SilverSim.BackendHandlers.Robust.Grid
     public sealed class RobustGridServerHandler : IPlugin, IServerParamListener
     {
         readonly string m_GridServiceName;
+        readonly string m_RegionDefaultFlagsServiceName;
         GridServiceInterface m_GridService;
+        RegionDefaultFlagsServiceInterface m_RegionDefaultFlagsService;
         readonly Dictionary<string, object> m_ExtraFeatures = new Dictionary<string, object>();
 
         static readonly ILog m_Log = LogManager.GetLogger("ROBUST GRID HANDLER");
-        public RobustGridServerHandler(string gridServiceName)
+        public RobustGridServerHandler(string gridServiceName, string regionDefaultFlagsServiceName)
         {
             m_GridServiceName = gridServiceName;
+            m_RegionDefaultFlagsServiceName = regionDefaultFlagsServiceName;
             m_ExtraFeatures["ExportSupported"] = "true";
             m_ExtraFeatures["gridname"] = string.Empty;
         }
@@ -39,6 +42,7 @@ namespace SilverSim.BackendHandlers.Robust.Grid
         public void Startup(ConfigurationLoader loader)
         {
             m_GridService = loader.GetService<GridServiceInterface>(m_GridServiceName);
+            m_RegionDefaultFlagsService = loader.GetService<RegionDefaultFlagsServiceInterface>(m_RegionDefaultFlagsServiceName);
             loader.HttpServer.StartsWithUriHandlers.Add("/grid", GridAccessHandler);
         }
 
@@ -392,6 +396,7 @@ namespace SilverSim.BackendHandlers.Robust.Grid
             
             try
             {
+                rInfo.Flags |= m_RegionDefaultFlagsService.GetRegionDefaultFlags(rInfo.ID);
                 m_GridService.RegisterRegion(rInfo);
             }
             catch(Exception e)
@@ -855,7 +860,8 @@ namespace SilverSim.BackendHandlers.Robust.Grid
 
         public IPlugin Initialize(ConfigurationLoader loader, IConfig ownSection)
         {
-            return new RobustGridServerHandler(ownSection.GetString("GridService", "GridService"));
+            return new RobustGridServerHandler(ownSection.GetString("GridService", "GridService"),
+                ownSection.GetString("RegionDefaultFlagsService", "RegionDefaultFlagsService"));
         }
     }
     #endregion
