@@ -308,4 +308,18 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
             capsPath = OpenSimTeleportProtocol.NewCapsURL(destinationInfo.ServerURI, agentPostData.Circuit.CapsPath);
         }
     }
+
+    [PluginName("LoginProtocol")]
+    public class OpenSimLoginProtocolFactory : IPluginFactory
+    {
+        public OpenSimLoginProtocolFactory()
+        {
+
+        }
+
+        public IPlugin Initialize(ConfigurationLoader loader, IConfig ownSection)
+        {
+            return new OpenSimLoginProtocol(ownSection);
+        }
+    }
 }
