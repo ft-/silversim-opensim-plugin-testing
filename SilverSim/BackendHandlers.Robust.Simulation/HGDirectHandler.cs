@@ -150,7 +150,7 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
         readonly RwLockedDictionary<UUID, bool> m_HGDirectEnabled = new RwLockedDictionary<UUID, bool>();
 
         [ServerParam("DirectHGEnabled")]
-        public void DirectHGEnabledUpdated(UUID regionID, string parametername, string value)
+        public void DirectHGEnabledUpdated(UUID regionID, string value)
         {
             bool intval;
             if (value.Length == 0)
