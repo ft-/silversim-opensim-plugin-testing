@@ -1,21 +1,20 @@
 ﻿// SilverSim is distributed under the terms of the
 // GNU Affero General Public License v3
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using log4net.Repository;
-using SilverSim.Main.Common;
+using log4net;
 using Nini.Config;
-using SilverSim.ServiceInterfaces.Maptile;
+using SilverSim.Main.Common;
 using SilverSim.Main.Common.HttpServer;
-using System.Net;
-using System.Text.RegularExpressions;
+using SilverSim.ServiceInterfaces.Maptile;
 using SilverSim.Types;
 using SilverSim.Types.Maptile;
+using SilverSim.Types.StructuredData.REST;
+using System;
+using System.Collections.Generic;
 using System.IO;
-using log4net;
+using System.Net;
+using System.Text.RegularExpressions;
+using System.Xml;
 
 namespace SilverSim.BackendHandlers.Robust.Maptile
 {
@@ -91,7 +90,7 @@ namespace SilverSim.BackendHandlers.Robust.Maptile
                 return;
             }
 
-            GridVector location = new GridVector(x, y);
+            GridVector location = new GridVector(x * 256, y * 256);
             MaptileData data;
             if(m_MaptileService.TryGetValue(UUID.Zero, location, zoomLevel, out data))
             {
@@ -112,7 +111,81 @@ namespace SilverSim.BackendHandlers.Robust.Maptile
 
         void PostMaptileHandler(HttpRequest req)
         {
+            Dictionary<string, object> data;
+            try
+            {
+                data = REST.ParseREST(req.Body);
+            }
+            catch
+            {
+                req.ErrorResponse(HttpStatusCode.BadRequest, "Bad Request");
+                return;
+            }
 
+            UUID scopeid = UUID.Zero;
+
+            uint x;
+            uint y;
+            byte[] imgdata;
+            string type;
+
+            try
+            {
+                x = uint.Parse(data["X"].ToString()) * 256;
+                y = uint.Parse(data["Y"].ToString()) * 256;
+                imgdata = Convert.FromBase64String(data["DATA"].ToString());
+                type = data["TYPE"].ToString();
+            }
+            catch
+            {
+                req.ErrorResponse(HttpStatusCode.BadRequest, "Bad Request");
+                return;
+            }
+
+
+            if (data.ContainsKey("SCOPEID"))
+            {
+                if(!UUID.TryParse(data["SCOPEID"].ToString(), out scopeid))
+                {
+                    req.ErrorResponse(HttpStatusCode.BadRequest, "Bad Request");
+                    return;
+                }
+            }
+
+            MaptileData nd = new MaptileData();
+            nd.Location = new GridVector(x, y);
+            nd.ContentType = type;
+            nd.Data = imgdata;
+            nd.ScopeID = scopeid;
+            nd.ZoomLevel = 1;
+            bool success;
+            string message = string.Empty;
+            try
+            {
+                m_MaptileService.Store(nd);
+                success = true;
+            }
+            catch(Exception e)
+            {
+                message = e.Message;
+                success = false;
+            }
+            using (HttpResponse res = req.BeginResponse("text/xml"))
+            {
+                using (Stream s = res.GetOutputStream())
+                {
+                    using (XmlTextWriter w = s.UTF8XmlTextWriter())
+                    {
+                        w.WriteStartElement("ServerResponse");
+                        w.WriteNamedValue("Result", success);
+                        if (!success)
+                        {
+                            w.WriteNamedValue("Message", message);
+                        }
+                        w.WriteEndElement();
+                    }
+                }
+            }
         }
     }
 
