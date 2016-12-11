@@ -15,11 +15,14 @@ using System.Text.RegularExpressions;
 using SilverSim.Types;
 using SilverSim.Types.Maptile;
 using System.IO;
+using log4net;
 
 namespace SilverSim.BackendHandlers.Robust.Maptile
 {
     public class MaptileServerHandler : IPlugin
     {
+        static readonly ILog m_Log = LogManager.GetLogger("ROBUST MAPTILE HANDLER");
+
         readonly string m_MaptileServiceName;
         MaptileServiceInterface m_MaptileService;
         Regex m_GetRegex = new Regex(@"/^map-([0-9]+)-([0-9]+)-([0-9]+)-.+\\.jpg$/");
@@ -31,11 +34,16 @@ namespace SilverSim.BackendHandlers.Robust.Maptile
 
         public void Startup(ConfigurationLoader loader)
         {
+            m_Log.Info("Initializing handler for maptile server");
             m_MaptileService = loader.GetService<MaptileServiceInterface>(m_MaptileServiceName);
             loader.HttpServer.StartsWithUriHandlers.Add("/map", MaptileHandler);
-            if (null != loader.HttpsServer)
+            try
             {
                 loader.HttpsServer.StartsWithUriHandlers.Add("/map", MaptileHandler);
+            }
+            catch(ConfigurationLoader.ServiceNotFoundException)
+            {
+
             }
         }
 
@@ -108,7 +116,7 @@ namespace SilverSim.BackendHandlers.Robust.Maptile
         }
     }
 
-    [PluginName("MaptileServer")]
+    [PluginName("MaptileHandler")]
     public class MaptileServerHandlerFactory : IPluginFactory
     {
         public MaptileServerHandlerFactory()
