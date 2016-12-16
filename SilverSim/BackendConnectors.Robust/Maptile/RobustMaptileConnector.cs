@@ -104,7 +104,7 @@ namespace SilverSim.BackendConnectors.Robust.Maptile
 
         public IPlugin Initialize(ConfigurationLoader loader, IConfig ownSection)
         {
-            return new RobustMaptileConnector(ownSection.GetString("URL"));
+            return new RobustMaptileConnector(ownSection.GetString("URI"));
         }
     }
 }
