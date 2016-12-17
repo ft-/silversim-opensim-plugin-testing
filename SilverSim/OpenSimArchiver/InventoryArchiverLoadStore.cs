@@ -163,7 +163,7 @@ namespace SilverSim.OpenSimArchiver
                 {
                     options |= InventoryArchiver.IAR.LoadOptions.NoAssets;
                 }
-                else if (arg == "--merge")
+                else if (arg == "--merge" || arg == "-m")
                 {
                     options |= InventoryArchiver.IAR.LoadOptions.Merge;
                 }
