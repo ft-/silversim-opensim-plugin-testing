@@ -100,6 +100,8 @@ namespace SilverSim.OpenSimArchiver.InventoryArchiver
                 using (TarArchiveReader reader = new TarArchiveReader(gzipStream))
                 {
                     Dictionary<string, UUID> inventoryPath = new Dictionary<string, UUID>();
+                    Dictionary<UUID, UUID> reassignedIds = new Dictionary<UUID, UUID>();
+                    List<InventoryItem> linkItems = new List<InventoryItem>();
 
                     UUID parentFolder;
                     parentFolder = inventoryService.Folder[principal.ID, AssetType.RootFolder].ID;
@@ -139,6 +141,19 @@ namespace SilverSim.OpenSimArchiver.InventoryArchiver
                         }
                         catch (TarArchiveReader.EndOfTarException)
                         {
+                            if(console_io != null)
+                            {
+                                console_io.Write("Creating link items");
+                            }
+                            foreach(InventoryItem linkitem in linkItems)
+                            {
+                                UUID newId;
+                                if(linkitem.AssetType == AssetType.Link && reassignedIds.TryGetValue(linkitem.AssetID, out newId))
+                                {
+                                    linkitem.AssetID = newId;
+                                }
+                                inventoryService.Item.Add(linkitem);
+                            }
                             return;
                         }
 
@@ -167,7 +182,19 @@ namespace SilverSim.OpenSimArchiver.InventoryArchiver
                                 /* Load inventory */
                                 InventoryItem item = LoadInventoryItem(reader, principal, nameServices);
                                 item.ParentFolderID = GetPath(principal, inventoryService, inventoryPath, header.FileName, options);
-                                inventoryService.Item.Add(item);
+
+                                UUID oldId = item.ID;
+                                item.ID = UUID.Random;
+                                reassignedIds.Add(oldId, item.ID);
+
+                                if (item.AssetType == AssetType.Link || item.AssetType == AssetType.LinkFolder)
+                                {
+                                    inventoryService.Item.Add(item);
+                                }
+                                else
+                                {
+                                    linkItems.Add(item);
+                                }
                             }
                         }
                     }
@@ -383,6 +410,9 @@ namespace SilverSim.OpenSimArchiver.InventoryArchiver
                                 break;
 
                             case "ID":
+                                item.ID = UUID.Parse(reader.ReadElementValueAsString());
+                                break;
+
                             case "Owner":
                             default:
                                 if(!reader.IsEmptyElement)

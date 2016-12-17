@@ -47,6 +47,8 @@ namespace SilverSim.OpenSimArchiver
 
         public void Startup(ConfigurationLoader loader)
         {
+            loader.CommandRegistry.AddSaveCommand("iar", SaveIarCommand);
+            loader.CommandRegistry.AddLoadCommand("iar", LoadIarCommand);
             m_AuthInfoService = loader.GetService<AuthInfoServiceInterface>(m_AuthInfoServiceName);
             m_AssetService = loader.GetService<AssetServiceInterface>(m_AssetServiceName);
             m_InventoryService = loader.GetService<InventoryServiceInterface>(m_InventoryServiceName);
