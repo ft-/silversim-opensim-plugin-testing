@@ -53,7 +53,10 @@ namespace SilverSim.OpenSimArchiver
             m_UserAccountService = loader.GetService<UserAccountServiceInterface>(m_UserAccountServiceName);
             foreach(string avatarNameService in m_AvatarNameServiceNames.Split(','))
             {
-                m_AvatarNameServices.Add(loader.GetService<AvatarNameServiceInterface>(avatarNameService));
+                if (!string.IsNullOrEmpty(avatarNameService))
+                {
+                    m_AvatarNameServices.Add(loader.GetService<AvatarNameServiceInterface>(avatarNameService));
+                }
             }
         }
 
