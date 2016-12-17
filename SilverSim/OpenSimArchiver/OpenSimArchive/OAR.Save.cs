@@ -382,7 +382,7 @@ namespace SilverSim.OpenSimArchiver.RegionArchiver
                 {
                     writer.WriteStartElement("archive");
                     writer.WriteAttributeString("major_version", "0");
-                    writer.WriteAttributeString("major_version", "8");
+                    writer.WriteAttributeString("minor_version", "8");
                     {
                         writer.WriteStartElement("creation_info");
                         {

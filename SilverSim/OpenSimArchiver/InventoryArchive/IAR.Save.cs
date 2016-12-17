@@ -36,7 +36,7 @@ namespace SilverSim.OpenSimArchiver.InventoryArchiver
                 {
                     writer.WriteStartElement("archive");
                     writer.WriteAttributeString("major_version", "0");
-                    writer.WriteAttributeString("major_version", "8");
+                    writer.WriteAttributeString("minor_version", "8");
                     {
                         writer.WriteNamedValue("assets_included", assetsIncluded);
                     }
