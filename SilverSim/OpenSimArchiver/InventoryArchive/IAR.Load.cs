@@ -1,6 +1,7 @@
 ﻿// SilverSim is distributed under the terms of the
 // GNU Affero General Public License v3
 
+using SilverSim.Main.Common.CmdIO;
 using SilverSim.Main.Common.Tar;
 using SilverSim.OpenSimArchiver.Common;
 using SilverSim.ServiceInterfaces.Asset;
@@ -79,6 +80,7 @@ namespace SilverSim.OpenSimArchiver.InventoryArchiver
         [Flags]
         public enum LoadOptions
         {
+            None = 0x00000000,
             Merge = 0x000000001,
             NoAssets = 0x00000002
         }
@@ -87,10 +89,11 @@ namespace SilverSim.OpenSimArchiver.InventoryArchiver
             UUI principal, 
             InventoryServiceInterface inventoryService,
             AssetServiceInterface assetService,
-            AvatarNameServiceInterface nameService,
+            List<AvatarNameServiceInterface> nameServices,
             LoadOptions options,
             Stream inputFile,
-            string topath)
+            string topath,
+            TTY console_io = null)
         {
             using (GZipStream gzipStream = new GZipStream(inputFile, CompressionMode.Decompress))
             {
@@ -162,7 +165,7 @@ namespace SilverSim.OpenSimArchiver.InventoryArchiver
                             if (header.FileName.StartsWith("inventory/"))
                             {
                                 /* Load inventory */
-                                InventoryItem item = LoadInventoryItem(reader, principal, nameService);
+                                InventoryItem item = LoadInventoryItem(reader, principal, nameServices);
                                 item.ParentFolderID = GetPath(principal, inventoryService, inventoryPath, header.FileName, options);
                                 inventoryService.Item.Add(item);
                             }
@@ -219,7 +222,7 @@ namespace SilverSim.OpenSimArchiver.InventoryArchiver
         static InventoryItem LoadInventoryItem(
             Stream s, 
             UUI principal,
-            AvatarNameServiceInterface nameService)
+            List<AvatarNameServiceInterface> nameServices)
         {
             using (XmlTextReader reader = new XmlTextReader(new ObjectXmlStreamFilter(s)))
             {
@@ -235,7 +238,7 @@ namespace SilverSim.OpenSimArchiver.InventoryArchiver
                         case XmlNodeType.Element:
                             if(reader.Name == "InventoryItem")
                             {
-                                return LoadInventoryItemData(reader, principal, nameService);
+                                return LoadInventoryItemData(reader, principal, nameServices);
                             }
                             break;
 
@@ -249,7 +252,7 @@ namespace SilverSim.OpenSimArchiver.InventoryArchiver
         static InventoryItem LoadInventoryItemData(
             XmlTextReader reader, 
             UUI principal,
-            AvatarNameServiceInterface nameService)
+            List<AvatarNameServiceInterface> nameServices)
         {
             InventoryItem item = new InventoryItem();
             item.Owner = principal;
@@ -292,7 +295,7 @@ namespace SilverSim.OpenSimArchiver.InventoryArchiver
                                         /* hope that name service knows that avatar */
                                         try
                                         {
-                                            item.Creator = nameService[item.Creator.FirstName, item.Creator.LastName];
+                                            item.Creator = nameServices.FindUUIByName(item.Creator.FirstName, item.Creator.LastName);
                                         }
                                         catch
                                         {
@@ -301,7 +304,14 @@ namespace SilverSim.OpenSimArchiver.InventoryArchiver
                                     }
                                     else if(UUID.TryParse(text, out uuid))
                                     {
-                                        item.Creator.ID = uuid;
+                                        try
+                                        {
+                                            item.Creator = nameServices.FindUUIById(uuid);
+                                        }
+                                        catch
+                                        {
+                                            item.Creator.ID = uuid;
+                                        }
                                     }
                                     else
                                     {

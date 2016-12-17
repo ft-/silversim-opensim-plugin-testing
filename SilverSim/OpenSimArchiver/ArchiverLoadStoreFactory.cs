@@ -15,7 +15,7 @@ namespace SilverSim.OpenSimArchiver
         }
         public IPlugin Initialize(ConfigurationLoader loader, IConfig ownSection)
         {
-            return new InventoryArchiverLoadStore();
+            return new InventoryArchiverLoadStore(ownSection);
         }
     }
 

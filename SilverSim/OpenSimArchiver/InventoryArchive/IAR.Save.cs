@@ -1,6 +1,7 @@
 ﻿// SilverSim is distributed under the terms of the
 // GNU Affero General Public License v3
 
+using SilverSim.Main.Common.CmdIO;
 using SilverSim.ServiceInterfaces.Asset;
 using SilverSim.ServiceInterfaces.AvatarName;
 using SilverSim.ServiceInterfaces.Inventory;
@@ -17,6 +18,7 @@ namespace SilverSim.OpenSimArchiver.InventoryArchiver
         [Flags]
         public enum SaveOptions
         {
+            None = 0x00000000,
             NoAssets = 0x00000001
         }
 
@@ -24,10 +26,11 @@ namespace SilverSim.OpenSimArchiver.InventoryArchiver
             UUI principal, 
             InventoryServiceInterface inventoryService,
             AssetServiceInterface assetService,
-            AvatarNameServiceInterface nameService,
+            List<AvatarNameServiceInterface> nameServices,
             SaveOptions options,
             string fileName,
-            string frompath)
+            string frompath,
+            TTY console_io = null)
         {
             UUID parentFolder;
             parentFolder = inventoryService.Folder[principal.ID, AssetType.RootFolder].ID;
