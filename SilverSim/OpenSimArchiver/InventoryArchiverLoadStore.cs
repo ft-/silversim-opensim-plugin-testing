@@ -134,7 +134,7 @@ namespace SilverSim.OpenSimArchiver
             }
             catch (Exception e)
             {
-                io.Write(e.Message);
+                io.WriteFormatted("IAR saving failed: {0}", e.Message);
             }
         }
         #endregion
@@ -218,7 +218,7 @@ namespace SilverSim.OpenSimArchiver
             }
             catch (Exception e)
             {
-                m_Log.Info("OAR load exception encountered", e);
+                m_Log.Info("IAR load exception encountered", e);
                 io.Write(e.Message);
             }
         }
