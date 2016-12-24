@@ -356,7 +356,7 @@ namespace SilverSim.OpenSimArchiver.InventoryArchiver
                                     }
                                     catch
                                     {
-
+                                        /* ignore misformatted creator data */
                                     }
                                 }
                                 break;
