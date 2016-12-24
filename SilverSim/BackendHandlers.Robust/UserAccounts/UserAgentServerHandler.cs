@@ -146,7 +146,7 @@ namespace SilverSim.BackendHandlers.Robust.UserAccounts
             {
                 respdata.Add("result", "false");
             }
-            return new XmlRpc.XmlRpcResponse() { ReturnValue = respdata };
+            return new XmlRpc.XmlRpcResponse { ReturnValue = respdata };
         }
 
         public XmlRpc.XmlRpcResponse VerifyClient(XmlRpc.XmlRpcRequest req)
@@ -307,7 +307,7 @@ namespace SilverSim.BackendHandlers.Robust.UserAccounts
             {
                 respdata.Add("SRV_" + kvp.Key, kvp.Value);
             }
-            return new XmlRpc.XmlRpcResponse() { ReturnValue = respdata };
+            return new XmlRpc.XmlRpcResponse { ReturnValue = respdata };
         }
 
         public XmlRpc.XmlRpcResponse GetHomeRegion(XmlRpc.XmlRpcRequest req)
