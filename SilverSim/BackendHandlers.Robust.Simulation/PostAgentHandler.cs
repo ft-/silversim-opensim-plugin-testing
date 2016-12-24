@@ -1424,7 +1424,7 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
             }
             using(HttpResponse res = req.BeginResponse(HttpStatusCode.OK, "OK"))
             {
-
+                /* all that is needed is already done */
             }
         }
 
@@ -1489,7 +1489,6 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
             }
 
             Map response = new Map();
-            Map _result = new Map();
             bool success = true;
             string reason = string.Empty;
             string[] myVersionSplit = myVersion.Split(new char[] { '.', '/' });
