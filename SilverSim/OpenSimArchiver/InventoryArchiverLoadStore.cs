@@ -28,7 +28,7 @@ namespace SilverSim.OpenSimArchiver
         AssetServiceInterface m_AssetService;
         InventoryServiceInterface m_InventoryService;
         UserAccountServiceInterface m_UserAccountService;
-        List<AvatarNameServiceInterface> m_AvatarNameServices = new List<AvatarNameServiceInterface>();
+        readonly List<AvatarNameServiceInterface> m_AvatarNameServices = new List<AvatarNameServiceInterface>();
 
         readonly string m_AuthInfoServiceName;
         readonly string m_AssetServiceName;

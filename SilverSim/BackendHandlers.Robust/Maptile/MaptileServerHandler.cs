@@ -24,7 +24,7 @@ namespace SilverSim.BackendHandlers.Robust.Maptile
 
         readonly string m_MaptileServiceName;
         MaptileServiceInterface m_MaptileService;
-        Regex m_GetRegex = new Regex(@"/^map-([0-9]+)-([0-9]+)-([0-9]+)-.+\\.jpg$/");
+        readonly Regex m_GetRegex = new Regex(@"/^map-([0-9]+)-([0-9]+)-([0-9]+)-.+\\.jpg$/");
 
         public MaptileServerHandler(IConfig ownSection)
         {

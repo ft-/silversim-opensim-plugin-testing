@@ -42,7 +42,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
         private static object m_RandomNumberLock = new object();
         public int TimeoutMs = 30000;
         private Thread m_TeleportThread;
-        private object m_TeleportThreadLock = new object();
+        private readonly object m_TeleportThreadLock = new object();
         protected CommandRegistry m_Commands { get; private set; }
         Main.Common.Caps.CapsHttpRedirector m_CapsRedirector;
         List<IProtocolExtender> m_PacketHandlerPlugins = new List<IProtocolExtender>();

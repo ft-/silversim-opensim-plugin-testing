@@ -52,20 +52,20 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
         GridServiceInterface m_GridService;
         BaseHttpServer m_HttpServer;
 
-        bool m_IsStandalone;
-        string m_LocalInventoryServiceName;
+        readonly bool m_IsStandalone;
+        readonly string m_LocalInventoryServiceName;
         InventoryServiceInterface m_LocalInventoryService;
-        string m_LocalAssetServiceName;
+        readonly string m_LocalAssetServiceName;
         AssetServiceInterface m_LocalAssetService;
-        string m_LocalProfileServiceName;
+        readonly string m_LocalProfileServiceName;
         ProfileServiceInterface m_LocalProfileService;
-        string m_LocalPresenceServiceName;
+        readonly string m_LocalPresenceServiceName;
         PresenceServiceInterface m_LocalPresenceService;
-        string m_LocalFriendsServiceName;
+        readonly string m_LocalFriendsServiceName;
         FriendsServiceInterface m_LocalFriendsService;
-        string m_LocalOfflineIMServiceName;
+        readonly string m_LocalOfflineIMServiceName;
         OfflineIMServiceInterface m_LocalOfflineIMService;
-        string m_LocalGroupsServiceName;
+        readonly string m_LocalGroupsServiceName;
         GroupsServiceInterface m_LocalGroupsService;
 
         List<AuthorizationServiceInterface> m_AuthorizationServices;
@@ -74,8 +74,8 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
         CapsHttpRedirector m_CapsRedirector;
         SceneList m_Scenes;
 
-        string m_GridUserServiceName;
-        string m_GridServiceName;
+        readonly string m_GridUserServiceName;
+        readonly string m_GridServiceName;
 
         protected CommandRegistry m_Commands { get; private set; }
 
