@@ -178,7 +178,7 @@ namespace SilverSim.BackendHandlers.Robust.UserAccounts
             {
                 respdata.Add("result", "false");
             }
-            return new XmlRpc.XmlRpcResponse() { ReturnValue = respdata };
+            return new XmlRpc.XmlRpcResponse { ReturnValue = respdata };
         }
 
         public XmlRpc.XmlRpcResponse VerifyAgent(XmlRpc.XmlRpcRequest req)
@@ -220,7 +220,7 @@ namespace SilverSim.BackendHandlers.Robust.UserAccounts
             {
                 respdata.Add("result", "false");
             }
-            return new XmlRpc.XmlRpcResponse() { ReturnValue = respdata };
+            return new XmlRpc.XmlRpcResponse { ReturnValue = respdata };
         }
 
         public XmlRpc.XmlRpcResponse GetUserInfo(XmlRpc.XmlRpcRequest req)
@@ -252,7 +252,7 @@ namespace SilverSim.BackendHandlers.Robust.UserAccounts
             {
                 resdata.Add("result", "failure");
             }
-            return new XmlRpc.XmlRpcResponse() { ReturnValue = resdata };
+            return new XmlRpc.XmlRpcResponse { ReturnValue = resdata };
         }
 
         public XmlRpc.XmlRpcResponse GetUUI(XmlRpc.XmlRpcRequest req)
@@ -297,7 +297,7 @@ namespace SilverSim.BackendHandlers.Robust.UserAccounts
             { 
                 respdata.Add("result", "User unknown");
             }
-            return new XmlRpc.XmlRpcResponse() { ReturnValue = respdata };
+            return new XmlRpc.XmlRpcResponse { ReturnValue = respdata };
         }
 
         public XmlRpc.XmlRpcResponse GetServerURLs(XmlRpc.XmlRpcRequest req)
@@ -356,7 +356,7 @@ namespace SilverSim.BackendHandlers.Robust.UserAccounts
                 respdata.Add("position", userInfo.HomePosition.ToString());
                 respdata.Add("lookAt", userInfo.HomeLookAt.ToString());
             }
-            return new XmlRpc.XmlRpcResponse() { ReturnValue = respdata };
+            return new XmlRpc.XmlRpcResponse { ReturnValue = respdata };
         }
     }
 
