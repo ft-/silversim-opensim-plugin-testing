@@ -6,6 +6,7 @@ using Nini.Config;
 using SilverSim.BackendConnectors.Robust.Common;
 using SilverSim.Http.Client;
 using SilverSim.Main.Common;
+using SilverSim.ServiceInterfaces;
 using SilverSim.ServiceInterfaces.Groups;
 using SilverSim.ServiceInterfaces.Inventory;
 using SilverSim.Types;
@@ -22,7 +23,7 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
     #region Service Implementation
     [SuppressMessage("Gendarme.Rules.Exceptions", "DoNotThrowInUnexpectedLocationRule")]
     [Description("Robust Inventory Connector")]
-    public sealed partial class RobustInventoryConnector : InventoryServiceInterface, IPlugin
+    public sealed partial class RobustInventoryConnector : InventoryServiceInterface, IPlugin, IServiceURLsGetInterface
     {
         readonly string m_InventoryURI;
         readonly GroupsServiceInterface m_GroupsService;
@@ -56,6 +57,11 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
             /* no action needed */
         }
         #endregion
+
+        void IServiceURLsGetInterface.GetServiceURLs(Dictionary<string, string> dict)
+        {
+            dict.Add("InventoryServerURI", m_InventoryURI);
+        }
 
         #region Accessors
         public int TimeoutMs { get; set; }

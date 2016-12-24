@@ -403,7 +403,9 @@ namespace SilverSim.BackendConnectors.Robust.StructuredData.Agent
                     }
                     vParams.Append(v.ToString());
                 }
-                WriteJSONString(w, "visualparams", vParams.ToString());
+                w.Write("\"visualparams\":[");
+                w.Write(vParams.ToString());
+                w.Write("]");
                 w.Write(",");
                 w.Write("\"textures\":[");
                 prefix = string.Empty;

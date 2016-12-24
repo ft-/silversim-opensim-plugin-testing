@@ -5,6 +5,7 @@ using log4net;
 using Nini.Config;
 using SilverSim.Main.Common;
 using SilverSim.Main.Common.HttpServer;
+using SilverSim.ServiceInterfaces;
 using SilverSim.ServiceInterfaces.Inventory;
 using SilverSim.Types;
 using SilverSim.Types.Asset;
@@ -155,16 +156,18 @@ namespace SilverSim.BackendHandlers.Robust.Inventory
 
     #region Service Implementation
     [Description("Robust Inventory Protocol Server")]
-    public class RobustInventoryServerHandler : IPlugin
+    public class RobustInventoryServerHandler : IPlugin, IServiceURLsGetInterface
     {
         protected static readonly ILog m_Log = LogManager.GetLogger("ROBUST INVENTORY HANDLER");
         private BaseHttpServer m_HttpServer;
         private InventoryServiceInterface m_InventoryService;
         readonly string m_InventoryServiceName;
+        readonly bool m_AdvertiseInventoryServerURI;
         readonly Dictionary<string, Action<HttpRequest, Dictionary<string, object>>> m_Handlers = new Dictionary<string, Action<HttpRequest, Dictionary<string, object>>>();
 
-        public RobustInventoryServerHandler(string inventoryServiceName)
+        public RobustInventoryServerHandler(string inventoryServiceName, bool advertiseInventoryServerURI)
         {
+            m_AdvertiseInventoryServerURI = advertiseInventoryServerURI;
             m_InventoryServiceName = inventoryServiceName;
             m_Handlers["CREATEUSERINVENTORY"] = CreateUserInventory;
             m_Handlers["GETINVENTORYSKELETON"] = GetInventorySkeleton;
@@ -194,6 +197,11 @@ namespace SilverSim.BackendHandlers.Robust.Inventory
             m_HttpServer = loader.HttpServer;
             m_HttpServer.StartsWithUriHandlers.Add("/xinventory", InventoryHandler);
             m_InventoryService = loader.GetService<InventoryServiceInterface>(m_InventoryServiceName);
+        }
+
+        void IServiceURLsGetInterface.GetServiceURLs(Dictionary<string, string> dict)
+        {
+            dict.Add("InventoryServerURI", m_HttpServer.ServerURI);
         }
 
         void SuccessResult(HttpRequest httpreq)
@@ -811,7 +819,9 @@ namespace SilverSim.BackendHandlers.Robust.Inventory
 
         public IPlugin Initialize(ConfigurationLoader loader, IConfig ownSection)
         {
-            return new RobustInventoryServerHandler(ownSection.GetString("InventoryService", "InventoryService"));
+            return new RobustInventoryServerHandler(
+                ownSection.GetString("InventoryService", "InventoryService"),
+                ownSection.GetBoolean("AdvertiseServerURI", true));
         }
     }
     #endregion

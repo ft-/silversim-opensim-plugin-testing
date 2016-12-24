@@ -5,6 +5,7 @@ using log4net;
 using Nini.Config;
 using SilverSim.Main.Common;
 using SilverSim.Main.Common.HttpServer;
+using SilverSim.ServiceInterfaces;
 using SilverSim.ServiceInterfaces.Asset;
 using SilverSim.Types;
 using SilverSim.Types.Asset;
@@ -21,7 +22,7 @@ namespace SilverSim.BackendHandlers.Robust.Asset
 {
     #region Service Implementation
     [Description("Robust Asset Protocol Server")]
-    public class RobustAssetServerHandler : IPlugin
+    public class RobustAssetServerHandler : IPlugin, IServiceURLsGetInterface
     {
         protected static readonly ILog m_Log = LogManager.GetLogger("ROBUST ASSET HANDLER");
         private BaseHttpServer m_HttpServer;
@@ -51,6 +52,11 @@ namespace SilverSim.BackendHandlers.Robust.Asset
                 m_TemporaryAssetService = loader.GetService<AssetServiceInterface>(m_TemporaryAssetServiceName);
             }
             m_ResourceAssetService = loader.GetService<AssetServiceInterface>("ResourceAssetService");
+        }
+
+        void IServiceURLsGetInterface.GetServiceURLs(Dictionary<string, string> dict)
+        {
+            dict.Add("AssetServerURI", m_HttpServer.ServerURI);
         }
 
         public void AssetHandler(HttpRequest req)

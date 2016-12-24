@@ -233,11 +233,19 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
                     }
                     GridParameterMap map = new GridParameterMap();
                     map.HomeURI = section.GetString("HomeURI");
-                    map.AssetServerURI = section.GetString("AssetServerURI");
+                    if(string.IsNullOrEmpty(map.HomeURI))
+                    {
+                        map.HomeURI = m_HttpServer.ServerURI;
+                        if(!map.HomeURI.EndsWith("/"))
+                        {
+                            map.HomeURI += "/";
+                        }
+                    }
+                    map.AssetServerURI = section.GetString("AssetServerURI", map.HomeURI);
                     map.GridUserServerURI = section.GetString("GridUserServerURI", m_DefaultGridUserServerURI);
                     map.PresenceServerURI = section.GetString("PresenceServerURI", string.Empty);
                     map.AvatarServerURI = section.GetString("AvatarServerURI", string.Empty);
-                    map.InventoryServerURI = section.GetString("InventoryServerURI");
+                    map.InventoryServerURI = section.GetString("InventoryServerURI", map.HomeURI);
                     map.OfflineIMServerURI = section.GetString("OfflineIMServerURI", string.Empty);
                     map.FriendsServerURI = section.GetString("FriendsServerURI", string.Empty);
 
@@ -321,7 +329,7 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
                 }
             }
 
-            m_CapsRedirector = loader.GetService<Main.Common.Caps.CapsHttpRedirector>("CapsRedirector");
+            m_CapsRedirector = loader.CapsRedirector;
         }
 
         public ShutdownOrder ShutdownOrder

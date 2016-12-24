@@ -4,11 +4,13 @@
 using Nini.Config;
 using SilverSim.Main.Common;
 using SilverSim.Main.Common.HttpServer;
+using SilverSim.ServiceInterfaces;
 using SilverSim.ServiceInterfaces.IM;
 using SilverSim.Types;
 using SilverSim.Types.IM;
 using SilverSim.Types.StructuredData.XmlRpc;
 using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Threading;
 
@@ -55,10 +57,11 @@ namespace SilverSim.BackendConnectors.Robust.IM
     }
 
     [Description("OpenSim InstantMessage Server")]
-    public sealed class RobustIMHandler : IPlugin
+    public sealed class RobustIMHandler : IPlugin, IServiceURLsGetInterface
     {
         readonly bool m_DisallowOfflineIM;
         IMServiceInterface m_IMService;
+        BaseHttpServer m_HttpServer;
         public RobustIMHandler(bool disallowOfflineIM)
         {
             m_DisallowOfflineIM = disallowOfflineIM;
@@ -66,9 +69,15 @@ namespace SilverSim.BackendConnectors.Robust.IM
 
         public void Startup(ConfigurationLoader loader)
         {
+            m_HttpServer = loader.HttpServer;
             HttpXmlRpcHandler xmlRpc = loader.GetService<HttpXmlRpcHandler>("XmlRpcServer");
             xmlRpc.XmlRpcMethods.Add("grid_instant_message", IMReceived);
             m_IMService = loader.GetService<IMServiceInterface>("IMService");
+        }
+
+        void IServiceURLsGetInterface.GetServiceURLs(Dictionary<string, string> dict)
+        {
+            dict.Add("IMServerURI", m_HttpServer.ServerURI);
         }
 
         public XmlRpc.XmlRpcResponse IMReceived(XmlRpc.XmlRpcRequest req)

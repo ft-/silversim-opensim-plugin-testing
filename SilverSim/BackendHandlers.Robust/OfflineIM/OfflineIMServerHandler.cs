@@ -9,11 +9,9 @@ using SilverSim.ServiceInterfaces.IM;
 using SilverSim.Types;
 using SilverSim.Types.IM;
 using SilverSim.Types.StructuredData.REST;
-using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
-using System.Linq;
 using System.Net;
 using System.Xml;
 
