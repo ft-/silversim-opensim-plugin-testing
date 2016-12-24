@@ -21,9 +21,9 @@ namespace SilverSim.BackendHandlers.Robust.AuthInfo
         readonly string m_AuthInfoServiceName;
         AuthInfoServiceInterface m_AuthInfoService;
         readonly List<HttpAclHandler> m_AclHandlers = new List<HttpAclHandler>();
-        HttpAclHandler m_SetAuthInfoAcl = new HttpAclHandler("setauthinfo");
-        HttpAclHandler m_GetAuthInfoAcl = new HttpAclHandler("getauthinfo");
-        HttpAclHandler m_SetPasswordAcl = new HttpAclHandler("setpassword");
+        readonly HttpAclHandler m_SetAuthInfoAcl = new HttpAclHandler("setauthinfo");
+        readonly HttpAclHandler m_GetAuthInfoAcl = new HttpAclHandler("getauthinfo");
+        readonly HttpAclHandler m_SetPasswordAcl = new HttpAclHandler("setpassword");
 
         public HttpAclHandler[] HttpAclLists
         {
