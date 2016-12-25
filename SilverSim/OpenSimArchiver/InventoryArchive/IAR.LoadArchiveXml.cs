@@ -26,10 +26,6 @@ namespace SilverSim.OpenSimArchiver.InventoryArchiver
                     switch (reader.NodeType)
                     {
                         case XmlNodeType.Element:
-                            if (reader.IsEmptyElement)
-                            {
-                                throw new IARFormatException();
-                            }
                             if (reader.Name != "archive")
                             {
                                 throw new IARFormatException();

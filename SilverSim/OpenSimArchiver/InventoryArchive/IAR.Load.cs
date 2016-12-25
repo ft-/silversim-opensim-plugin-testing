@@ -104,30 +104,42 @@ namespace SilverSim.OpenSimArchiver.InventoryArchiver
                     List<InventoryItem> linkItems = new List<InventoryItem>();
 
                     UUID parentFolder;
+                    try
+                    {
+                        inventoryService.CheckInventory(principal.ID);
+                    }
+                    catch(NotSupportedException)
+                    {
+                        /* some handlers may not support this call, so ignore that error */
+                    }
                     parentFolder = inventoryService.Folder[principal.ID, AssetType.RootFolder].ID;
 
                     if (!topath.StartsWith("/"))
                     {
                         throw new InvalidInventoryPathException();
                     }
-                    foreach (string pathcomp in topath.Substring(1).Split('/'))
+
+                    if (topath != "/")
                     {
-                        List<InventoryFolder> childfolders = inventoryService.Folder.GetFolders(principal.ID, parentFolder);
-                        int idx;
-                        for (idx = 0; idx < childfolders.Count; ++idx)
+                        foreach (string pathcomp in topath.Substring(1).Split('/'))
                         {
-                            if (pathcomp.ToLower() == childfolders[idx].Name.ToLower())
+                            List<InventoryFolder> childfolders = inventoryService.Folder.GetFolders(principal.ID, parentFolder);
+                            int idx;
+                            for (idx = 0; idx < childfolders.Count; ++idx)
                             {
-                                break;
+                                if (pathcomp.ToLower() == childfolders[idx].Name.ToLower())
+                                {
+                                    break;
+                                }
                             }
-                        }
 
-                        if (idx == childfolders.Count)
-                        {
-                            throw new InvalidInventoryPathException();
-                        }
+                            if (idx == childfolders.Count)
+                            {
+                                throw new InvalidInventoryPathException();
+                            }
 
-                        parentFolder = childfolders[idx].ID;
+                            parentFolder = childfolders[idx].ID;
+                        }
                     }
 
                     inventoryPath[string.Empty] = parentFolder;
