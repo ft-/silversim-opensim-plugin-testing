@@ -2,16 +2,16 @@
 <Project frameworkVersion="v4_5" name="SilverSim.BackendConnectors.OpenSim" path="SilverSim/BackendConnectors.OpenSim" type="Library">
   <Configuration name="Release">
     <Options>
-      <OutputPath>../../bin/plugins/</OutputPath>
+      <OutputPath>../../bin/plugins</OutputPath>
     </Options>
   </Configuration>
   <Configuration name="Debug">
     <Options>
-      <OutputPath>../../bin/plugins/</OutputPath>
+      <OutputPath>../../bin/plugins</OutputPath>
     </Options>
   </Configuration>
-  <ReferencePath>../../bin/</ReferencePath>
-  <Reference name="log4net" path="../../bin/" localCopy="false"/>
+  <ReferencePath>../../bin</ReferencePath>
+  <Reference name="log4net" localCopy="false"/>
   <Reference name="System"/>
   <Reference name="System.Core"/>
   <Reference name="System.Xml"/>
@@ -24,7 +24,7 @@
   <Reference name="SilverSim.Main.Common" localCopy="false"/>
   <Reference name="SilverSim.BackendConnectors.Robust" localCopy="false"/>
   <Reference name="SilverSim.Scene.Management" localCopy="false"/>
-  <Reference name="Nini" path="../../bin/" localCopy="false"/>
+  <Reference name="Nini" localCopy="false"/>
   <Reference name="SilverSim.Threading" localCopy="false"/>
   <Reference name="SilverSim.Viewer.Messages" localCopy="false"/>
   <Reference name="SilverSim.Viewer.Core" localCopy="false"/>
