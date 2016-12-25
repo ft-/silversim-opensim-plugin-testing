@@ -6,14 +6,12 @@ using SilverSim.Main.Common;
 using SilverSim.Main.Common.HttpServer;
 using SilverSim.ServiceInterfaces.Account;
 using SilverSim.ServiceInterfaces.Friends;
-using SilverSim.ServiceInterfaces.GridUser;
 using SilverSim.Types;
 using SilverSim.Types.Friends;
 using SilverSim.Types.StructuredData.REST;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.IO;
 using System.Net;
 using System.Xml;
 

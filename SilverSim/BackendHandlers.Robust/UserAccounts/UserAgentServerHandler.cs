@@ -6,20 +6,16 @@ using SilverSim.Main.Common;
 using SilverSim.Main.Common.HttpServer;
 using SilverSim.ServiceInterfaces.Account;
 using SilverSim.ServiceInterfaces.AuthInfo;
-using SilverSim.ServiceInterfaces.Friends;
 using SilverSim.ServiceInterfaces.Grid;
 using SilverSim.ServiceInterfaces.GridUser;
 using SilverSim.ServiceInterfaces.Presence;
-using SilverSim.ServiceInterfaces.ServerParam;
 using SilverSim.ServiceInterfaces.Traveling;
 using SilverSim.Types;
 using SilverSim.Types.Account;
-using SilverSim.Types.Friends;
 using SilverSim.Types.Grid;
 using SilverSim.Types.GridUser;
 using SilverSim.Types.StructuredData.XmlRpc;
 using SilverSim.Types.TravelingData;
-using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 
@@ -355,7 +351,7 @@ namespace SilverSim.BackendHandlers.Robust.UserAccounts
         }
     }
 
-    [PluginName("UserAgentServer")]
+    [PluginName("UserAgentHandler")]
     public class UserAgentServerHandlerFactory : IPluginFactory
     {
         public UserAgentServerHandlerFactory()

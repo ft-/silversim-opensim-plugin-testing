@@ -1,4 +1,7 @@
-﻿using Nini.Config;
+﻿// SilverSim is distributed under the terms of the
+// GNU Affero General Public License v3
+
+using Nini.Config;
 using SilverSim.Main.Common;
 using SilverSim.Main.Common.HttpServer;
 using SilverSim.ServiceInterfaces;
@@ -8,10 +11,7 @@ using SilverSim.Types.StructuredData.REST;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Linq;
 using System.Net;
-using System.Text;
-using System.Threading.Tasks;
 using System.Xml;
 
 namespace SilverSim.BackendHandlers.Robust.Friends
