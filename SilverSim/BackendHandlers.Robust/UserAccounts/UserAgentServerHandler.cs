@@ -280,12 +280,9 @@ namespace SilverSim.BackendHandlers.Robust.UserAccounts
             {
                 uui = account.Principal;
             }
-            else if(m_GridUserService.TryGetValue(toid, out userInfo))
+            else if(m_GridUserService.TryGetValue(toid, out userInfo) && userInfo.User.HomeURI != null)
             {
-                if(userInfo.User.HomeURI != null)
-                {
-                    uui = userInfo.User;
-                }
+                uui = userInfo.User;
             }
 
             Map respdata = new Map();
@@ -329,13 +326,11 @@ namespace SilverSim.BackendHandlers.Robust.UserAccounts
                 throw new XmlRpc.XmlRpcFaultException(-32602, "invalid method parameters");
             }
 
-            if (null != m_GridService && null != m_GridUserService)
-            {
-                if(!m_GridUserService.TryGetValue(userID, out userInfo) ||
-                    !m_GridService.TryGetValue(userInfo.HomeRegionID, out ri))
-                {
-                    ri = null;
-                }
+            if (null != m_GridService && null != m_GridUserService &&
+                (!m_GridUserService.TryGetValue(userID, out userInfo) ||
+                    !m_GridService.TryGetValue(userInfo.HomeRegionID, out ri)))
+            { 
+                ri = null;
             }
 
             if(null == ri)

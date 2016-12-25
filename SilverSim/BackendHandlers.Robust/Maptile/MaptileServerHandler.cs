@@ -143,13 +143,11 @@ namespace SilverSim.BackendHandlers.Robust.Maptile
             }
 
 
-            if (data.ContainsKey("SCOPEID"))
+            if (data.ContainsKey("SCOPEID") &&
+                !UUID.TryParse(data["SCOPEID"].ToString(), out scopeid))
             {
-                if(!UUID.TryParse(data["SCOPEID"].ToString(), out scopeid))
-                {
-                    req.ErrorResponse(HttpStatusCode.BadRequest, "Bad Request");
-                    return;
-                }
+                req.ErrorResponse(HttpStatusCode.BadRequest, "Bad Request");
+                return;
             }
 
             MaptileData nd = new MaptileData();

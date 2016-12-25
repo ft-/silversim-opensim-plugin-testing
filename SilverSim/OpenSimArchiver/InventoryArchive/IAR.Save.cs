@@ -204,12 +204,10 @@ namespace SilverSim.OpenSimArchiver.InventoryArchiver
 
                     foreach (InventoryItem item in content.Items)
                     {
-                        if(item.AssetType != AssetType.Link && item.AssetType != AssetType.LinkFolder)
+                        if(item.AssetType != AssetType.Link && item.AssetType != AssetType.LinkFolder &&
+                            !assetIds.Contains(item.AssetID) && saveAssets)
                         {
-                            if(!assetIds.Contains(item.AssetID) && saveAssets)
-                            {
-                                assetIds.Add(item.AssetID);
-                            }
+                            assetIds.Add(item.AssetID);
                         }
 
                         writer.WriteFile(GetFolderPath(folders, item), WriteInventoryItem(item));
