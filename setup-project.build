@@ -41,7 +41,7 @@
 		<property name="silversim.package.C5.path" value="net45"/>
 		<property name="silversim.package.CSJ2K.path" value="net40"/>
 		<property name="silversim.package.log4net.path" value="net45-full"/>
-		<property name="silversim.package.log4net.version" value="2.0.5"/>
+		<property name="silversim-nuget.log4net.version" value="2.0.5"/>
 		<property name="silversim.package.MySql.Data.path" value="net45"/>
 		<property name="silversim.package.Nini.path" value="net40"/>
 		
