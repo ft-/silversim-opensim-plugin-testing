@@ -244,7 +244,7 @@ namespace SilverSim.OpenSimArchiver.InventoryArchiver
                 }
                 string pname = pathcomps[pathidx].Substring(0, pathcomps[pathidx].Length - 38);
                 finalpath.Append(pname);
-                if (!folders.TryGetValue(finalpath.ToString(), out folderID))
+                if (!folders.ContainsKey(finalpath.ToString()))
                 {
                     InventoryFolder folder = new InventoryFolder();
                     folder.Owner = principalID;
