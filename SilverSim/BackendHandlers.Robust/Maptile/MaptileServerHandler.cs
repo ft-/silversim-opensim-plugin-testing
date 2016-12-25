@@ -42,7 +42,7 @@ namespace SilverSim.BackendHandlers.Robust.Maptile
             }
             catch(ConfigurationLoader.ServiceNotFoundException)
             {
-
+                /* intentionally ignored */
             }
         }
 
