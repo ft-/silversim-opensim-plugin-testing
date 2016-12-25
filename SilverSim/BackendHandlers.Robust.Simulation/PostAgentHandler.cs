@@ -135,18 +135,9 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
         bool GetOpenSimProtocolCompatibility(UUID regionId)
         {
             bool boolval;
-            if(m_OpenSimProtocolCompatibilityParams.TryGetValue(regionId, out boolval))
-            {
-                return boolval;
-            }
-            else if(m_OpenSimProtocolCompatibilityParams.TryGetValue(UUID.Zero, out boolval))
-            {
-                return boolval;
-            }
-            else
-            {
-                return false;
-            }
+            return (m_OpenSimProtocolCompatibilityParams.TryGetValue(regionId, out boolval) ||
+                m_OpenSimProtocolCompatibilityParams.TryGetValue(UUID.Zero, out boolval)) &&
+                boolval;
         }
 
         public PostAgentHandler(IConfig ownSection)
