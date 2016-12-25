@@ -37,7 +37,7 @@ namespace SilverSim.BackendHandlers.Robust.OfflineIM
         {
             m_OfflineIMService = loader.GetService<OfflineIMServiceInterface>(m_OfflineIMServiceName);
             m_UserAccountService = loader.GetService<UserAccountServiceInterface>(m_UserAccountServiceName);
-            loader.HttpServer.StartsWithUriHandlers.Add("/offlineim", HandleOfflineIM);
+            loader.HttpServer.UriHandlers.Add("/offlineim", HandleOfflineIM);
         }
 
         void BoolResult(HttpRequest httpreq, bool success, string reason = "")

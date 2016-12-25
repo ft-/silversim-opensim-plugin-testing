@@ -59,7 +59,7 @@ namespace SilverSim.BackendHandlers.Robust.Avatar
         {
             m_Log.Info("Initializing handler for avatar server");
             m_HttpServer = loader.HttpServer;
-            m_HttpServer.StartsWithUriHandlers.Add("/avatar", AvatarHandler);
+            m_HttpServer.UriHandlers.Add("/avatar", AvatarHandler);
             m_AvatarService = loader.GetService<AvatarServiceInterface>(m_AvatarServiceName);
         }
 

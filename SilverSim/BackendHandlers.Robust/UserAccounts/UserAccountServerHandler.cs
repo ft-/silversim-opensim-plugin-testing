@@ -67,7 +67,7 @@ namespace SilverSim.BackendHandlers.Robust.UserAccounts
         {
             m_Log.Info("Initializing handler for UserAccount server");
             m_HttpServer = loader.HttpServer;
-            m_HttpServer.StartsWithUriHandlers.Add("/accounts", UserAccountHandler);
+            m_HttpServer.UriHandlers.Add("/accounts", UserAccountHandler);
             m_UserAccountService = loader.GetService<UserAccountServiceInterface>(m_UserAccountServiceName);
         }
 

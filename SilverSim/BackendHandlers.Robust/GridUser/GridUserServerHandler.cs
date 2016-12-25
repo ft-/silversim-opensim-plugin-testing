@@ -44,7 +44,7 @@ namespace SilverSim.BackendHandlers.Robust.GridUser
         {
             m_Log.Info("Initializing handler for GridUser server");
             m_HttpServer = loader.HttpServer;
-            m_HttpServer.StartsWithUriHandlers.Add("/griduser", GridUserHandler);
+            m_HttpServer.UriHandlers.Add("/griduser", GridUserHandler);
             m_GridUserService = loader.GetService<GridUserServiceInterface>(m_GridUserServiceName);
             m_UserAccountService = loader.GetService<UserAccountServiceInterface>(m_UserAccountServiceName);
             m_AvatarNameService = loader.GetService<AvatarNameServiceInterface>(m_AvatarNameStorageName);
