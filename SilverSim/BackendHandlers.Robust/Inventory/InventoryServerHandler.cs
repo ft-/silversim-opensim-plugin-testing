@@ -195,7 +195,7 @@ namespace SilverSim.BackendHandlers.Robust.Inventory
         {
             m_Log.Info("Initializing handler for asset server");
             m_HttpServer = loader.HttpServer;
-            m_HttpServer.StartsWithUriHandlers.Add("/xinventory", InventoryHandler);
+            m_HttpServer.UriHandlers.Add("/xinventory", InventoryHandler);
             m_InventoryService = loader.GetService<InventoryServiceInterface>(m_InventoryServiceName);
         }
 
