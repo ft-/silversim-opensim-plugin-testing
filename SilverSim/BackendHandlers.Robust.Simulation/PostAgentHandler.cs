@@ -1413,7 +1413,7 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
                 /* let the disconnect be handled by Circuit */
                 agent.SendMessageAlways(new DisableSimulator(), scene.ID);
             }
-            using(HttpResponse res = req.BeginResponse(HttpStatusCode.OK, "OK"))
+            using (req.BeginResponse(HttpStatusCode.OK, "OK"))
             {
                 /* all that is needed is already done */
             }
