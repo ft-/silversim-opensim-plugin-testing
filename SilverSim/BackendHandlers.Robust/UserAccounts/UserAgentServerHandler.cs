@@ -73,6 +73,7 @@ namespace SilverSim.BackendHandlers.Robust.UserAccounts
             xmlRpc.XmlRpcMethods.Add("verify_client", VerifyClient);
             xmlRpc.XmlRpcMethods.Add("verify_agent", VerifyAgent);
             xmlRpc.XmlRpcMethods.Add("get_uui", GetUUI);
+            xmlRpc.XmlRpcMethods.Add("get_uuid", GetUUID);
             xmlRpc.XmlRpcMethods.Add("get_server_urls", GetServerURLs);
             xmlRpc.XmlRpcMethods.Add("get_home_region", GetHomeRegion);
             xmlRpc.XmlRpcMethods.Add("get_user_info", GetUserInfo);
@@ -100,7 +101,41 @@ namespace SilverSim.BackendHandlers.Robust.UserAccounts
             m_AuthInfoService = loader.GetService<AuthInfoServiceInterface>(m_AuthInfoServiceName);
         }
 
-        public XmlRpc.XmlRpcResponse LogoutAgent(XmlRpc.XmlRpcRequest req)
+        XmlRpc.XmlRpcResponse GetUUID(XmlRpc.XmlRpcRequest req)
+        {
+            IValue first;
+            IValue last;
+            Map reqdata;
+            if (!req.Params.TryGetValue(0, out reqdata))
+            {
+                throw new XmlRpc.XmlRpcFaultException(-32602, "invalid method parameters");
+            }
+            if (!reqdata.TryGetValue("first", out first) ||
+                !reqdata.TryGetValue("last", out last))
+            {
+                throw new XmlRpc.XmlRpcFaultException(-32602, "invalid method parameters");
+            }
+
+            UserAccount account;
+            UUI uui = null;
+            if (m_UserAccountService.TryGetValue(UUID.Zero, first.ToString(), last.ToString(), out account))
+            {
+                uui = account.Principal;
+            }
+
+            Map respdata = new Map();
+            if (null != uui)
+            {
+                respdata.Add("UUID", uui.ID.ToString());
+            }
+            else
+            {
+                respdata.Add("result", "User unknown");
+            }
+            return new XmlRpc.XmlRpcResponse { ReturnValue = respdata };
+        }
+
+        XmlRpc.XmlRpcResponse LogoutAgent(XmlRpc.XmlRpcRequest req)
         {
             Map reqdata;
             if (!req.Params.TryGetValue(0, out reqdata))
@@ -145,7 +180,7 @@ namespace SilverSim.BackendHandlers.Robust.UserAccounts
             return new XmlRpc.XmlRpcResponse { ReturnValue = respdata };
         }
 
-        public XmlRpc.XmlRpcResponse VerifyClient(XmlRpc.XmlRpcRequest req)
+        XmlRpc.XmlRpcResponse VerifyClient(XmlRpc.XmlRpcRequest req)
         {
             Map reqdata;
             if (!req.Params.TryGetValue(0, out reqdata))
@@ -177,7 +212,7 @@ namespace SilverSim.BackendHandlers.Robust.UserAccounts
             return new XmlRpc.XmlRpcResponse { ReturnValue = respdata };
         }
 
-        public XmlRpc.XmlRpcResponse VerifyAgent(XmlRpc.XmlRpcRequest req)
+        XmlRpc.XmlRpcResponse VerifyAgent(XmlRpc.XmlRpcRequest req)
         {
             Map reqdata;
             if (!req.Params.TryGetValue(0, out reqdata))
@@ -219,7 +254,7 @@ namespace SilverSim.BackendHandlers.Robust.UserAccounts
             return new XmlRpc.XmlRpcResponse { ReturnValue = respdata };
         }
 
-        public XmlRpc.XmlRpcResponse GetUserInfo(XmlRpc.XmlRpcRequest req)
+        XmlRpc.XmlRpcResponse GetUserInfo(XmlRpc.XmlRpcRequest req)
         {
             Map reqdata;
             if(!req.Params.TryGetValue(0, out reqdata))
@@ -251,7 +286,7 @@ namespace SilverSim.BackendHandlers.Robust.UserAccounts
             return new XmlRpc.XmlRpcResponse { ReturnValue = resdata };
         }
 
-        public XmlRpc.XmlRpcResponse GetUUI(XmlRpc.XmlRpcRequest req)
+        XmlRpc.XmlRpcResponse GetUUI(XmlRpc.XmlRpcRequest req)
         {
             Map reqdata;
             if(!req.Params.TryGetValue(0, out reqdata))
@@ -293,7 +328,7 @@ namespace SilverSim.BackendHandlers.Robust.UserAccounts
             return new XmlRpc.XmlRpcResponse { ReturnValue = respdata };
         }
 
-        public XmlRpc.XmlRpcResponse GetServerURLs(XmlRpc.XmlRpcRequest req)
+        XmlRpc.XmlRpcResponse GetServerURLs(XmlRpc.XmlRpcRequest req)
         {
             Map respdata = new Map();
             foreach(KeyValuePair<string, string> kvp in m_ServiceURLs)
@@ -303,7 +338,7 @@ namespace SilverSim.BackendHandlers.Robust.UserAccounts
             return new XmlRpc.XmlRpcResponse { ReturnValue = respdata };
         }
 
-        public XmlRpc.XmlRpcResponse GetHomeRegion(XmlRpc.XmlRpcRequest req)
+        XmlRpc.XmlRpcResponse GetHomeRegion(XmlRpc.XmlRpcRequest req)
         {
             Map respdata = new Map();
 
