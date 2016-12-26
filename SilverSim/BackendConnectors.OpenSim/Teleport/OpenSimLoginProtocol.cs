@@ -90,7 +90,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
             {
                 m_LocalInventoryServiceName = ownConfig.GetString("LocalInventoryService", "InventoryService");
                 m_LocalAssetServiceName = ownConfig.GetString("LocalAssetService", "AssetService");
-                m_LocalProfileServiceName = ownConfig.GetString("LocalProfileService", string.Empty);
+                m_LocalProfileServiceName = ownConfig.GetString("LocalProfileService", "ProfileService");
                 m_LocalFriendsServiceName = ownConfig.GetString("LocalFriendsService", "FriendsService");
                 m_LocalPresenceServiceName = ownConfig.GetString("LocalPresenceService", "PresenceService");
                 m_LocalOfflineIMServiceName = ownConfig.GetString("LocalOfflineIMService", "OfflineIMService");
