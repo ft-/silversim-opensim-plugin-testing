@@ -37,6 +37,7 @@ using SilverSim.Types.StructuredData.Json;
 using SilverSim.Viewer.Core;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
