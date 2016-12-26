@@ -45,6 +45,7 @@ using System.Text.RegularExpressions;
 
 namespace SilverSim.BackendConnectors.OpenSim.Teleport
 {
+    [Description("OpenSim Login Protocol Connector")]
     public class OpenSimLoginProtocol : ILoginConnectorServiceInterface, IPlugin, IServerParamListener
     {
         protected static readonly ILog m_Log = LogManager.GetLogger("OPENSIM LOGIN PROTOCOL");
