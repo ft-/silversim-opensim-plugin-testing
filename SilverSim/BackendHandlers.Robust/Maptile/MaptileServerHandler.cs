@@ -11,6 +11,7 @@ using SilverSim.Types.Maptile;
 using SilverSim.Types.StructuredData.REST;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 using System.Net;
 using System.Text.RegularExpressions;
@@ -18,6 +19,7 @@ using System.Xml;
 
 namespace SilverSim.BackendHandlers.Robust.Maptile
 {
+    [Description("Robust Maptile Protocol Server")]
     public class MaptileServerHandler : IPlugin
     {
         static readonly ILog m_Log = LogManager.GetLogger("ROBUST MAPTILE HANDLER");

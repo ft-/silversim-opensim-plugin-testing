@@ -12,10 +12,12 @@ using System.Collections.Generic;
 using System.Net;
 using System.Xml;
 using System;
+using System.ComponentModel;
 
 namespace SilverSim.BackendHandlers.Robust.AuthInfo
 {
     #region Service implementation
+    [Description("Robust AuthInfo Protocol Server")]
     public class AuthInfoServiceHandler : IPlugin, IHttpAclListAccess
     {
         readonly string m_AuthInfoServiceName;
