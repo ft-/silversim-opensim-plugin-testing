@@ -52,7 +52,7 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
         {
             m_Scenes = loader.Scenes;
             m_HttpServer = loader.HttpServer;
-            m_HttpServer.StartsWithUriHandlers.Add("/friends", FriendsHandler);
+            m_HttpServer.UriHandlers.Add("/friends", FriendsHandler);
         }
 
         void FriendsHandler(HttpRequest httpreq)
