@@ -19,6 +19,19 @@ namespace SilverSim.OpenSimArchiver
         }
     }
 
+    [PluginName("NpcInventoryArchiveSupport")]
+    public class NpcInventoryArchiverLoadStoreFactory : IPluginFactory
+    {
+        public NpcInventoryArchiverLoadStoreFactory()
+        {
+
+        }
+        public IPlugin Initialize(ConfigurationLoader loader, IConfig ownSection)
+        {
+            return new NpcInventoryArchiverLoadStore(ownSection);
+        }
+    }
+
     [PluginName("RegionArchiveSupport")]
     public class OpenSimArchiverLoadStoreFactory : IPluginFactory
     {

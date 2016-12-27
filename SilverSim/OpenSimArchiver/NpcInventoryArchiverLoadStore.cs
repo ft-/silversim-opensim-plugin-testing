@@ -6,13 +6,11 @@ using Nini.Config;
 using SilverSim.Http.Client;
 using SilverSim.Main.Common;
 using SilverSim.Main.Common.CmdIO;
-using SilverSim.ServiceInterfaces.Account;
 using SilverSim.ServiceInterfaces.Asset;
-using SilverSim.ServiceInterfaces.AuthInfo;
 using SilverSim.ServiceInterfaces.AvatarName;
 using SilverSim.ServiceInterfaces.Inventory;
+using SilverSim.ServiceInterfaces.Presence;
 using SilverSim.Types;
-using SilverSim.Types.Account;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -21,53 +19,41 @@ using System.IO;
 namespace SilverSim.OpenSimArchiver
 {
     [Description("IAR Plugin")]
-    public sealed class InventoryArchiverLoadStore : IPlugin
+    public class NpcInventoryArchiverLoadStore : IPlugin
     {
-        private static readonly ILog m_Log = LogManager.GetLogger("IAR ARCHIVER");
-        AuthInfoServiceInterface m_AuthInfoService;
-        AssetServiceInterface m_AssetService;
-        InventoryServiceInterface m_InventoryService;
-        UserAccountServiceInterface m_UserAccountService;
+        private static readonly ILog m_Log = LogManager.GetLogger("NPC-IAR ARCHIVER");
+        InventoryServiceInterface m_NpcInventoryService;
+        NpcPresenceServiceInterface m_NpcPresenceService;
+        AssetServiceInterface m_NpcAssetService;
         readonly List<AvatarNameServiceInterface> m_AvatarNameServices = new List<AvatarNameServiceInterface>();
 
-        readonly string m_AuthInfoServiceName;
-        readonly string m_AssetServiceName;
-        readonly string m_InventoryServiceName;
-        readonly string m_UserAccountServiceName;
+        readonly string m_NpcInventoryServiceName;
+        readonly string m_NpcPresenceServiceName;
+        readonly string m_NpcAssetServiceName;
         readonly string m_AvatarNameServiceNames;
 
-        public InventoryArchiverLoadStore(IConfig ownSection)
+        public NpcInventoryArchiverLoadStore(IConfig ownSection)
         {
-            m_AuthInfoServiceName = ownSection.GetString("AuthInfoService", "AuthInfoService");
-            m_AssetServiceName = ownSection.GetString("AssetService", "AssetService");
-            m_InventoryServiceName = ownSection.GetString("InventoryService", "InventoryService");
-            m_UserAccountServiceName = ownSection.GetString("UserAccountService", "UserAccountService");
+            m_NpcPresenceServiceName = ownSection.GetString("NpcPresenceService");
+            m_NpcInventoryServiceName = ownSection.GetString("NpcInventoryService");
+            m_NpcAssetServiceName = ownSection.GetString("NpcAssetService", "AssetService");
             m_AvatarNameServiceNames = ownSection.GetString("AvatarNameServices", string.Empty);
         }
 
         public void Startup(ConfigurationLoader loader)
         {
-            loader.CommandRegistry.AddSaveCommand("iar", SaveIarCommand);
-            loader.CommandRegistry.AddLoadCommand("iar", LoadIarCommand);
-            m_AuthInfoService = loader.GetService<AuthInfoServiceInterface>(m_AuthInfoServiceName);
-            m_AssetService = loader.GetService<AssetServiceInterface>(m_AssetServiceName);
-            m_InventoryService = loader.GetService<InventoryServiceInterface>(m_InventoryServiceName);
-            m_UserAccountService = loader.GetService<UserAccountServiceInterface>(m_UserAccountServiceName);
-            foreach(string avatarNameService in m_AvatarNameServiceNames.Split(','))
+            m_NpcInventoryService = loader.GetService<InventoryServiceInterface>(m_NpcInventoryServiceName);
+            m_NpcPresenceService = loader.GetService<NpcPresenceServiceInterface>(m_NpcPresenceServiceName);
+            m_NpcAssetService = loader.GetService<AssetServiceInterface>(m_NpcAssetServiceName);
+            foreach (string avatarNameService in m_AvatarNameServiceNames.Split(','))
             {
                 if (!string.IsNullOrEmpty(avatarNameService))
                 {
                     m_AvatarNameServices.Add(loader.GetService<AvatarNameServiceInterface>(avatarNameService));
                 }
             }
-        }
-
-        UserAccount Authenticate(string firstName, string lastName, string password, out UUID token)
-        {
-            UserAccount accountInfo = m_UserAccountService[UUID.Zero, firstName, lastName];
-            token = m_AuthInfoService.Authenticate(UUID.Zero, accountInfo.Principal.ID, password, 30);
-
-            return accountInfo;
+            loader.CommandRegistry.AddLoadCommand("npc-iar", LoadIarCommand);
+            loader.CommandRegistry.AddSaveCommand("npc-iar", SaveIarCommand);
         }
 
         #region Save IAR
@@ -76,8 +62,20 @@ namespace SilverSim.OpenSimArchiver
             if (args[0] == "help")
             {
                 string outp = "Available commands:\n";
-                outp += "save iar [--noassets] <firstname> <lastname> <inventorypath> <filename>\n";
+                outp += "save npc-iar [--noassets] <firstname> <lastname> <inventorypath> <filename>\n";
                 io.Write(outp);
+                return;
+            }
+
+            UUID selectedScene = io.SelectedScene;
+            if (limitedToScene != UUID.Zero)
+            {
+                selectedScene = limitedToScene;
+            }
+
+            if (UUID.Zero == selectedScene)
+            {
+                io.Write("No scene selected");
                 return;
             }
 
@@ -94,15 +92,15 @@ namespace SilverSim.OpenSimArchiver
                 {
                     options |= InventoryArchiver.IAR.SaveOptions.NoAssets;
                 }
-                else if(firstname == null)
+                else if (firstname == null)
                 {
                     firstname = arg;
                 }
-                else if(lastname == null)
+                else if (lastname == null)
                 {
                     lastname = arg;
                 }
-                else if(inventorypath == null)
+                else if (inventorypath == null)
                 {
                     inventorypath = arg;
                 }
@@ -112,21 +110,16 @@ namespace SilverSim.OpenSimArchiver
                 }
             }
 
-            if(null == filename)
+            if (null == filename)
             {
                 io.Write("missing parameters");
                 return;
             }
 
-            UserAccount account;
-            UUID token;
-            try
+            NpcPresenceInfo presence;
+            if(!m_NpcPresenceService.TryGetValue(selectedScene, firstname, lastname, out presence))
             {
-                account = Authenticate(firstname, lastname, io.GetPass("Password"), out token);
-            }
-            catch(Exception e)
-            {
-                io.WriteFormatted("failed to authenticate: {0}", e.Message);
+                io.Write("npc not found");
                 return;
             }
 
@@ -134,17 +127,13 @@ namespace SilverSim.OpenSimArchiver
             {
                 using (Stream s = new FileStream(filename, FileMode.Create, FileAccess.Write))
                 {
-                    InventoryArchiver.IAR.Save(account.Principal, m_InventoryService, m_AssetService, m_AvatarNameServices, options, filename, inventorypath, io);
+                    InventoryArchiver.IAR.Save(presence.Npc, m_NpcInventoryService, m_NpcAssetService, m_AvatarNameServices, options, filename, inventorypath, io);
                 }
                 io.Write("IAR saved successfully.");
             }
             catch (Exception e)
             {
                 io.WriteFormatted("IAR saving failed: {0}", e.Message);
-            }
-            finally
-            {
-                m_AuthInfoService.ReleaseToken(account.Principal.ID, token);
             }
         }
         #endregion
@@ -155,10 +144,23 @@ namespace SilverSim.OpenSimArchiver
             if (args[0] == "help")
             {
                 string outp = "Available commands:\n";
-                outp += "load iar [-m|--merge] [--noassets] <firstname> <lastname> <inventorypath> <filename>\n";
+                outp += "load npc-iar [-m|--merge] [--noassets] <firstname> <lastname> <inventorypath> <filename>\n";
                 io.Write(outp);
                 return;
             }
+
+            UUID selectedScene = io.SelectedScene;
+            if (limitedToScene != UUID.Zero)
+            {
+                selectedScene = limitedToScene;
+            }
+
+            if (UUID.Zero == selectedScene)
+            {
+                io.Write("No scene selected");
+                return;
+            }
+
 
             string filename = null;
             string firstname = null;
@@ -177,15 +179,15 @@ namespace SilverSim.OpenSimArchiver
                 {
                     options |= InventoryArchiver.IAR.LoadOptions.Merge;
                 }
-                else if(firstname == null)
+                else if (firstname == null)
                 {
                     firstname = arg;
                 }
-                else if(lastname == null)
+                else if (lastname == null)
                 {
                     lastname = arg;
                 }
-                else if(inventorypath == null)
+                else if (inventorypath == null)
                 {
                     inventorypath = arg;
                 }
@@ -201,15 +203,10 @@ namespace SilverSim.OpenSimArchiver
                 return;
             }
 
-            UserAccount account;
-            UUID token;
-            try
+            NpcPresenceInfo presenceInfo;
+            if(!m_NpcPresenceService.TryGetValue(selectedScene, firstname, lastname, out presenceInfo))
             {
-                account = Authenticate(firstname, lastname, io.GetPass("Password"), out token);
-            }
-            catch (Exception e)
-            {
-                io.WriteFormatted("failed to authenticate: {0}", e.Message);
+                io.Write("Npc not found");
                 return;
             }
 
@@ -219,7 +216,7 @@ namespace SilverSim.OpenSimArchiver
                     HttpRequestHandler.DoStreamGetRequest(filename, null, 20000) :
                     new FileStream(filename, FileMode.Open, FileAccess.Read))
                 {
-                    InventoryArchiver.IAR.Load(account.Principal, m_InventoryService, m_AssetService, m_AvatarNameServices, options, s, inventorypath, io);
+                    InventoryArchiver.IAR.Load(presenceInfo.Npc, m_NpcInventoryService, m_NpcAssetService, m_AvatarNameServices, options, s, inventorypath, io);
                 }
                 io.Write("IAR loaded successfully.");
             }
@@ -232,11 +229,8 @@ namespace SilverSim.OpenSimArchiver
                 m_Log.Info("IAR load exception encountered", e);
                 io.Write(e.Message);
             }
-            finally
-            {
-                m_AuthInfoService.ReleaseToken(account.Principal.ID, token);
-            }
         }
         #endregion
+
     }
 }
