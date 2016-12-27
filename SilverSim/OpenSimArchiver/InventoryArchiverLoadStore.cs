@@ -42,7 +42,7 @@ namespace SilverSim.OpenSimArchiver
             m_AssetServiceName = ownSection.GetString("AssetService", "AssetService");
             m_InventoryServiceName = ownSection.GetString("InventoryService", "InventoryService");
             m_UserAccountServiceName = ownSection.GetString("UserAccountService", "UserAccountService");
-            m_AvatarNameServiceNames = ownSection.GetString("AvatarNameServices", string.Empty);
+            m_AvatarNameServiceNames = ownSection.GetString("AvatarNameServices", "AvatarNameStorage");
         }
 
         public void Startup(ConfigurationLoader loader)

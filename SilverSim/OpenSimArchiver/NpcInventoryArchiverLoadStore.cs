@@ -37,7 +37,7 @@ namespace SilverSim.OpenSimArchiver
             m_NpcPresenceServiceName = ownSection.GetString("NpcPresenceService");
             m_NpcInventoryServiceName = ownSection.GetString("NpcInventoryService");
             m_NpcAssetServiceName = ownSection.GetString("NpcAssetService", "AssetService");
-            m_AvatarNameServiceNames = ownSection.GetString("AvatarNameServices", string.Empty);
+            m_AvatarNameServiceNames = ownSection.GetString("AvatarNameServices", "AvatarNameStorage");
         }
 
         public void Startup(ConfigurationLoader loader)
@@ -119,7 +119,7 @@ namespace SilverSim.OpenSimArchiver
             NpcPresenceInfo presence;
             if(!m_NpcPresenceService.TryGetValue(selectedScene, firstname, lastname, out presence))
             {
-                io.Write("npc not found");
+                io.Write("Persistent npc not found");
                 return;
             }
 
@@ -206,7 +206,7 @@ namespace SilverSim.OpenSimArchiver
             NpcPresenceInfo presenceInfo;
             if(!m_NpcPresenceService.TryGetValue(selectedScene, firstname, lastname, out presenceInfo))
             {
-                io.Write("Npc not found");
+                io.Write("Persistent npc not found");
                 return;
             }
 
