@@ -201,7 +201,7 @@ namespace SilverSim.BackendHandlers.Robust.Inventory
 
         void IServiceURLsGetInterface.GetServiceURLs(Dictionary<string, string> dict)
         {
-            dict.Add("InventoryServerURI", m_HttpServer.ServerURI);
+            dict["InventoryServerURI"] = m_HttpServer.ServerURI;
         }
 
         void SuccessResult(HttpRequest httpreq)

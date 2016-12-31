@@ -56,7 +56,7 @@ namespace SilverSim.BackendHandlers.Robust.Asset
 
         void IServiceURLsGetInterface.GetServiceURLs(Dictionary<string, string> dict)
         {
-            dict.Add("AssetServerURI", m_HttpServer.ServerURI);
+            dict["AssetServerURI"] = m_HttpServer.ServerURI;
         }
 
         public void AssetHandler(HttpRequest req)

@@ -77,7 +77,7 @@ namespace SilverSim.BackendConnectors.Robust.IM
 
         void IServiceURLsGetInterface.GetServiceURLs(Dictionary<string, string> dict)
         {
-            dict.Add("IMServerURI", m_HttpServer.ServerURI);
+            dict["IMServerURI"] = m_HttpServer.ServerURI;
         }
 
         public XmlRpc.XmlRpcResponse IMReceived(XmlRpc.XmlRpcRequest req)

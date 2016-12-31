@@ -1139,7 +1139,7 @@ namespace SilverSim.BackendHandlers.Robust.Profile
 
         public void GetServiceURLs(Dictionary<string, string> dict)
         {
-            dict.Add("ProfileServerURI", m_HttpServer.ServerURI);
+            dict["ProfileServerURI"] = m_HttpServer.ServerURI;
         }
     }
 

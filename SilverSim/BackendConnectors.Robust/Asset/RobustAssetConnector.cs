@@ -5,7 +5,6 @@ using log4net;
 using Nini.Config;
 using SilverSim.Http.Client;
 using SilverSim.Main.Common;
-using SilverSim.ServiceInterfaces;
 using SilverSim.ServiceInterfaces.Asset;
 using SilverSim.Types;
 using SilverSim.Types.Asset;
@@ -26,7 +25,7 @@ namespace SilverSim.BackendConnectors.Robust.Asset
 {
     #region Service Implementation
     [Description("Robust Asset Connector")]
-    public class RobustAssetConnector : AssetServiceInterface, IPlugin, IAssetMetadataServiceInterface, IAssetDataServiceInterface, IServiceURLsGetInterface
+    public class RobustAssetConnector : AssetServiceInterface, IPlugin, IAssetMetadataServiceInterface, IAssetDataServiceInterface
     {
         [Serializable]
         public class RobustAssetProtocolErrorException : Exception
@@ -66,11 +65,6 @@ namespace SilverSim.BackendConnectors.Robust.Asset
             /* no action needed */
         }
         #endregion
-
-        void IServiceURLsGetInterface.GetServiceURLs(Dictionary<string, string> dict)
-        {
-            dict.Add("AssetServerURI", m_AssetURI);
-        }
 
         public override bool IsSameServer(AssetServiceInterface other)
         {

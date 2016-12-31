@@ -40,7 +40,7 @@ namespace SilverSim.BackendHandlers.Robust.Friends
 
         public void GetServiceURLs(Dictionary<string, string> dict)
         {
-            dict.Add("FriendsServerURI", m_HttpServer.ServerURI);
+            dict["FriendsServerURI"] = m_HttpServer.ServerURI;
         }
 
         public void Startup(ConfigurationLoader loader)
