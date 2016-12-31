@@ -211,7 +211,7 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
                 InventoryFolder folder;
                 if(!Folder.TryGetValue(principalID, type, out folder))
                 {
-                    throw new InventoryInaccessibleException();
+                    throw new InventoryFolderTypeNotFoundException(type);
                 }
                 return folder;
             }
