@@ -27,7 +27,7 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
             post["ID"] = (string)key;
             post["METHOD"] = "GETFOLDER";
             Map map;
-            using(Stream s = HttpRequestHandler.DoStreamPostRequest(m_InventoryURI, null, post, false, TimeoutMs))
+            using(Stream s = HttpClient.DoStreamPostRequest(m_InventoryURI, null, post, false, TimeoutMs))
             {
                 map = OpenSimResponse.Deserialize(s);
             }
@@ -67,7 +67,7 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
             post["ID"] = (string)folderID;
             post["METHOD"] = "GETFOLDER";
             Map map;
-            using (Stream s = HttpRequestHandler.DoStreamPostRequest(m_InventoryURI, null, post, false, TimeoutMs))
+            using (Stream s = HttpClient.DoStreamPostRequest(m_InventoryURI, null, post, false, TimeoutMs))
             {
                 map = OpenSimResponse.Deserialize(s);
             }
@@ -90,7 +90,7 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
                 post["FOLDER"] = (string)folderID;
                 post["METHOD"] = "GETFOLDERCONTENT";
                 Map map;
-                using(Stream s = HttpRequestHandler.DoStreamPostRequest(m_InventoryURI, null, post, false, TimeoutMs))
+                using(Stream s = HttpClient.DoStreamPostRequest(m_InventoryURI, null, post, false, TimeoutMs))
                 {
                     map = OpenSimResponse.Deserialize(s);
                 }
@@ -186,12 +186,12 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
                 Map map;
                 try
                 {
-                    using (Stream s = HttpRequestHandler.DoStreamPostRequest(m_InventoryURI, null, post, false, TimeoutMs))
+                    using (Stream s = HttpClient.DoStreamPostRequest(m_InventoryURI, null, post, false, TimeoutMs))
                     {
                         map = OpenSimResponse.Deserialize(s);
                     }
                 }
-                catch(HttpRequestHandler.BadHttpResponseException)
+                catch(HttpClient.BadHttpResponseException)
                 {
                     m_IsMultipeServiceSupported = false;
                     return GetContentInSingleRequests(principalID, folderIDs);

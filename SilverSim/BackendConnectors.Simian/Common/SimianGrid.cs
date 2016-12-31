@@ -14,7 +14,7 @@ namespace SilverSim.BackendConnectors.Simian.Common
         public static Map PostToService(string serverUrl, string capability, Dictionary<string, string> requestargs, bool compressed, int timeoutms = 100000)
         {
             requestargs["cap"] = capability;
-            using(Stream s = HttpRequestHandler.DoStreamPostRequest(serverUrl, null, requestargs, compressed, timeoutms))
+            using(Stream s = HttpClient.DoStreamPostRequest(serverUrl, null, requestargs, compressed, timeoutms))
             {
                 return (Map)LlsdXml.Deserialize(s);
             }
@@ -23,7 +23,7 @@ namespace SilverSim.BackendConnectors.Simian.Common
         public static Map PostToService(string serverUrl, string capability, Dictionary<string, string> requestargs, int timeoutms = 100000)
         {
             requestargs["cap"] = capability;
-            using(Stream s = HttpRequestHandler.DoStreamPostRequest(serverUrl, null, requestargs, false, timeoutms))
+            using(Stream s = HttpClient.DoStreamPostRequest(serverUrl, null, requestargs, false, timeoutms))
             {
                 return (Map)LlsdXml.Deserialize(s);
             }

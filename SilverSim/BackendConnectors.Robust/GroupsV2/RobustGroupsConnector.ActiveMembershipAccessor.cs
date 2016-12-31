@@ -35,7 +35,7 @@ namespace SilverSim.BackendConnectors.Robust.GroupsV2
                 post["METHOD"] = "GETMEMBERSHIP";
 
                 Map m;
-                using (Stream s = HttpRequestHandler.DoStreamPostRequest(m_Uri, null, post, false, TimeoutMs))
+                using (Stream s = HttpClient.DoStreamPostRequest(m_Uri, null, post, false, TimeoutMs))
                 {
                     m = OpenSimResponse.Deserialize(s);
                 }
@@ -67,7 +67,7 @@ namespace SilverSim.BackendConnectors.Robust.GroupsV2
                 post["METHOD"] = "GETMEMBERSHIP";
 
                 Map m;
-                using (Stream s = HttpRequestHandler.DoStreamPostRequest(m_Uri, null, post, false, TimeoutMs))
+                using (Stream s = HttpClient.DoStreamPostRequest(m_Uri, null, post, false, TimeoutMs))
                 {
                     m = OpenSimResponse.Deserialize(s);
                 }

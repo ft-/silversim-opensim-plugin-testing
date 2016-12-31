@@ -87,7 +87,7 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
             post["PRINCIPAL"] = (string)principalID;
             post["METHOD"] = "CREATEUSERINVENTORY";
             Map map;
-            using(Stream s = HttpRequestHandler.DoStreamPostRequest(m_InventoryURI, null, post, false, TimeoutMs))
+            using(Stream s = HttpClient.DoStreamPostRequest(m_InventoryURI, null, post, false, TimeoutMs))
             {
                 map = OpenSimResponse.Deserialize(s);
             }
@@ -103,7 +103,7 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
             post["PRINCIPAL"] = (string)principalID;
             post["METHOD"] = "GETACTIVEGESTURES";
             Map map;
-            using(Stream s = HttpRequestHandler.DoStreamPostRequest(m_InventoryURI, null, post, false, TimeoutMs))
+            using(Stream s = HttpClient.DoStreamPostRequest(m_InventoryURI, null, post, false, TimeoutMs))
             {
                 map = OpenSimResponse.Deserialize(s);
             }

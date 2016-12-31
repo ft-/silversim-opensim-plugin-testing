@@ -213,7 +213,7 @@ namespace SilverSim.BackendConnectors.Simian.Asset
         {
             try
             {
-                s = HttpRequestHandler.DoStreamGetRequest(m_AssetURI + "assets/" + key.ToString() + "/data", null, TimeoutMs);
+                s = HttpClient.DoStreamGetRequest(m_AssetURI + "assets/" + key.ToString() + "/data", null, TimeoutMs);
                 return true;
             }
             catch

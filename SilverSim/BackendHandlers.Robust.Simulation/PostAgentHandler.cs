@@ -170,7 +170,7 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
             Dictionary<string, string> headers = new Dictionary<string, string>();
             try
             {
-                using (Stream responseStream = HttpRequestHandler.DoStreamRequest("HEAD", uri, null, string.Empty, string.Empty, false, 20000, headers))
+                using (Stream responseStream = HttpClient.DoStreamRequest("HEAD", uri, null, string.Empty, string.Empty, false, 20000, headers))
                 {
                     using (StreamReader reader = new StreamReader(responseStream))
                     {
@@ -1268,7 +1268,7 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
             {
                 try
                 {
-                    HttpRequestHandler.DoRequest("DELETE", (string)o, null, string.Empty, string.Empty, false, 10000);
+                    HttpClient.DoRequest("DELETE", (string)o, null, string.Empty, string.Empty, false, 10000);
                 }
                 catch(Exception e)
                 {

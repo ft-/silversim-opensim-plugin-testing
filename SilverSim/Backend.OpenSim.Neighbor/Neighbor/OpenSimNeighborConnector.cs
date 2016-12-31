@@ -46,7 +46,7 @@ namespace SilverSim.Backend.OpenSim.Neighbor.Neighbor
             m.Add("destination_handle", toRegion.Location.RegionHandle.ToString());
             m_Log.InfoFormat("notifying neighbor {0} ({1}) of {2} ({3})", toRegion.Name, toRegion.ID, fromRegion.Name, fromRegion.Name);
             Map res;
-            using (Stream resStream = HttpRequestHandler.DoStreamRequest("POST", uri, null, "application/json", Json.Serialize(m), false, 10000))
+            using (Stream resStream = HttpClient.DoStreamRequest("POST", uri, null, "application/json", Json.Serialize(m), false, 10000))
             {
                 res = (Map)Json.Deserialize(resStream);
             }

@@ -172,7 +172,7 @@ namespace SilverSim.BackendConnectors.Robust.GroupsV2
         internal static void BooleanResponseRequest(string uri, Dictionary<string, string> post, bool compressed, int timeoutms)
         {
             Map m;
-            using(Stream s = HttpRequestHandler.DoStreamPostRequest(uri, null, post, compressed, timeoutms))
+            using(Stream s = HttpClient.DoStreamPostRequest(uri, null, post, compressed, timeoutms))
             {
                 m = OpenSimResponse.Deserialize(s);
             }

@@ -95,7 +95,7 @@ namespace SilverSim.BackendConnectors.Robust.Friends
                 post["PRINCIPALID"] = (string)user.ID;
 
                 Map res;
-                using(Stream s = HttpRequestHandler.DoStreamPostRequest(m_Uri, null, post, false, TimeoutMs))
+                using(Stream s = HttpClient.DoStreamPostRequest(m_Uri, null, post, false, TimeoutMs))
                 {
                     res = OpenSimResponse.Deserialize(s);
                 }
@@ -151,7 +151,7 @@ namespace SilverSim.BackendConnectors.Robust.Friends
                 post["FRIEND"] += ";" + fi.Secret;
             }
 
-            using (Stream s = HttpRequestHandler.DoStreamPostRequest(m_Uri, null, post, false, TimeoutMs))
+            using (Stream s = HttpClient.DoStreamPostRequest(m_Uri, null, post, false, TimeoutMs))
             {
                 CheckResult(OpenSimResponse.Deserialize(s));
             }
@@ -182,7 +182,7 @@ namespace SilverSim.BackendConnectors.Robust.Friends
 
             post["MyFlags"] = ((int)flags).ToString();
 
-            using (Stream s = HttpRequestHandler.DoStreamPostRequest(m_Uri, null, post, false, TimeoutMs))
+            using (Stream s = HttpClient.DoStreamPostRequest(m_Uri, null, post, false, TimeoutMs))
             {
                 CheckResult(OpenSimResponse.Deserialize(s));
             }

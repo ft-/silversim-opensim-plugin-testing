@@ -165,7 +165,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
         public override void ReleaseAgent(UUID fromSceneID, IAgent agent, RegionInfo regionInfo)
         {
             string uri = BuildAgentUri(regionInfo, agent, "release");
-            HttpRequestHandler.DoRequest("DELETE", uri, null, string.Empty, string.Empty, false, TimeoutMs);
+            HttpClient.DoRequest("DELETE", uri, null, string.Empty, string.Empty, false, TimeoutMs);
             agent.ActiveChilds.Remove(regionInfo.ID);
         }
 
@@ -222,7 +222,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
             }
             try
             {
-                using (Stream o = HttpRequestHandler.DoStreamRequest("POST", agentURL, null, "application/json", compressed_postdata.Length, delegate (Stream ws)
+                using (Stream o = HttpClient.DoStreamRequest("POST", agentURL, null, "application/json", compressed_postdata.Length, delegate (Stream ws)
                 {
                     ws.Write(compressed_postdata, 0, compressed_postdata.Length);
                 }, true, TimeoutMs))
@@ -234,7 +234,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
             {
                 try
                 {
-                    using (Stream o = HttpRequestHandler.DoStreamRequest("POST", agentURL, null, "application/x-gzip", compressed_postdata.Length, delegate (Stream ws)
+                    using (Stream o = HttpClient.DoStreamRequest("POST", agentURL, null, "application/x-gzip", compressed_postdata.Length, delegate (Stream ws)
                     {
                         ws.Write(compressed_postdata, 0, compressed_postdata.Length);
                     }, false, TimeoutMs))
@@ -246,7 +246,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
                 {
                     try
                     {
-                        using (Stream o = HttpRequestHandler.DoStreamRequest("POST", agentURL, null, "application/json", uncompressed_postdata.Length, delegate (Stream ws)
+                        using (Stream o = HttpClient.DoStreamRequest("POST", agentURL, null, "application/json", uncompressed_postdata.Length, delegate (Stream ws)
                         {
                             ws.Write(uncompressed_postdata, 0, uncompressed_postdata.Length);
                         }, false, TimeoutMs))
@@ -309,7 +309,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
         public override void DisableSimulator(UUID fromSceneID, IAgent agent, RegionInfo regionInfo)
         {
             string uri = BuildAgentUri(regionInfo, agent, "?auth=" + agent.Session.SessionID.ToString());
-            HttpRequestHandler.DoRequest("DELETE", uri, null, string.Empty, string.Empty, false, TimeoutMs);
+            HttpClient.DoRequest("DELETE", uri, null, string.Empty, string.Empty, false, TimeoutMs);
             agent.ActiveChilds.Remove(regionInfo.ID);
         }
 
@@ -1048,7 +1048,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
             }
 
             Map jsonres;
-            using (Stream s = HttpRequestHandler.DoStreamRequest("QUERYACCESS", uri, null, "application/json", Json.Serialize(req), false, TimeoutMs))
+            using (Stream s = HttpClient.DoStreamRequest("QUERYACCESS", uri, null, "application/json", Json.Serialize(req), false, TimeoutMs))
             {
                 jsonres = Json.Deserialize(s) as Map;
             }
@@ -1415,7 +1415,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
             }
             try
             {
-                using (Stream o = HttpRequestHandler.DoStreamRequest("PUT", uri, null, "application/json", compressed_postdata.Length, delegate (Stream ws)
+                using (Stream o = HttpClient.DoStreamRequest("PUT", uri, null, "application/json", compressed_postdata.Length, delegate (Stream ws)
                 {
                     ws.Write(compressed_postdata, 0, compressed_postdata.Length);
                 }, true, TimeoutMs))
@@ -1430,7 +1430,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
             {
                 try
                 {
-                    using (Stream o = HttpRequestHandler.DoStreamRequest("PUT", uri, null, "application/x-gzip", compressed_postdata.Length, delegate (Stream ws)
+                    using (Stream o = HttpClient.DoStreamRequest("PUT", uri, null, "application/x-gzip", compressed_postdata.Length, delegate (Stream ws)
                     {
                         ws.Write(compressed_postdata, 0, compressed_postdata.Length);
                     }, false, TimeoutMs))
@@ -1445,7 +1445,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
                 {
                     try
                     {
-                        using (Stream o = HttpRequestHandler.DoStreamRequest("PUT", uri, null, "application/json", uncompressed_postdata.Length, delegate (Stream ws)
+                        using (Stream o = HttpClient.DoStreamRequest("PUT", uri, null, "application/json", uncompressed_postdata.Length, delegate (Stream ws)
                         {
                             ws.Write(uncompressed_postdata, 0, uncompressed_postdata.Length);
                         }, false, TimeoutMs))

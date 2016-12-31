@@ -3,7 +3,6 @@
 
 using SilverSim.BackendConnectors.Robust.Common;
 using SilverSim.Http.Client;
-using SilverSim.ServiceInterfaces.Groups;
 using SilverSim.ServiceInterfaces.Inventory;
 using SilverSim.Types;
 using SilverSim.Types.Inventory;
@@ -27,7 +26,7 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
             post["ID"] = (string)key;
             post["METHOD"] = "GETITEM";
             Map map;
-            using (Stream s = HttpRequestHandler.DoStreamPostRequest(m_InventoryURI, null, post, false, TimeoutMs))
+            using (Stream s = HttpClient.DoStreamPostRequest(m_InventoryURI, null, post, false, TimeoutMs))
             {
                 map = OpenSimResponse.Deserialize(s);
             }
@@ -54,7 +53,7 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
             post["ID"] = (string)key;
             post["METHOD"] = "GETITEM";
             Map map;
-            using (Stream s = HttpRequestHandler.DoStreamPostRequest(m_InventoryURI, null, post, false, TimeoutMs))
+            using (Stream s = HttpClient.DoStreamPostRequest(m_InventoryURI, null, post, false, TimeoutMs))
             {
                 map = OpenSimResponse.Deserialize(s);
             }
@@ -92,7 +91,7 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
             post["ID"] = (string)key;
             post["METHOD"] = "GETITEM";
             Map map;
-            using (Stream s = HttpRequestHandler.DoStreamPostRequest(m_InventoryURI, null, post, false, TimeoutMs))
+            using (Stream s = HttpClient.DoStreamPostRequest(m_InventoryURI, null, post, false, TimeoutMs))
             {
                 map = OpenSimResponse.Deserialize(s);
             }
@@ -121,7 +120,7 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
             post["ID"] = (string)key;
             post["METHOD"] = "GETITEM";
             Map map;
-            using (Stream s = HttpRequestHandler.DoStreamPostRequest(m_InventoryURI, null, post, false, TimeoutMs))
+            using (Stream s = HttpClient.DoStreamPostRequest(m_InventoryURI, null, post, false, TimeoutMs))
             {
                 map = OpenSimResponse.Deserialize(s);
             }
@@ -144,7 +143,7 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
                 post["ID"] = (string)key;
                 post["METHOD"] = "GETITEM";
                 Map map;
-                using(Stream s = HttpRequestHandler.DoStreamPostRequest(m_InventoryURI, null, post, false, TimeoutMs))
+                using(Stream s = HttpClient.DoStreamPostRequest(m_InventoryURI, null, post, false, TimeoutMs))
                 {
                     map = OpenSimResponse.Deserialize(s);
                 }
@@ -201,12 +200,12 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
 
                 try
                 {
-                    using(Stream s = HttpRequestHandler.DoStreamPostRequest(m_InventoryURI, null, post, false, TimeoutMs))
+                    using(Stream s = HttpClient.DoStreamPostRequest(m_InventoryURI, null, post, false, TimeoutMs))
                     {
                         map = OpenSimResponse.Deserialize(s);
                     }
                 }
-                catch (HttpRequestHandler.BadHttpResponseException)
+                catch (HttpClient.BadHttpResponseException)
                 {
                     m_isMultipleSupported = false;
                     return GetItemsBySingleRequests(principalID, itemids);
@@ -287,7 +286,7 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
             Dictionary<string, string> post = SerializeItem(item);
             post["METHOD"] = "ADDITEM";
             Map map;
-            using(Stream s = HttpRequestHandler.DoStreamPostRequest(m_InventoryURI, null, post, false, TimeoutMs))
+            using(Stream s = HttpClient.DoStreamPostRequest(m_InventoryURI, null, post, false, TimeoutMs))
             {
                 map = OpenSimResponse.Deserialize(s);
             }
@@ -302,7 +301,7 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
             Dictionary<string, string> post = SerializeItem(item);
             post["METHOD"] = "UPDATEITEM";
             Map map;
-            using(Stream s = HttpRequestHandler.DoStreamPostRequest(m_InventoryURI, null, post, false, TimeoutMs))
+            using(Stream s = HttpClient.DoStreamPostRequest(m_InventoryURI, null, post, false, TimeoutMs))
             {
                 map = OpenSimResponse.Deserialize(s);
             }
@@ -319,7 +318,7 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
             post["PRINCIPAL"] = (string)principalID;
             post["METHOD"] = "DELETEITEMS";
             Map map;
-            using(Stream s = HttpRequestHandler.DoStreamPostRequest(m_InventoryURI, null, post, false, TimeoutMs))
+            using(Stream s = HttpClient.DoStreamPostRequest(m_InventoryURI, null, post, false, TimeoutMs))
             {
                 map = OpenSimResponse.Deserialize(s);
             }
@@ -337,7 +336,7 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
             post["PRINCIPAL"] = (string)principalID;
             post["METHOD"] = "MOVEITEMS";
             Map map;
-            using(Stream s = HttpRequestHandler.DoStreamPostRequest(m_InventoryURI, null, post, false, TimeoutMs))
+            using(Stream s = HttpClient.DoStreamPostRequest(m_InventoryURI, null, post, false, TimeoutMs))
             {
                 map = OpenSimResponse.Deserialize(s);
             }

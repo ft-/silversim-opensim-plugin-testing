@@ -216,7 +216,7 @@ namespace SilverSim.OpenSimArchiver
             try
             {
                 using (Stream s = Uri.IsWellFormedUriString(filename, UriKind.Absolute) ?
-                    HttpRequestHandler.DoStreamGetRequest(filename, null, 20000) :
+                    HttpClient.DoStreamGetRequest(filename, null, 20000) :
                     new FileStream(filename, FileMode.Open, FileAccess.Read))
                 {
                     InventoryArchiver.IAR.Load(account.Principal, m_InventoryService, m_AssetService, m_AvatarNameServices, options, s, inventorypath, io);

@@ -73,7 +73,7 @@ namespace SilverSim.BackendConnectors.Robust.AvatarName
             post["UserID"] = (string)userID;
             post["METHOD"] = "getgriduserinfo";
             Map map;
-            using (Stream s = HttpRequestHandler.DoStreamPostRequest(m_GridUserURI, null, post, false, TimeoutMs))
+            using (Stream s = HttpClient.DoStreamPostRequest(m_GridUserURI, null, post, false, TimeoutMs))
             {
                 map = OpenSimResponse.Deserialize(s);
             }

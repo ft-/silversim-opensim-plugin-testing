@@ -68,7 +68,7 @@ namespace SilverSim.BackendConnectors.Robust.GridUser
             post["UserID"] = userID;
             post["METHOD"] = "getgriduserinfo";
             Map map;
-            using (Stream s = HttpRequestHandler.DoStreamPostRequest(m_GridUserURI, null, post, false, TimeoutMs))
+            using (Stream s = HttpClient.DoStreamPostRequest(m_GridUserURI, null, post, false, TimeoutMs))
             {
                 map = OpenSimResponse.Deserialize(s);
             }
@@ -145,7 +145,7 @@ namespace SilverSim.BackendConnectors.Robust.GridUser
             Dictionary<string, string> post = new Dictionary<string, string>();
             post["UserID"] = (string)userID;
             post["METHOD"] = "loggedin";
-            using(Stream s = HttpRequestHandler.DoStreamPostRequest(m_GridUserURI, null, post, false, TimeoutMs))
+            using(Stream s = HttpClient.DoStreamPostRequest(m_GridUserURI, null, post, false, TimeoutMs))
             {
                 CheckResult(OpenSimResponse.Deserialize(s));
             }
@@ -159,7 +159,7 @@ namespace SilverSim.BackendConnectors.Robust.GridUser
             post["Position"] = lastPosition.ToString();
             post["LookAt"] = lastLookAt.ToString();
             post["METHOD"] = "loggedout";
-            using (Stream s = HttpRequestHandler.DoStreamPostRequest(m_GridUserURI, null, post, false, TimeoutMs))
+            using (Stream s = HttpClient.DoStreamPostRequest(m_GridUserURI, null, post, false, TimeoutMs))
             {
                 CheckResult(OpenSimResponse.Deserialize(s));
             }
@@ -173,7 +173,7 @@ namespace SilverSim.BackendConnectors.Robust.GridUser
             post["Position"] = homePosition.ToString();
             post["LookAt"] = homeLookAt.ToString();
             post["METHOD"] = "sethome";
-            using (Stream s = HttpRequestHandler.DoStreamPostRequest(m_GridUserURI, null, post, false, TimeoutMs))
+            using (Stream s = HttpClient.DoStreamPostRequest(m_GridUserURI, null, post, false, TimeoutMs))
             {
                 CheckResult(OpenSimResponse.Deserialize(s));
             }
@@ -187,7 +187,7 @@ namespace SilverSim.BackendConnectors.Robust.GridUser
             post["Position"] = lastPosition.ToString();
             post["LookAt"] = lastLookAt.ToString();
             post["METHOD"] = "setposition";
-            using (Stream s = HttpRequestHandler.DoStreamPostRequest(m_GridUserURI, null, post, false, TimeoutMs))
+            using (Stream s = HttpClient.DoStreamPostRequest(m_GridUserURI, null, post, false, TimeoutMs))
             {
                 CheckResult(OpenSimResponse.Deserialize(s));
             }

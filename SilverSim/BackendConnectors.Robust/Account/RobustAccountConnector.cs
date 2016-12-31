@@ -47,7 +47,7 @@ namespace SilverSim.BackendConnectors.Robust.Account
             post["UserID"] = (string)accountID;
             post["SCOPEID"] = (string)scopeID;
             post["METHOD"] = "getaccount";
-            using (Stream s = HttpRequestHandler.DoStreamPostRequest(m_UserAccountURI, null, post, false, TimeoutMs))
+            using (Stream s = HttpClient.DoStreamPostRequest(m_UserAccountURI, null, post, false, TimeoutMs))
             {
                 Map map = OpenSimResponse.Deserialize(s);
                 Map resultmap = map["result"] as Map;
@@ -67,7 +67,7 @@ namespace SilverSim.BackendConnectors.Robust.Account
             post["UserID"] = (string)accountID;
             post["SCOPEID"] = (string)scopeID;
             post["METHOD"] = "getaccount";
-            using (Stream s = HttpRequestHandler.DoStreamPostRequest(m_UserAccountURI, null, post, false, TimeoutMs))
+            using (Stream s = HttpClient.DoStreamPostRequest(m_UserAccountURI, null, post, false, TimeoutMs))
             {
                 Map map = OpenSimResponse.Deserialize(s);
                 Map resultmap = map["result"] as Map;
@@ -94,7 +94,7 @@ namespace SilverSim.BackendConnectors.Robust.Account
             post["Email"] = email;
             post["SCOPEID"] = (string)scopeID;
             post["METHOD"] = "getaccount";
-            using (Stream s = HttpRequestHandler.DoStreamPostRequest(m_UserAccountURI, null, post, false, TimeoutMs))
+            using (Stream s = HttpClient.DoStreamPostRequest(m_UserAccountURI, null, post, false, TimeoutMs))
             {
                 Map map = OpenSimResponse.Deserialize(s);
                 if(!map.ContainsKey("result"))
@@ -119,7 +119,7 @@ namespace SilverSim.BackendConnectors.Robust.Account
             post["Email"] = email;
             post["SCOPEID"] = (string)scopeID;
             post["METHOD"] = "getaccount";
-            using (Stream s = HttpRequestHandler.DoStreamPostRequest(m_UserAccountURI, null, post, false, TimeoutMs))
+            using (Stream s = HttpClient.DoStreamPostRequest(m_UserAccountURI, null, post, false, TimeoutMs))
             {
                 Map map = OpenSimResponse.Deserialize(s);
                 if (!map.ContainsKey("result"))
@@ -151,7 +151,7 @@ namespace SilverSim.BackendConnectors.Robust.Account
             post["LastName"] = lastName;
             post["SCOPEID"] = (string)scopeID;
             post["METHOD"] = "getaccount";
-            using (Stream s = HttpRequestHandler.DoStreamPostRequest(m_UserAccountURI, null, post, false, TimeoutMs))
+            using (Stream s = HttpClient.DoStreamPostRequest(m_UserAccountURI, null, post, false, TimeoutMs))
             {
                 Map map = OpenSimResponse.Deserialize(s);
                 if(!map.ContainsKey("result"))
@@ -177,7 +177,7 @@ namespace SilverSim.BackendConnectors.Robust.Account
             post["LastName"] = lastName;
             post["SCOPEID"] = (string)scopeID;
             post["METHOD"] = "getaccount";
-            using (Stream s = HttpRequestHandler.DoStreamPostRequest(m_UserAccountURI, null, post, false, TimeoutMs))
+            using (Stream s = HttpClient.DoStreamPostRequest(m_UserAccountURI, null, post, false, TimeoutMs))
             {
                 Map map = OpenSimResponse.Deserialize(s);
                 if (!map.ContainsKey("result"))
@@ -214,7 +214,7 @@ namespace SilverSim.BackendConnectors.Robust.Account
             post["METHOD"] = "getaccounts";
             Map map;
             
-            using(Stream s = HttpRequestHandler.DoStreamPostRequest(m_UserAccountURI, null, post, false, TimeoutMs))
+            using(Stream s = HttpClient.DoStreamPostRequest(m_UserAccountURI, null, post, false, TimeoutMs))
             {
                 map = OpenSimResponse.Deserialize(s);
             }

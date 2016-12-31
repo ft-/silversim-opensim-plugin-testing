@@ -31,7 +31,7 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
             post["ID"] = (string)key;
             post["METHOD"] = "GETFOLDER";
             Map map;
-            using (Stream s = HttpRequestHandler.DoStreamPostRequest(m_InventoryURI, null, post, false, TimeoutMs))
+            using (Stream s = HttpClient.DoStreamPostRequest(m_InventoryURI, null, post, false, TimeoutMs))
             {
                 map = OpenSimResponse.Deserialize(s);
             }
@@ -58,7 +58,7 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
             post["ID"] = (string)key;
             post["METHOD"] = "GETFOLDER";
             Map map;
-            using (Stream s = HttpRequestHandler.DoStreamPostRequest(m_InventoryURI, null, post, false, TimeoutMs))
+            using (Stream s = HttpClient.DoStreamPostRequest(m_InventoryURI, null, post, false, TimeoutMs))
             {
                 map = OpenSimResponse.Deserialize(s);
             }
@@ -97,7 +97,7 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
             post["ID"] = (string)key;
             post["METHOD"] = "GETFOLDER";
             Map map;
-            using (Stream s = HttpRequestHandler.DoStreamPostRequest(m_InventoryURI, null, post, false, TimeoutMs))
+            using (Stream s = HttpClient.DoStreamPostRequest(m_InventoryURI, null, post, false, TimeoutMs))
             {
                 map = OpenSimResponse.Deserialize(s);
             }
@@ -125,7 +125,7 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
             post["ID"] = (string)key;
             post["METHOD"] = "GETFOLDER";
             Map map;
-            using (Stream s = HttpRequestHandler.DoStreamPostRequest(m_InventoryURI, null, post, false, TimeoutMs))
+            using (Stream s = HttpClient.DoStreamPostRequest(m_InventoryURI, null, post, false, TimeoutMs))
             {
                 map = OpenSimResponse.Deserialize(s);
             }
@@ -165,7 +165,7 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
                 post["METHOD"] = "GETFOLDERFORTYPE";
             }
             Map map;
-            using (Stream s = HttpRequestHandler.DoStreamPostRequest(m_InventoryURI, null, post, false, TimeoutMs))
+            using (Stream s = HttpClient.DoStreamPostRequest(m_InventoryURI, null, post, false, TimeoutMs))
             {
                 map = OpenSimResponse.Deserialize(s);
             }
@@ -195,7 +195,7 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
                 post["METHOD"] = "GETFOLDERFORTYPE";
             }
             Map map;
-            using (Stream s = HttpRequestHandler.DoStreamPostRequest(m_InventoryURI, null, post, false, TimeoutMs))
+            using (Stream s = HttpClient.DoStreamPostRequest(m_InventoryURI, null, post, false, TimeoutMs))
             {
                 map = OpenSimResponse.Deserialize(s);
             }
@@ -224,7 +224,7 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
             post["FOLDER"] = (string)key;
             post["METHOD"] = "GETFOLDERCONTENT";
             Map map;
-            using(Stream s = HttpRequestHandler.DoStreamPostRequest(m_InventoryURI, null, post, false, TimeoutMs))
+            using(Stream s = HttpClient.DoStreamPostRequest(m_InventoryURI, null, post, false, TimeoutMs))
             {
                 map = OpenSimResponse.Deserialize(s);
             }
@@ -254,7 +254,7 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
             post["FOLDER"] = (string)key;
             post["METHOD"] = "GETFOLDERITEMS";
             Map map;
-            using(Stream s = HttpRequestHandler.DoStreamPostRequest(m_InventoryURI, null, post, false, TimeoutMs))
+            using(Stream s = HttpClient.DoStreamPostRequest(m_InventoryURI, null, post, false, TimeoutMs))
             {
                 map = OpenSimResponse.Deserialize(s);
             }
@@ -296,7 +296,7 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
             Dictionary<string, string> post = SerializeFolder(folder);
             post["METHOD"] = "ADDFOLDER";
             Map map;
-            using(Stream s = HttpRequestHandler.DoStreamPostRequest(m_InventoryURI, null, post, false, TimeoutMs))
+            using(Stream s = HttpClient.DoStreamPostRequest(m_InventoryURI, null, post, false, TimeoutMs))
             {
                 map = OpenSimResponse.Deserialize(s);
             }
@@ -311,7 +311,7 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
             Dictionary<string, string> post = SerializeFolder(folder);
             post["METHOD"] = "UPDATEFOLDER";
             Map map;
-            using(Stream s = HttpRequestHandler.DoStreamPostRequest(m_InventoryURI, null, post, false, TimeoutMs))
+            using(Stream s = HttpClient.DoStreamPostRequest(m_InventoryURI, null, post, false, TimeoutMs))
             {
                 map = OpenSimResponse.Deserialize(s);
             }
@@ -329,7 +329,7 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
             post["PRINCIPAL"] = (string)principalID;
             post["METHOD"] = "MOVEFOLDER";
             Map map;
-            using(Stream s = HttpRequestHandler.DoStreamPostRequest(m_InventoryURI, null, post, false, TimeoutMs))
+            using(Stream s = HttpClient.DoStreamPostRequest(m_InventoryURI, null, post, false, TimeoutMs))
             {
                 map = OpenSimResponse.Deserialize(s);
             }
@@ -355,7 +355,7 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
             post["PRINCIPAL"] = (string)principalID;
             post["METHOD"] = "DELETEFOLDERS";
             Map map;
-            using(Stream s = HttpRequestHandler.DoStreamPostRequest(m_InventoryURI, null, post, false, TimeoutMs))
+            using(Stream s = HttpClient.DoStreamPostRequest(m_InventoryURI, null, post, false, TimeoutMs))
             {
                 map = OpenSimResponse.Deserialize(s);
             }
@@ -371,7 +371,7 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
             post["ID"] = (string)folderID;
             post["METHOD"] = "PURGEFOLDER";
             Map map;
-            using(Stream s = HttpRequestHandler.DoStreamPostRequest(m_InventoryURI, null, post, false, TimeoutMs))
+            using(Stream s = HttpClient.DoStreamPostRequest(m_InventoryURI, null, post, false, TimeoutMs))
             {
                 map = OpenSimResponse.Deserialize(s);
             }
@@ -388,7 +388,7 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
             post["PRINCIPAL"] = (string)principalID;
             post["METHOD"] = "PURGEFOLDER";
             Map map;
-            using(Stream s = HttpRequestHandler.DoStreamPostRequest(m_InventoryURI, null, post, false, TimeoutMs))
+            using(Stream s = HttpClient.DoStreamPostRequest(m_InventoryURI, null, post, false, TimeoutMs))
             {
                 map = OpenSimResponse.Deserialize(s);
             }
