@@ -69,6 +69,14 @@ namespace SilverSim.BackendHandlers.Robust.UserAccounts
             m_HttpServer = loader.HttpServer;
             m_HttpServer.UriHandlers.Add("/accounts", UserAccountHandler);
             m_UserAccountService = loader.GetService<UserAccountServiceInterface>(m_UserAccountServiceName);
+            try
+            {
+                loader.HttpsServer.UriHandlers.Add("/accounts", UserAccountHandler);
+            }
+            catch
+            {
+                /* intentionally left empty */
+            }
         }
 
         public void UserAccountHandler(HttpRequest req)

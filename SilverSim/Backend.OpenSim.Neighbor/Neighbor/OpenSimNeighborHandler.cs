@@ -36,6 +36,14 @@ namespace SilverSim.Backend.OpenSim.Neighbor.Neighbor
             m_Log.Info("Initializing handler for /region");
             m_HttpServer = loader.HttpServer;
             m_HttpServer.StartsWithUriHandlers.Add("/region", RegionPostHandler);
+            try
+            {
+                loader.HttpsServer.StartsWithUriHandlers.Add("/region", RegionPostHandler);
+            }
+            catch
+            {
+                /* intentionally left empty */
+            }
         }
 
         [SuppressMessage("Gendarme.Rules.BadPractice", "PreferTryParseRule")]

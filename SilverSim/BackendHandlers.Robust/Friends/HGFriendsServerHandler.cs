@@ -49,6 +49,14 @@ namespace SilverSim.BackendHandlers.Robust.Friends
             m_FriendsService = loader.GetService<FriendsServiceInterface>(m_FriendsServiceName);
             m_PresenceService = loader.GetService<PresenceServiceInterface>(m_PresenceServiceName);
             m_HttpServer.UriHandlers.Add("/hgfriends", HGFriendsHandler);
+            try
+            {
+                loader.HttpsServer.UriHandlers.Add("/hgfriends", HGFriendsHandler);
+            }
+            catch
+            {
+                /* intentionally left empty */
+            }
         }
 
         string GetSecret(string friendId)

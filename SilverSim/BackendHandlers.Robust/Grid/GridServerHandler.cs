@@ -40,6 +40,14 @@ namespace SilverSim.BackendHandlers.Robust.Grid
         {
             m_GridService = loader.GetService<GridServiceInterface>(m_GridServiceName);
             loader.HttpServer.UriHandlers.Add("/grid", GridAccessHandler);
+            try
+            {
+                loader.HttpsServer.UriHandlers.Add("/grid", GridAccessHandler);
+            }
+            catch
+            {
+                /* intentionally left empty */
+            }
         }
 
         [ServerParam("GridName")]

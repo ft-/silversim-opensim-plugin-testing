@@ -198,6 +198,14 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
             m_AuthorizationServices = loader.GetServicesByValue<AuthorizationServiceInterface>();
             m_HttpServer = loader.HttpServer;
             m_HttpServer.StartsWithUriHandlers.Add(m_AgentBaseURL, AgentPostHandler);
+            try
+            {
+                loader.HttpsServer.StartsWithUriHandlers.Add(m_AgentBaseURL, AgentPostHandler);
+            }
+            catch
+            {
+                /* intentionally left empty */
+            }
             foreach(IAssetServicePlugin plugin in loader.GetServicesByValue<IAssetServicePlugin>())
             {
                 m_AssetServicePlugins.Add(plugin.Name, plugin);

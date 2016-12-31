@@ -49,6 +49,14 @@ namespace SilverSim.BackendHandlers.Robust.Friends
             m_HttpServer = loader.HttpServer;
 
             m_HttpServer.UriHandlers.Add("/friends", FriendsHandler);
+            try
+            {
+                loader.HttpsServer.UriHandlers.Add("/friends", FriendsHandler);
+            }
+            catch
+            {
+                /* intentionally left empty */
+            }
         }
 
         void FriendsHandler(HttpRequest httpreq)

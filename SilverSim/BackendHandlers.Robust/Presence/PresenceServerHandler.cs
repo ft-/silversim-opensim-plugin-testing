@@ -38,6 +38,14 @@ namespace SilverSim.BackendHandlers.Robust.Presence
             m_TravelingDataService = loader.GetService<TravelingDataServiceInterface>(m_TravelingDataServiceName);
             m_HttpServer = loader.HttpServer;
             m_HttpServer.UriHandlers.Add("/presence", PresenceHandler);
+            try
+            {
+                loader.HttpsServer.UriHandlers.Add("/presence", PresenceHandler);
+            }
+            catch
+            {
+                /* intentionally left empty */
+            }
         }
 
         void FailureResult(HttpRequest req)
