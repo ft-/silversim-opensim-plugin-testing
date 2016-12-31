@@ -94,15 +94,13 @@ namespace SilverSim.BackendHandlers.Robust.Grid
             {
                 UUID redirectid;
                 string message = string.Empty;
-                if(m_RegionRedirects.TryGetValue(regionid, out redirectid))
+                if(m_RegionRedirects.TryGetValue(regionid, out redirectid) &&
+                    m_GridService.ContainsKey(redirectid))
                 {
-                    if(m_GridService.ContainsKey(redirectid))
+                    regionid = redirectid;
+                    if(!m_RegionRedirectMessages.TryGetValue(regionid, out message))
                     {
-                        regionid = redirectid;
-                        if(!m_RegionRedirectMessages.TryGetValue(regionid, out message))
-                        {
-                            message = string.Empty;
-                        }
+                        message = string.Empty;
                     }
                 }
                 if (m_GridService.TryGetValue(UUID.Zero, regionid, out ri))
