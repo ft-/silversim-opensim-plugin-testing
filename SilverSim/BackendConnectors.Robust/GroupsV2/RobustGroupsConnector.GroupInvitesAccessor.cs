@@ -27,6 +27,12 @@ namespace SilverSim.BackendConnectors.Robust.GroupsV2
                 m_GetGroupsAgentID = getGroupsAgentID;
             }
 
+            public bool ContainsKey(UUI requestingAgent, UUID groupInviteID)
+            {
+                GroupInvite inv;
+                return TryGetValue(requestingAgent, groupInviteID, out inv);
+            }
+
             public bool TryGetValue(UUI requestingAgent, UUID groupInviteID, out GroupInvite gi)
             {
                 Dictionary<string, string> post = new Dictionary<string, string>();

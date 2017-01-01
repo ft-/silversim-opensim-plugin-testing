@@ -17,6 +17,12 @@ namespace SilverSim.BackendConnectors.Flotsam.Groups
             {
             }
 
+            public bool ContainsKey(UUI requestingAgent, UUID groupInviteID)
+            {
+                GroupInvite inv;
+                return TryGetValue(requestingAgent, groupInviteID, out inv);
+            }
+
             public bool TryGetValue(UUI requestingAgent, UUID groupInviteID, out GroupInvite inv)
             {
                 Map m = new Map();
