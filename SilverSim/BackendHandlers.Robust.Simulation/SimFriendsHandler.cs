@@ -64,7 +64,7 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
             }
             catch
             {
-                httpreq.ErrorResponse(HttpStatusCode.BadRequest, "Bad Request");
+                httpreq.ErrorResponse(HttpStatusCode.BadRequest);
                 return;
             }
 
@@ -108,7 +108,7 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
             }
             catch
             {
-                httpreq.ErrorResponse(HttpStatusCode.InternalServerError, "Internal Server Error");
+                httpreq.ErrorResponse(HttpStatusCode.InternalServerError);
                 return;
             }
 

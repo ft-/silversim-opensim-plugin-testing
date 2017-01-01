@@ -79,7 +79,7 @@ namespace SilverSim.BackendHandlers.Robust.OfflineIM
 
             if (httpreq.Method != "POST")
             {
-                httpreq.ErrorResponse(HttpStatusCode.MethodNotAllowed, "Method Not Allowed");
+                httpreq.ErrorResponse(HttpStatusCode.MethodNotAllowed);
                 return;
             }
 
@@ -90,7 +90,7 @@ namespace SilverSim.BackendHandlers.Robust.OfflineIM
             }
             catch
             {
-                httpreq.ErrorResponse(HttpStatusCode.BadRequest, "Bad Request");
+                httpreq.ErrorResponse(HttpStatusCode.BadRequest);
                 return;
             }
 

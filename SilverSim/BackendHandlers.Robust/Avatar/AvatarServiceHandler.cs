@@ -96,7 +96,7 @@ namespace SilverSim.BackendHandlers.Robust.Avatar
 
             if (req.Method != "POST")
             {
-                req.ErrorResponse(HttpStatusCode.MethodNotAllowed, "Method Not Allowed");
+                req.ErrorResponse(HttpStatusCode.MethodNotAllowed);
                 return;
             }
 
@@ -107,13 +107,13 @@ namespace SilverSim.BackendHandlers.Robust.Avatar
             }
             catch
             {
-                req.ErrorResponse(HttpStatusCode.BadRequest, "Bad Request");
+                req.ErrorResponse(HttpStatusCode.BadRequest);
                 return;
             }
 
             if(!data.ContainsKey("METHOD"))
             {
-                req.ErrorResponse(HttpStatusCode.BadRequest, "Bad Request");
+                req.ErrorResponse(HttpStatusCode.BadRequest);
                 return;
             }
 
@@ -142,7 +142,7 @@ namespace SilverSim.BackendHandlers.Robust.Avatar
                         break;
 
                     default:
-                        req.ErrorResponse(HttpStatusCode.BadRequest, "Bad Request");
+                        req.ErrorResponse(HttpStatusCode.BadRequest);
                         break;
                 }
             }

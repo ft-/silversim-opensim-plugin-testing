@@ -433,7 +433,7 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
             }
             else
             {
-                req.ErrorResponse(HttpStatusCode.MethodNotAllowed, "Method not allowed");
+                req.ErrorResponse(HttpStatusCode.MethodNotAllowed);
             }
         }
 
@@ -469,7 +469,7 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
                 else
                 {
                     m_Log.InfoFormat("Invalid content for agent message {0}: {1}", req.RawUrl, req.ContentType);
-                    req.ErrorResponse(HttpStatusCode.BadRequest, "Invalid content for agent message");
+                    req.ErrorResponse(HttpStatusCode.UnsupportedMediaType);
                     return;
                 }
             }
@@ -494,7 +494,7 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
             if (!m_Scenes.TryGetValue(agentPost.Destination.ID, out scene))
             {
                 m_Log.InfoFormat("No destination for agent {0}", req.RawUrl);
-                req.ErrorResponse(HttpStatusCode.NotFound, "Not Found");
+                req.ErrorResponse(HttpStatusCode.NotFound);
                 return;
             }
 
@@ -505,7 +505,7 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
             catch
             {
                 m_Log.InfoFormat("No destination for agent {0}", req.RawUrl);
-                req.ErrorResponse(HttpStatusCode.NotFound, "Not Found");
+                req.ErrorResponse(HttpStatusCode.NotFound);
                 return;
             }
 
@@ -840,7 +840,7 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
                 else
                 {
                     m_Log.InfoFormat("Invalid content for agent message {0}: {1}", req.RawUrl, req.ContentType);
-                    req.ErrorResponse(HttpStatusCode.UnsupportedMediaType, "Invalid content for agent message");
+                    req.ErrorResponse(HttpStatusCode.UnsupportedMediaType);
                     return;
                 }
             }
@@ -1373,7 +1373,7 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
             }
             catch
             {
-                req.ErrorResponse(HttpStatusCode.NotFound, "Not Found");
+                req.ErrorResponse(HttpStatusCode.NotFound);
                 return;
             }
 
@@ -1384,7 +1384,7 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
             }
             catch
             {
-                req.ErrorResponse(HttpStatusCode.NotFound, "Not Found");
+                req.ErrorResponse(HttpStatusCode.NotFound);
                 return;
             }
 
@@ -1412,7 +1412,7 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
                 }
                 else
                 {
-                    req.ErrorResponse(HttpStatusCode.Forbidden, "Forbidden");
+                    req.ErrorResponse(HttpStatusCode.Forbidden);
                     return;
                 }
             }
@@ -1451,7 +1451,7 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
             }
             catch
             {
-                req.ErrorResponse(HttpStatusCode.NotFound, "Not Found");
+                req.ErrorResponse(HttpStatusCode.NotFound);
                 return;
             }
 
@@ -1493,12 +1493,12 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
             string[] myVersionSplit = myVersion.Split(new char[] { '.', '/' });
             if (myVersionSplit.Length < 3)
             {
-                req.ErrorResponse(HttpStatusCode.BadRequest, "Bad Request");
+                req.ErrorResponse(HttpStatusCode.BadRequest);
                 return;
             }
             if (myVersionSplit[0] != "SIMULATION")
             {
-                req.ErrorResponse(HttpStatusCode.BadRequest, "Bad Request");
+                req.ErrorResponse(HttpStatusCode.BadRequest);
                 return;
             }
             int versionMajor;

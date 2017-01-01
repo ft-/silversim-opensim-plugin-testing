@@ -19,6 +19,7 @@
   <Reference name="SilverSim.Http" localCopy="false"/>
   <Reference name="SilverSim.ServiceInterfaces" localCopy="false"/>
   <Reference name="SilverSim.Main.Common" localCopy="false"/>
+  <Reference name="SilverSim.Scene.Management" localCopy="false"/>
   <Reference name="Nini" localCopy="false"/>
   <Reference name="SilverSim.Threading" localCopy="false"/>
   <Files>

@@ -69,7 +69,7 @@ namespace SilverSim.BackendHandlers.Robust.Friends
 
             if (httpreq.Method != "POST")
             {
-                httpreq.ErrorResponse(HttpStatusCode.MethodNotAllowed, "Method Not Allowed");
+                httpreq.ErrorResponse(HttpStatusCode.MethodNotAllowed);
                 return;
             }
 
@@ -80,7 +80,7 @@ namespace SilverSim.BackendHandlers.Robust.Friends
             }
             catch
             {
-                httpreq.ErrorResponse(HttpStatusCode.BadRequest, "Bad Request");
+                httpreq.ErrorResponse(HttpStatusCode.BadRequest);
                 return;
             }
 

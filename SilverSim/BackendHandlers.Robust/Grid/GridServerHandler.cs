@@ -164,9 +164,15 @@ namespace SilverSim.BackendHandlers.Robust.Grid
 
         void GridAccessHandler(HttpRequest req)
         {
-            if(req.Method != "POST")
+            if (req.ContainsHeader("X-SecondLife-Shard"))
             {
-                req.ErrorResponse(HttpStatusCode.MethodNotAllowed, "Method not allowed");
+                req.ErrorResponse(HttpStatusCode.BadRequest, "Request source not allowed");
+                return;
+            }
+
+            if (req.Method != "POST")
+            {
+                req.ErrorResponse(HttpStatusCode.MethodNotAllowed);
                 return;
             }
 

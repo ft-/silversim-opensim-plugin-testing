@@ -84,18 +84,18 @@ namespace SilverSim.Backend.OpenSim.Neighbor.Neighbor
 
             if(req.Method == "DELETE" || req.Method == "PUT")
             {
-                req.ErrorResponse(HttpStatusCode.MethodNotAllowed, "Method not allowed");
+                req.ErrorResponse(HttpStatusCode.MethodNotAllowed);
                 return;
             }
             if (req.Method != "POST")
             {
-                req.ErrorResponse(HttpStatusCode.MethodNotAllowed, "Method not allowed");
+                req.ErrorResponse(HttpStatusCode.MethodNotAllowed);
                 return;
             }
 
             if (req.ContentType != "application/json")
             {
-                req.ErrorResponse(HttpStatusCode.UnsupportedMediaType, "Unsupported media type");
+                req.ErrorResponse(HttpStatusCode.UnsupportedMediaType);
                 return;
             }
 
@@ -106,19 +106,19 @@ namespace SilverSim.Backend.OpenSim.Neighbor.Neighbor
             }
             catch
             {
-                req.ErrorResponse(HttpStatusCode.BadRequest, "Bad Request");
+                req.ErrorResponse(HttpStatusCode.BadRequest);
                 return;
             }
 
             if (null == m)
             {
-                req.ErrorResponse(HttpStatusCode.BadRequest, "Bad Request");
+                req.ErrorResponse(HttpStatusCode.BadRequest);
                 return;
             }
 
             if (!m.ContainsKey("destination_handle"))
             {
-                req.ErrorResponse(HttpStatusCode.BadRequest, "Bad Request");
+                req.ErrorResponse(HttpStatusCode.BadRequest);
                 return;
             }
 
@@ -146,7 +146,7 @@ namespace SilverSim.Backend.OpenSim.Neighbor.Neighbor
             }
             catch
             {
-                req.ErrorResponse(HttpStatusCode.BadRequest, "Bad Request");
+                req.ErrorResponse(HttpStatusCode.BadRequest);
                 return;
             }
 

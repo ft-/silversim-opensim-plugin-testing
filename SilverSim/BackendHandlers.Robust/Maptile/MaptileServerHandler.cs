@@ -67,7 +67,7 @@ namespace SilverSim.BackendHandlers.Robust.Maptile
                     break;
 
                 default:
-                    req.ErrorResponse(HttpStatusCode.MethodNotAllowed, "Method Not Allowed");
+                    req.ErrorResponse(HttpStatusCode.MethodNotAllowed);
                     break;
             }
         }
@@ -77,7 +77,7 @@ namespace SilverSim.BackendHandlers.Robust.Maptile
             Match m = m_GetRegex.Match(req.RawUrl);
             if(m == null)
             {
-                req.ErrorResponse(HttpStatusCode.NotFound, "Not found");
+                req.ErrorResponse(HttpStatusCode.NotFound);
                 return;
             }
 
@@ -88,7 +88,7 @@ namespace SilverSim.BackendHandlers.Robust.Maptile
                 uint.TryParse(m.Groups[2].Value, out x) ||
                 uint.TryParse(m.Groups[3].Value, out y))
             {
-                req.ErrorResponse(HttpStatusCode.NotFound, "Not found");
+                req.ErrorResponse(HttpStatusCode.NotFound);
                 return;
             }
 
@@ -106,7 +106,7 @@ namespace SilverSim.BackendHandlers.Robust.Maptile
             }
             else
             {
-                req.ErrorResponse(HttpStatusCode.NotFound, "Not found");
+                req.ErrorResponse(HttpStatusCode.NotFound);
                 return;
             }
         }
@@ -120,7 +120,7 @@ namespace SilverSim.BackendHandlers.Robust.Maptile
             }
             catch
             {
-                req.ErrorResponse(HttpStatusCode.BadRequest, "Bad Request");
+                req.ErrorResponse(HttpStatusCode.BadRequest);
                 return;
             }
 
@@ -140,7 +140,7 @@ namespace SilverSim.BackendHandlers.Robust.Maptile
             }
             catch
             {
-                req.ErrorResponse(HttpStatusCode.BadRequest, "Bad Request");
+                req.ErrorResponse(HttpStatusCode.BadRequest);
                 return;
             }
 
@@ -148,7 +148,7 @@ namespace SilverSim.BackendHandlers.Robust.Maptile
             if (data.ContainsKey("SCOPEID") &&
                 !UUID.TryParse(data["SCOPEID"].ToString(), out scopeid))
             {
-                req.ErrorResponse(HttpStatusCode.BadRequest, "Bad Request");
+                req.ErrorResponse(HttpStatusCode.BadRequest);
                 return;
             }
 

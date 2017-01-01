@@ -67,7 +67,7 @@ namespace SilverSim.BackendHandlers.Robust.AuthInfo
 
             if (httpreq.Method != "POST")
             {
-                httpreq.ErrorResponse(HttpStatusCode.MethodNotAllowed, "Method Not Allowed");
+                httpreq.ErrorResponse(HttpStatusCode.MethodNotAllowed);
                 return;
             }
 
@@ -78,13 +78,13 @@ namespace SilverSim.BackendHandlers.Robust.AuthInfo
             }
             catch
             {
-                httpreq.ErrorResponse(HttpStatusCode.BadRequest, "Bad Request");
+                httpreq.ErrorResponse(HttpStatusCode.BadRequest);
                 return;
             }
 
             if (!data.ContainsKey("METHOD") || !data.ContainsKey("PRINCIPAL"))
             {
-                httpreq.ErrorResponse(HttpStatusCode.BadRequest, "Bad Request");
+                httpreq.ErrorResponse(HttpStatusCode.BadRequest);
                 return;
             }
 
@@ -103,7 +103,7 @@ namespace SilverSim.BackendHandlers.Robust.AuthInfo
                         }
                         else
                         {
-                            httpreq.ErrorResponse(HttpStatusCode.BadRequest, "Bad Request");
+                            httpreq.ErrorResponse(HttpStatusCode.BadRequest);
                         }
                         break;
 
@@ -122,7 +122,7 @@ namespace SilverSim.BackendHandlers.Robust.AuthInfo
                         }
                         else
                         {
-                            httpreq.ErrorResponse(HttpStatusCode.BadRequest, "Bad Request");
+                            httpreq.ErrorResponse(HttpStatusCode.BadRequest);
                         }
                         break;
 
@@ -133,12 +133,12 @@ namespace SilverSim.BackendHandlers.Robust.AuthInfo
                         }
                         else
                         {
-                            httpreq.ErrorResponse(HttpStatusCode.BadRequest, "Bad Request");
+                            httpreq.ErrorResponse(HttpStatusCode.BadRequest);
                         }
                         break;
 
                     default:
-                        httpreq.ErrorResponse(HttpStatusCode.BadRequest, "Bad Request");
+                        httpreq.ErrorResponse(HttpStatusCode.BadRequest);
                         break;
                 }
             }
@@ -190,13 +190,13 @@ namespace SilverSim.BackendHandlers.Robust.AuthInfo
             UUID id;
             if(!UUID.TryParse(data["PRINCIPAL"].ToString(), out id))
             {
-                req.ErrorResponse(HttpStatusCode.BadRequest, "Bad Request");
+                req.ErrorResponse(HttpStatusCode.BadRequest);
                 return;
             }
             object password;
             if (!data.TryGetValue("PASSWORD", out password))
             {
-                req.ErrorResponse(HttpStatusCode.BadRequest, "Bad Request");
+                req.ErrorResponse(HttpStatusCode.BadRequest);
                 return;
             }
 
@@ -221,12 +221,12 @@ namespace SilverSim.BackendHandlers.Robust.AuthInfo
             object password;
             if(!data.TryGetValue("PASSWORD", out password))
             {
-                req.ErrorResponse(HttpStatusCode.BadRequest, "Bad Request");
+                req.ErrorResponse(HttpStatusCode.BadRequest);
                 return;
             }
             if (!UUID.TryParse(data["PRINCIPAL"].ToString(), out id))
             {
-                req.ErrorResponse(HttpStatusCode.BadRequest, "Bad Request");
+                req.ErrorResponse(HttpStatusCode.BadRequest);
                 return;
             }
 
@@ -239,18 +239,18 @@ namespace SilverSim.BackendHandlers.Robust.AuthInfo
             UUID id;
             if (!UUID.TryParse(data["PRINCIPAL"].ToString(), out id))
             {
-                req.ErrorResponse(HttpStatusCode.BadRequest, "Bad Request");
+                req.ErrorResponse(HttpStatusCode.BadRequest);
                 return;
             }
             if (!data.ContainsKey("TOKEN"))
             {
-                req.ErrorResponse(HttpStatusCode.BadRequest, "Bad Request");
+                req.ErrorResponse(HttpStatusCode.BadRequest);
                 return;
             }
             UUID token;
             if (!UUID.TryParse(data["TOKEN"].ToString(), out token))
             {
-                req.ErrorResponse(HttpStatusCode.BadRequest, "Bad Request");
+                req.ErrorResponse(HttpStatusCode.BadRequest);
                 return;
             }
             int lifetime = 30;
@@ -273,18 +273,18 @@ namespace SilverSim.BackendHandlers.Robust.AuthInfo
             UUID id;
             if (!UUID.TryParse(data["PRINCIPAL"].ToString(), out id))
             {
-                req.ErrorResponse(HttpStatusCode.BadRequest, "Bad Request");
+                req.ErrorResponse(HttpStatusCode.BadRequest);
                 return;
             }
             if (!data.ContainsKey("TOKEN"))
             {
-                req.ErrorResponse(HttpStatusCode.BadRequest, "Bad Request");
+                req.ErrorResponse(HttpStatusCode.BadRequest);
                 return;
             }
             UUID token;
             if (!UUID.TryParse(data["TOKEN"].ToString(), out token))
             {
-                req.ErrorResponse(HttpStatusCode.BadRequest, "Bad Request");
+                req.ErrorResponse(HttpStatusCode.BadRequest);
                 return;
             }
 
@@ -298,7 +298,7 @@ namespace SilverSim.BackendHandlers.Robust.AuthInfo
             UUID id;
             if (!UUID.TryParse(data["PRINCIPAL"].ToString(), out id))
             {
-                req.ErrorResponse(HttpStatusCode.BadRequest, "Bad Request");
+                req.ErrorResponse(HttpStatusCode.BadRequest);
                 return;
             }
 
@@ -328,7 +328,7 @@ namespace SilverSim.BackendHandlers.Robust.AuthInfo
             UUID id;
             if (!UUID.TryParse(data["PRINCIPAL"].ToString(), out id))
             {
-                req.ErrorResponse(HttpStatusCode.BadRequest, "Bad Request");
+                req.ErrorResponse(HttpStatusCode.BadRequest);
                 return;
             }
 

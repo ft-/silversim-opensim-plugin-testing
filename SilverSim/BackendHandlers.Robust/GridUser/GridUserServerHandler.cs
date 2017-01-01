@@ -73,7 +73,7 @@ namespace SilverSim.BackendHandlers.Robust.GridUser
                     break;
 
                 default:
-                    req.ErrorResponse(HttpStatusCode.MethodNotAllowed, "Method Not Allowed");
+                    req.ErrorResponse(HttpStatusCode.MethodNotAllowed);
                     break;
             }
         }
@@ -90,7 +90,7 @@ namespace SilverSim.BackendHandlers.Robust.GridUser
             }
             catch
             {
-                req.ErrorResponse(HttpStatusCode.BadRequest, "Bad Request");
+                req.ErrorResponse(HttpStatusCode.BadRequest);
                 return;
             }
 

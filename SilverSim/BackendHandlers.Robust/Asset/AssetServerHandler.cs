@@ -91,7 +91,7 @@ namespace SilverSim.BackendHandlers.Robust.Asset
                     break;
 
                 default:
-                    req.ErrorResponse(HttpStatusCode.MethodNotAllowed, "Method Not Allowed");
+                    req.ErrorResponse(HttpStatusCode.MethodNotAllowed);
                     break;
             }
         }
@@ -105,7 +105,7 @@ namespace SilverSim.BackendHandlers.Robust.Asset
             string[] parts = uri.Split('/');
             if (parts.Length < 2)
             {
-                req.ErrorResponse(HttpStatusCode.NotFound, "Not Found");
+                req.ErrorResponse(HttpStatusCode.NotFound);
                 return;
             }
 
@@ -116,13 +116,13 @@ namespace SilverSim.BackendHandlers.Robust.Asset
             }
             catch
             {
-                req.ErrorResponse(HttpStatusCode.NotFound, "Not Found");
+                req.ErrorResponse(HttpStatusCode.NotFound);
                 return;
             }
 
             if(!m_EnableGet)
             {
-                req.ErrorResponse(HttpStatusCode.NotFound, "Not Found");
+                req.ErrorResponse(HttpStatusCode.NotFound);
                 return;
             }
 
@@ -147,7 +147,7 @@ namespace SilverSim.BackendHandlers.Robust.Asset
                         }
                         catch
                         {
-                            req.ErrorResponse(HttpStatusCode.NotFound, "Not Found");
+                            req.ErrorResponse(HttpStatusCode.NotFound);
                             return;
                         }
                     }
@@ -248,7 +248,7 @@ namespace SilverSim.BackendHandlers.Robust.Asset
                         }
                         catch
                         {
-                            req.ErrorResponse(HttpStatusCode.NotFound, "Not Found");
+                            req.ErrorResponse(HttpStatusCode.NotFound);
                             return;
                         }
                     }
@@ -327,7 +327,7 @@ namespace SilverSim.BackendHandlers.Robust.Asset
                         }
                         catch
                         {
-                            req.ErrorResponse(HttpStatusCode.NotFound, "Not Found");
+                            req.ErrorResponse(HttpStatusCode.NotFound);
                             return;
                         }
                     }
@@ -357,7 +357,7 @@ namespace SilverSim.BackendHandlers.Robust.Asset
             }
             else
             {
-                req.ErrorResponse(HttpStatusCode.NotFound, "Not Found");
+                req.ErrorResponse(HttpStatusCode.NotFound);
             }
         }
 
@@ -383,7 +383,7 @@ namespace SilverSim.BackendHandlers.Robust.Asset
             }
             catch
             {
-                req.ErrorResponse(HttpStatusCode.BadRequest, "Bad Request");
+                req.ErrorResponse(HttpStatusCode.BadRequest);
                 return;
             }
 
@@ -405,7 +405,7 @@ namespace SilverSim.BackendHandlers.Robust.Asset
                 }
                 catch
                 {
-                    req.ErrorResponse(HttpStatusCode.InternalServerError, "Internal Server Error");
+                    req.ErrorResponse(HttpStatusCode.InternalServerError);
                 }
             }
 
@@ -519,7 +519,7 @@ namespace SilverSim.BackendHandlers.Robust.Asset
         {
             if (req.Method != "POST")
             {
-                req.ErrorResponse(HttpStatusCode.MethodNotAllowed, "Method not allowed");
+                req.ErrorResponse(HttpStatusCode.MethodNotAllowed);
                 return;
             }
 
@@ -533,7 +533,7 @@ namespace SilverSim.BackendHandlers.Robust.Asset
             }
             catch
             {
-                req.ErrorResponse(HttpStatusCode.BadRequest, "Bad Request");
+                req.ErrorResponse(HttpStatusCode.BadRequest);
                 return;
             }
 

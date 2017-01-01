@@ -10,17 +10,26 @@ namespace SilverSim.BackendHandlers.Robust.Groups
 {
     #region Service Implementation
     [Description("Robust Groups Protocol Server")]
-    public sealed class RobustGroupsServerHandler : IPlugin
+    public sealed class RobustGroupsServerHandler : BaseGroupsServerHandler
     {
-        //private static readonly ILog m_Log = LogManager.GetLogger("ROBUST GROUPS HANDLER");
-        public RobustGroupsServerHandler(string groupsServiceName)
+        static readonly ILog m_Log = LogManager.GetLogger("ROBUST GROUPS HANDLER");
+        public RobustGroupsServerHandler(IConfig ownSection)
+            : base(ownSection)
         {
-
         }
 
-        public void Startup(ConfigurationLoader loader)
+        protected override string UrlPath
         {
-            /* intentionally left empty */
+            get
+            {
+                return "/groups";
+            }
+        }
+
+        public override void Startup(ConfigurationLoader loader)
+        {
+            m_Log.Info("Initializing handler for Groups server");
+            base.Startup(loader);
         }
     }
     #endregion
@@ -36,7 +45,7 @@ namespace SilverSim.BackendHandlers.Robust.Groups
 
         public IPlugin Initialize(ConfigurationLoader loader, IConfig ownSection)
         {
-            return new RobustGroupsServerHandler(ownSection.GetString("GroupsService", "GroupsService"));
+            return new RobustGroupsServerHandler(ownSection);
         }
     }
     #endregion
