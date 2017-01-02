@@ -57,7 +57,7 @@ namespace SilverSim.BackendConnectors.Flotsam.Groups
                 return this[requestingAgent, group.ID];
             }
 
-            public void Delete(UUI requestingAgent, GroupInfo group)
+            public void Delete(UUI requestingAgent, UGI group)
             {
                 throw new NotImplementedException();
             }

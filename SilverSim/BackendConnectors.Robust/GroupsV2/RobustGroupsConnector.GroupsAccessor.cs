@@ -63,7 +63,7 @@ namespace SilverSim.BackendConnectors.Robust.GroupsV2
                 return CreateOrUpdate(requestingAgent, group, "UPDATE");
             }
 
-            public void Delete(UUI requestingAgent, GroupInfo group)
+            public void Delete(UUI requestingAgent, UGI group)
             {
                 throw new NotSupportedException();
             }
