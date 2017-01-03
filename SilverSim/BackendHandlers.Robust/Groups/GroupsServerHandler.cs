@@ -43,6 +43,7 @@ namespace SilverSim.BackendHandlers.Robust.Groups
             MethodHandlers.Add("INVITE", HandleInvite);
         }
 
+        #region INVITE
         void HandleInvite(HttpRequest req, Dictionary<string, object> reqdata)
         {
             string op;
@@ -63,7 +64,9 @@ namespace SilverSim.BackendHandlers.Robust.Groups
                     break;
             }
         }
+        #endregion
 
+        #region AGENTROLE
         void HandleAgentRole(HttpRequest req, Dictionary<string, object> reqdata)
         {
             string op;
@@ -84,7 +87,9 @@ namespace SilverSim.BackendHandlers.Robust.Groups
                     break;
             }
         }
+        #endregion
 
+        #region PUTROLE
         void HandlePutRole(HttpRequest req, Dictionary<string, object> reqdata)
         {
             string op;
@@ -105,7 +110,9 @@ namespace SilverSim.BackendHandlers.Robust.Groups
                     break;
             }
         }
+        #endregion
 
+        #region PUTGROUP
         void HandlePutGroup(HttpRequest req, Dictionary<string, object> reqdata)
         {
             string op;
@@ -198,6 +205,7 @@ namespace SilverSim.BackendHandlers.Robust.Groups
                 }
             }
         }
+        #endregion
     }
     #endregion
 
