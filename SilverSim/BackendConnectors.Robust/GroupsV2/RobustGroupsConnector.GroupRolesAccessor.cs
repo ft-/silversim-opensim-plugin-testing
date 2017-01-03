@@ -101,7 +101,9 @@ namespace SilverSim.BackendConnectors.Robust.GroupsV2
                     {
                         if (iv is Map)
                         {
-                            roles.Add(iv.ToGroupRole());
+                            GroupRole role = iv.ToGroupRole();
+                            role.Group = group;
+                            roles.Add(role);
                         }
                     }
 
@@ -142,7 +144,9 @@ namespace SilverSim.BackendConnectors.Robust.GroupsV2
                     {
                         if(iv is Map)
                         {
-                            roles.Add(iv.ToGroupRole());
+                            GroupRole role = iv.ToGroupRole();
+                            role.Group = group;
+                            roles.Add(role);
                         }
                     }
 

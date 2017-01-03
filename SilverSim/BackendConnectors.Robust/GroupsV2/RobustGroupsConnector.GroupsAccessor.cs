@@ -18,14 +18,12 @@ namespace SilverSim.BackendConnectors.Robust.GroupsV2
         public sealed class GroupsAccessor : IGroupsInterface
         {
             public int TimeoutMs = 20000;
-            readonly string m_GroupServiceURI;
             readonly string m_Uri;
             readonly Func<UUI, string> m_GetGroupsAgentID;
 
-            public GroupsAccessor(string uri, string serviceURI, Func<UUI, string> getGroupsAgentID)
+            public GroupsAccessor(string uri, Func<UUI, string> getGroupsAgentID)
             {
                 m_Uri = uri;
-                m_GroupServiceURI = serviceURI;
                 m_GetGroupsAgentID = getGroupsAgentID;
             }
 
@@ -50,7 +48,7 @@ namespace SilverSim.BackendConnectors.Robust.GroupsV2
                     throw new AccessFailedException(m["REASON"].ToString());
                 }
 
-                return m["RESULT"].ToGroup(m_GroupServiceURI);
+                return m["RESULT"].ToGroup();
             }
 
             public GroupInfo Create(UUI requestingAgent, GroupInfo group)
@@ -90,7 +88,7 @@ namespace SilverSim.BackendConnectors.Robust.GroupsV2
                     return false;
                 }
 
-                ugi = m["RESULT"].ToGroup(m_GroupServiceURI).ID;
+                ugi = m["RESULT"].ToGroup().ID;
                 return true;
             }
 
@@ -152,7 +150,7 @@ namespace SilverSim.BackendConnectors.Robust.GroupsV2
                     return false;
                 }
 
-                groupInfo = m["RESULT"].ToGroup(m_GroupServiceURI);
+                groupInfo = m["RESULT"].ToGroup();
                 return true;
             }
 
@@ -214,7 +212,7 @@ namespace SilverSim.BackendConnectors.Robust.GroupsV2
                     return false;
                 }
 
-                groupInfo = m["RESULT"].ToGroup(m_GroupServiceURI);
+                groupInfo = m["RESULT"].ToGroup();
                 return true;
             }
 

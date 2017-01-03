@@ -4,7 +4,14 @@
 using log4net;
 using Nini.Config;
 using SilverSim.Main.Common;
+using SilverSim.Main.Common.HttpServer;
+using SilverSim.Types;
+using SilverSim.Types.Groups;
+using System;
+using System.Collections.Generic;
 using System.ComponentModel;
+using System.Net;
+using System.Xml;
 
 namespace SilverSim.BackendHandlers.Robust.Groups
 {
@@ -30,6 +37,100 @@ namespace SilverSim.BackendHandlers.Robust.Groups
         {
             m_Log.Info("Initializing handler for Groups server");
             base.Startup(loader);
+            MethodHandlers.Add("PUTGROUP", HandlePutGroup);
+        }
+
+        void HandlePutGroup(HttpRequest req, Dictionary<string, object> reqdata)
+        {
+            string op;
+            try
+            {
+                op = reqdata["OP"].ToString();
+            }
+            catch
+            {
+                req.ErrorResponse(HttpStatusCode.BadRequest);
+                return;
+            }
+
+            switch(op)
+            {
+                case "ADD":
+                    HandlePutGroupAdd(req, reqdata);
+                    break;
+
+                default:
+                    req.ErrorResponse(HttpStatusCode.BadRequest);
+                    break;
+            }
+        }
+
+        void HandlePutGroupAdd(HttpRequest req, Dictionary<string, object> reqdata)
+        {
+            GroupInfo gInfo = new GroupInfo();
+            gInfo.ID.ID = UUID.Random;
+            UUI requestingAgentID;
+            try
+            {
+                requestingAgentID = new UUI(reqdata["RequestingAgentID"].ToString());
+                gInfo.ID.GroupName = reqdata["Name"].ToString();
+                if(reqdata.ContainsKey("Charter"))
+                {
+                    gInfo.Charter = reqdata["Charter"].ToString();
+                }
+                if(reqdata.ContainsKey("ShownInList"))
+                {
+                    gInfo.IsShownInList = GroupsV2ExtensionMethods.String2Boolean(reqdata["ShownInList"].ToString());
+                }
+                if(reqdata.ContainsKey("InsigniaID"))
+                {
+                    gInfo.InsigniaID = reqdata["InsigniaID"].ToString();
+                }
+                if(reqdata.ContainsKey("MembershipFee"))
+                {
+                    gInfo.MembershipFee = int.Parse(reqdata["MembershipFee"].ToString());
+                }
+                if(reqdata.ContainsKey("OpenEnrollment"))
+                {
+                    gInfo.IsOpenEnrollment = GroupsV2ExtensionMethods.String2Boolean(reqdata["OpenEnrollment"].ToString());
+                }
+                if (reqdata.ContainsKey("AllowPublish"))
+                {
+                    gInfo.IsAllowPublish = GroupsV2ExtensionMethods.String2Boolean(reqdata["AllowPublish"].ToString());
+                }
+                if (reqdata.ContainsKey("MaturePublish"))
+                {
+                    gInfo.IsMaturePublish = GroupsV2ExtensionMethods.String2Boolean(reqdata["MaturePublish"].ToString());
+                }
+                if (reqdata.ContainsKey("FounderID"))
+                {
+                    gInfo.Founder.ID = reqdata["FounderID"].ToString();
+                }
+            }
+            catch
+            {
+                req.ErrorResponse(HttpStatusCode.BadRequest);
+                return;
+            }
+
+            try
+            {
+                gInfo = m_GroupsService.CreateGroup(requestingAgentID, gInfo, GroupPowers.DefaultEveryonePowers, GroupPowers.OwnerPowers);
+            }
+            catch
+            {
+                SendNullResult(req, "Group not created");
+                return;
+            }
+            using (HttpResponse res = req.BeginResponse("text/xml"))
+            {
+                using (XmlTextWriter writer = res.GetOutputStream().UTF8XmlTextWriter())
+                {
+                    writer.WriteStartElement("ServerResponse");
+                    gInfo.ToXml(writer, "RESULT");
+                    writer.WriteEndElement();
+                }
+            }
         }
     }
     #endregion

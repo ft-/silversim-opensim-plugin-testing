@@ -8,6 +8,7 @@ using SilverSim.ServiceInterfaces.Account;
 using SilverSim.ServiceInterfaces.Groups;
 using SilverSim.Types;
 using SilverSim.Types.Account;
+using SilverSim.Types.Groups;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
@@ -70,7 +71,7 @@ namespace SilverSim.BackendConnectors.Robust.GroupsV2
             }
         }
 
-        public RobustGroupsConnector(string uri, string serviceUri, string userAccountServiceName)
+        public RobustGroupsConnector(string uri, string userAccountServiceName)
         {
             if(!uri.EndsWith("/"))
             {
@@ -78,7 +79,7 @@ namespace SilverSim.BackendConnectors.Robust.GroupsV2
             }
             uri += "groups";
             m_UserAccountServiceName = userAccountServiceName;
-            m_Groups = new GroupsAccessor(uri, serviceUri, GetGroupsAgentID);
+            m_Groups = new GroupsAccessor(uri, GetGroupsAgentID);
             m_GroupRoles = new GroupRolesAccessor(uri, GetGroupsAgentID);
             m_Members = new MembersAccessor(uri, GetGroupsAgentID);
             m_Memberships = new MembershipsAccessor(uri, GetGroupsAgentID);
@@ -184,6 +185,11 @@ namespace SilverSim.BackendConnectors.Robust.GroupsV2
             {
                 throw new AccessFailedException();
             }
+        }
+
+        public override GroupInfo CreateGroup(UUI requestingAgent, GroupInfo ginfo, GroupPowers everyonePowers, GroupPowers ownerPowers)
+        {
+            return Groups.Create(requestingAgent, ginfo);
         }
     }
 }

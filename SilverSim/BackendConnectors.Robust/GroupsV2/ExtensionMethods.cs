@@ -6,8 +6,6 @@ using SilverSim.Types.Asset;
 using SilverSim.Types.Groups;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace SilverSim.BackendConnectors.Robust.GroupsV2
 {
@@ -28,7 +26,7 @@ namespace SilverSim.BackendConnectors.Robust.GroupsV2
         #endregion
 
         #region Group
-        public static GroupInfo ToGroup(this IValue iv, string serviceURI)
+        public static GroupInfo ToGroup(this IValue iv)
         {
             Map m = (Map)iv;
             GroupInfo group = new GroupInfo();
@@ -94,10 +92,6 @@ namespace SilverSim.BackendConnectors.Robust.GroupsV2
                     group.ID.HomeURI = new Uri(uri);
                 }
             }
-            if(group.ID.HomeURI == null)
-            {
-                group.ID.HomeURI = new Uri(serviceURI);
-            }
 
             if(m.ContainsKey("ShownInList"))
             {
@@ -126,7 +120,7 @@ namespace SilverSim.BackendConnectors.Robust.GroupsV2
             post["FounderID"] = (string)group.Founder.ID;
             post["FounderUUI"] = group.Founder.ToString();
             post["GroupID"] = (string)group.ID.ID;
-            post["GroupName"] = group.ID.GroupName;
+            post["Name"] = group.ID.GroupName;
             post["InsigniaID"] = (string)group.InsigniaID;
             post["MaturePublish"] = group.IsMaturePublish.ToString();
             post["MembershipFee"] = group.MembershipFee.ToString();

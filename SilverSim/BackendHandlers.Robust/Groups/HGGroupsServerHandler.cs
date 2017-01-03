@@ -181,7 +181,7 @@ namespace SilverSim.BackendHandlers.Robust.Groups
             base.HandleGetRoleMembers(req, reqdata);
         }
 
-        protected override void HandleGetRoles(HttpRequest req, Dictionary<string, object> reqdata)
+        protected override void HandleGetGroupRoles(HttpRequest req, Dictionary<string, object> reqdata)
         {
             UUI requestingAgent = UUI.Unknown;
             UGI group = UGI.Unknown;
@@ -203,7 +203,7 @@ namespace SilverSim.BackendHandlers.Robust.Groups
                 return;
             }
 
-            base.HandleGetRoles(req, reqdata);
+            base.HandleGetGroupRoles(req, reqdata);
         }
 
         protected override void HandleGetMembers(HttpRequest req, Dictionary<string, object> reqdata)
