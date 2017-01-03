@@ -38,6 +38,72 @@ namespace SilverSim.BackendHandlers.Robust.Groups
             m_Log.Info("Initializing handler for Groups server");
             base.Startup(loader);
             MethodHandlers.Add("PUTGROUP", HandlePutGroup);
+            MethodHandlers.Add("PUTROLE", HandlePutRole);
+            MethodHandlers.Add("AGENTROLE", HandleAgentRole);
+            MethodHandlers.Add("INVITE", HandleInvite);
+        }
+
+        void HandleInvite(HttpRequest req, Dictionary<string, object> reqdata)
+        {
+            string op;
+            try
+            {
+                op = reqdata["OP"].ToString();
+            }
+            catch
+            {
+                req.ErrorResponse(HttpStatusCode.BadRequest);
+                return;
+            }
+
+            switch (op)
+            {
+                default:
+                    req.ErrorResponse(HttpStatusCode.BadRequest);
+                    break;
+            }
+        }
+
+        void HandleAgentRole(HttpRequest req, Dictionary<string, object> reqdata)
+        {
+            string op;
+            try
+            {
+                op = reqdata["OP"].ToString();
+            }
+            catch
+            {
+                req.ErrorResponse(HttpStatusCode.BadRequest);
+                return;
+            }
+
+            switch (op)
+            {
+                default:
+                    req.ErrorResponse(HttpStatusCode.BadRequest);
+                    break;
+            }
+        }
+
+        void HandlePutRole(HttpRequest req, Dictionary<string, object> reqdata)
+        {
+            string op;
+            try
+            {
+                op = reqdata["OP"].ToString();
+            }
+            catch
+            {
+                req.ErrorResponse(HttpStatusCode.BadRequest);
+                return;
+            }
+
+            switch (op)
+            {
+                default:
+                    req.ErrorResponse(HttpStatusCode.BadRequest);
+                    break;
+            }
         }
 
         void HandlePutGroup(HttpRequest req, Dictionary<string, object> reqdata)
