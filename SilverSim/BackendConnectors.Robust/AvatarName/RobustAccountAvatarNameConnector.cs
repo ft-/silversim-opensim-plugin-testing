@@ -173,10 +173,16 @@ namespace SilverSim.BackendConnectors.Robust.AvatarName
                 }
                 return uui;
             }
-            set
-            {
-                /* no action needed */
-            }
+        }
+
+        public override void Store(UUI uui)
+        {
+            /* no action needed */
+        }
+
+        public override bool Remove(UUID key)
+        {
+            return false;
         }
     }
     #endregion
