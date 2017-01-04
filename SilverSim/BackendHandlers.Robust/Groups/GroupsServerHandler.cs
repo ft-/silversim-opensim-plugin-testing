@@ -55,7 +55,7 @@ namespace SilverSim.BackendHandlers.Robust.Groups
             string accessToken;
             try
             {
-                requestingAgentID = new UUI(reqdata["RequestAgentID"].ToString());
+                requestingAgentID = new UUI(reqdata["RequestingAgentID"].ToString());
                 agentID = new UUI(reqdata["AgentID"].ToString());
                 groupID = reqdata["GroupID"].ToString();
                 roleID = reqdata["RoleID"].ToString();
