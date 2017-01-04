@@ -147,15 +147,6 @@ namespace SilverSim.BackendHandlers.Robust.Groups
             return gmem.AccessToken == accessToken;
         }
 
-        void HandleGetGroup(HttpRequest req, Dictionary<string, object> reqdata)
-        {
-            if(!reqdata.ContainsKey("GroupID") && !reqdata.ContainsKey("Name"))
-            {
-                req.ErrorResponse(HttpStatusCode.BadRequest);
-                return;
-            }
-        }
-
         protected override void HandleGetRoleMembers(HttpRequest req, Dictionary<string, object> reqdata)
         {
             UUI requestingAgent = UUI.Unknown;

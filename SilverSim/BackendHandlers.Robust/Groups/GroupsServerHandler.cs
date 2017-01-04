@@ -41,6 +41,7 @@ namespace SilverSim.BackendHandlers.Robust.Groups
             MethodHandlers.Add("PUTROLE", HandlePutRole);
             MethodHandlers.Add("AGENTROLE", HandleAgentRole);
             MethodHandlers.Add("INVITE", HandleInvite);
+            MethodHandlers.Add("REMOVEROLE", HandleRemoveRole);
         }
 
         #region INVITE
@@ -105,12 +106,130 @@ namespace SilverSim.BackendHandlers.Robust.Groups
 
             switch (op)
             {
+                case "ADD":
+                    HandlePutRoleAdd(req, reqdata);
+                    break;
+
+                case "UPDATE":
+                    HandlePutRoleUpdate(req, reqdata);
+                    break;
+
                 default:
                     req.ErrorResponse(HttpStatusCode.BadRequest);
                     break;
             }
         }
+
+        void HandlePutRoleAdd(HttpRequest req, Dictionary<string, object> reqdata)
+        {
+            GroupRole role = new GroupRole();
+            UUI requestingAgentID;
+            try
+            {
+                requestingAgentID = new UUI(reqdata["RequestingAgentID"].ToString());
+                role.ID = reqdata["RoleID"].ToString();
+                role.Group.ID = reqdata["GroupID"].ToString();
+                role.Name = reqdata["Name"].ToString();
+                role.Description = reqdata["Description"].ToString();
+                role.Title = reqdata["Title"].ToString();
+                role.Powers = (GroupPowers)ulong.Parse(reqdata["Powers"].ToString());
+            }
+            catch
+            {
+                req.ErrorResponse(HttpStatusCode.BadRequest);
+                return;
+            }
+
+            try
+            {
+                m_GroupsService.Roles.Add(requestingAgentID, role);
+            }
+            catch
+            {
+                SendBooleanResponse(req, false);
+                return;
+            }
+            SendBooleanResponse(req, true);
+        }
+
+        void HandlePutRoleUpdate(HttpRequest req, Dictionary<string, object> reqdata)
+        {
+            GroupRole role = new GroupRole();
+            UUI requestingAgentID;
+
+            try
+            {
+                requestingAgentID = new UUI(reqdata["RequestingAgentID"].ToString());
+                role.ID = reqdata["RoleID"].ToString();
+                role.Group.ID = reqdata["GroupID"].ToString();
+            }
+            catch
+            {
+                req.ErrorResponse(HttpStatusCode.BadRequest);
+                return;
+            }
+
+            if (!m_GroupsService.Roles.TryGetValue(requestingAgentID, role.Group, role.ID, out role))
+            {
+                SendBooleanResponse(req, false, "Role not found");
+                return;
+            }
+
+            try
+            {
+                role.Name = reqdata["Name"].ToString();
+                role.Description = reqdata["Description"].ToString();
+                role.Title = reqdata["Title"].ToString();
+                role.Powers = (GroupPowers)ulong.Parse(reqdata["Powers"].ToString());
+            }
+            catch
+            {
+                req.ErrorResponse(HttpStatusCode.BadRequest);
+                return;
+            }
+
+            try
+            {
+                m_GroupsService.Roles.Update(requestingAgentID, role);
+            }
+            catch
+            {
+                SendBooleanResponse(req, false);
+                return;
+            }
+            SendBooleanResponse(req, true);
+        }
         #endregion
+
+        void HandleRemoveRole(HttpRequest req, Dictionary<string, object> reqdata)
+        {
+            UUI requestingAgent;
+            UUID groupID;
+            UUID roleID;
+
+            try
+            {
+                requestingAgent = new UUI(reqdata["RequestingAgentID"].ToString());
+                groupID = reqdata["GroupID"].ToString();
+                roleID = reqdata["RoleID"].ToString();
+            }
+            catch
+            {
+                req.ErrorResponse(HttpStatusCode.BadRequest);
+                return;
+            }
+
+            try
+            {
+                m_GroupsService.Roles.Delete(requestingAgent, new UGI(groupID), roleID);
+            }
+            catch
+            {
+                SendBooleanResponse(req, false);
+                return;
+            }
+            SendBooleanResponse(req, true);
+        }
 
         #region PUTGROUP
         void HandlePutGroup(HttpRequest req, Dictionary<string, object> reqdata)
