@@ -7,7 +7,7 @@ using SilverSim.Main.Common;
 
 namespace SilverSim.BackendConnectors.Robust.GroupsV2
 {
-    [PluginName("GroupsV2")]
+    [PluginName("Groups")]
     public class Factory : IPluginFactory
     {
         private static readonly ILog m_Log = LogManager.GetLogger("ROBUST GROUPS CONNECTOR");
