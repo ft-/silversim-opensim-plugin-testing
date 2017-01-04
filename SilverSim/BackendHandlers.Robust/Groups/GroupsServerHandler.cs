@@ -60,10 +60,115 @@ namespace SilverSim.BackendHandlers.Robust.Groups
 
             switch (op)
             {
+                case "ADD":
+                    HandleInviteAdd(req, reqdata);
+                    break;
+
+                case "DELETE":
+                    HandleInviteDelete(req, reqdata);
+                    break;
+
+                case "GET":
+                    HandleInviteGet(req, reqdata);
+                    break;
+
                 default:
                     req.ErrorResponse(HttpStatusCode.BadRequest);
                     break;
             }
+        }
+
+        void HandleInviteAdd(HttpRequest req, Dictionary<string, object> reqdata)
+        {
+            UUI requestingAgentID;
+            GroupInvite invite = new GroupInvite();
+            try
+            {
+                requestingAgentID = new UUI(reqdata["RequestingAgentID"].ToString());
+                invite.ID = reqdata["InviteID"].ToString();
+                invite.Group.ID = reqdata["GroupID"].ToString();
+                invite.RoleID = reqdata["RoleID"].ToString();
+                invite.Principal = new UUI(reqdata["AgentID"].ToString());
+            }
+            catch
+            {
+                req.ErrorResponse(HttpStatusCode.BadRequest);
+                return;
+            }
+
+            try
+            {
+                m_GroupsService.Invites.Add(requestingAgentID, invite);
+            }
+            catch
+            {
+                SendBooleanResponse(req, false);
+                return;
+            }
+            SendBooleanResponse(req, true);
+        }
+
+        void HandleInviteGet(HttpRequest req, Dictionary<string, object> reqdata)
+        {
+            UUI requestingAgentID;
+            UUID inviteID;
+
+            try
+            {
+                requestingAgentID = new UUI(reqdata["RequestingAgentID"].ToString());
+                inviteID = reqdata["InviteID"].ToString();
+            }
+            catch
+            {
+                req.ErrorResponse(HttpStatusCode.BadRequest);
+                return;
+            }
+
+            GroupInvite invite;
+            if(m_GroupsService.Invites.TryGetValue(requestingAgentID, inviteID, out invite))
+            {
+                using (HttpResponse res = req.BeginResponse("text/xml"))
+                {
+                    using (XmlTextWriter writer = res.GetOutputStream().UTF8XmlTextWriter())
+                    {
+                        writer.WriteStartElement("ServerResponse");
+                        invite.ToXml(writer, "RESULT");
+                        writer.WriteEndElement();
+                    }
+                }
+            }
+            else
+            {
+                SendNullResult(req, "Not found");
+            }
+        }
+
+        void HandleInviteDelete(HttpRequest req, Dictionary<string, object> reqdata)
+        {
+            UUI requestingAgentID;
+            UUID inviteID;
+
+            try
+            {
+                requestingAgentID = new UUI(reqdata["RequestingAgentID"].ToString());
+                inviteID = reqdata["InviteID"].ToString();
+            }
+            catch
+            {
+                req.ErrorResponse(HttpStatusCode.BadRequest);
+                return;
+            }
+
+            try
+            {
+                m_GroupsService.Invites.Delete(requestingAgentID, inviteID);
+            }
+            catch
+            {
+                SendBooleanResponse(req, false);
+                return;
+            }
+            SendBooleanResponse(req, true);
         }
         #endregion
 

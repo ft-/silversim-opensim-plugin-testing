@@ -85,11 +85,19 @@ namespace SilverSim.BackendConnectors.Robust.GroupsV2
                 }
             }
 
+            bool IGroupInvitesInterface.DoesSupportListGetters
+            {
+                get
+                {
+                    return false;
+                }
+            }
+
             public List<GroupInvite> this[UUI requestingAgent, UGI group, UUID roleID, UUI principal]
             {
                 get 
                 {
-                    return new List<GroupInvite>();
+                    throw new NotSupportedException();
                 }
             }
 
@@ -97,13 +105,13 @@ namespace SilverSim.BackendConnectors.Robust.GroupsV2
             {
                 get
                 {
-                    return new List<GroupInvite>();
+                    throw new NotSupportedException();
                 }
             }
 
             public List<GroupInvite> GetByGroup(UUI requestingAgent, UGI group)
             {
-                return new List<GroupInvite>();
+                throw new NotSupportedException();
             }
 
             public void Add(UUI requestingAgent, GroupInvite invite)

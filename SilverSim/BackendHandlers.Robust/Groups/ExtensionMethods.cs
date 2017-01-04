@@ -96,5 +96,16 @@ namespace SilverSim.BackendHandlers.Robust.Groups
                 ++index;
             }
         }
+
+        public static void ToXml(this GroupInvite invite, XmlTextWriter writer, string tagname)
+        {
+            writer.WriteStartElement(tagname);
+            writer.WriteAttributeString("type", "List");
+            writer.WriteNamedValue("InviteID", invite.ID);
+            writer.WriteNamedValue("GroupID", invite.Group.ID);
+            writer.WriteNamedValue("RoleID", invite.RoleID);
+            writer.WriteNamedValue("AgentID", invite.Principal.ID);
+            writer.WriteEndElement();
+        }
     }
 }

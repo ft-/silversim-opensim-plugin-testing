@@ -55,19 +55,27 @@ namespace SilverSim.BackendConnectors.Flotsam.Groups
                 }
             }
 
+            bool IGroupInvitesInterface.DoesSupportListGetters
+            {
+                get
+                {
+                    return false;
+                }
+            }
+
             public List<GroupInvite> this[UUI requestingAgent, UGI group, UUID roleID, UUI principal]
             {
-                get { throw new NotImplementedException(); }
+                get { throw new NotSupportedException(); }
             }
 
             public List<GroupInvite> this[UUI requestingAgent, UUI principal]
             {
-                get { throw new NotImplementedException(); }
+                get { throw new NotSupportedException(); }
             }
 
             public List<GroupInvite> GetByGroup(UUI requestingAgent, UGI group)
             {
-                throw new NotImplementedException();
+                throw new NotSupportedException();
             }
 
             public void Add(UUI requestingAgent, GroupInvite invite)
