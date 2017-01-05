@@ -208,11 +208,47 @@ namespace SilverSim.BackendConnectors.Robust.GroupsV2
             }
             if (m.ContainsKey("ListInProfile"))
             {
-                member.ListInProfile = bool.Parse(m["ListInProfile"].ToString());
+                member.IsListInProfile = bool.Parse(m["ListInProfile"].ToString());
             }
             if (m.ContainsKey("AcceptNotices"))
             {
-                member.AcceptNotices = bool.Parse(m["AcceptNotices"].ToString());
+                member.IsAcceptNotices = bool.Parse(m["AcceptNotices"].ToString());
+            }
+            if(m.ContainsKey("AllowPublish"))
+            {
+                member.IsAllowPublish = bool.Parse(m["AllowPublish"].ToString());
+            }
+            if(m.ContainsKey("Charter"))
+            {
+                member.Charter = m["Charter"].ToString();
+            }
+            if(m.ContainsKey("ActiveRole"))
+            {
+                member.ActiveRoleID = m["ActiveRole"].ToString();
+            }
+            if(m.ContainsKey("FounderID"))
+            {
+                member.Founder.ID = m["FounderID"].ToString();
+            }
+            if(m.ContainsKey("AccessToken"))
+            {
+                member.AccessToken = m["AccessToken"].ToString();
+            }
+            if(m.ContainsKey("MaturePublish"))
+            {
+                member.IsMaturePublish = bool.Parse(m["MaturePublish"].ToString());
+            }
+            if(m.ContainsKey("OpenEnrollment"))
+            {
+                member.IsOpenEnrollment = bool.Parse(m["OpenEnrollment"].ToString());
+            }
+            if(m.ContainsKey("MembershipFee"))
+            {
+                member.MembershipFee = int.Parse(m["MembershipFee"].ToString());
+            }
+            if(m.ContainsKey("ShowInList"))
+            {
+                member.IsShownInList = bool.Parse(m["ShowInList"].ToString());
             }
 
             return member;

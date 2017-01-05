@@ -63,14 +63,24 @@ namespace SilverSim.BackendConnectors.Flotsam.Groups
         public static GroupMembership ToGroupMembership(this Map m)
         {
             GroupMembership gmem = new GroupMembership();
-            gmem.ListInProfile = Convert.ToBoolean(m["ListInProfile"].ToString());
+            gmem.IsListInProfile = Convert.ToBoolean(m["ListInProfile"].ToString());
             gmem.Contribution = m["Contribution"].AsInt;
-            gmem.AcceptNotices = Convert.ToBoolean(m["AcceptNotices"].ToString());
+            gmem.IsAcceptNotices = Convert.ToBoolean(m["AcceptNotices"].ToString());
             gmem.GroupTitle = m["Title"].ToString();
             gmem.GroupPowers = (GroupPowers)ulong.Parse(m["GroupPowers"].ToString());
             gmem.Principal.ID = m["AgentID"].AsUUID;
             gmem.Group.ID = m["GroupID"].AsUUID;
             gmem.Group.GroupName = m["GroupName"].ToString();
+            gmem.IsAllowPublish = Convert.ToBoolean(m["AllowPublish"].ToString());
+            gmem.Charter = m["Charter"].ToString();
+            gmem.ActiveRoleID = m["SelectedRoleID"].ToString();
+            gmem.Founder.ID = m["FounderID"].ToString();
+            gmem.AccessToken = string.Empty;
+            gmem.IsMaturePublish = Convert.ToBoolean(m["MaturePublish"].ToString());
+            gmem.IsOpenEnrollment = Convert.ToBoolean(m["OpenEnrollment"].ToString());
+            gmem.MembershipFee = int.Parse(m["MembershipFee"].ToString());
+            gmem.IsShownInList = Convert.ToBoolean(m["OPenEnrollment"].ToString());
+
             return gmem;
         }
 

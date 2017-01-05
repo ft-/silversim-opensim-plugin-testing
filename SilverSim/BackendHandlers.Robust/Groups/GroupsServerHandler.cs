@@ -124,6 +124,100 @@ namespace SilverSim.BackendHandlers.Robust.Groups
             }
         }
 
+        void HandleGetMembership(HttpRequest req, Dictionary<string, object> reqdata)
+        {
+            UUI requestingAgentID;
+            UUI agentID;
+            try
+            {
+                requestingAgentID = new UUI(reqdata["RequestingAgentID"].ToString());
+                agentID = new UUI(reqdata["AgentID"].ToString());
+            }
+            catch
+            {
+                req.ErrorResponse(HttpStatusCode.BadRequest);
+                return;
+            }
+
+
+            if(reqdata.ContainsKey("ALL"))
+            {
+                List<GroupMembership> memberships;
+                try
+                {
+                    memberships = m_GroupsService.Memberships[requestingAgentID, agentID];
+                }
+                catch
+                {
+                    memberships = new List<GroupMembership>();
+                }
+
+                if (memberships.Count == 0)
+                {
+                    SendNullResult(req, "No memberships");
+                }
+                else
+                {
+                    using (HttpResponse res = req.BeginResponse("text/xml"))
+                    {
+                        using (XmlTextWriter writer = res.GetOutputStream().UTF8XmlTextWriter())
+                        {
+                            writer.WriteStartElement("ServerResponse");
+                            writer.WriteStartElement("RESULT");
+                            writer.WriteAttributeString("type", "List");
+                            memberships.ToXml(writer);
+                            writer.WriteEndElement();
+                            writer.WriteEndElement();
+                        }
+                    }
+                }
+            }
+            else
+            {
+                UGI group;
+                if (reqdata.ContainsKey("GroupID"))
+                {
+                    group = UGI.Unknown;
+                    try
+                    {
+                        requestingAgentID = new UUI(reqdata["RequestingAgentID"].ToString());
+                        group.ID = reqdata["GroupID"].ToString();
+                    }
+                    catch
+                    {
+                        req.ErrorResponse(HttpStatusCode.BadRequest);
+                        return;
+                    }
+                }
+                else
+                {
+                    if(!m_GroupsService.ActiveGroup.TryGetValue(requestingAgentID, agentID, out group) || group.ID != UUID.Zero)
+                    {
+                        SendNullResult(req, "No active group");
+                        return;
+                    }
+                }
+
+                GroupMembership memship;
+                if(m_GroupsService.Memberships.TryGetValue(requestingAgentID, group, agentID, out memship))
+                {
+                    using (HttpResponse res = req.BeginResponse("text/xml"))
+                    {
+                        using (XmlTextWriter writer = res.GetOutputStream().UTF8XmlTextWriter())
+                        {
+                            writer.WriteStartElement("ServerResponse");
+                            memship.ToXml(writer, "RESULT");
+                            writer.WriteEndElement();
+                        }
+                    }
+                }
+                else
+                {
+                    SendNullResult(req, "Group not found");
+                }
+            }
+        }
+
         void HandleRemoveAgentFromGroup(HttpRequest req, Dictionary<string, object> reqdata)
         {
             UUI requestingAgentID;
