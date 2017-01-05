@@ -44,6 +44,96 @@ namespace SilverSim.BackendHandlers.Robust.Groups
             MethodHandlers.Add("REMOVEROLE", HandleRemoveRole);
             MethodHandlers.Add("ADDAGENTTOGROUP", HandleAddAgentToGroup);
             MethodHandlers.Add("REMOVEAGENTFROMGROUP", HandleRemoveAgentFromGroup);
+            MethodHandlers.Add("GETNOTICES", HandleGetNotices);
+            MethodHandlers.Add("GETMEMBERSHIP", HandleGetMembership);
+            MethodHandlers.Add("SETACTIVE", HandleSetActive);
+            MethodHandlers.Add("GETAGENTROLES", HandleGetAgentRoles);
+            MethodHandlers.Add("UPDATEMEMBERSHIP", HandleUpdateMembership);
+            MethodHandlers.Add("FINDGROUPS", HandleFindGroups);
+        }
+
+        void WriteGroupMembershipData(XmlTextWriter writer, string tagname, GroupInfo groupInfo, GroupMember groupmember, GroupRole groupRole)
+        {
+            writer.WriteStartElement(tagname);
+            writer.WriteAttributeString("type", "List");
+            writer.WriteNamedValue("AcceptNotices", GroupsV2ExtensionMethods.Boolean2String(groupmember.IsAcceptNotices));
+            writer.WriteNamedValue("AccessToken", string.Empty);
+            writer.WriteNamedValue("Active", "True");
+            writer.WriteNamedValue("ActiveRole", groupmember.SelectedRoleID);
+            writer.WriteNamedValue("AllowPublish", GroupsV2ExtensionMethods.Boolean2String(groupInfo.IsAllowPublish));
+            writer.WriteNamedValue("Charter", groupInfo.Charter);
+            writer.WriteNamedValue("Contribution", groupmember.Contribution);
+            writer.WriteNamedValue("FounderID", groupInfo.Founder.ID);
+            writer.WriteNamedValue("GroupID", groupInfo.ID.ID);
+            writer.WriteNamedValue("GroupName", groupInfo.ID.GroupName);
+            writer.WriteNamedValue("GroupPicture", groupInfo.InsigniaID);
+            writer.WriteNamedValue("GroupPowers", ((ulong)groupRole.Powers).ToString());
+            writer.WriteNamedValue("GroupTitle", groupRole.Title);
+            writer.WriteNamedValue("ListInProfile", GroupsV2ExtensionMethods.Boolean2String(groupmember.IsListInProfile));
+            writer.WriteNamedValue("MaturePublish", GroupsV2ExtensionMethods.Boolean2String(groupInfo.IsMaturePublish));
+            writer.WriteNamedValue("MembershipFee", groupInfo.MembershipFee);
+            writer.WriteNamedValue("OpenEnrollment", GroupsV2ExtensionMethods.Boolean2String(groupInfo.IsOpenEnrollment));
+            writer.WriteNamedValue("ShowInList", GroupsV2ExtensionMethods.Boolean2String(groupInfo.IsShownInList));
+            writer.WriteEndElement();
+        }
+
+        void HandleFindGroups(HttpRequest req, Dictionary<string, object> reqdata)
+        {
+            UUI requestingAgent;
+            try
+            {
+                requestingAgent = new UUI(reqdata["RequestingAgentID"].ToString());
+            }
+            catch
+            {
+                req.ErrorResponse(HttpStatusCode.BadRequest);
+                return;
+            }
+
+            List<DirGroupInfo> groups;
+            string query = string.Empty;
+
+            if (reqdata.ContainsKey("Query"))
+            {
+                query = reqdata["Query"].ToString();
+            }
+            groups = m_GroupsService.Groups.GetGroupsByName(requestingAgent, query);
+
+            if(groups.Count != 0)
+            {
+                using (HttpResponse res = req.BeginResponse("text/xml"))
+                {
+                    using (XmlTextWriter writer = res.GetOutputStream().UTF8XmlTextWriter())
+                    {
+                        int index = 0;
+                        writer.WriteStartElement("ServerResponse");
+                        writer.WriteStartElement("RESULT");
+                        writer.WriteAttributeString("type", "List");
+                        foreach(DirGroupInfo groupInfo in groups)
+                        {
+                            writer.WriteStartElement("n-" + index.ToString());
+                            writer.WriteAttributeString("type", "List");
+                            writer.WriteNamedValue("GroupID", groupInfo.ID.ID);
+                            writer.WriteNamedValue("Name", groupInfo.ID.GroupName);
+                            writer.WriteNamedValue("NMembers", groupInfo.MemberCount);
+                            writer.WriteNamedValue("SearchOrder", groupInfo.SearchOrder);
+                            writer.WriteEndElement();
+                            ++index;
+
+                            if(index == 100)
+                            {
+                                break;
+                            }
+                        }
+                        writer.WriteEndElement();
+                        writer.WriteEndElement();
+                    }
+                }
+            }
+            else
+            {
+                SendNullResult(req, "No groups found");
+            }
         }
 
         void HandleAddAgentToGroup(HttpRequest req, Dictionary<string, object> reqdata)
@@ -98,27 +188,7 @@ namespace SilverSim.BackendHandlers.Robust.Groups
                 using (XmlTextWriter writer = res.GetOutputStream().UTF8XmlTextWriter())
                 {
                     writer.WriteStartElement("ServerResponse");
-                    writer.WriteStartElement("RESULT");
-                    writer.WriteAttributeString("type", "List");
-                    writer.WriteNamedValue("AcceptNotices", GroupsV2ExtensionMethods.Boolean2String(groupmember.IsAcceptNotices));
-                    writer.WriteNamedValue("AccessToken", string.Empty);
-                    writer.WriteNamedValue("Active", "True");
-                    writer.WriteNamedValue("ActiveRole", groupmember.SelectedRoleID);
-                    writer.WriteNamedValue("AllowPublish", GroupsV2ExtensionMethods.Boolean2String(groupInfo.IsAllowPublish));
-                    writer.WriteNamedValue("Charter", groupInfo.Charter);
-                    writer.WriteNamedValue("Contribution", groupmember.Contribution);
-                    writer.WriteNamedValue("FounderID", groupInfo.Founder.ID);
-                    writer.WriteNamedValue("GroupID", groupInfo.ID.ID);
-                    writer.WriteNamedValue("GroupName", groupInfo.ID.GroupName);
-                    writer.WriteNamedValue("GroupPicture", groupInfo.InsigniaID);
-                    writer.WriteNamedValue("GroupPowers", ((ulong)groupRole.Powers).ToString());
-                    writer.WriteNamedValue("GroupTitle", groupRole.Title);
-                    writer.WriteNamedValue("ListInProfile", GroupsV2ExtensionMethods.Boolean2String(groupmember.IsListInProfile));
-                    writer.WriteNamedValue("MaturePublish", GroupsV2ExtensionMethods.Boolean2String(groupInfo.IsMaturePublish));
-                    writer.WriteNamedValue("MembershipFee", groupInfo.MembershipFee);
-                    writer.WriteNamedValue("OpenEnrollment", GroupsV2ExtensionMethods.Boolean2String(groupInfo.IsOpenEnrollment));
-                    writer.WriteNamedValue("ShowInList", GroupsV2ExtensionMethods.Boolean2String(groupInfo.IsShownInList));
-                    writer.WriteEndElement();
+                    WriteGroupMembershipData(writer, "RESULT", groupInfo, groupmember, groupRole);
                     writer.WriteEndElement();
                 }
             }
@@ -218,6 +288,54 @@ namespace SilverSim.BackendHandlers.Robust.Groups
             }
         }
 
+        void HandleUpdateMembership(HttpRequest req, Dictionary<string, object> reqdata)
+        {
+            UUI requestingAgent;
+            UUI agent;
+            UUID groupID;
+            
+            try
+            {
+                requestingAgent = new UUI(reqdata["RequestingAgentID"].ToString());
+                agent = new UUI(reqdata["AgentID"].ToString());
+                groupID = reqdata["GroupID"].ToString();
+            }
+            catch
+            {
+                req.ErrorResponse(HttpStatusCode.BadRequest);
+                return;
+            }
+
+            GroupMember member;
+            if(!m_GroupsService.Members.TryGetValue(requestingAgent, new UGI(groupID), agent, out member))
+            {
+                SendBooleanResponse(req, false);
+                return;
+            }
+
+            try
+            {
+                member.IsListInProfile = GroupsV2ExtensionMethods.String2Boolean(reqdata["ListInProfile"].ToString());
+                member.IsAcceptNotices = GroupsV2ExtensionMethods.String2Boolean(reqdata["AcceptNotices"].ToString());
+            }
+            catch
+            {
+                req.ErrorResponse(HttpStatusCode.BadRequest);
+                return;
+            }
+
+            try
+            {
+                m_GroupsService.Members.Update(requestingAgent, member.Group, member.Principal, member.IsAcceptNotices, member.IsListInProfile);
+            }
+            catch
+            {
+                SendBooleanResponse(req, false);
+                return;
+            }
+            SendBooleanResponse(req, true);
+        }
+
         void HandleRemoveAgentFromGroup(HttpRequest req, Dictionary<string, object> reqdata)
         {
             UUI requestingAgentID;
@@ -246,6 +364,123 @@ namespace SilverSim.BackendHandlers.Robust.Groups
             }
             SendBooleanResponse(req, true);
         }
+
+        #region SETACTIVE
+        void HandleSetActive(HttpRequest req, Dictionary<string, object> reqdata)
+        {
+            string op;
+            try
+            {
+                op = reqdata["OP"].ToString();
+            }
+            catch
+            {
+                req.ErrorResponse(HttpStatusCode.BadRequest);
+                return;
+            }
+
+            switch (op)
+            {
+                case "GROUP":
+                    HandleSetActiveGroup(req, reqdata);
+                    break;
+
+                case "ROLE":
+                    HandleSetActiveRole(req, reqdata);
+                    break;
+
+                default:
+                    req.ErrorResponse(HttpStatusCode.BadRequest);
+                    break;
+            }
+        }
+
+        void HandleSetActiveGroup(HttpRequest req, Dictionary<string, object> reqdata)
+        {
+            UUI requestingAgentID;
+            UUI agentID;
+            UUID groupID;
+            try
+            {
+                requestingAgentID = new UUI(reqdata["RequestingAgentID"].ToString());
+                agentID = new UUI(reqdata["AgentID"].ToString());
+                groupID = reqdata["GroupID"].ToString();
+            }
+            catch
+            {
+                req.ErrorResponse(HttpStatusCode.BadRequest);
+                return;
+            }
+
+            if(UUID.Zero == groupID)
+            {
+                m_GroupsService.ActiveGroup[requestingAgentID, agentID] = new UGI(groupID);
+                SendNullResult(req, "No active group");
+            }
+            else
+            {
+                GroupInfo groupInfo;
+                GroupMember member;
+                GroupRole role;
+                try
+                {
+                    groupInfo = m_GroupsService.Groups[requestingAgentID, new UGI(groupID)];
+                    member = m_GroupsService.Members[requestingAgentID, groupInfo.ID, agentID];
+                    role = m_GroupsService.Roles[requestingAgentID, groupInfo.ID, member.SelectedRoleID];
+                }
+                catch
+                {
+                    SendNullResult(req, "Not a member");
+                    return;
+                }
+
+                m_GroupsService.ActiveGroup[requestingAgentID, agentID] = groupInfo.ID;
+                using (HttpResponse res = req.BeginResponse("text/xml"))
+                {
+                    using (XmlTextWriter writer = res.GetOutputStream().UTF8XmlTextWriter())
+                    {
+                        writer.WriteStartElement("ServerResponse");
+                        WriteGroupMembershipData(writer, "RESULT", groupInfo, member, role);
+                        writer.WriteEndElement();
+                    }
+                }
+            }
+        }
+
+        void HandleSetActiveRole(HttpRequest req, Dictionary<string, object> reqdata)
+        {
+            UUI requestingAgentID;
+            UUI agentID;
+            UUID groupID;
+            UUID roleID;
+            try
+            {
+                requestingAgentID = new UUI(reqdata["RequestingAgentID"].ToString());
+                agentID = new UUI(reqdata["AgentID"].ToString());
+                groupID = reqdata["GroupID"].ToString();
+                roleID = reqdata["RoleID"].ToString();
+            }
+            catch
+            {
+                req.ErrorResponse(HttpStatusCode.BadRequest);
+                return;
+            }
+
+            try
+            {
+                if (m_GroupsService.Rolemembers.ContainsKey(requestingAgentID, new UGI(groupID), roleID, agentID))
+                {
+                    m_GroupsService.ActiveGroup[requestingAgentID, new UGI(groupID), agentID] = roleID;
+                }
+            }
+            catch
+            {
+                SendBooleanResponse(req, false);
+                return;
+            }
+            SendBooleanResponse(req, true);
+        }
+        #endregion
 
         #region INVITE
         void HandleInvite(HttpRequest req, Dictionary<string, object> reqdata)
@@ -391,10 +626,88 @@ namespace SilverSim.BackendHandlers.Robust.Groups
 
             switch (op)
             {
+                case "ADD":
+                    HandleAgentRoleAdd(req, reqdata);
+                    break;
+
+                case "DELETE":
+                    HandleAgentRoleDelete(req, reqdata);
+                    break;
+
                 default:
                     req.ErrorResponse(HttpStatusCode.BadRequest);
                     break;
             }
+        }
+
+        void HandleAgentRoleAdd(HttpRequest req, Dictionary<string, object> reqdata)
+        {
+            UUI requestingAgent;
+            GroupRolemember rolemember = new GroupRolemember();
+
+            try
+            {
+                requestingAgent = new UUI(reqdata["RequestingAgentID"].ToString());
+                rolemember.Group.ID = reqdata["GroupID"].ToString();
+                rolemember.Principal = new UUI(reqdata["AgentID"].ToString());
+                rolemember.RoleID = reqdata["RoleID"].ToString();
+            }
+            catch
+            {
+                req.ErrorResponse(HttpStatusCode.BadRequest);
+                return;
+            }
+
+            if(m_GroupsService.Members.ContainsKey(requestingAgent, rolemember.Group, rolemember.Principal))
+            {
+                try
+                {
+                    m_GroupsService.Rolemembers.Add(requestingAgent, rolemember);
+                }
+                catch
+                {
+                    SendBooleanResponse(req, false);
+                    return;
+                }
+                SendBooleanResponse(req, true);
+            }
+            SendBooleanResponse(req, false);
+        }
+
+        void HandleAgentRoleDelete(HttpRequest req, Dictionary<string, object> reqdata)
+        {
+            UUI requestingAgent;
+            UUID groupID;
+            UUID roleID;
+            UUI agent;
+            try
+            {
+                requestingAgent = new UUI(reqdata["RequestingAgentID"].ToString());
+                agent = new UUI(reqdata["AgentID"].ToString());
+                groupID = reqdata["GroupID"].ToString();
+                roleID = reqdata["RoleID"].ToString();
+            }
+            catch
+            {
+                req.ErrorResponse(HttpStatusCode.BadRequest);
+                return;
+            }
+            if(UUID.Zero == roleID)
+            {
+                req.ErrorResponse(HttpStatusCode.BadRequest);
+                return;
+            }
+
+            try
+            {
+                m_GroupsService.Rolemembers.Delete(requestingAgent, new UGI(groupID), roleID, agent);
+            }
+            catch
+            {
+                SendBooleanResponse(req, false);
+                return;
+            }
+            SendBooleanResponse(req, true);
         }
         #endregion
 
@@ -509,6 +822,53 @@ namespace SilverSim.BackendHandlers.Robust.Groups
         }
         #endregion
 
+        void HandleGetAgentRoles(HttpRequest req, Dictionary<string, object> reqdata)
+        {
+            UUI requestingAgent;
+            UUID groupID;
+            UUI agentID;
+            try
+            {
+                requestingAgent = new UUI(reqdata["RequestingAgentID"].ToString());
+                groupID = reqdata["GroupID"].ToString();
+                agentID = new UUI(reqdata["AgentID"].ToString());
+            }
+            catch
+            {
+                req.ErrorResponse(HttpStatusCode.BadRequest);
+                return;
+            }
+
+            GroupMember member;
+            if(m_GroupsService.Members.TryGetValue(requestingAgent, new UGI(groupID), agentID, out member))
+            {
+                List<GroupRole> roles = m_GroupsService.Roles[requestingAgent, member.Group, member.Principal];
+                if(roles.Count != 0)
+                {
+                    using (HttpResponse res = req.BeginResponse("text/xml"))
+                    {
+                        using (XmlTextWriter writer = res.GetOutputStream().UTF8XmlTextWriter())
+                        {
+                            writer.WriteStartElement("ServerResponse");
+                            writer.WriteStartElement("RESULT");
+                            writer.WriteAttributeString("type", "List");
+                            roles.ToXml(writer);
+                            writer.WriteEndElement();
+                            writer.WriteEndElement();
+                        }
+                    }
+                }
+                else
+                {
+                    SendNullResult(req, "No members");
+                }
+            }
+            else
+            {
+                SendNullResult(req, "No members");
+            }
+        }
+
         void HandleRemoveRole(HttpRequest req, Dictionary<string, object> reqdata)
         {
             UUI requestingAgent;
@@ -557,6 +917,10 @@ namespace SilverSim.BackendHandlers.Robust.Groups
             {
                 case "ADD":
                     HandlePutGroupAdd(req, reqdata);
+                    break;
+
+                case "UPDATE":
+                    HandlePutGroupUpdate(req, reqdata);
                     break;
 
                 default:
@@ -632,7 +996,171 @@ namespace SilverSim.BackendHandlers.Robust.Groups
                 }
             }
         }
+
+        void HandlePutGroupUpdate(HttpRequest req, Dictionary<string, object> reqdata)
+        {
+            UUI requestingAgentID;
+            UUID groupID;
+            try
+            {
+                requestingAgentID = new UUI(reqdata["RequestingAgentID"].ToString());
+                groupID = reqdata["GroupID"].ToString();
+            }
+            catch
+            {
+                req.ErrorResponse(HttpStatusCode.BadRequest);
+                return;
+            }
+
+            GroupInfo groupInfo;
+            if(!m_GroupsService.Groups.TryGetValue(requestingAgentID, new UGI(groupID), out groupInfo))
+            {
+                SendNullResult(req, string.Empty);
+                return;
+            }
+
+            try
+            {
+                if (reqdata.ContainsKey("Charter"))
+                {
+                    groupInfo.Charter = reqdata["Charter"].ToString();
+                }
+                if (reqdata.ContainsKey("ShownInList"))
+                {
+                    groupInfo.IsShownInList = GroupsV2ExtensionMethods.String2Boolean(reqdata["ShownInList"].ToString());
+                }
+                if (reqdata.ContainsKey("InsigniaID"))
+                {
+                    groupInfo.InsigniaID = reqdata["InsigniaID"].ToString();
+                }
+                if(reqdata.ContainsKey("MembershipFee"))
+                {
+                    groupInfo.MembershipFee = int.Parse(reqdata["MembershipFee"].ToString());
+                }
+                if(reqdata.ContainsKey("OpenEnrollment"))
+                {
+                    groupInfo.IsOpenEnrollment = GroupsV2ExtensionMethods.String2Boolean(reqdata["OpenEnrollment"].ToString());
+                }
+                if(reqdata.ContainsKey("AllowPublish"))
+                {
+                    groupInfo.IsAllowPublish = GroupsV2ExtensionMethods.String2Boolean(reqdata["AllowPublish"].ToString());
+                }
+                if(reqdata.ContainsKey("MaturePublish"))
+                {
+                    groupInfo.IsMaturePublish = GroupsV2ExtensionMethods.String2Boolean(reqdata["MaturePublish"].ToString());
+                }
+            }
+            catch
+            {
+                req.ErrorResponse(HttpStatusCode.BadRequest);
+                return;
+            }
+
+            try
+            {
+                groupInfo = m_GroupsService.Groups.Update(requestingAgentID, groupInfo);
+            }
+            catch
+            {
+                SendNullResult(req, string.Empty);
+                return;
+            }
+
+            using (HttpResponse res = req.BeginResponse("text/xml"))
+            {
+                using (XmlTextWriter writer = res.GetOutputStream().UTF8XmlTextWriter())
+                {
+                    writer.WriteStartElement("ServerResponse");
+                    groupInfo.ToXml(writer, "RESULT");
+                    writer.WriteEndElement();
+                }
+            }
+        }
         #endregion
+
+        void HandleGetNotices(HttpRequest req, Dictionary<string, object> reqdata)
+        {
+            UUI requestingAgentID;
+            try
+            {
+                requestingAgentID = new UUI(reqdata["RequestingAgentID"].ToString());
+            }
+            catch
+            {
+                req.ErrorResponse(HttpStatusCode.BadRequest);
+                return;
+            }
+
+            if(reqdata.ContainsKey("NoticeID"))
+            {
+                UUID noticeID;
+                try
+                {
+                    noticeID = reqdata["NoticeID"].ToString();
+                }
+                catch
+                {
+                    req.ErrorResponse(HttpStatusCode.BadRequest);
+                    return;
+                }
+
+                GroupNotice notice;
+                if (m_GroupsService.Notices.TryGetValue(requestingAgentID, noticeID, out notice))
+                {
+                    using (HttpResponse res = req.BeginResponse("text/xml"))
+                    {
+                        using (XmlTextWriter writer = res.GetOutputStream().UTF8XmlTextWriter())
+                        {
+                            writer.WriteStartElement("ServerResponse");
+                            notice.ToXml(writer, "RESULT");
+                            writer.WriteEndElement();
+                        }
+                    }
+                }
+                else
+                {
+                    SendNullResult(req, "Not found");
+                }
+            }
+            else if(reqdata.ContainsKey("GroupID"))
+            {
+                UUID groupID;
+                try
+                {
+                    groupID = reqdata["GroupID"].ToString();
+                }
+                catch
+                {
+                    req.ErrorResponse(HttpStatusCode.BadRequest);
+                    return;
+                }
+
+                List<GroupNotice> notices = m_GroupsService.Notices.GetNotices(requestingAgentID, new UGI(groupID));
+                if (notices.Count != 0)
+                {
+                    using (HttpResponse res = req.BeginResponse("text/xml"))
+                    {
+                        using (XmlTextWriter writer = res.GetOutputStream().UTF8XmlTextWriter())
+                        {
+                            writer.WriteStartElement("ServerResponse");
+                            writer.WriteStartElement("RESULT");
+                            writer.WriteAttributeString("type", "List");
+                            notices.ToXml(writer);
+                            writer.WriteEndElement();
+                            writer.WriteEndElement();
+                        }
+                    }
+                }
+                else
+                {
+                    SendNullResult(req, "No group notices");
+                }
+            }
+            else
+            {
+                req.ErrorResponse(HttpStatusCode.BadRequest);
+            }
+        }
     }
     #endregion
 

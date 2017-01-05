@@ -136,5 +136,72 @@ namespace SilverSim.BackendHandlers.Robust.Groups
                 ++index;
             }
         }
+
+        public static void ToXml(this GroupNotice notice, XmlTextWriter writer, string tagname)
+        {
+            writer.WriteStartElement(tagname);
+            writer.WriteAttributeString("type", "List");
+            writer.WriteNamedValue("GroupID", notice.Group.ID);
+            writer.WriteNamedValue("NoticeID", notice.ID);
+            writer.WriteNamedValue("Timestamp", notice.Timestamp.AsULong.ToString());
+            writer.WriteNamedValue("FromName", notice.FromName);
+            writer.WriteNamedValue("Subject", notice.Subject);
+            writer.WriteNamedValue("Message", notice.Message);
+            writer.WriteNamedValue("HasAttachment", Boolean2String(notice.HasAttachment));
+            writer.WriteNamedValue("AttachmentItemID", notice.AttachmentItemID);
+            writer.WriteNamedValue("AttachmentName", notice.AttachmentName);
+            writer.WriteNamedValue("AttachmentType", (int)notice.AttachmentType);
+            writer.WriteNamedValue("AttachmentOwnerID", notice.AttachmentOwner.ID);
+            writer.WriteEndElement();
+        }
+
+        public static void ToXml(this List<GroupNotice> notices, XmlTextWriter writer)
+        {
+            int index = 0;
+            foreach(GroupNotice notice in notices)
+            {
+                notice.ToXml(writer, "n-" + index.ToString());
+                ++index;
+            }
+        }
+
+        public static void ToXml(this GroupRolemember rolemember, XmlTextWriter writer, string tagname, bool excludePowers)
+        {
+            writer.WriteStartElement(tagname);
+            writer.WriteAttributeString("type", "List");
+            writer.WriteNamedValue("RoleID", rolemember.RoleID);
+            writer.WriteNamedValue("MemberID", rolemember.Principal.ID);
+            if (!excludePowers)
+            {
+                writer.WriteNamedValue("Powers", ((ulong)rolemember.Powers).ToString());
+            }
+            writer.WriteEndElement();
+        }
+
+        public static void ToXml(this List<GroupRolemember> rolemembers, XmlTextWriter writer, bool excludePowers)
+        {
+            int index = 0;
+            foreach(GroupRolemember rolemember in rolemembers)
+            {
+                rolemember.ToXml(writer, "rm-" + index.ToString(), excludePowers);
+                ++index;
+            }
+        }
+
+        public static void ToXml(this GroupMember member, XmlTextWriter writer, string tagname, GroupPowers powers, bool isOwner, string groupTitle)
+        {
+            writer.WriteStartElement(tagname);
+            writer.WriteAttributeString("type", "List");
+            writer.WriteNamedValue("AcceptNotices", Boolean2String(member.IsAcceptNotices));
+            writer.WriteNamedValue("AccessToken", member.AccessToken);
+            writer.WriteNamedValue("AgentID", member.Principal.ID);
+            writer.WriteNamedValue("AgentPowers", ((ulong)powers).ToString());
+            writer.WriteNamedValue("Contribution", member.Contribution);
+            writer.WriteNamedValue("IsOwner", isOwner);
+            writer.WriteNamedValue("ListInProfile", Boolean2String(member.IsListInProfile));
+            writer.WriteNamedValue("OnlineStatus", false);
+            writer.WriteNamedValue("Title", groupTitle);
+            writer.WriteEndElement();
+        }
     }
 }
