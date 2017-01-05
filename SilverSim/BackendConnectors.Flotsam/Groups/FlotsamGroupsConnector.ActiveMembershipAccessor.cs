@@ -1,6 +1,7 @@
 ﻿// SilverSim is distributed under the terms of the
 // GNU Affero General Public License v3
 
+using SilverSim.ServiceInterfaces.Groups;
 using SilverSim.Types;
 using SilverSim.Types.Groups;
 using System;
@@ -10,83 +11,76 @@ using System.Text;
 
 namespace SilverSim.BackendConnectors.Flotsam.Groups
 {
-    public partial class FlotsamGroupsConnector
+    public partial class FlotsamGroupsConnector : GroupsServiceInterface.IActiveGroupMembershipInterface
     {
-        public sealed class ActiveGroupMembershipAccessor : FlotsamGroupsCommonConnector, IActiveGroupMembershipInterface
+        bool IActiveGroupMembershipInterface.TryGetValue(UUI requestingAgent, UUI principal, out GroupActiveMembership gam)
         {
-            public ActiveGroupMembershipAccessor(string uri)
-                : base(uri)
+            Map m = new Map();
+            m["AgentID"] = principal.ID;
+            m = FlotsamXmlRpcGetCall(requestingAgent, "groups.getAgentActiveMembership", m) as Map;
+            if (m == null)
             {
+                gam = default(GroupActiveMembership);
+                return false;
             }
 
-            public bool TryGetValue(UUI requestingAgent, UUI principal, out GroupActiveMembership gam)
+            if (m.ContainsKey("error"))
             {
-                Map m = new Map();
-                m["AgentID"] = principal.ID;
-                m = FlotsamXmlRpcGetCall(requestingAgent, "groups.getAgentActiveMembership", m) as Map;
-                if (m == null)
+                if (m["error"].ToString() == "No Active Group Specified")
                 {
-                    gam = default(GroupActiveMembership);
-                    return false;
+                    gam = new GroupActiveMembership();
+                    gam.Group = UGI.Unknown;
+                    gam.SelectedRoleID = UUID.Zero;
+                    gam.User = principal;
+                    return true;
                 }
-
-                if (m.ContainsKey("error"))
-                {
-                    if (m["error"].ToString() == "No Active Group Specified")
-                    {
-                        gam = new GroupActiveMembership();
-                        gam.Group = UGI.Unknown;
-                        gam.SelectedRoleID = UUID.Zero;
-                        gam.User = principal;
-                        return true;
-                    }
-                    gam = default(GroupActiveMembership);
-                    return false;
-                }
-
-                gam = new GroupActiveMembership();
-                gam.Group = UGI.Unknown;
-                gam.SelectedRoleID = UUID.Zero;
-                gam.User = principal;
-                gam.Group.ID = m["GroupID"].AsUUID;
-                gam.Group.GroupName = m["GroupName"].ToString();
-                gam.SelectedRoleID = m["SelectedRoleID"].AsUUID;
-                return true;
+                gam = default(GroupActiveMembership);
+                return false;
             }
 
-            public bool ContainsKey(UUI requestingAgent, UUI principal)
+            gam = new GroupActiveMembership();
+            gam.Group = UGI.Unknown;
+            gam.SelectedRoleID = UUID.Zero;
+            gam.User = principal;
+            gam.Group.ID = m["GroupID"].AsUUID;
+            gam.Group.GroupName = m["GroupName"].ToString();
+            gam.SelectedRoleID = m["SelectedRoleID"].AsUUID;
+            gam.User = m_AvatarNameService.ResolveName(gam.User);
+            return true;
+        }
+
+        bool IActiveGroupMembershipInterface.ContainsKey(UUI requestingAgent, UUI principal)
+        {
+            Map m = new Map();
+            m["AgentID"] = principal.ID;
+            m = FlotsamXmlRpcGetCall(requestingAgent, "groups.getAgentActiveMembership", m) as Map;
+            if (m == null)
             {
-                Map m = new Map();
-                m["AgentID"] = principal.ID;
-                m = FlotsamXmlRpcGetCall(requestingAgent, "groups.getAgentActiveMembership", m) as Map;
-                if (m == null)
-                {
-                    return false;
-                }
-
-                if (m.ContainsKey("error"))
-                {
-                    if (m["error"].ToString() == "No Active Group Specified")
-                    {
-                        return true;
-                    }
-                    return false;
-                }
-
-                return true;
+                return false;
             }
 
-            public GroupActiveMembership this[UUI requestingAgent, UUI principal]
+            if (m.ContainsKey("error"))
             {
-                get 
+                if (m["error"].ToString() == "No Active Group Specified")
                 {
-                    GroupActiveMembership gam;
-                    if(!TryGetValue(requestingAgent, principal, out gam))
-                    {
-                        throw new AccessFailedException();
-                    }
-                    return gam;
+                    return true;
                 }
+                return false;
+            }
+
+            return true;
+        }
+
+        GroupActiveMembership IActiveGroupMembershipInterface.this[UUI requestingAgent, UUI principal]
+        {
+            get 
+            {
+                GroupActiveMembership gam;
+                if(!ActiveMembership.TryGetValue(requestingAgent, principal, out gam))
+                {
+                    throw new AccessFailedException();
+                }
+                return gam;
             }
         }
     }

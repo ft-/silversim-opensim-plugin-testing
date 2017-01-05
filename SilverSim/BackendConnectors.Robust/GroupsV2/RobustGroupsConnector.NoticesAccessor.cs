@@ -91,6 +91,30 @@ namespace SilverSim.BackendConnectors.Robust.GroupsV2
                 return true;
             }
 
+            public bool ContainsKey(UUI requestingAgent, UUID groupNoticeID)
+            {
+                Dictionary<string, string> post = new Dictionary<string, string>();
+                post["InviteID"] = (string)groupNoticeID;
+                post["RequestingAgentID"] = m_GetGroupsAgentID(requestingAgent);
+                post["OP"] = "GET";
+                post["METHOD"] = "INVITE";
+                Map m;
+                using (Stream s = HttpClient.DoStreamPostRequest(m_Uri, null, post, false, TimeoutMs))
+                {
+                    m = OpenSimResponse.Deserialize(s);
+                }
+                if (!m.ContainsKey("RESULT"))
+                {
+                    return false;
+                }
+                if (m["RESULT"].ToString() == "NULL")
+                {
+                    return false;
+                }
+
+                return true;
+            }
+
             public GroupNotice this[UUI requestingAgent, UUID groupNoticeID]
             {
                 get 

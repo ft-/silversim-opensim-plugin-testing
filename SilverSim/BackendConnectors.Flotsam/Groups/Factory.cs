@@ -24,7 +24,7 @@ namespace SilverSim.BackendConnectors.Flotsam.Groups
                 m_Log.FatalFormat("Missing 'URI' in section {0}", ownSection.Name);
                 throw new ConfigurationLoader.ConfigurationErrorException();
             }
-            return new FlotsamGroupsConnector(ownSection.GetString("URI"));
+            return new FlotsamGroupsConnector(ownSection.GetString("URI"), ownSection.GetString("AvatarNameServices", "AvatarNameStorage"));
         }
     }
 }

@@ -3,7 +3,9 @@
 
 using SilverSim.Main.Common;
 using SilverSim.Main.Common.Rpc;
+using SilverSim.ServiceInterfaces.AvatarName;
 using SilverSim.ServiceInterfaces.Groups;
+using SilverSim.Threading;
 using SilverSim.Types;
 using SilverSim.Types.StructuredData.XmlRpc;
 using System;
@@ -52,124 +54,85 @@ namespace SilverSim.BackendConnectors.Flotsam.Groups
     [Description("XmlRpc Groups Connector")]
     public partial class FlotsamGroupsConnector : GroupsServiceInterface, IPlugin
     {
-        readonly GroupsAccessor m_Groups;
-        readonly GroupRolesAccessor m_GroupRoles;
-        readonly MembersAccessor m_Members;
-        readonly RoleMembersAccessor m_Rolemembers;
-        readonly ActiveGroupAccessor m_ActiveGroup;
-        readonly MembershipsAccessor m_Memberships;
-        readonly InvitesAccessor m_Invites;
-        readonly NoticesAccessor m_Notices;
-        readonly ActiveGroupMembershipAccessor m_ActiveGroupMembership;
-        int m_TimeoutMs = 20000;
+        AvatarNameServiceInterface m_AvatarNameService;
+        readonly string m_AvatarNameServiceNames;
+        readonly string m_ReadKey = string.Empty;
+        readonly string m_WriteKey = string.Empty;
+        readonly string m_Uri;
 
-        public int TimeoutMs
-        {
-            get
-            {
-                return m_TimeoutMs;
-            }
-            set
-            {
-                m_TimeoutMs = value;
-                m_Groups.TimeoutMs = value;
-                m_GroupRoles.TimeoutMs = value;
-                m_Members.TimeoutMs = value;
-                m_Memberships.TimeoutMs = value;
-                m_Rolemembers.TimeoutMs = value;
-                m_ActiveGroup.TimeoutMs = value;
-                m_Invites.TimeoutMs = value;
-                m_Notices.TimeoutMs = value;
-                m_ActiveGroupMembership.TimeoutMs = value;
-            }
-        }
+        public int TimeoutMs { get; set; }
 
-        public FlotsamGroupsConnector(string uri)
+        public FlotsamGroupsConnector(string uri, string avatarNameServiceNames)
         {
-            m_Groups = new GroupsAccessor(uri);
-            m_GroupRoles = new GroupRolesAccessor(uri);
-            m_Members = new MembersAccessor(uri);
-            m_Memberships = new MembershipsAccessor(uri);
-            m_Rolemembers = new RoleMembersAccessor(uri);
-            m_ActiveGroup = new ActiveGroupAccessor(uri);
-            m_Invites = new InvitesAccessor(uri);
-            m_Notices = new NoticesAccessor(uri);
-            m_ActiveGroupMembership = new ActiveGroupMembershipAccessor(uri);
+            m_Uri = uri;
+            TimeoutMs = 20000;
+            m_AvatarNameServiceNames = avatarNameServiceNames.Trim();
         }
 
         public void Startup(ConfigurationLoader loader)
         {
-            /* no action needed */
+            RwLockedList<AvatarNameServiceInterface> list = new RwLockedList<AvatarNameServiceInterface>();
+            foreach(string name in m_AvatarNameServiceNames.Split(','))
+            {
+                list.Add(loader.GetService<AvatarNameServiceInterface>(name.Trim()));
+            }
+            m_AvatarNameService = new AggregatingAvatarNameService(list);
         }
 
-        public class FlotsamGroupsCommonConnector
+
+        protected IValue FlotsamXmlRpcCall(UUI requestingAgent, string methodName, Map structparam)
         {
-            readonly string m_Uri;
-            public int TimeoutMs = 20000;
-            readonly string m_ReadKey = string.Empty;
-            readonly string m_WriteKey = string.Empty;
-
-            public FlotsamGroupsCommonConnector(string uri)
+            XmlRpc.XmlRpcRequest req = new XmlRpc.XmlRpcRequest();
+            req.MethodName = methodName;
+            structparam.Add("RequestingAgentID", requestingAgent.ID);
+            structparam.Add("RequestingAgentUserService", requestingAgent.HomeURI);
+            structparam.Add("RequestingSessionID", UUID.Zero);
+            structparam.Add("ReadKey", m_ReadKey);
+            structparam.Add("WriteKey", m_WriteKey);
+            req.Params.Add(structparam);
+            XmlRpc.XmlRpcResponse res = RPC.DoXmlRpcRequest(m_Uri, req, TimeoutMs);
+            if (!(res.ReturnValue is Map))
             {
-                m_Uri = uri;
+                throw new InvalidDataException("Unexpected FlotsamGroups return value");
+            }
+            Map p = (Map)res.ReturnValue;
+            if (!p.ContainsKey("success"))
+            {
+                throw new InvalidDataException("Unexpected FlotsamGroups return value");
             }
 
-            protected IValue FlotsamXmlRpcCall(UUI requestingAgent, string methodName, Map structparam)
+            if (p["success"].ToString().ToLower() != "true")
             {
-                XmlRpc.XmlRpcRequest req = new XmlRpc.XmlRpcRequest();
-                req.MethodName = methodName;
-                structparam.Add("RequestingAgentID", requestingAgent.ID);
-                structparam.Add("RequestingAgentUserService", requestingAgent.HomeURI);
-                structparam.Add("RequestingSessionID", UUID.Zero);
-                structparam.Add("ReadKey", m_ReadKey);
-                structparam.Add("WriteKey", m_WriteKey);
-                req.Params.Add(structparam);
-                XmlRpc.XmlRpcResponse res = RPC.DoXmlRpcRequest(m_Uri, req, TimeoutMs);
-                if (!(res.ReturnValue is Map))
-                {
-                    throw new InvalidDataException("Unexpected FlotsamGroups return value");
-                }
-                Map p = (Map)res.ReturnValue;
-                if (!p.ContainsKey("success"))
-                {
-                    throw new InvalidDataException("Unexpected FlotsamGroups return value");
-                }
-
-                if (p["success"].ToString().ToLower() != "true")
-                {
-                    throw new KeyNotFoundException();
-                }
-                return (p.ContainsKey("results")) ? p["results"] : null /* some calls have no data */;
+                throw new KeyNotFoundException();
             }
-
-            protected IValue FlotsamXmlRpcGetCall(UUI requestingAgent, string methodName, Map structparam)
-            {
-                XmlRpc.XmlRpcRequest req = new XmlRpc.XmlRpcRequest();
-                req.MethodName = methodName;
-                structparam.Add("RequestingAgentID", requestingAgent.ID);
-                structparam.Add("RequestingAgentUserService", requestingAgent.HomeURI);
-                structparam.Add("RequestingSessionID", UUID.Zero);
-                structparam.Add("ReadKey", m_ReadKey);
-                structparam.Add("WriteKey", m_WriteKey);
-                req.Params.Add(structparam);
-                XmlRpc.XmlRpcResponse res = RPC.DoXmlRpcRequest(m_Uri, req, TimeoutMs);
-                Map p = res.ReturnValue as Map;
-                if (null != p && p.ContainsKey("error"))
-                {
-                    throw new InvalidDataException("Unexpected FlotsamGroups return value");
-                }
-                
-                return res.ReturnValue;
-            }
-
+            return (p.ContainsKey("results")) ? p["results"] : null /* some calls have no data */;
         }
 
+        protected IValue FlotsamXmlRpcGetCall(UUI requestingAgent, string methodName, Map structparam)
+        {
+            XmlRpc.XmlRpcRequest req = new XmlRpc.XmlRpcRequest();
+            req.MethodName = methodName;
+            structparam.Add("RequestingAgentID", requestingAgent.ID);
+            structparam.Add("RequestingAgentUserService", requestingAgent.HomeURI);
+            structparam.Add("RequestingSessionID", UUID.Zero);
+            structparam.Add("ReadKey", m_ReadKey);
+            structparam.Add("WriteKey", m_WriteKey);
+            req.Params.Add(structparam);
+            XmlRpc.XmlRpcResponse res = RPC.DoXmlRpcRequest(m_Uri, req, TimeoutMs);
+            Map p = res.ReturnValue as Map;
+            if (null != p && p.ContainsKey("error"))
+            {
+                throw new InvalidDataException("Unexpected FlotsamGroups return value");
+            }
+                
+            return res.ReturnValue;
+        }
 
         public override IGroupsInterface Groups
         {
             get
             {
-                return m_Groups;
+                return this;
             }
         }
 
@@ -177,7 +140,7 @@ namespace SilverSim.BackendConnectors.Flotsam.Groups
         {
             get
             {
-                return m_GroupRoles;
+                return this;
             }
         }
 
@@ -185,7 +148,7 @@ namespace SilverSim.BackendConnectors.Flotsam.Groups
         {
             get
             {
-                return m_Members;
+                return this;
             }
         }
 
@@ -193,7 +156,7 @@ namespace SilverSim.BackendConnectors.Flotsam.Groups
         {
             get 
             {
-                return m_Memberships;
+                return this;
             }
         }
 
@@ -201,7 +164,7 @@ namespace SilverSim.BackendConnectors.Flotsam.Groups
         {
             get
             {
-                return m_Rolemembers;
+                return this;
             }
         }
 
@@ -209,7 +172,7 @@ namespace SilverSim.BackendConnectors.Flotsam.Groups
         {
             get
             {
-                return m_ActiveGroup;
+                return this;
             }
         }
 
@@ -217,7 +180,7 @@ namespace SilverSim.BackendConnectors.Flotsam.Groups
         {
             get 
             {
-                return m_ActiveGroupMembership;
+                return this;
             }
         }
 
@@ -225,7 +188,7 @@ namespace SilverSim.BackendConnectors.Flotsam.Groups
         {
             get
             {
-                return m_Invites;
+                return this;
             }
         }
 
@@ -233,7 +196,7 @@ namespace SilverSim.BackendConnectors.Flotsam.Groups
         {
             get
             {
-                return m_Notices;
+                return this;
             }
         }
     }

@@ -1,6 +1,7 @@
 ﻿// SilverSim is distributed under the terms of the
 // GNU Affero General Public License v3
 
+using SilverSim.ServiceInterfaces.AvatarName;
 using SilverSim.Types;
 using SilverSim.Types.Groups;
 using System;
@@ -9,7 +10,7 @@ namespace SilverSim.BackendConnectors.Flotsam.Groups
 {
     public static class FlotsamExtensionMethods
     {
-        public static GroupInfo ToGroupInfo(this Map m)
+        public static GroupInfo ToGroupInfo(this Map m, AvatarNameServiceInterface avatarNameService)
         {
             GroupInfo gi = new GroupInfo();
             gi.ID.ID = m["GroupID"].AsUUID;
@@ -23,6 +24,7 @@ namespace SilverSim.BackendConnectors.Flotsam.Groups
             gi.IsAllowPublish = Convert.ToBoolean(m["AllowPublish"].ToString());
             gi.IsMaturePublish = Convert.ToBoolean(m["MaturePublish"].ToString());
             gi.OwnerRoleID = m["OwnerRoleID"].AsUUID;
+            gi.Founder = avatarNameService.ResolveName(gi.Founder);
             return gi;
         }
 
@@ -35,7 +37,7 @@ namespace SilverSim.BackendConnectors.Flotsam.Groups
             return gi;
         }
 
-        public static GroupMember ToGroupMember(this Map m, UGI group)
+        public static GroupMember ToGroupMember(this Map m, UGI group, AvatarNameServiceInterface avatarNameService)
         {
             GroupMember gmem = new GroupMember();
             gmem.IsListInProfile = Convert.ToBoolean(m["ListInProfile"].ToString());
@@ -44,10 +46,11 @@ namespace SilverSim.BackendConnectors.Flotsam.Groups
             gmem.SelectedRoleID = m["SelectedRoleID"].AsUUID;
             gmem.Principal.ID = m["AgentID"].AsUUID;
             gmem.Group = group;
+            gmem.Principal = avatarNameService.ResolveName(gmem.Principal);
             return gmem;
         }
 
-        public static GroupMember ToGroupMember(this Map m)
+        public static GroupMember ToGroupMember(this Map m, AvatarNameServiceInterface avatarNameService)
         {
             GroupMember gmem = new GroupMember();
             gmem.IsListInProfile = Convert.ToBoolean(m["ListInProfile"].ToString());
@@ -55,12 +58,13 @@ namespace SilverSim.BackendConnectors.Flotsam.Groups
             gmem.IsAcceptNotices = Convert.ToBoolean(m["AcceptNotices"].ToString());
             gmem.SelectedRoleID = m["SelectedRoleID"].AsUUID;
             gmem.Principal.ID = m["AgentID"].AsUUID;
+            gmem.Principal = avatarNameService.ResolveName(gmem.Principal);
             gmem.Group.ID = m["GroupID"].AsUUID;
             gmem.Group.GroupName = m["GroupName"].ToString();
             return gmem;
         }
 
-        public static GroupMembership ToGroupMembership(this Map m)
+        public static GroupMembership ToGroupMembership(this Map m, AvatarNameServiceInterface avatarNameService)
         {
             GroupMembership gmem = new GroupMembership();
             gmem.IsListInProfile = Convert.ToBoolean(m["ListInProfile"].ToString());
@@ -69,12 +73,14 @@ namespace SilverSim.BackendConnectors.Flotsam.Groups
             gmem.GroupTitle = m["Title"].ToString();
             gmem.GroupPowers = (GroupPowers)ulong.Parse(m["GroupPowers"].ToString());
             gmem.Principal.ID = m["AgentID"].AsUUID;
+            gmem.Principal = avatarNameService.ResolveName(gmem.Principal);
             gmem.Group.ID = m["GroupID"].AsUUID;
             gmem.Group.GroupName = m["GroupName"].ToString();
             gmem.IsAllowPublish = Convert.ToBoolean(m["AllowPublish"].ToString());
             gmem.Charter = m["Charter"].ToString();
             gmem.ActiveRoleID = m["SelectedRoleID"].ToString();
             gmem.Founder.ID = m["FounderID"].ToString();
+            gmem.Founder = avatarNameService.ResolveName(gmem.Founder);
             gmem.AccessToken = string.Empty;
             gmem.IsMaturePublish = Convert.ToBoolean(m["MaturePublish"].ToString());
             gmem.IsOpenEnrollment = Convert.ToBoolean(m["OpenEnrollment"].ToString());
@@ -84,32 +90,35 @@ namespace SilverSim.BackendConnectors.Flotsam.Groups
             return gmem;
         }
 
-        public static GroupRolemember ToGroupRolemember(this Map m, UGI group)
+        public static GroupRolemember ToGroupRolemember(this Map m, UGI group, AvatarNameServiceInterface avatarNameService)
         {
             GroupRolemember gmem = new GroupRolemember();
             gmem.RoleID = m["RoleID"].AsUUID;
             gmem.Principal.ID = m["AgentID"].AsUUID;
             gmem.Group = group;
+            gmem.Principal = avatarNameService.ResolveName(gmem.Principal);
             return gmem;
         }
 
-        public static GroupRolemembership ToGroupRolemembership(this Map m, UGI group)
+        public static GroupRolemembership ToGroupRolemembership(this Map m, UGI group, AvatarNameServiceInterface avatarNameService)
         {
             GroupRolemembership gmem = new GroupRolemembership();
             gmem.RoleID = m["RoleID"].AsUUID;
             gmem.Principal.ID = m["AgentID"].AsUUID;
             gmem.GroupTitle = m["Title"].ToString();
             gmem.Group = group;
+            gmem.Principal = avatarNameService.ResolveName(gmem.Principal);
             return gmem;
         }
 
-        public static GroupRolemembership ToGroupRolemembership(this Map m)
+        public static GroupRolemembership ToGroupRolemembership(this Map m, AvatarNameServiceInterface avatarNameService)
         {
             GroupRolemembership gmem = new GroupRolemembership();
             gmem.RoleID = m["RoleID"].AsUUID;
             gmem.Principal.ID = m["AgentID"].AsUUID;
             gmem.GroupTitle = m["Title"].ToString();
             gmem.Group.ID = m["GroupID"].AsUUID;
+            gmem.Principal = avatarNameService.ResolveName(gmem.Principal);
             return gmem;
         }
 

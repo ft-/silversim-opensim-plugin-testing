@@ -1,6 +1,7 @@
 ﻿// SilverSim is distributed under the terms of the
 // GNU Affero General Public License v3
 
+using SilverSim.ServiceInterfaces.Groups;
 using SilverSim.Types;
 using SilverSim.Types.Groups;
 using System;
@@ -8,17 +9,35 @@ using System.Collections.Generic;
 
 namespace SilverSim.BackendConnectors.Flotsam.Groups
 {
-    public partial class FlotsamGroupsConnector
+    public partial class FlotsamGroupsConnector : GroupsServiceInterface.IGroupMembershipsInterface
     {
-        public sealed class MembershipsAccessor : FlotsamGroupsCommonConnector, IGroupMembershipsInterface
+        bool IGroupMembershipsInterface.TryGetValue(UUI requestingAgent, UGI group, UUI principal, out GroupMembership gmem)
         {
-            public MembershipsAccessor(string uri)
-                : base(uri)
+            Map m = new Map();
+            m.Add("AgentID", principal.ID);
+            m.Add("GroupID", group.ID);
+            m = FlotsamXmlRpcGetCall(requestingAgent, "groups.getAgentGroupMembership", m) as Map;
+            if (null == m)
             {
-
+                gmem = default(GroupMembership);
+                return false;
             }
+            gmem = m.ToGroupMembership(m_AvatarNameService);
+            return true;
+        }
 
-            public bool TryGetValue(UUI requestingAgent, UGI group, UUI principal, out GroupMembership gmem)
+        bool IGroupMembershipsInterface.ContainsKey(UUI requestingAgent, UGI group, UUI principal)
+        {
+            Map m = new Map();
+            m.Add("AgentID", principal.ID);
+            m.Add("GroupID", group.ID);
+            m = FlotsamXmlRpcGetCall(requestingAgent, "groups.getAgentGroupMembership", m) as Map;
+            return null != m;
+        }
+
+        GroupMembership IGroupMembershipsInterface.this[UUI requestingAgent, UGI group, UUI principal]
+        {
+            get
             {
                 Map m = new Map();
                 m.Add("AgentID", principal.ID);
@@ -26,60 +45,33 @@ namespace SilverSim.BackendConnectors.Flotsam.Groups
                 m = FlotsamXmlRpcGetCall(requestingAgent, "groups.getAgentGroupMembership", m) as Map;
                 if (null == m)
                 {
-                    gmem = default(GroupMembership);
-                    return false;
+                    throw new AccessFailedException();
                 }
-                gmem = m.ToGroupMembership();
-                return true;
+                return m.ToGroupMembership(m_AvatarNameService);
             }
+        }
 
-            public bool ContainsKey(UUI requestingAgent, UGI group, UUI principal)
+        List<GroupMembership> IGroupMembershipsInterface.this[UUI requestingAgent, UUI principal]
+        {
+            get 
             {
                 Map m = new Map();
                 m.Add("AgentID", principal.ID);
-                m.Add("GroupID", group.ID);
-                m = FlotsamXmlRpcGetCall(requestingAgent, "groups.getAgentGroupMembership", m) as Map;
-                return null != m;
-            }
-
-            public GroupMembership this[UUI requestingAgent, UGI group, UUI principal]
-            {
-                get
+                AnArray res = FlotsamXmlRpcGetCall(requestingAgent, "groups.getAgentGroupMemberships", m) as AnArray;
+                if (null == res)
                 {
-                    Map m = new Map();
-                    m.Add("AgentID", principal.ID);
-                    m.Add("GroupID", group.ID);
-                    m = FlotsamXmlRpcGetCall(requestingAgent, "groups.getAgentGroupMembership", m) as Map;
-                    if (null == m)
-                    {
-                        throw new AccessFailedException();
-                    }
-                    return m.ToGroupMembership();
+                    throw new AccessFailedException();
                 }
-            }
-
-            public List<GroupMembership> this[UUI requestingAgent, UUI principal]
-            {
-                get 
+                List<GroupMembership> gmems = new List<GroupMembership>();
+                foreach (IValue iv in res)
                 {
-                    Map m = new Map();
-                    m.Add("AgentID", principal.ID);
-                    AnArray res = FlotsamXmlRpcGetCall(requestingAgent, "groups.getAgentGroupMemberships", m) as AnArray;
-                    if (null == res)
+                    Map data = iv as Map;
+                    if (null != data)
                     {
-                        throw new AccessFailedException();
+                        gmems.Add(data.ToGroupMembership(m_AvatarNameService));
                     }
-                    List<GroupMembership> gmems = new List<GroupMembership>();
-                    foreach (IValue iv in res)
-                    {
-                        Map data = iv as Map;
-                        if (null != data)
-                        {
-                            gmems.Add(data.ToGroupMembership());
-                        }
-                    }
-                    return gmems;
                 }
+                return gmems;
             }
         }
     }
