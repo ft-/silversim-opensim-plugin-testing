@@ -99,7 +99,7 @@ namespace SilverSim.BackendConnectors.Robust.GroupsV2
                     }
                     if (m["RESULT"].ToString() == "NULL")
                     {
-                        throw new AccessFailedException(m["REASON"].ToString());
+                        throw new KeyNotFoundException(m["REASON"].ToString());
                     }
 
                     GroupMember member = m["RESULT"].ToGroupMemberFromMembership();
@@ -133,7 +133,9 @@ namespace SilverSim.BackendConnectors.Robust.GroupsV2
                     List<GroupMember> members = new List<GroupMember>();
                     foreach (IValue iv in ((Map)m["RESULT"]).Values)
                     {
-                        members.Add(iv.ToGroupMember(group));
+                        GroupMember member = iv.ToGroupMember(group);
+                        member.Principal = requestingAgent;
+                        members.Add(member);
                     }
                     return members;
                 }
@@ -199,7 +201,9 @@ namespace SilverSim.BackendConnectors.Robust.GroupsV2
                 {
                     throw new AccessFailedException();
                 }
-                return m["RESULT"].ToGroupMemberFromMembership();
+                GroupMember member = m["RESULT"].ToGroupMemberFromMembership();
+                member.Principal = principal;
+                return member;
             }
 
             public void SetContribution(UUI requestingAgent, UGI group, UUI principal, int contribution)

@@ -250,7 +250,6 @@ namespace SilverSim.BackendHandlers.Robust.Groups
                     group = UGI.Unknown;
                     try
                     {
-                        requestingAgentID = new UUI(reqdata["RequestingAgentID"].ToString());
                         group.ID = reqdata["GroupID"].ToString();
                     }
                     catch
@@ -261,7 +260,7 @@ namespace SilverSim.BackendHandlers.Robust.Groups
                 }
                 else
                 {
-                    if(!m_GroupsService.ActiveGroup.TryGetValue(requestingAgentID, agentID, out group) || group.ID != UUID.Zero)
+                    if(!m_GroupsService.ActiveGroup.TryGetValue(requestingAgentID, agentID, out group) || group.ID == UUID.Zero)
                     {
                         SendNullResult(req, "No active group");
                         return;
