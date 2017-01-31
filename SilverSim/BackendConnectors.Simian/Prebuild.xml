@@ -5,6 +5,11 @@
       <OutputPath>../../bin/plugins</OutputPath>
     </Options>
   </Configuration>
+  <Configuration name="DebugRel">
+    <Options>
+      <OutputPath>../../bin/plugins</OutputPath>
+    </Options>
+  </Configuration>
   <Configuration name="Debug">
     <Options>
       <OutputPath>../../bin/plugins</OutputPath>
