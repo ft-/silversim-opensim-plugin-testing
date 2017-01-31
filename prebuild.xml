@@ -16,6 +16,21 @@
         <NoStdLib>false</NoStdLib>
       </Options>
     </Configuration>
+    <Configuration name="DebugRel">
+      <Options>
+        <CompilerDefines>TRACE</CompilerDefines>
+        <OptimizeCode>true</OptimizeCode>
+        <CheckUnderflowOverflow>false</CheckUnderflowOverflow>
+        <AllowUnsafe>false</AllowUnsafe>
+        <WarningLevel>4</WarningLevel>
+        <WarningsAsErrors>false</WarningsAsErrors>
+        <SuppressWarnings/>
+        <OutputPath>bin</OutputPath>
+        <DebugInformation>true</DebugInformation>
+        <IncrementalBuild>true</IncrementalBuild>
+        <NoStdLib>false</NoStdLib>
+      </Options>
+    </Configuration>
     <Configuration name="Debug">
       <Options>
         <CompilerDefines>TRACE;DEBUG;CODE_ANALYSIS</CompilerDefines>
