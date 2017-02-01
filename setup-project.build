@@ -141,6 +141,8 @@ ${sonar.moduledeclarations}
 		<if test="${platform::is-unix()}">
 			<exec program="xbuild" workingdir=".">
 				<arg value="/p:Configuration=Debug" if="${property::exists('debug-build')}"/>
+				<arg value="/p:Configuration=DebugRel" if="${property::exists('debugrel-build')}"/>
+				<arg value="/p:Configuration=Release" if="${property::exists('release-build')}"/>
 			</exec>
 		</if>
 	</target>
