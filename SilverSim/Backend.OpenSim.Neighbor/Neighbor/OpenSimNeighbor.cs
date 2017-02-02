@@ -57,7 +57,7 @@ namespace SilverSim.Backend.OpenSim.Neighbor.Neighbor
         public void Startup(ConfigurationLoader loader)
         {
             m_Scenes = loader.Scenes;
-            new Thread(RequestThread).Start();
+            ThreadManager.CreateThread(RequestThread).Start();
             m_Timer.Elapsed += UpdateTimer;
             m_Timer.Start();
         }

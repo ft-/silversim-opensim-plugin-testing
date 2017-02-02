@@ -322,7 +322,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
                 {
                     m_Log.DebugFormat("Teleport home requested for {0}", agent.Owner.FullName);
 
-                    m_TeleportThread = new Thread(delegate ()
+                    m_TeleportThread = ThreadManager.CreateThread(delegate ()
                     {
                         try
                         {
@@ -366,7 +366,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
                 {
                     m_Log.DebugFormat("Teleport to {0} requested for {1}: {2}", regionName, agent.Owner.FullName, flags.ToString());
 
-                    m_TeleportThread = new Thread(delegate ()
+                    m_TeleportThread = ThreadManager.CreateThread(delegate ()
                     {
                         try
                         {
@@ -428,7 +428,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
                     {
                         m_Log.DebugFormat("Teleport to this grid at {0},{1} requested for {2}: {3}", location.GridX, location.GridY, agent.Owner.FullName, flags.ToString());
 
-                        m_TeleportThread = new Thread(delegate ()
+                        m_TeleportThread = ThreadManager.CreateThread(delegate ()
                         {
                             try
                             {
@@ -486,7 +486,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
                     {
                         m_Log.DebugFormat("Teleport to grid {3} at {0},{1} requested for {2}: {3}", location.GridX, location.GridY, agent.Owner.FullName, gatekeeperURI, flags.ToString());
 
-                        m_TeleportThread = new Thread(delegate ()
+                        m_TeleportThread = ThreadManager.CreateThread(delegate ()
                         {
                             try
                             {
@@ -549,7 +549,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
                     {
                         m_Log.DebugFormat("Teleport to region {0} at this grid requested for {1}: {2}", regionID.ToString(), agent.Owner.FullName, flags.ToString());
 
-                        m_TeleportThread = new Thread(delegate ()
+                        m_TeleportThread = ThreadManager.CreateThread(delegate ()
                         {
                             try
                             {
@@ -607,7 +607,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
                     {
                         m_Log.DebugFormat("Teleport to region {0} at grid {2} requested for {1}: {3}", regionID.ToString(), agent.Owner.FullName, gatekeeperURI, flags.ToString());
 
-                        m_TeleportThread = new Thread(delegate ()
+                        m_TeleportThread = ThreadManager.CreateThread(delegate ()
                         {
                             try
                             {
