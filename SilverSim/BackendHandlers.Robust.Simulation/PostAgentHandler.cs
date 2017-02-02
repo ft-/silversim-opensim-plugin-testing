@@ -554,9 +554,9 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
             }
             userAgentService = new RobustUserAgentConnector(agentPost.Account.Principal.HomeURI.ToString());
 
-            if (agentPost.Account.ServiceURLs.ContainsKey("ProfileServerURI"))
+            if (!agentPost.Account.ServiceURLs.TryGetValue("ProfileServerURI", out profileServiceURI))
             {
-                profileServiceURI = agentPost.Account.ServiceURLs["ProfileServerURI"];
+                profileServiceURI = string.Empty;
             }
 
             if (!string.IsNullOrEmpty(profileServiceURI))
