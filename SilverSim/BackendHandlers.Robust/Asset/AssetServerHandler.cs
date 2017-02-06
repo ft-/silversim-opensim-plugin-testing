@@ -32,12 +32,14 @@ namespace SilverSim.BackendHandlers.Robust.Asset
         readonly string m_TemporaryAssetServiceName;
         readonly string m_PersistentAssetServiceName;
         readonly bool m_EnableGet;
+        readonly bool m_EnableLimitedGet;
 
-        public RobustAssetServerHandler(string persistentAssetServiceName, string temporaryAssetServiceName, bool enableGet)
+        public RobustAssetServerHandler(string persistentAssetServiceName, string temporaryAssetServiceName, bool enableGet, bool enableLimitedGet)
         {
             m_PersistentAssetServiceName = persistentAssetServiceName;
             m_TemporaryAssetServiceName = temporaryAssetServiceName;
             m_EnableGet = enableGet;
+            m_EnableLimitedGet = enableLimitedGet;
         }
 
         public void Startup(ConfigurationLoader loader)
@@ -120,7 +122,7 @@ namespace SilverSim.BackendHandlers.Robust.Asset
                 return;
             }
 
-            if(!m_EnableGet)
+            if(!m_EnableGet && !m_EnableLimitedGet)
             {
                 req.ErrorResponse(HttpStatusCode.NotFound);
                 return;
@@ -150,6 +152,22 @@ namespace SilverSim.BackendHandlers.Robust.Asset
                             req.ErrorResponse(HttpStatusCode.NotFound);
                             return;
                         }
+                    }
+                }
+
+                if (!m_EnableGet)
+                {
+                    switch (data.Type)
+                    {
+                        case AssetType.Texture:
+                        case AssetType.Sound:
+                        case AssetType.ImageJPEG:
+                        case AssetType.Mesh:
+                            break;
+
+                        default:
+                            req.ErrorResponse(HttpStatusCode.NotFound);
+                            return;
                     }
                 }
 
@@ -254,6 +272,22 @@ namespace SilverSim.BackendHandlers.Robust.Asset
                     }
                 }
 
+                if (!m_EnableGet)
+                {
+                    switch (data.Type)
+                    {
+                        case AssetType.Texture:
+                        case AssetType.Sound:
+                        case AssetType.ImageJPEG:
+                        case AssetType.Mesh:
+                            break;
+
+                        default:
+                            req.ErrorResponse(HttpStatusCode.NotFound);
+                            return;
+                    }
+                }
+
                 string assetbase_header = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<AssetMetadata>";
                 string flags = string.Empty;
 
@@ -330,6 +364,22 @@ namespace SilverSim.BackendHandlers.Robust.Asset
                             req.ErrorResponse(HttpStatusCode.NotFound);
                             return;
                         }
+                    }
+                }
+
+                if(!m_EnableGet)
+                {
+                    switch(data.Type)
+                    {
+                        case AssetType.Texture:
+                        case AssetType.Sound:
+                        case AssetType.ImageJPEG:
+                        case AssetType.Mesh:
+                            break;
+
+                        default:
+                            req.ErrorResponse(HttpStatusCode.NotFound);
+                            return;
                     }
                 }
 
@@ -610,7 +660,8 @@ namespace SilverSim.BackendHandlers.Robust.Asset
         {
             return new RobustAssetServerHandler(ownSection.GetString("PersistentAssetService", "AssetService"),
                 ownSection.GetString("TemporaryAssetService", string.Empty), 
-                ownSection.GetBoolean("IsGetEnabled", true));
+                ownSection.GetBoolean("IsGetEnabled", true),
+                ownSection.GetBoolean("IsLimitedGetEnabled", false));
         }
     }
     #endregion
