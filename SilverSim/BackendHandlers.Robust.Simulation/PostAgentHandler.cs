@@ -177,11 +177,11 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
                     }
                 }
 
-                if (!headers.ContainsKey("X-Handlers-Provided"))
+                if (!headers.ContainsKey("x-handlers-provided"))
                 {
                     return "opensim-robust"; /* let us assume Robust API */
                 }
-                return headers["X-Handlers-Provided"];
+                return headers["x-handlers-provided"];
             }
             catch
             {
