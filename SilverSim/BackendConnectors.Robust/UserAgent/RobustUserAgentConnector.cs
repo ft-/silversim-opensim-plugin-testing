@@ -245,6 +245,11 @@ namespace SilverSim.BackendConnectors.Robust.UserAgent
             return dInfo;
         }
 
+        public override bool IsOnline(UUI user)
+        {
+            return false;
+        }
+
         void DoXmlRpcWithBoolResponse(string method, Map reqparams)
         {
             XmlRpc.XmlRpcRequest req = new XmlRpc.XmlRpcRequest(method);
