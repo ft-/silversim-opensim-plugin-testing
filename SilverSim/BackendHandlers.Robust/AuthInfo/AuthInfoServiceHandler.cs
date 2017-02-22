@@ -57,7 +57,7 @@ namespace SilverSim.BackendHandlers.Robust.AuthInfo
             }
         }
 
-        public void HandlePlainRequests(HttpRequest httpreq)
+        void HandlePlainRequests(HttpRequest httpreq)
         {
             if (httpreq.ContainsHeader("X-SecondLife-Shard"))
             {

@@ -80,7 +80,7 @@ namespace SilverSim.BackendConnectors.Robust.IM
             dict["IMServerURI"] = m_HttpServer.ServerURI;
         }
 
-        public XmlRpc.XmlRpcResponse IMReceived(XmlRpc.XmlRpcRequest req)
+        XmlRpc.XmlRpcResponse IMReceived(XmlRpc.XmlRpcRequest req)
         {
             RobustIMMessage im = new RobustIMMessage();
             XmlRpc.XmlRpcResponse res = new XmlRpc.XmlRpcResponse();

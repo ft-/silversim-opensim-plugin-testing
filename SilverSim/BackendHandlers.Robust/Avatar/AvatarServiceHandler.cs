@@ -86,7 +86,7 @@ namespace SilverSim.BackendHandlers.Robust.Avatar
             }
         }
 
-        public void AvatarHandler(HttpRequest req)
+        void AvatarHandler(HttpRequest req)
         {
             if (req.ContainsHeader("X-SecondLife-Shard"))
             {

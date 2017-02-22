@@ -79,7 +79,7 @@ namespace SilverSim.BackendHandlers.Robust.UserAccounts
             }
         }
 
-        public void UserAccountHandler(HttpRequest req)
+        void UserAccountHandler(HttpRequest req)
         {
             if (req.ContainsHeader("X-SecondLife-Shard"))
             {
@@ -102,7 +102,7 @@ namespace SilverSim.BackendHandlers.Robust.UserAccounts
         readonly byte[] SuccessResult = "<?xml version=\"1.0\"?><ServerResponse><result>Success</result></ServerResponse>".ToUTF8Bytes();
         readonly byte[] FailureResult = "<?xml version=\"1.0\"?><ServerResponse><result>Failure</result></ServerResponse>".ToUTF8Bytes();
 
-        public void PostUserAccountHandler(HttpRequest req)
+        void PostUserAccountHandler(HttpRequest req)
         {
             Dictionary<string, object> data;
             try
@@ -145,7 +145,7 @@ namespace SilverSim.BackendHandlers.Robust.UserAccounts
             }
         }
 
-        public void GetAccount(HttpRequest req, Dictionary<string, object> reqdata)
+        void GetAccount(HttpRequest req, Dictionary<string, object> reqdata)
         {
             UUID scopeID = reqdata.GetUUID("ScopeID");
             UserAccount ua = null;
@@ -204,7 +204,7 @@ namespace SilverSim.BackendHandlers.Robust.UserAccounts
             }
         }
 
-        public void GetAccounts(HttpRequest req, Dictionary<string, object> reqdata)
+        void GetAccounts(HttpRequest req, Dictionary<string, object> reqdata)
         {
             UUID scopeID = reqdata.GetUUID("ScopeID");
             string query = reqdata.GetString("query");

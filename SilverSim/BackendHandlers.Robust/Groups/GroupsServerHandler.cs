@@ -7,7 +7,6 @@ using SilverSim.Main.Common;
 using SilverSim.Main.Common.HttpServer;
 using SilverSim.Types;
 using SilverSim.Types.Groups;
-using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Net;

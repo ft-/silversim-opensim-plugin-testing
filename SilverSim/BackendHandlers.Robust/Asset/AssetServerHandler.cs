@@ -70,7 +70,7 @@ namespace SilverSim.BackendHandlers.Robust.Asset
             dict["AssetServerURI"] = m_HttpServer.ServerURI;
         }
 
-        public void AssetHandler(HttpRequest req)
+        void AssetHandler(HttpRequest req)
         {
             if (req.ContainsHeader("X-SecondLife-Shard"))
             {
@@ -98,9 +98,9 @@ namespace SilverSim.BackendHandlers.Robust.Asset
             }
         }
 
-        private static int MAX_ASSET_BASE64_CONVERSION_SIZE = 9 * 1024; /* must be an integral multiple of 3 */
+        private const int MAX_ASSET_BASE64_CONVERSION_SIZE = 9 * 1024; /* must be an integral multiple of 3 */
 
-        public void GetAssetHandler(HttpRequest req)
+        void GetAssetHandler(HttpRequest req)
         {
             string uri;
             uri = req.RawUrl.Trim(new char[] { '/' });
@@ -130,280 +130,15 @@ namespace SilverSim.BackendHandlers.Robust.Asset
 
             if(parts.Length == 2)
             {
-                AssetData data;
-                try
-                {
-                    data = m_TemporaryAssetService[id];
-                }
-                catch
-                {
-                    try
-                    {
-                        data = m_PersistentAssetService[id];
-                    }
-                    catch
-                    {
-                        try
-                        {
-                            data = m_ResourceAssetService[id];
-                        }
-                        catch
-                        {
-                            req.ErrorResponse(HttpStatusCode.NotFound);
-                            return;
-                        }
-                    }
-                }
-
-                if (!m_EnableGet)
-                {
-                    switch (data.Type)
-                    {
-                        case AssetType.Texture:
-                        case AssetType.Sound:
-                        case AssetType.ImageJPEG:
-                        case AssetType.Mesh:
-                            break;
-
-                        default:
-                            req.ErrorResponse(HttpStatusCode.NotFound);
-                            return;
-                    }
-                }
-
-                string assetbase_header = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<AssetBase>";
-                string flags = string.Empty;
-                assetbase_header += (data.Data.Length != 0) ? "<Data>" : "<Data/>";
-
-                if(0 != (data.Flags & AssetFlags.Maptile))
-                {
-                    flags = "Maptile";
-                }
-
-                if (0 != (data.Flags & AssetFlags.Rewritable))
-                {
-                    if(flags.Length != 0)
-                    {
-                        flags += ",";
-                    }
-                    flags += "Rewritable";
-                }
-
-                if (0 != (data.Flags & AssetFlags.Collectable))
-                {
-                    if (flags.Length != 0)
-                    {
-                        flags += ",";
-                    }
-                    flags += "Collectable";
-                }
-
-                if(flags.Length == 0)
-                {
-                    flags = "Normal";
-                }
-                string assetbase_footer = string.Empty;
-
-                if (data.Data.Length != 0)
-                {
-                    assetbase_footer = "</Data>" + assetbase_footer;
-                }
-                assetbase_footer += String.Format(
-                     "<FullID><Guid>{0}</Guid></FullID><ID>{0}</ID><Name>{1}</Name><Description/><Type>{2}</Type><Local>{3}</Local><Temporary>{4}</Temporary><CreatorID>{5}</CreatorID><Flags>{6}</Flags></AssetBase>",
-                     data.ID.ToString(),
-                     data.Name.Replace("&", "&amp;").Replace("<", "&lt;").Replace(">", "&gt;"),
-                     (int)data.Type,
-                     data.Local.ToString(),
-                     data.Temporary.ToString(),
-                     data.Creator.ToString(),
-                     flags);
-
-                byte[] header = assetbase_header.ToUTF8Bytes();
-                byte[] footer = assetbase_footer.ToUTF8Bytes();
-
-                using (HttpResponse res = req.BeginResponse())
-                {
-                    res.ContentType = "text/xml";
-                    using (Stream st = res.GetOutputStream())
-                    {
-                        st.Write(header, 0, header.Length);
-                        int pos = 0;
-                        while (data.Data.Length - pos >= MAX_ASSET_BASE64_CONVERSION_SIZE)
-                        {
-                            string b = Convert.ToBase64String(data.Data, pos, MAX_ASSET_BASE64_CONVERSION_SIZE);
-                            byte[] block = Encoding.UTF8.GetBytes(b);
-                            st.Write(block, 0, block.Length);
-                            pos += MAX_ASSET_BASE64_CONVERSION_SIZE;
-                        }
-                        if (data.Data.Length > pos)
-                        {
-                            string b = Convert.ToBase64String(data.Data, pos, data.Data.Length - pos);
-                            byte[] block = Encoding.UTF8.GetBytes(b);
-                            st.Write(block, 0, block.Length);
-                        }
-                        st.Write(footer, 0, footer.Length);
-                    }
-                }
+                GetAssetHandler_Xml(req, id);
             }
             else if(parts[2] == "metadata")
             {
-                AssetMetadata data;
-                try
-                {
-                    data = m_TemporaryAssetService.Metadata[id];
-                }
-                catch
-                {
-                    try
-                    {
-                        data = m_PersistentAssetService.Metadata[id];
-                    }
-                    catch
-                    {
-                        try
-                        {
-                            data = m_ResourceAssetService.Metadata[id];
-                        }
-                        catch
-                        {
-                            req.ErrorResponse(HttpStatusCode.NotFound);
-                            return;
-                        }
-                    }
-                }
-
-                if (!m_EnableGet)
-                {
-                    switch (data.Type)
-                    {
-                        case AssetType.Texture:
-                        case AssetType.Sound:
-                        case AssetType.ImageJPEG:
-                        case AssetType.Mesh:
-                            break;
-
-                        default:
-                            req.ErrorResponse(HttpStatusCode.NotFound);
-                            return;
-                    }
-                }
-
-                string assetbase_header = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<AssetMetadata>";
-                string flags = string.Empty;
-
-                if (0 != (data.Flags & AssetFlags.Maptile))
-                {
-                    flags = "Maptile";
-                }
-
-                if (0 != (data.Flags & AssetFlags.Rewritable))
-                {
-                    if (flags.Length != 0)
-                    {
-                        flags += ",";
-                    }
-                    flags += "Rewritable";
-                }
-
-                if (0 != (data.Flags & AssetFlags.Collectable))
-                {
-                    if (flags.Length != 0)
-                    {
-                        flags += ",";
-                    }
-                    flags += "Collectable";
-                }
-
-                if (flags.Length == 0)
-                {
-                    flags = "Normal";
-                }
-                string assetbase_footer = String.Format(
-                    "<FullID><Guid>{0}</Guid></FullID><ID>{0}</ID><Name>{1}</Name><Description/><Type>{2}</Type><Local>{3}</Local><Temporary>{4}</Temporary><CreatorID>{5}</CreatorID><Flags>{6}</Flags></AssetMetadata>",
-                    data.ID.ToString(),
-                    data.Name.Replace("&", "&amp;").Replace("<", "&lt;").Replace(">", "&gt;"),
-                    (int)data.Type,
-                    data.Local.ToString(),
-                    data.Temporary.ToString(),
-                    data.Creator.ToString(),
-                    flags);
-                byte[] header = assetbase_header.ToUTF8Bytes();
-                byte[] footer = assetbase_footer.ToUTF8Bytes();
-
-                using (HttpResponse res = req.BeginResponse())
-                {
-                    res.ContentType = "text/xml";
-                    using (Stream st = res.GetOutputStream(header.Length + footer.Length))
-                    {
-                        st.Write(header, 0, header.Length);
-                        st.Write(footer, 0, footer.Length);
-                    }
-                }
+                GetAssetHandler_Metadata(req, id);
             }
             else if(parts[2] == "data")
             {
-                AssetData data;
-                try
-                {
-                    data = m_TemporaryAssetService[id];
-                }
-                catch
-                {
-                    try
-                    {
-                        data = m_PersistentAssetService[id];
-                    }
-                    catch
-                    {
-                        try
-                        {
-                            data = m_ResourceAssetService[id];
-                        }
-                        catch
-                        {
-                            req.ErrorResponse(HttpStatusCode.NotFound);
-                            return;
-                        }
-                    }
-                }
-
-                if(!m_EnableGet)
-                {
-                    switch(data.Type)
-                    {
-                        case AssetType.Texture:
-                        case AssetType.Sound:
-                        case AssetType.ImageJPEG:
-                        case AssetType.Mesh:
-                            break;
-
-                        default:
-                            req.ErrorResponse(HttpStatusCode.NotFound);
-                            return;
-                    }
-                }
-
-                using (HttpResponse res = req.BeginResponse())
-                {
-                    res.ContentType = data.ContentType;
-                    bool compressionEnabled = true;
-                    switch (data.Type)
-                    {
-                        case AssetType.Texture:
-                        case AssetType.Sound:
-                        case AssetType.ImageJPEG:
-                            /* these are well-compressed no need for further compression */
-                            compressionEnabled = false;
-                            break;
-
-                        default:
-                            break;
-                    }
-                    using (Stream st = res.GetOutputStream(compressionEnabled))
-                    {
-                        st.Write(data.Data, 0, data.Data.Length);
-                    }
-                }
+                GetAssetHandler_Data(req, id);
             }
             else
             {
@@ -411,7 +146,287 @@ namespace SilverSim.BackendHandlers.Robust.Asset
             }
         }
 
-        public void DeleteAssetHandler(HttpRequest req)
+        void GetAssetHandler_Xml(HttpRequest req, UUID id)
+        {
+            AssetData data;
+            try
+            {
+                data = m_TemporaryAssetService[id];
+            }
+            catch
+            {
+                try
+                {
+                    data = m_PersistentAssetService[id];
+                }
+                catch
+                {
+                    try
+                    {
+                        data = m_ResourceAssetService[id];
+                    }
+                    catch
+                    {
+                        req.ErrorResponse(HttpStatusCode.NotFound);
+                        return;
+                    }
+                }
+            }
+
+            if (!m_EnableGet)
+            {
+                switch (data.Type)
+                {
+                    case AssetType.Texture:
+                    case AssetType.Sound:
+                    case AssetType.ImageJPEG:
+                    case AssetType.Mesh:
+                        break;
+
+                    default:
+                        req.ErrorResponse(HttpStatusCode.NotFound);
+                        return;
+                }
+            }
+
+            string assetbase_header = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<AssetBase>";
+            string flags = string.Empty;
+            assetbase_header += (data.Data.Length != 0) ? "<Data>" : "<Data/>";
+
+            if (0 != (data.Flags & AssetFlags.Maptile))
+            {
+                flags = "Maptile";
+            }
+
+            if (0 != (data.Flags & AssetFlags.Rewritable))
+            {
+                if (flags.Length != 0)
+                {
+                    flags += ",";
+                }
+                flags += "Rewritable";
+            }
+
+            if (0 != (data.Flags & AssetFlags.Collectable))
+            {
+                if (flags.Length != 0)
+                {
+                    flags += ",";
+                }
+                flags += "Collectable";
+            }
+
+            if (flags.Length == 0)
+            {
+                flags = "Normal";
+            }
+            string assetbase_footer = string.Empty;
+
+            if (data.Data.Length != 0)
+            {
+                assetbase_footer = "</Data>" + assetbase_footer;
+            }
+            assetbase_footer += String.Format(
+                    "<FullID><Guid>{0}</Guid></FullID><ID>{0}</ID><Name>{1}</Name><Description/><Type>{2}</Type><Local>{3}</Local><Temporary>{4}</Temporary><CreatorID>{5}</CreatorID><Flags>{6}</Flags></AssetBase>",
+                    data.ID.ToString(),
+                    data.Name.Replace("&", "&amp;").Replace("<", "&lt;").Replace(">", "&gt;"),
+                    (int)data.Type,
+                    data.Local.ToString(),
+                    data.Temporary.ToString(),
+                    data.Creator.ToString(),
+                    flags);
+
+            byte[] header = assetbase_header.ToUTF8Bytes();
+            byte[] footer = assetbase_footer.ToUTF8Bytes();
+
+            using (HttpResponse res = req.BeginResponse())
+            {
+                res.ContentType = "text/xml";
+                using (Stream st = res.GetOutputStream())
+                {
+                    st.Write(header, 0, header.Length);
+                    int pos = 0;
+                    while (data.Data.Length - pos >= MAX_ASSET_BASE64_CONVERSION_SIZE)
+                    {
+                        string b = Convert.ToBase64String(data.Data, pos, MAX_ASSET_BASE64_CONVERSION_SIZE);
+                        byte[] block = Encoding.UTF8.GetBytes(b);
+                        st.Write(block, 0, block.Length);
+                        pos += MAX_ASSET_BASE64_CONVERSION_SIZE;
+                    }
+                    if (data.Data.Length > pos)
+                    {
+                        string b = Convert.ToBase64String(data.Data, pos, data.Data.Length - pos);
+                        byte[] block = Encoding.UTF8.GetBytes(b);
+                        st.Write(block, 0, block.Length);
+                    }
+                    st.Write(footer, 0, footer.Length);
+                }
+            }
+        }
+
+        void GetAssetHandler_Metadata(HttpRequest req, UUID id)
+        {
+            AssetMetadata data;
+            try
+            {
+                data = m_TemporaryAssetService.Metadata[id];
+            }
+            catch
+            {
+                try
+                {
+                    data = m_PersistentAssetService.Metadata[id];
+                }
+                catch
+                {
+                    try
+                    {
+                        data = m_ResourceAssetService.Metadata[id];
+                    }
+                    catch
+                    {
+                        req.ErrorResponse(HttpStatusCode.NotFound);
+                        return;
+                    }
+                }
+            }
+
+            if (!m_EnableGet)
+            {
+                switch (data.Type)
+                {
+                    case AssetType.Texture:
+                    case AssetType.Sound:
+                    case AssetType.ImageJPEG:
+                    case AssetType.Mesh:
+                        break;
+
+                    default:
+                        req.ErrorResponse(HttpStatusCode.NotFound);
+                        return;
+                }
+            }
+
+            string assetbase_header = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<AssetMetadata>";
+            string flags = string.Empty;
+
+            if (0 != (data.Flags & AssetFlags.Maptile))
+            {
+                flags = "Maptile";
+            }
+
+            if (0 != (data.Flags & AssetFlags.Rewritable))
+            {
+                if (flags.Length != 0)
+                {
+                    flags += ",";
+                }
+                flags += "Rewritable";
+            }
+
+            if (0 != (data.Flags & AssetFlags.Collectable))
+            {
+                if (flags.Length != 0)
+                {
+                    flags += ",";
+                }
+                flags += "Collectable";
+            }
+
+            if (flags.Length == 0)
+            {
+                flags = "Normal";
+            }
+            string assetbase_footer = String.Format(
+                "<FullID><Guid>{0}</Guid></FullID><ID>{0}</ID><Name>{1}</Name><Description/><Type>{2}</Type><Local>{3}</Local><Temporary>{4}</Temporary><CreatorID>{5}</CreatorID><Flags>{6}</Flags></AssetMetadata>",
+                data.ID.ToString(),
+                data.Name.Replace("&", "&amp;").Replace("<", "&lt;").Replace(">", "&gt;"),
+                (int)data.Type,
+                data.Local.ToString(),
+                data.Temporary.ToString(),
+                data.Creator.ToString(),
+                flags);
+            byte[] header = assetbase_header.ToUTF8Bytes();
+            byte[] footer = assetbase_footer.ToUTF8Bytes();
+
+            using (HttpResponse res = req.BeginResponse())
+            {
+                res.ContentType = "text/xml";
+                using (Stream st = res.GetOutputStream(header.Length + footer.Length))
+                {
+                    st.Write(header, 0, header.Length);
+                    st.Write(footer, 0, footer.Length);
+                }
+            }
+        }
+
+        void GetAssetHandler_Data(HttpRequest req, UUID id)
+        {
+            AssetData data;
+            try
+            {
+                data = m_TemporaryAssetService[id];
+            }
+            catch
+            {
+                try
+                {
+                    data = m_PersistentAssetService[id];
+                }
+                catch
+                {
+                    try
+                    {
+                        data = m_ResourceAssetService[id];
+                    }
+                    catch
+                    {
+                        req.ErrorResponse(HttpStatusCode.NotFound);
+                        return;
+                    }
+                }
+            }
+
+            if (!m_EnableGet)
+            {
+                switch (data.Type)
+                {
+                    case AssetType.Texture:
+                    case AssetType.Sound:
+                    case AssetType.ImageJPEG:
+                    case AssetType.Mesh:
+                        break;
+
+                    default:
+                        req.ErrorResponse(HttpStatusCode.NotFound);
+                        return;
+                }
+            }
+
+            using (HttpResponse res = req.BeginResponse())
+            {
+                res.ContentType = data.ContentType;
+                bool compressionEnabled = true;
+                switch (data.Type)
+                {
+                    case AssetType.Texture:
+                    case AssetType.Sound:
+                    case AssetType.ImageJPEG:
+                        /* these are well-compressed no need for further compression */
+                        compressionEnabled = false;
+                        break;
+
+                    default:
+                        break;
+                }
+                using (Stream st = res.GetOutputStream(compressionEnabled))
+                {
+                    st.Write(data.Data, 0, data.Data.Length);
+                }
+            }
+        }
+
+        void DeleteAssetHandler(HttpRequest req)
         {
             using (HttpResponse res = req.BeginResponse())
             {
@@ -424,7 +439,7 @@ namespace SilverSim.BackendHandlers.Robust.Asset
             }
         }
 
-        public void PostAssetHandler(HttpRequest req)
+        void PostAssetHandler(HttpRequest req)
         {
             AssetData data;
             try
@@ -491,7 +506,7 @@ namespace SilverSim.BackendHandlers.Robust.Asset
             }
         }
 
-        private static UUID ParseUUID(XmlTextReader reader)
+        static UUID ParseUUID(XmlTextReader reader)
         {
             while (true)
             {
@@ -520,7 +535,8 @@ namespace SilverSim.BackendHandlers.Robust.Asset
                 }
             }
         }
-        private static List<UUID> ParseArrayOfUUIDs(XmlTextReader reader)
+
+        static List<UUID> ParseArrayOfUUIDs(XmlTextReader reader)
         {
             List<UUID> result = new List<UUID>();
             bool haveroot = false;
@@ -565,7 +581,7 @@ namespace SilverSim.BackendHandlers.Robust.Asset
             }
         }
 
-        public void GetAssetsExistHandler(HttpRequest req)
+        void GetAssetsExistHandler(HttpRequest req)
         {
             if (req.Method != "POST")
             {

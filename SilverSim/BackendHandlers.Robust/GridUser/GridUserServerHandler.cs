@@ -58,7 +58,7 @@ namespace SilverSim.BackendHandlers.Robust.GridUser
             }
         }
 
-        public void GridUserHandler(HttpRequest req)
+        void GridUserHandler(HttpRequest req)
         {
             if (req.ContainsHeader("X-SecondLife-Shard"))
             {
@@ -173,12 +173,12 @@ namespace SilverSim.BackendHandlers.Robust.GridUser
             }
         }
 
-        public void LoggedIn(Dictionary<string, object> req)
+        void LoggedIn(Dictionary<string, object> req)
         {
             m_GridUserService.LoggedIn(FindUser(req["UserID"].ToString()));
         }
 
-        public void LoggedOut(Dictionary<string, object> req)
+        void LoggedOut(Dictionary<string, object> req)
         {
             UUID region = new UUID(req["RegionID"].ToString());
             Vector3 position = Vector3.Parse(req["Position"].ToString());
@@ -187,7 +187,7 @@ namespace SilverSim.BackendHandlers.Robust.GridUser
             m_GridUserService.LoggedOut(FindUser(req["UserID"].ToString()), region, position, lookAt);
         }
 
-        public void SetHome(Dictionary<string, object> req)
+        void SetHome(Dictionary<string, object> req)
         {
             UUID region = new UUID(req["RegionID"].ToString());
             Vector3 position = Vector3.Parse(req["Position"].ToString());
@@ -196,7 +196,7 @@ namespace SilverSim.BackendHandlers.Robust.GridUser
             m_GridUserService.SetHome(FindUser(req["UserID"].ToString()), region, position, lookAt);
         }
 
-        public void SetPosition(Dictionary<string, object> req)
+        void SetPosition(Dictionary<string, object> req)
         {
             UUID region = new UUID(req["RegionID"].ToString());
             Vector3 position = Vector3.Parse(req["Position"].ToString());
@@ -238,7 +238,7 @@ namespace SilverSim.BackendHandlers.Robust.GridUser
             w.WriteEndElement();
         }
 
-        public UUI CheckGetUUI(Dictionary<string, object> req, HttpRequest httpreq)
+        UUI CheckGetUUI(Dictionary<string, object> req, HttpRequest httpreq)
         {
             try
             {
@@ -336,7 +336,7 @@ namespace SilverSim.BackendHandlers.Robust.GridUser
             return true;
         }
 
-        public void GetGridUserInfo(Dictionary<string, object> req, HttpRequest httpreq)
+        void GetGridUserInfo(Dictionary<string, object> req, HttpRequest httpreq)
         {
             UUI uui = CheckGetUUI(req, httpreq);
             if(null == uui)
@@ -355,7 +355,7 @@ namespace SilverSim.BackendHandlers.Robust.GridUser
             }
         }
 
-        public void GetGridUserInfos(Dictionary<string, object> req, HttpRequest httpreq)
+        void GetGridUserInfos(Dictionary<string, object> req, HttpRequest httpreq)
         {
             bool anyFound = false;
             using (HttpResponse resp = httpreq.BeginResponse("text/xml"))
