@@ -6,6 +6,7 @@ using SilverSim.Main.Common.Rpc;
 using SilverSim.ServiceInterfaces.UserAgents;
 using SilverSim.Types;
 using SilverSim.Types.Grid;
+using SilverSim.Types.ServerURIs;
 using SilverSim.Types.StructuredData.XmlRpc;
 using System;
 using System.Collections.Generic;
@@ -120,13 +121,13 @@ namespace SilverSim.BackendConnectors.Robust.UserAgent
             return info;
         }
 
-        public override Dictionary<string, string> GetServerURLs(UUI user)
+        public override ServerURIs GetServerURLs(UUI user)
         {
             Map hash = new Map();
             hash.Add("userID", user.ID);
 
             Map res = DoXmlRpcWithHashResponse("get_server_urls", hash);
-            Dictionary<string, string> serverUrls = new Dictionary<string, string>();
+            ServerURIs serverUrls = new ServerURIs();
             foreach (string key in res.Keys)
             {
                 if(key.StartsWith("SRV_") && res[key] != null)
