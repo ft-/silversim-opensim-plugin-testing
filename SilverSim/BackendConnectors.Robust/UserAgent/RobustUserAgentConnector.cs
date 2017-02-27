@@ -16,10 +16,31 @@ using System.Net;
 namespace SilverSim.BackendConnectors.Robust.UserAgent
 {
     [Description("Robust UserAgent Connector")]
-    public class RobustUserAgentConnector : UserAgentServiceInterface, IPlugin
+    public class RobustUserAgentConnector : UserAgentServiceInterface, IPlugin, IDisplayNameAccessor
     {
         public int TimeoutMs = 20000;
         readonly string m_Uri;
+
+        public override IDisplayNameAccessor DisplayName
+        {
+            get
+            {
+                return this;
+            }
+        }
+
+        string IDisplayNameAccessor.this[UUI agent]
+        {
+            get
+            {
+                throw new KeyNotFoundException();
+            }
+
+            set
+            {
+                throw new NotSupportedException();
+            }
+        }
 
         public RobustUserAgentConnector(string uri)
         {
@@ -291,6 +312,17 @@ namespace SilverSim.BackendConnectors.Robust.UserAgent
             }
 
             return hash;
+        }
+
+        bool IDisplayNameAccessor.TryGetValue(UUI agent, out string displayname)
+        {
+            displayname = string.Empty;
+            return false;
+        }
+
+        bool IDisplayNameAccessor.ContainsKey(UUI agent)
+        {
+            return false;
         }
     }
 }
