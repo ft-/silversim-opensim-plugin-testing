@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<package>
+	<name>SilverSim.OpenSimArchiver</name>
+	<default-configuration>
+		<source>SilverSim.OpenSimArchiver:PackageConfig.ini</source>
+		<use-if-started-as>bare</use-if-started-as>
+		<use-if-started-as>simulator</use-if-started-as>
+		<use-if-started-as>standalone</use-if-started-as>
+		<use-if-started-as>grid</use-if-started-as>
+	</default-configuration>
+	<dependencies>
+		<dependency name="SilverSim"/>
+	</dependencies>
+	<files>
+		<file name="bin/plugins/SilverSim.OpenSimArchiver.dll"/>
+	</files>
+</package>
