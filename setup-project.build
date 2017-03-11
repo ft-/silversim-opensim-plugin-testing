@@ -3,6 +3,7 @@
 	<target name="setup">
 		<call target="setup-workspace" unless="${directory::exists('bin')}"/>
 		<call target="additional-bin"/>
+		<call target="packages"/>
 		<call target="nuget-updates" unless="${file::exists('bin/.nuget-done')}"/>
 		<call target="exe.config"/>
 		<call target="prebuild"/>
@@ -28,6 +29,14 @@
 				<include name="**/*.so"/>
 				<include name="**/*.dylib"/>
 				<include name="**/*.config"/>
+			</fileset>
+		</copy>
+	</target>
+	
+	<target name="packages" description="Copy package definitions">
+		<copy todir="bin/installed-packages" if="${directory::exists('packages')}" overwrite="true">
+			<fileset basedir="packages">
+				<include name="**/*.spkg"/>
 			</fileset>
 		</copy>
 	</target>
