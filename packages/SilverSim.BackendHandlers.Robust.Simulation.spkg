@@ -1,12 +1,12 @@
 <?xml version="1.0"?>
 <package>
-	<name>SilverSim.BackendConnectors.Robust.Simulation</name>
+	<name>SilverSim.BackendHandlers.Robust.Simulation</name>
 	<dependencies>
 		<dependency name="SilverSim.Core"/>
 		<dependency name="SilverSim.BackendConnectors.Robust"/>
 		<dependency name="SilverSim.BackendConnectors.Simian"/>
 	</dependencies>
 	<files>
-		<file name="bin/plugins/SilverSim.BackendConnectors.Robust.Simulation.dll"/>
+		<file name="bin/plugins/SilverSim.BackendHandlers.Robust.Simulation.dll"/>
 	</files>
 </package>
