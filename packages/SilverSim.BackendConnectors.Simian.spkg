@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<package>
+	<name>SilverSim.BackendConnectors.Simian</name>
+	<default-configuration>
+		<source>SilverSim.BackendConnectors.Simian:Connectors.ini</source>
+		<use-if-started-as>bare</use-if-started-as>
+		<use-if-started-as>simulator</use-if-started-as>
+		<use-if-started-as>standalone</use-if-started-as>
+	</default-configuration>
+	<dependencies>
+		<dependency name="SilverSim.Core"/>
+	</dependencies>
+	<files>
+		<file name="bin/plugins/SilverSim.BackendConnectors.Simian.dll"/>
+	</files>
+</package>
