@@ -9,7 +9,7 @@
 		<use-if-started-as>grid</use-if-started-as>
 	</default-configuration>
 	<dependencies>
-		<dependency name="SilverSim"/>
+		<dependency name="SilverSim.Core"/>
 	</dependencies>
 	<files>
 		<file name="bin/plugins/SilverSim.OpenSimArchiver.dll"/>
