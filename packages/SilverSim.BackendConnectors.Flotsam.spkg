@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <package>
-	<name>SilverSim.BackendConnectors.Robust</name>
+	<name>SilverSim.BackendConnectors.Flotsam</name>
 	<default-configuration>
-		<source>SilverSim.BackendConnectors.Robust:Connectors.ini</source>
+		<source>SilverSim.BackendConnectors.Flotsam:PackageConfig.ini</source>
 		<use-if-started-as>bare</use-if-started-as>
 		<use-if-started-as>simulator</use-if-started-as>
 		<use-if-started-as>standalone</use-if-started-as>
@@ -11,6 +11,6 @@
 		<dependency name="SilverSim.Core"/>
 	</dependencies>
 	<files>
-		<file name="bin/plugins/SilverSim.BackendConnectors.Robust.dll"/>
+		<file name="bin/plugins/SilverSim.BackendConnectors.Flotsam.dll"/>
 	</files>
 </package>

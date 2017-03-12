@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<package>
+	<name>SilverSim.BackendConnectors.OpenSim.Neighbor</name>
+	<dependencies>
+		<dependency name="SilverSim.Core"/>
+	</dependencies>
+	<files>
+		<file name="bin/plugins/SilverSim.BackendConnectors.OpenSim.Neighbor.dll"/>
+	</files>
+</package>

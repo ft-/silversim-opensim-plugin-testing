@@ -11,11 +11,11 @@
 		<use-if-started-as>simulator</use-if-started-as>
 	</default-configuration>
 	<default-configuration>
-		<source>SilverSim.BackendHandlers.Ambergrove:PackageConfig.Grid.ini</source>
+		<source>SilverSim.BackendHandlers.Robust:PackageConfig.Grid.ini</source>
 		<use-if-started-as>grid</use-if-started-as>
 	</default-configuration>
 	<default-configuration>
-		<source>SilverSim.BackendHandlers.Ambergrove:PackageConfig.Bare.ini</source>
+		<source>SilverSim.BackendHandlers.Robust:PackageConfig.Bare.ini</source>
 		<use-if-started-as>bare</use-if-started-as>
 	</default-configuration>
 	<dependencies>
