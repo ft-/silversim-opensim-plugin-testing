@@ -3,12 +3,11 @@
 	<name>SilverSim.BackendHandlers.Robust</name>
 	<default-configuration>
 		<source>SilverSim.BackendHandlers.Robust:PackageConfig.Simulator.ini</source>
-		<use-if-started-as>bare</use-if-started-as>
 		<use-if-started-as>simulator</use-if-started-as>
 	</default-configuration>
 	<default-configuration>
-		<source>SilverSim.BackendHandlers.Robust:PackageConfig.Bare.ini</source>
-		<use-if-started-as>simulator</use-if-started-as>
+		<source>SilverSim.BackendHandlers.Robust:PackageConfig.Standalone.ini</source>
+		<use-if-started-as>standalone</use-if-started-as>
 	</default-configuration>
 	<default-configuration>
 		<source>SilverSim.BackendHandlers.Robust:PackageConfig.Grid.ini</source>
