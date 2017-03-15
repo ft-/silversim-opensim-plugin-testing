@@ -31,3 +31,4 @@ nls/de
 libraries
 data/dumps/**
 sonar-project.properties
+feed/**
