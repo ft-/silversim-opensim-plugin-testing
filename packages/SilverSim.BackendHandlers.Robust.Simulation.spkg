@@ -2,7 +2,7 @@
 <package>
 	<name>SilverSim.BackendHandlers.Robust.Simulation</name>
 	<dependencies>
-		<dependency name="SilverSim.Core"/>
+		<dependency name="SilverSim.Meta.Core"/>
 		<dependency name="SilverSim.BackendConnectors.Robust"/>
 		<dependency name="SilverSim.BackendConnectors.Simian"/>
 	</dependencies>

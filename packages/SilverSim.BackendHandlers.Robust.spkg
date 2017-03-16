@@ -18,7 +18,7 @@
 		<use-if-started-as>bare</use-if-started-as>
 	</default-configuration>
 	<dependencies>
-		<dependency name="SilverSim.Core"/>
+		<dependency name="SilverSim.Meta.Core"/>
 	</dependencies>
 	<files>
 		<file name="bin/plugins/SilverSim.BackendHandlers.Robust.dll"/>

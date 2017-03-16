@@ -2,7 +2,7 @@
 <package>
 	<name>SilverSim.Backend.OpenSim.Neighbor</name>
 	<dependencies>
-		<dependency name="SilverSim.Core"/>
+		<dependency name="SilverSim.Meta.Core"/>
 	</dependencies>
 	<files>
 		<file name="bin/plugins/SilverSim.Backend.OpenSim.Neighbor.dll"/>
