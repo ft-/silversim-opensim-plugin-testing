@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<package>
+	<name>SilverSim.Meta.Robust.Simulator</name>
+	<dependencies>
+		<dependency name="log4net"/>
+		<dependency name="SilverSim.Meta.Core.Simulator"/>
+		<dependency name="SilverSim.Backend.OpenSim.Neighbor"/>
+		<dependency name="SilverSim.BackendConnectors.Flotsam"/>
+		<dependency name="SilverSim.BackendConnectors.OpenSim"/>
+		<dependency name="SilverSim.BackendConnectors.Robust"/>
+		<dependency name="SilverSim.BackendConnectors.Simian"/>
+		<dependency name="SilverSim.BackendHandlers.Robust.Simulation"/>
+		<dependency name="SilverSim.BackendHandlers.Robust"/>
+	</dependencies>
+</package>

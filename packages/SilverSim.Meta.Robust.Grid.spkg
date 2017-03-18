@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<package>
+	<name>SilverSim.Meta.Robust.Grid</name>
+	<dependencies>
+		<dependency name="log4net"/>
+		<dependency name="SilverSim.Meta.Core.Grid"/>
+		<dependency name="SilverSim.BackendConnectors.OpenSim"/>
+		<dependency name="SilverSim.BackendConnectors.Robust"/>
+		<dependency name="SilverSim.BackendHandlers.Robust.Simulation"/>
+		<dependency name="SilverSim.BackendHandlers.Robust"/>
+	</dependencies>
+</package>
