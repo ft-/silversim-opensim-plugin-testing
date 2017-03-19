@@ -29,6 +29,7 @@ using SilverSim.Types;
 using SilverSim.Types.AuthInfo;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 using System.Runtime.Serialization;
 
@@ -46,6 +47,7 @@ namespace SilverSim.BackendConnectors.Robust.AuthInfo
         protected RobustAuthInfoConnectorFailureException(SerializationInfo info, StreamingContext context) : base(info, context) { }
     }
 
+    [Description("Robust AuthInfo Connector")]
     public class RobustAuthInfoConnector : AuthInfoServiceInterface, IPlugin
     {
         readonly string m_Uri;
