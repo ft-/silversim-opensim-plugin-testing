@@ -19,29 +19,31 @@
 // obligated to do so. If you do not wish to do so, delete this
 // exception statement from your version.
 
+using Nini.Config;
 using SilverSim.Main.Common;
 using SilverSim.Main.Common.HttpServer;
+using SilverSim.Scene.Management.Scene;
+using SilverSim.Scene.Types.Agent;
+using SilverSim.Scene.Types.Scene;
+using SilverSim.ServiceInterfaces.Inventory;
 using SilverSim.Types;
+using SilverSim.Types.Asset;
+using SilverSim.Types.Friends;
+using SilverSim.Types.IM;
+using SilverSim.Types.Inventory;
 using SilverSim.Types.StructuredData.REST;
+using SilverSim.Viewer.Messages.Friend;
+using SilverSim.Viewer.Messages.Inventory;
+using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 using System.Net;
 using System.Xml;
-using System;
-using SilverSim.Scene.Management.Scene;
-using SilverSim.Scene.Types.Scene;
-using SilverSim.Scene.Types.Agent;
-using SilverSim.Types.IM;
-using SilverSim.Types.Inventory;
-using SilverSim.Types.Asset;
-using SilverSim.ServiceInterfaces.Inventory;
-using SilverSim.Viewer.Messages.Friend;
-using Nini.Config;
-using SilverSim.Viewer.Messages.Inventory;
-using SilverSim.Types.Friends;
 
 namespace SilverSim.BackendHandlers.Robust.Simulation
 {
+    [Description("Friends Status Receive Handler")]
     public class SimFriendsHandler : IPlugin, IPluginShutdown
     {
         BaseHttpServer m_HttpServer;
