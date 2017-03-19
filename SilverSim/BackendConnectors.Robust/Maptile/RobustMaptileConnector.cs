@@ -27,12 +27,14 @@ using SilverSim.Types;
 using SilverSim.Types.Maptile;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 using System.Net;
 using System.Web;
 
 namespace SilverSim.BackendConnectors.Robust.Maptile
 {
+    [Description("Robust Maptile Connector")]
     public class RobustMaptileConnector : MaptileServiceInterface, IPlugin
     {
         readonly string m_Url;
