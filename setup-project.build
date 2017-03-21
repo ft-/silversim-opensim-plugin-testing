@@ -44,8 +44,8 @@
 	<target name="nuget-updates" description="Updates packages from nuget">
 		<setenv name="PATH" path="${environment::get-variable('PATH')}:${project::get-base-directory()}/windows" if="${platform::is-windows()}"/>
 	
-		<property name="silversim-nuget.packages" value="C5,log4net,MySql.Data"/>
-		<property name="silversim.packages" value="${silversim-nuget.packages},CSJ2K,Nini"/>
+		<property name="silversim-nuget.packages" value="C5,log4net"/>
+		<property name="silversim.packages" value="${silversim-nuget.packages},CSJ2K,Nini,MySql.Data"/>
 		
 		<property name="silversim.package.C5.path" value="net45"/>
 		<property name="silversim.package.CSJ2K.path" value="net40"/>
