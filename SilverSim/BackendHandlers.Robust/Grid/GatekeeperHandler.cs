@@ -173,7 +173,7 @@ namespace SilverSim.BackendHandlers.Robust.Grid
             m_AllowTeleportsToAnyRegion = (value.Length == 0) || (bool.TryParse(value, out b) && b);
         }
 
-        public IDictionary<string, ServerParamAttribute> ServerParams
+        public IReadOnlyDictionary<string, ServerParamAttribute> ServerParams
         {
             get
             {
