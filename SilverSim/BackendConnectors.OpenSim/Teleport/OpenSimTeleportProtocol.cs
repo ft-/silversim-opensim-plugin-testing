@@ -55,6 +55,9 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
     [Description("OpenSim Teleport Protocol")]
     public class OpenSimTeleportProtocol : TeleportHandlerServiceInterface, IPlugin
     {
+        const int PROTOCOL_VERSION_MAJOR = 0;
+        const int PROTOCOL_VERSION_MINOR = 6;
+
         protected static readonly ILog m_Log = LogManager.GetLogger("OPENSIM TELEPORT PROTOCOL");
         private static Random m_RandomNumber = new Random();
         private static object m_RandomNumberLock = new object();
@@ -1059,14 +1062,15 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
 
             Map req = new Map();
             req.Add("position", position.ToString());
-            req.Add("my_version", "SIMULATION/0.6");
-            req.Add("simulation_service_supported_min", 0.3);
-            req.Add("simulation_service_supported_max", 0.6);
-            req.Add("simulation_service_accepted_min", 0.3);
-            req.Add("simulation_service_accepted_max", 0.6);
+            string versionStr = string.Format("{0}.{1}", PROTOCOL_VERSION_MAJOR, PROTOCOL_VERSION_MINOR);
+            req.Add("my_version", "SIMULATION/" + versionStr);
+            req.Add("simulation_service_supported_min", "0.3");
+            req.Add("simulation_service_supported_max", versionStr);
+            req.Add("simulation_service_accepted_min", "0.3");
+            req.Add("simulation_service_accepted_max", versionStr);
             Map entityctx = new Map();
-            entityctx.Add("InboundVersion", 0.6);
-            entityctx.Add("OutboundVersion", 0.6);
+            entityctx.Add("InboundVersion", versionStr);
+            entityctx.Add("OutboundVersion", versionStr);
             entityctx.Add("WearablesCount", (int)WearableType.NumWearables);
             req.Add("context", entityctx);
             Map features = new Map();
@@ -1108,14 +1112,14 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
             }
 
 
-            if (protoVersion.Major > 0)
+            if (protoVersion.Major > PROTOCOL_VERSION_MAJOR)
             {
-                protoVersion.Major = 0;
-                protoVersion.Minor = 6;
+                protoVersion.Major = PROTOCOL_VERSION_MAJOR;
+                protoVersion.Minor = PROTOCOL_VERSION_MINOR;
             }
-            else if (protoVersion.Major == 0 && protoVersion.Minor > 6)
+            else if (protoVersion.Major == PROTOCOL_VERSION_MAJOR && protoVersion.Minor > PROTOCOL_VERSION_MINOR)
             {
-                protoVersion.Minor = 6;
+                protoVersion.Minor = PROTOCOL_VERSION_MINOR;
             }
             return protoVersion;
         }

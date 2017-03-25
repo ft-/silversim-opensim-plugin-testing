@@ -76,7 +76,7 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
         /* CAUTION! Never ever make a protocol version configurable */
         const int PROTOCOL_VERSION_MAJOR = 0;
         const int PROTOCOL_VERSION_MINOR = 0;
-        const string PROTOCOL_VERSION = "SIMULATION/0.6";
+
         protected static readonly ILog m_Log = LogManager.GetLogger("ROBUST AGENT HANDLER");
         private BaseHttpServer m_HttpServer;
         private Main.Common.Caps.CapsHttpRedirector m_CapsRedirector;
@@ -1615,8 +1615,9 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
             response.Add("success", success);
             response.Add("reason", reason);
             /* CAUTION! never ever make version parameters a configuration parameter */
-            response.Add("version", PROTOCOL_VERSION);
-            response.Add("negotiated_outbound_version", string.Format("{0}.{1}", versionMajor, versionMinor));
+            string versionStr = string.Format("{0}.{1}", versionMajor, versionMinor);
+            response.Add("version", "SIMULATION/" + versionStr);
+            response.Add("negotiated_outbound_version", versionStr);
             string acceptedMaxVersion;
             if(jsonreq.TryGetValue("simulation_service_accepted_max", out acceptedMaxVersion))
             {
