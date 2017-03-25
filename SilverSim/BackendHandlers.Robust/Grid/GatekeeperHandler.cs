@@ -38,7 +38,7 @@ using SilverSim.ServiceInterfaces.ServerParam;
 namespace SilverSim.BackendHandlers.Robust.Grid
 {
     [Description("Hypergrid Gatekeeper Server")]
-    [ServerParam("AllowTeleportsToAnyRegion", Description = "Controls whether teleports anywhere is allowed", ParameterType = typeof(bool), Type = ServerParamType.GlobalOnly)]
+    [ServerParam("AllowTeleportsToAnyRegion", Description = "Controls whether teleports anywhere is allowed", ParameterType = typeof(bool), Type = ServerParamType.GlobalOnly, DefaultValue = true)]
     [ServerParamStartsWith("HGRegionRedirect_")]
     public class GatekeeperHandler : IPlugin, IServerParamListener, IServerParamAnyListener
     {

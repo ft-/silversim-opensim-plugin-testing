@@ -34,8 +34,8 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
 {
     #region Service Implementation
     [Description("OpenSim PostAgent Direct HG Handler")]
-    [ServerParam("DirectHGEnabled")]
-    [ServerParam("DefaultHGRegion")]
+    [ServerParam("DirectHGEnabled", ParameterType = typeof(bool), DefaultValue = false)]
+    [ServerParam("DefaultHGRegion", ParameterType = typeof(string), DefaultValue = "", Type = ServerParamType.GlobalOnly)]
     public class PostAgentHGDirectHandler : PostAgentHandler, IServerParamListener
     {
         private HttpXmlRpcHandler m_XmlRpcServer;

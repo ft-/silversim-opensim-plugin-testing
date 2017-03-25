@@ -1045,9 +1045,9 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
             public uint Major;
             public uint Minor;
 
-            public ProtocolVersion(string version)
+            public ProtocolVersion(string version, int startOfNumbers = 11)
             {
-                string[] verparts = version.Substring(11).Split('.');
+                string[] verparts = version.Substring(startOfNumbers).Split('.');
                 Major = uint.Parse(verparts[0]);
                 Minor = verparts.Length > 1 ? uint.Parse(verparts[1]) : 0;
             }
@@ -1059,7 +1059,18 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
 
             Map req = new Map();
             req.Add("position", position.ToString());
-            req.Add("my_version", "SIMULATION/0.3");
+            req.Add("my_version", "SIMULATION/0.6");
+            req.Add("simulation_service_supported_min", 0.3);
+            req.Add("simulation_service_supported_max", 0.6);
+            req.Add("simulation_service_accepted_min", 0.3);
+            req.Add("simulation_service_accepted_max", 0.6);
+            Map entityctx = new Map();
+            entityctx.Add("InboundVersion", 0.6);
+            entityctx.Add("OutboundVersion", 0.6);
+            entityctx.Add("WearablesCount", (int)WearableType.NumWearables);
+            req.Add("context", entityctx);
+            Map features = new Map();
+            req.Add("features", features);
             if (null != agent.Owner.HomeURI)
             {
                 req.Add("agent_home_uri", agent.Owner.HomeURI);
@@ -1080,22 +1091,31 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
                 throw new TeleportFailedException(jsonres["reason"].ToString());
             }
 
-            string version = jsonres["version"].ToString();
-            if (!version.StartsWith("SIMULATION/"))
+            ProtocolVersion protoVersion;
+            string versionAsDouble;
+            if (jsonres.TryGetValue("negotiated_outbound_version", out versionAsDouble))
             {
-                throw new TeleportFailedException(this.GetLanguageString(agent.CurrentCulture, "TeleportProtocolError", "Teleport Protocol Error"));
+                protoVersion = new ProtocolVersion(versionAsDouble, 0);
+            }
+            else
+            {
+                string version = jsonres["version"].ToString();
+                if (!version.StartsWith("SIMULATION/"))
+                {
+                    throw new TeleportFailedException(this.GetLanguageString(agent.CurrentCulture, "TeleportProtocolError", "Teleport Protocol Error"));
+                }
+                protoVersion = new ProtocolVersion(version);
             }
 
-            ProtocolVersion protoVersion = new ProtocolVersion(version);
 
             if (protoVersion.Major > 0)
             {
                 protoVersion.Major = 0;
-                protoVersion.Minor = 3;
+                protoVersion.Minor = 6;
             }
-            else if (protoVersion.Major == 0 && protoVersion.Minor > 3)
+            else if (protoVersion.Major == 0 && protoVersion.Minor > 6)
             {
-                protoVersion.Minor = 3;
+                protoVersion.Minor = 6;
             }
             return protoVersion;
         }

@@ -70,11 +70,13 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
 {
     #region Service Implementation
     [Description("OpenSim PostAgent Handler")]
-    [ServerParam("OpenSimProtocolCompatibility")]
+    [ServerParam("OpenSimProtocolCompatibility", ParameterType = typeof(bool))]
     public class PostAgentHandler : IPlugin, IPluginShutdown, IServerParamListener
     {
         /* CAUTION! Never ever make a protocol version configurable */
-        const string PROTOCOL_VERSION = "SIMULATION/0.3";
+        const int PROTOCOL_VERSION_MAJOR = 0;
+        const int PROTOCOL_VERSION_MINOR = 0;
+        const string PROTOCOL_VERSION = "SIMULATION/0.6";
         protected static readonly ILog m_Log = LogManager.GetLogger("ROBUST AGENT HANDLER");
         private BaseHttpServer m_HttpServer;
         private Main.Common.Caps.CapsHttpRedirector m_CapsRedirector;
@@ -1507,38 +1509,61 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
             Map response = new Map();
             bool success = true;
             string reason = string.Empty;
-            string[] myVersionSplit = myVersion.Split(new char[] { '.', '/' });
-            if (myVersionSplit.Length < 3)
-            {
-                req.ErrorResponse(HttpStatusCode.BadRequest);
-                return;
-            }
-            if (myVersionSplit[0] != "SIMULATION")
-            {
-                req.ErrorResponse(HttpStatusCode.BadRequest);
-                return;
-            }
             int versionMajor;
-            if(!int.TryParse(myVersionSplit[1], out versionMajor))
-            {
-                versionMajor = 0;
-            }
             int versionMinor;
-            if(!int.TryParse(myVersionSplit[2], out versionMinor))
+
+            string versionAsDouble;
+            if (jsonreq.TryGetValue("simulation_service_supported_max", out versionAsDouble))
             {
-                versionMinor = 0;
+                string[] myVersionSplit = versionAsDouble.Split(new char[] { '.' });
+                if (myVersionSplit.Length < 2)
+                {
+                    req.ErrorResponse(HttpStatusCode.BadRequest);
+                    return;
+                }
+                if (!int.TryParse(myVersionSplit[0], out versionMajor))
+                {
+                    versionMajor = 0;
+                }
+                if (!int.TryParse(myVersionSplit[1], out versionMinor))
+                {
+                    versionMinor = 0;
+                }
             }
+            else
+            {
+                string[] myVersionSplit = myVersion.Split(new char[] { '.', '/' });
+                if (myVersionSplit.Length < 3)
+                {
+                    req.ErrorResponse(HttpStatusCode.BadRequest);
+                    return;
+                }
+                if (myVersionSplit[0] != "SIMULATION")
+                {
+                    req.ErrorResponse(HttpStatusCode.BadRequest);
+                    return;
+                }
+                if (!int.TryParse(myVersionSplit[1], out versionMajor))
+                {
+                    versionMajor = 0;
+                }
+                if (!int.TryParse(myVersionSplit[2], out versionMinor))
+                {
+                    versionMinor = 0;
+                }
+            }
+
             /* check version and limit it down to what we actually understand
              * weird but the truth of OpenSim protocol versioning
              */
-            if (versionMajor > 0)
+            if (versionMajor > PROTOCOL_VERSION_MAJOR)
             {
-                versionMajor = 0;
-                versionMinor = 3;
+                versionMajor = PROTOCOL_VERSION_MAJOR;
+                versionMinor = PROTOCOL_VERSION_MINOR;
             }
-            if (0 == versionMajor && versionMinor > 3)
+            else if (PROTOCOL_VERSION_MAJOR == versionMajor && versionMinor > PROTOCOL_VERSION_MINOR)
             {
-                versionMinor = 3;
+                versionMinor = PROTOCOL_VERSION_MINOR;
             }
 
             if (success && 
@@ -1591,6 +1616,37 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
             response.Add("reason", reason);
             /* CAUTION! never ever make version parameters a configuration parameter */
             response.Add("version", PROTOCOL_VERSION);
+            response.Add("negotiated_outbound_version", string.Format("{0}.{1}", versionMajor, versionMinor));
+            string acceptedMaxVersion;
+            if(jsonreq.TryGetValue("simulation_service_accepted_max", out acceptedMaxVersion))
+            {
+                string[] myVersionSplit = acceptedMaxVersion.Split(new char[] { '.' });
+                if (myVersionSplit.Length < 2)
+                {
+                    req.ErrorResponse(HttpStatusCode.BadRequest);
+                    return;
+                }
+                if (!int.TryParse(myVersionSplit[0], out versionMajor))
+                {
+                    versionMajor = 0;
+                }
+                if (!int.TryParse(myVersionSplit[1], out versionMinor))
+                {
+                    versionMinor = 0;
+                }
+
+                if(versionMajor > PROTOCOL_VERSION_MAJOR)
+                {
+                    versionMajor = PROTOCOL_VERSION_MAJOR;
+                    versionMinor = PROTOCOL_VERSION_MINOR;
+                }
+                else if(versionMajor == PROTOCOL_VERSION_MAJOR && versionMinor > PROTOCOL_VERSION_MINOR)
+                {
+                    versionMinor = PROTOCOL_VERSION_MINOR;
+                }
+                response.Add("negotiated_inbound_version", string.Format("{0}.{1}", versionMajor, versionMinor));
+            }
+            response.Add("features", new Map());
             using(HttpResponse res = req.BeginResponse(HttpStatusCode.OK, "OK"))
             {
                 using(Stream s = res.GetOutputStream())

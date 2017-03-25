@@ -39,7 +39,7 @@ namespace SilverSim.BackendHandlers.Robust.Grid
 {
     #region Service Implementation
     [Description("Robust Grid Protocol Server")]
-    [ServerParam("GridName", ParameterType = typeof(Uri), Type = ServerParamType.GlobalOnly)]
+    [ServerParam("GridName", ParameterType = typeof(Uri), Type = ServerParamType.GlobalOnly, DefaultValue = "")]
     public sealed class RobustGridServerHandler : IPlugin, IServerParamListener
     {
         readonly string m_GridServiceName;
