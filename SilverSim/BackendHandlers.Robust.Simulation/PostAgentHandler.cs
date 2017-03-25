@@ -70,7 +70,7 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
 {
     #region Service Implementation
     [Description("OpenSim PostAgent Handler")]
-    [ServerParam("OpenSimProtocolCompatibility", ParameterType = typeof(bool))]
+    [ServerParam("OpenSimProtocolCompatibility", ParameterType = typeof(bool), DefaultValue = true)]
     public class PostAgentHandler : IPlugin, IPluginShutdown, IServerParamListener
     {
         /* CAUTION! Never ever make a protocol version configurable */
@@ -154,8 +154,8 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
         bool GetOpenSimProtocolCompatibility(UUID regionId)
         {
             bool boolval;
-            return (m_OpenSimProtocolCompatibilityParams.TryGetValue(regionId, out boolval) ||
-                m_OpenSimProtocolCompatibilityParams.TryGetValue(UUID.Zero, out boolval)) &&
+            return !(m_OpenSimProtocolCompatibilityParams.TryGetValue(regionId, out boolval) ||
+                m_OpenSimProtocolCompatibilityParams.TryGetValue(UUID.Zero, out boolval)) ||
                 boolval;
         }
 
