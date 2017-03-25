@@ -606,7 +606,7 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
             }
             else
             {
-                m_Log.WarnFormat("OpenSim protocol in use for agent {0}.", agentPost.Account.Principal.FullName);
+                m_Log.InfoFormat("OpenSim protocol in use for agent {0}.", agentPost.Account.Principal.FullName);
             }
 
             try
