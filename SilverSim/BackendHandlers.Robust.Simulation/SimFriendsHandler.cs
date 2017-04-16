@@ -256,7 +256,7 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
 
                 ChangeUserRights.RightsEntry r = new ChangeUserRights.RightsEntry();
                 r.AgentRelated = gim.FromAgent.ID;
-                r.RelatedRights = newRights;
+                r.RelatedRights = (FriendRightFlags)newRights;
                 m.Rights.Add(r);
 
                 agent.SendMessageAlways(m, agentScene.ID);
