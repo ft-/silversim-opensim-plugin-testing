@@ -37,7 +37,6 @@ namespace SilverSim.OpenSimArchiver
     [Description("OS Assets Load Plugin")]
     public sealed class OSAssetsLoad : IPlugin
     {
-        private static readonly ILog m_Log = LogManager.GetLogger("OSASSETS LOAD ARCHIVER");
         SceneList m_Scenes;
 
         public OSAssetsLoad()
