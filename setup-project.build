@@ -16,7 +16,7 @@
 			<arg path="../bin"/>
 		</exec>
 		<exec program="ln" unless="${platform::is-windows()}">
-			<arg value="-s"/>
+			<arg value="-sf"/>
 			<arg path="../bin"/>
 			<arg path="bin"/>
 		</exec>
