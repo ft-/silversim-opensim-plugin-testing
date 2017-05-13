@@ -10,14 +10,14 @@
 	</target>
 	
 	<target name="setup-workspace" description="Generates sym linked binaries storage">
-		<mkdir dir="../_silversim-binaries-dev_"/>
+		<mkdir dir="../bin"/>
 		<exec program="windows/junction.exe" if="${platform::is-windows()}">
 			<arg path="bin"/>
-			<arg path="../_silversim-binaries-dev_"/>
+			<arg path="../bin"/>
 		</exec>
 		<exec program="ln" unless="${platform::is-windows()}">
 			<arg value="-s"/>
-			<arg path="../_silversim-binaries-dev_"/>
+			<arg path="../bin"/>
 			<arg path="bin"/>
 		</exec>
 	</target>
