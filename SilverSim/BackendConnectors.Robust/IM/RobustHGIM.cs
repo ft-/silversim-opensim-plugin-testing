@@ -84,15 +84,10 @@ namespace SilverSim.BackendConnectors.Robust.IM
 
             foreach(AvatarNameServiceInterface avatarNameService in m_AvatarNameServices)
             {
-                try
+                if(avatarNameService.TryGetValue(im.ToAgent, out resolved))
                 {
-                    resolved = avatarNameService[resolved];
                     isResolved = true;
                     break;
-                }
-                catch
-                {
-                    /* no action required */
                 }
             }
 

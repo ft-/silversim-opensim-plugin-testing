@@ -94,7 +94,7 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
             {
                 try
                 {
-                    SceneInterface s = m_Scenes[region_name];
+                    SceneInterface s = Scenes[region_name];
                     if (GetHGDirectEnabled(s.ID))
                     {
                         resdata.Add("uuid", s.ID);
@@ -124,7 +124,7 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
             Map resdata = new Map();
             try
             {
-                SceneInterface s = m_Scenes[region_uuid];
+                SceneInterface s = Scenes[region_uuid];
                 if (GetHGDirectEnabled(s.ID))
                 {
                     resdata.Add("uuid", s.ID);

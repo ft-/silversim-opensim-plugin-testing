@@ -87,8 +87,8 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
         readonly Dictionary<string, IProfileServicePlugin> m_ProfileServicePlugins = new Dictionary<string, IProfileServicePlugin>();
         List<IProtocolExtender> m_PacketHandlerPlugins = new List<IProtocolExtender>();
         List<AuthorizationServiceInterface> m_AuthorizationServices;
-        protected SceneList m_Scenes { get; private set; }
-        protected CommandRegistry m_Commands { get; private set; }
+        protected SceneList Scenes { get; private set; }
+        protected CommandRegistry Commands { get; private set; }
 
         sealed class GridParameterMap : ICloneable
         {
@@ -111,17 +111,19 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
 
             public object Clone()
             {
-                GridParameterMap m = new GridParameterMap();
-                m.HomeURI = HomeURI;
-                m.GatekeeperURI = GatekeeperURI;
-                m.AssetServerURI = AssetServerURI;
-                m.InventoryServerURI = InventoryServerURI;
-                m.GridUserServerURI = GridUserServerURI;
-                m.PresenceServerURI = PresenceServerURI;
-                m.AvatarServerURI = AvatarServerURI;
-                m.FriendsServerURI = FriendsServerURI;
-                m.ProfileServerURI = ProfileServerURI;
-                m.OfflineIMServerURI = OfflineIMServerURI;
+                GridParameterMap m = new GridParameterMap()
+                {
+                    HomeURI = HomeURI,
+                    GatekeeperURI = GatekeeperURI,
+                    AssetServerURI = AssetServerURI,
+                    InventoryServerURI = InventoryServerURI,
+                    GridUserServerURI = GridUserServerURI,
+                    PresenceServerURI = PresenceServerURI,
+                    AvatarServerURI = AvatarServerURI,
+                    FriendsServerURI = FriendsServerURI,
+                    ProfileServerURI = ProfileServerURI,
+                    OfflineIMServerURI = OfflineIMServerURI
+                };
                 m.ValidForSims.AddRange(ValidForSims);
                 return m;
             }
@@ -211,8 +213,8 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
 
         public virtual void Startup(ConfigurationLoader loader)
         {
-            m_Scenes = loader.Scenes;
-            m_Commands = loader.CommandRegistry;
+            Scenes = loader.Scenes;
+            Commands = loader.CommandRegistry;
             m_Log.Info("Initializing agent post handler for " + m_AgentBaseURL);
             m_AuthorizationServices = loader.GetServicesByValue<AuthorizationServiceInterface>();
             m_HttpServer = loader.HttpServer;
@@ -250,15 +252,6 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
                         continue;
                     }
                     GridParameterMap map = new GridParameterMap();
-                    map.HomeURI = section.GetString("HomeURI");
-                    if(string.IsNullOrEmpty(map.HomeURI))
-                    {
-                        map.HomeURI = m_HttpServer.ServerURI;
-                        if(!map.HomeURI.EndsWith("/"))
-                        {
-                            map.HomeURI += "/";
-                        }
-                    }
                     map.AssetServerURI = section.GetString("AssetServerURI", map.HomeURI);
                     map.GridUserServerURI = section.GetString("GridUserServerURI", m_DefaultGridUserServerURI);
                     map.PresenceServerURI = section.GetString("PresenceServerURI", string.Empty);
@@ -266,6 +259,15 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
                     map.InventoryServerURI = section.GetString("InventoryServerURI", map.HomeURI);
                     map.OfflineIMServerURI = section.GetString("OfflineIMServerURI", string.Empty);
                     map.FriendsServerURI = section.GetString("FriendsServerURI", string.Empty);
+                    map.HomeURI = section.GetString("HomeURI");
+                    if (string.IsNullOrEmpty(map.HomeURI))
+                    {
+                        map.HomeURI = m_HttpServer.ServerURI;
+                        if (!map.HomeURI.EndsWith("/"))
+                        {
+                            map.HomeURI += "/";
+                        }
+                    }
 
                     if (!Uri.IsWellFormedUriString(map.HomeURI, UriKind.Absolute))
                     {
@@ -413,10 +415,12 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
 
         public void DoAgentResponse(HttpRequest req, string reason, bool success)
         {
-            Map resmap = new Map();
-            resmap.Add("reason", reason);
-            resmap.Add("success", success);
-            resmap.Add("your_ip", req.CallerIP);
+            Map resmap = new Map
+            {
+                { "reason", reason },
+                { "success", success },
+                { "your_ip", req.CallerIP }
+            };
             using (HttpResponse res = req.BeginResponse())
             {
                 res.ContentType = "application/json";
@@ -510,7 +514,7 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
             }
 
             SceneInterface scene;
-            if (!m_Scenes.TryGetValue(agentPost.Destination.ID, out scene))
+            if (!Scenes.TryGetValue(agentPost.Destination.ID, out scene))
             {
                 m_Log.InfoFormat("No destination for agent {0}", req.RawUrl);
                 req.ErrorResponse(HttpStatusCode.NotFound);
@@ -628,13 +632,14 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
              * 
              * Now, we can validate the access of the agent.
              */
-            AuthorizationServiceInterface.AuthorizationData ad = new AuthorizationServiceInterface.AuthorizationData();
-            ad.ClientInfo = agentPost.Client;
-            ad.SessionInfo = agentPost.Session;
-            ad.AccountInfo = agentPost.Account;
-            ad.DestinationInfo = agentPost.Destination;
-            ad.AppearanceInfo = agentPost.Appearance;
-
+            AuthorizationServiceInterface.AuthorizationData ad = new AuthorizationServiceInterface.AuthorizationData()
+            {
+                ClientInfo = agentPost.Client,
+                SessionInfo = agentPost.Session,
+                AccountInfo = agentPost.Account,
+                DestinationInfo = agentPost.Destination,
+                AppearanceInfo = agentPost.Appearance
+            };
             try
             {
                 foreach (AuthorizationServiceInterface authService in m_AuthorizationServices)
@@ -693,7 +698,7 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
             string assetType = HeloRequester(assetServerURI);
 
             assetService = (string.IsNullOrEmpty(assetType) || assetType == "opensim-robust") ?
-                (AssetServiceInterface)new RobustAssetConnector(assetServerURI) :
+                new RobustAssetConnector(assetServerURI) :
                 m_AssetServicePlugins[assetType].Instantiate(assetServerURI);
 
             inventoryService = (string.IsNullOrEmpty(inventoryType) || inventoryType == "opensim-robust") ?
@@ -702,25 +707,26 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
 
             GridServiceInterface gridService = scene.GridService;
 
-            AgentServiceList serviceList = new AgentServiceList();
-            serviceList.Add(assetService);
-            serviceList.Add(inventoryService);
-            serviceList.Add(groupsService);
-            serviceList.Add(profileService);
-            serviceList.Add(friendsService);
-            serviceList.Add(userAgentService);
-            serviceList.Add(presenceService);
-            serviceList.Add(gridUserService);
-            serviceList.Add(gridService);
-            serviceList.Add(offlineIMService);
-            serviceList.Add(new OpenSimTeleportProtocol(
-                m_Commands,
+            AgentServiceList serviceList = new AgentServiceList
+            {
+                assetService,
+                inventoryService,
+                groupsService,
+                profileService,
+                friendsService,
+                userAgentService,
+                presenceService,
+                gridUserService,
+                gridService,
+                offlineIMService,
+                new OpenSimTeleportProtocol(
+                Commands,
                 m_CapsRedirector,
                 m_PacketHandlerPlugins,
-                m_Scenes));
-
+                Scenes)
+            };
             ViewerAgent agent = new ViewerAgent(
-                m_Scenes,
+                Scenes,
                 agentPost.Account.Principal.ID,
                 agentPost.Account.Principal.FirstName,
                 agentPost.Account.Principal.LastName,
@@ -730,10 +736,12 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
                 agentPost.Session.ServiceSessionID,
                 agentPost.Client,
                 agentPost.Account,
-                serviceList);
-            agent.ServiceURLs = agentPost.Account.ServiceURLs;
+                serviceList)
+            {
+                ServiceURLs = agentPost.Account.ServiceURLs,
 
-            agent.Appearance = agentPost.Appearance;
+                Appearance = agentPost.Appearance
+            };
             try
             {
                 scene.DetermineInitialAgentLocation(agent, agentPost.Destination.TeleportFlags, agentPost.Destination.Location, agentPost.Destination.LookAt);
@@ -756,7 +764,7 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
             }
             IPEndPoint ep = new IPEndPoint(ipAddr, 0);
             AgentCircuit circuit = new AgentCircuit(
-                m_Commands,
+                Commands,
                 agent,
                 udpServer,
                 agentPost.Circuit.CircuitCode,
@@ -765,11 +773,13 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
                 agent.ServiceURLs,
                 gatekeeperURI,
                 m_PacketHandlerPlugins,
-                ep);
-            circuit.LastTeleportFlags = agentPost.Destination.TeleportFlags;
-            circuit.Agent = agent;
-            circuit.AgentID = agentPost.Account.Principal.ID;
-            circuit.SessionID = agentPost.Session.SessionID;
+                ep)
+            {
+                LastTeleportFlags = agentPost.Destination.TeleportFlags,
+                Agent = agent,
+                AgentID = agentPost.Account.Principal.ID,
+                SessionID = agentPost.Session.SessionID
+            };
             agent.Circuits.Add(circuit.Scene.ID, circuit);
 
             try
@@ -811,11 +821,13 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
 
             try
             {
-                PresenceInfo pinfo = new PresenceInfo();
-                pinfo.UserID = agent.Owner;
-                pinfo.SessionID = agent.SessionID;
-                pinfo.SecureSessionID = agentPost.Session.SecureSessionID;
-                pinfo.RegionID = scene.ID;
+                PresenceInfo pinfo = new PresenceInfo()
+                {
+                    UserID = agent.Owner,
+                    SessionID = agent.SessionID,
+                    SecureSessionID = agentPost.Session.SecureSessionID,
+                    RegionID = scene.ID
+                };
                 presenceService[agent.SessionID, agent.ID, PresenceServiceInterface.SetType.Report] = pinfo;
             }
             catch (Exception e)
@@ -997,8 +1009,10 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
                     foreach (IValue gval in groups)
                     {
                         Map group = (Map)gval;
-                        ChildAgentUpdate.GroupDataEntry g = new ChildAgentUpdate.GroupDataEntry();
-                        g.AcceptNotices = group["accept_notices"].AsBoolean;
+                        ChildAgentUpdate.GroupDataEntry g = new ChildAgentUpdate.GroupDataEntry()
+                        {
+                            AcceptNotices = group["accept_notices"].AsBoolean
+                        };
                         UInt64 groupPowers;
                         if (UInt64.TryParse(group["group_powers"].ToString(), out groupPowers))
                         {
@@ -1018,8 +1032,10 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
                     foreach (IValue aval in anims)
                     {
                         Map anim = (Map)aval;
-                        ChildAgentUpdate.AnimationDataEntry a = new ChildAgentUpdate.AnimationDataEntry();
-                        a.Animation = anim["animation"].AsUUID;
+                        ChildAgentUpdate.AnimationDataEntry a = new ChildAgentUpdate.AnimationDataEntry()
+                        {
+                            Animation = anim["animation"].AsUUID
+                        };
                         if (anim.ContainsKey("object_id"))
                         {
                             a.ObjectID = anim["object_id"].AsUUID;
@@ -1058,10 +1074,11 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
             /*-----------------------------------------------------------------*/
             /* Appearance */
             Map appearancePack = (Map)param["packed_appearance"];
-            AppearanceInfo Appearance = new AppearanceInfo();
-            Appearance.AvatarHeight = appearancePack["height"].AsReal;
-
-            if(appearancePack.ContainsKey("visualparams"))
+            AppearanceInfo Appearance = new AppearanceInfo()
+            {
+                AvatarHeight = appearancePack["height"].AsReal
+            };
+            if (appearancePack.ContainsKey("visualparams"))
             {
                 AnArray vParams = (AnArray)appearancePack["visualparams"];
                 byte[] visualParams = new byte[vParams.Count];
@@ -1102,9 +1119,11 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
                     foreach (IValue val in ar)
                     {
                         Map wp = (Map)val;
-                        AgentWearables.WearableInfo wi = new AgentWearables.WearableInfo();
-                        wi.ItemID = wp["item"].AsUUID;
-                        wi.AssetID = wp.ContainsKey("asset") ? wp["asset"].AsUUID : UUID.Zero;
+                        AgentWearables.WearableInfo wi = new AgentWearables.WearableInfo()
+                        {
+                            ItemID = wp["item"].AsUUID,
+                            AssetID = wp.ContainsKey("asset") ? wp["asset"].AsUUID : UUID.Zero
+                        };
                         WearableType type = (WearableType)i;
                         Appearance.Wearables[type, n++] = wi;
                     }
@@ -1190,7 +1209,7 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
              */
 
             SceneInterface scene;
-            if (m_Scenes.TryGetValue(destinationRegionID, out scene))
+            if (Scenes.TryGetValue(destinationRegionID, out scene))
             {
                 IAgent agent;
 
@@ -1331,7 +1350,7 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
             /* Far and Throttles are extra in opensim so we have to cope with these on sending */
 
             SceneInterface scene;
-            if (m_Scenes.TryGetValue(destinationRegionID, out scene))
+            if (Scenes.TryGetValue(destinationRegionID, out scene))
             {
                 IAgent agent;
                 if (!scene.Agents.TryGetValue(childAgentPosition.AgentID, out agent))
@@ -1388,7 +1407,7 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
             SceneInterface scene;
             try
             {
-                scene = m_Scenes[regionID];
+                scene = Scenes[regionID];
             }
             catch
             {
@@ -1466,7 +1485,7 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
             SceneInterface scene;
             try
             {
-                scene = m_Scenes[regionID];
+                scene = Scenes[regionID];
             }
             catch
             {
@@ -1577,8 +1596,10 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
                 reason = "Destination is a variable-sized region, and source is an old simulator. Consider upgrading.";
             }
 
-            UUI agentUUI = new UUI();
-            agentUUI.ID = agentID;
+            UUI agentUUI = new UUI()
+            {
+                ID = agentID
+            };
             if (!string.IsNullOrEmpty(agent_home_uri))
             {
                 agentUUI.HomeURI = new Uri(agent_home_uri);

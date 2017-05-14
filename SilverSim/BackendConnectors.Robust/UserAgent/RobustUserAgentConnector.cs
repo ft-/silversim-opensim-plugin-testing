@@ -72,25 +72,31 @@ namespace SilverSim.BackendConnectors.Robust.UserAgent
 
         public override void VerifyAgent(UUID sessionID, string token)
         {
-            Map hash = new Map();
-            hash.Add("sessionID", sessionID);
-            hash.Add("token", token);
+            Map hash = new Map
+            {
+                { "sessionID", sessionID },
+                { "token", token }
+            };
             DoXmlRpcWithBoolResponse("verify_agent", hash);
         }
 
         public override void VerifyClient(UUID sessionID, string token)
         {
-            Map hash = new Map();
-            hash.Add("sessionID", sessionID);
-            hash.Add("token", token);
+            Map hash = new Map
+            {
+                { "sessionID", sessionID },
+                { "token", token }
+            };
             DoXmlRpcWithBoolResponse("verify_client", hash);
         }
 
         public override List<UUID> NotifyStatus(List<KeyValuePair<UUI, string>> friends, UUI user, bool online)
         {
-            Map hash = new Map();
-            hash.Add("userID", user.ID);
-            hash.Add("online", online.ToString());
+            Map hash = new Map
+            {
+                { "userID", user.ID },
+                { "online", online.ToString() }
+            };
             int i = 0;
             foreach(KeyValuePair<UUI, string> s in friends)
             {
@@ -120,10 +126,11 @@ namespace SilverSim.BackendConnectors.Robust.UserAgent
         public override UserAgentServiceInterface.UserInfo GetUserInfo(UUI user)
         {
             Dictionary<string, string> info = GetUserInfo_Internal(user);
-            UserInfo userInfo = new UserInfo();
-            userInfo.FirstName = info.ContainsKey("user_firstname") ? info["user_firstname"] : user.FirstName;
-            userInfo.LastName = info.ContainsKey("user_lastname") ? info["user_lastname"] : user.LastName;
-
+            UserInfo userInfo = new UserInfo()
+            {
+                FirstName = info.ContainsKey("user_firstname") ? info["user_firstname"] : user.FirstName,
+                LastName = info.ContainsKey("user_lastname") ? info["user_lastname"] : user.LastName
+            };
             if (info.ContainsKey("user_flags"))
             {
                 userInfo.UserFlags = uint.Parse(info["user_flags"]);
@@ -144,9 +151,10 @@ namespace SilverSim.BackendConnectors.Robust.UserAgent
 
         Dictionary<string, string> GetUserInfo_Internal(UUI user)
         {
-            Map hash = new Map();
-            hash.Add("userID", user.ID);
-            
+            Map hash = new Map
+            {
+                { "userID", user.ID }
+            };
             Map res = DoXmlRpcWithHashResponse("get_user_info", hash);
             Dictionary<string, string> info = new Dictionary<string, string>();
             foreach (string key in res.Keys)
@@ -162,9 +170,10 @@ namespace SilverSim.BackendConnectors.Robust.UserAgent
 
         public override ServerURIs GetServerURLs(UUI user)
         {
-            Map hash = new Map();
-            hash.Add("userID", user.ID);
-
+            Map hash = new Map
+            {
+                { "userID", user.ID }
+            };
             Map res = DoXmlRpcWithHashResponse("get_server_urls", hash);
             ServerURIs serverUrls = new ServerURIs();
             foreach (string key in res.Keys)
@@ -181,9 +190,10 @@ namespace SilverSim.BackendConnectors.Robust.UserAgent
 
         public override string LocateUser(UUI user)
         {
-            Map hash = new Map();
-            hash.Add("userID", user.ID);
-
+            Map hash = new Map
+            {
+                { "userID", user.ID }
+            };
             Map res = DoXmlRpcWithHashResponse("locate_user", hash);
 
             if(res.ContainsKey("URL"))
@@ -196,10 +206,11 @@ namespace SilverSim.BackendConnectors.Robust.UserAgent
 
         public override UUI GetUUI(UUI user, UUI targetUserID)
         {
-            Map hash = new Map();
-            hash.Add("userID", user.ID);
-            hash.Add("targetUserID", targetUserID.ID);
-
+            Map hash = new Map
+            {
+                { "userID", user.ID },
+                { "targetUserID", targetUserID.ID }
+            };
             Map res = DoXmlRpcWithHashResponse("get_uui", hash);
 
             if (res.ContainsKey("UUI"))
@@ -212,21 +223,24 @@ namespace SilverSim.BackendConnectors.Robust.UserAgent
 
         public override DestinationInfo GetHomeRegion(UUI user)
         {
-            Map hash = new Map();
-            hash.Add("userID", user.ID.ToString());
-
+            Map hash = new Map
+            {
+                { "userID", user.ID.ToString() }
+            };
             Map res = DoXmlRpcWithHashResponse("get_home_region", hash);
             if(!res["result"].AsBoolean)
             {
                 throw new KeyNotFoundException();
             }
 
-            DestinationInfo dInfo = new DestinationInfo();
-            /* assume that HomeURI supports Gatekeeper services */
-            dInfo.GatekeeperURI = user.HomeURI.ToString();
-            dInfo.LocalToGrid = false;
-            dInfo.ID = res["uuid"].AsUUID;
-            if(res.ContainsKey("x"))
+            DestinationInfo dInfo = new DestinationInfo()
+            {
+                /* assume that HomeURI supports Gatekeeper services */
+                GatekeeperURI = user.HomeURI.ToString(),
+                LocalToGrid = false,
+                ID = res["uuid"].AsUUID
+            };
+            if (res.ContainsKey("x"))
             {
                 dInfo.Location.X = res["x"].AsUInt;
             }
