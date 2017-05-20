@@ -37,9 +37,9 @@ namespace SilverSim.BackendConnectors.Robust.AvatarName
     [Description("Robust UserAccount AvatarName Connector")]
     public sealed class RobustAccountAvatarNameConnector : AvatarNameServiceInterface, IPlugin
     {
-        readonly string m_UserAccountURI;
-        string m_HomeURI;
-        readonly UUID m_ScopeID;
+        private readonly string m_UserAccountURI;
+        private string m_HomeURI;
+        private readonly UUID m_ScopeID;
         public int TimeoutMs { get; set; }
 
         #region Constructor
@@ -65,11 +65,13 @@ namespace SilverSim.BackendConnectors.Robust.AvatarName
 
         public override bool TryGetValue(string firstName, string lastName, out UUI uui)
         {
-            Dictionary<string, string> post = new Dictionary<string, string>();
-            post["FirstName"] = firstName;
-            post["LastName"] = lastName;
-            post["SCOPEID"] = (string)m_ScopeID;
-            post["METHOD"] = "getaccount";
+            var post = new Dictionary<string, string>
+            {
+                ["FirstName"] = firstName,
+                ["LastName"] = lastName,
+                ["SCOPEID"] = (string)m_ScopeID,
+                ["METHOD"] = "getaccount"
+            };
             Map map;
             using (Stream s = HttpClient.DoStreamPostRequest(m_UserAccountURI, null, post, false, TimeoutMs))
             {
@@ -82,18 +84,20 @@ namespace SilverSim.BackendConnectors.Robust.AvatarName
                 return false;
             }
 
-            Map m = map["result"] as Map;
-            if(null == m)
+            var m = map["result"] as Map;
+            if(m == null)
             {
                 uui = default(UUI);
                 return false;
             }
-            uui = new UUI();
-            uui.FirstName = m["FirstName"].ToString();
-            uui.LastName = m["LastName"].ToString();
-            uui.ID = m["PrincipalID"].ToString();
-            uui.HomeURI = new Uri(m_HomeURI);
-            uui.IsAuthoritative = true;
+            uui = new UUI()
+            {
+                FirstName = m["FirstName"].ToString(),
+                LastName = m["LastName"].ToString(),
+                ID = m["PrincipalID"].ToString(),
+                HomeURI = new Uri(m_HomeURI),
+                IsAuthoritative = true
+            };
             return true;
         }
 
@@ -112,32 +116,35 @@ namespace SilverSim.BackendConnectors.Robust.AvatarName
 
         public override List<UUI> Search(string[] names)
         {
-            Dictionary<string, string> post = new Dictionary<string, string>();
-            post["VERSIONMIN"] = "0";
-            post["VERSIONMAX"] = "0";
-            post["query"] = string.Join(" ", names);
-            post["ScopeID"] = (string)m_ScopeID;
-            post["METHOD"] = "getaccounts";
+            var post = new Dictionary<string, string>
+            {
+                ["VERSIONMIN"] = "0",
+                ["VERSIONMAX"] = "0",
+                ["query"] = string.Join(" ", names),
+                ["ScopeID"] = (string)m_ScopeID,
+                ["METHOD"] = "getaccounts"
+            };
             Map map;
             using(Stream s = HttpClient.DoStreamPostRequest(m_UserAccountURI, null, post, false, TimeoutMs))
             {
                 map = OpenSimResponse.Deserialize(s);
             }
 
-            List<UUI> results = new List<UUI>();
+            var results = new List<UUI>();
 
             foreach(IValue iv in map.Values)
             {
                 try
                 {
-                    Map m = iv as Map;
-                    UUI nd = new UUI();
-                    nd.FirstName = m["FirstName"].ToString();
-                    nd.LastName = m["LastName"].ToString();
-                    nd.ID = m["PrincipalID"].ToString();
-                    nd.HomeURI = new Uri(m_HomeURI);
-                    nd.IsAuthoritative = true;
-                    results.Add(nd);
+                    var m = iv as Map;
+                    results.Add(new UUI()
+                    {
+                        FirstName = m["FirstName"].ToString(),
+                        LastName = m["LastName"].ToString(),
+                        ID = m["PrincipalID"].ToString(),
+                        HomeURI = new Uri(m_HomeURI),
+                        IsAuthoritative = true
+                    });
                 }
                 catch
                 {
@@ -150,10 +157,12 @@ namespace SilverSim.BackendConnectors.Robust.AvatarName
 
         public override bool TryGetValue(UUID key, out UUI uui)
         {
-            Dictionary<string, string> post = new Dictionary<string, string>();
-            post["UserID"] = (string)key;
-            post["SCOPEID"] = (string)m_ScopeID;
-            post["METHOD"] = "getaccount";
+            var post = new Dictionary<string, string>
+            {
+                ["UserID"] = (string)key,
+                ["SCOPEID"] = (string)m_ScopeID,
+                ["METHOD"] = "getaccount"
+            };
             Map map;
             using (Stream s = HttpClient.DoStreamPostRequest(m_UserAccountURI, null, post, false, TimeoutMs))
             {
@@ -164,19 +173,21 @@ namespace SilverSim.BackendConnectors.Robust.AvatarName
                 uui = default(UUI);
                 return false;
             }
-            Map m = map["result"] as Map;
+            var m = map["result"] as Map;
             if (m == null)
             {
                 uui = default(UUI);
                 return false;
             }
 
-            uui = new UUI();
-            uui.FirstName = m["FirstName"].ToString();
-            uui.LastName = m["LastName"].ToString();
-            uui.ID = m["PrincipalID"].ToString();
-            uui.HomeURI = new Uri(m_HomeURI);
-            uui.IsAuthoritative = true;
+            uui = new UUI()
+            {
+                FirstName = m["FirstName"].ToString(),
+                LastName = m["LastName"].ToString(),
+                ID = m["PrincipalID"].ToString(),
+                HomeURI = new Uri(m_HomeURI),
+                IsAuthoritative = true
+            };
             return true;
         }
 
@@ -198,10 +209,7 @@ namespace SilverSim.BackendConnectors.Robust.AvatarName
             /* no action needed */
         }
 
-        public override bool Remove(UUID key)
-        {
-            return false;
-        }
+        public override bool Remove(UUID key) => false;
     }
     #endregion
 
@@ -210,10 +218,6 @@ namespace SilverSim.BackendConnectors.Robust.AvatarName
     public sealed class RobustAccountAvatarNameConnectorFactory : IPluginFactory
     {
         private static readonly ILog m_Log = LogManager.GetLogger("ROBUST ACCOUNT AVATAR NAME CONNECTOR");
-        public RobustAccountAvatarNameConnectorFactory()
-        {
-
-        }
 
         public IPlugin Initialize(ConfigurationLoader loader, IConfig ownSection)
         {

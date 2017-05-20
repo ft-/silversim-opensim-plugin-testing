@@ -27,14 +27,14 @@ namespace SilverSim.OpenSimArchiver.RegionArchiver
 {
     public static partial class OAR
     {
-        static class TerrainLoader
+        private static class TerrainLoader
         {
             public static List<LayerPatch> LoadStream(Stream input, int suggested_width, int suggested_height)
             {
-                List<LayerPatch> patches = new List<LayerPatch>();
-                float[,] vals = new float[LayerCompressor.LAYER_PATCH_NUM_XY_ENTRIES, suggested_width];
+                var patches = new List<LayerPatch>();
+                var vals = new float[LayerCompressor.LAYER_PATCH_NUM_XY_ENTRIES, suggested_width];
 
-                using (BinaryReader bs = new BinaryReader(input))
+                using (var bs = new BinaryReader(input))
                 {
                     for (uint patchy = 0; patchy < suggested_height / LayerCompressor.LAYER_PATCH_NUM_XY_ENTRIES; ++patchy)
                     {
@@ -50,9 +50,11 @@ namespace SilverSim.OpenSimArchiver.RegionArchiver
                         /* now build patches from those 16 lines */
                         for (uint patchx = 0; patchx < suggested_width / LayerCompressor.LAYER_PATCH_NUM_XY_ENTRIES; ++patchx)
                         {
-                            LayerPatch patch = new LayerPatch();
-                            patch.X = patchx;
-                            patch.Y = patchy;
+                            var patch = new LayerPatch()
+                            {
+                                X = patchx,
+                                Y = patchy
+                            };
                             for (uint y = 0; y < LayerCompressor.LAYER_PATCH_NUM_XY_ENTRIES; ++y)
                             {
                                 for (uint x = 0; x < LayerCompressor.LAYER_PATCH_NUM_XY_ENTRIES; ++x)

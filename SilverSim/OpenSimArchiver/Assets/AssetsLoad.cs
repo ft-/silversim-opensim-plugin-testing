@@ -36,11 +36,10 @@ namespace SilverSim.OpenSimArchiver.Assets
             UUI owner,
             Stream inputFile)
         {
-            using (GZipStream gzipStream = new GZipStream(inputFile, CompressionMode.Decompress))
+            using (var gzipStream = new GZipStream(inputFile, CompressionMode.Decompress))
             {
-                using (TarArchiveReader reader = new TarArchiveReader(gzipStream))
+                using (var reader = new TarArchiveReader(gzipStream))
                 {
-
                     for (; ; )
                     {
                         TarArchiveReader.Header header;

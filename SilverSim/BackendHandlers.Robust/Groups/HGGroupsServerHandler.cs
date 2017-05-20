@@ -37,24 +37,18 @@ namespace SilverSim.BackendHandlers.Robust.Groups
     [Description("Robust HG-Groups Protocol Server")]
     public class RobustHGGroupsServerHandler : BaseGroupsServerHandler, IServiceURLsGetInterface
     {
-        static readonly ILog m_Log = LogManager.GetLogger("ROBUST HGGROUPS HANDLER");
+        private static readonly ILog m_Log = LogManager.GetLogger("ROBUST HGGROUPS HANDLER");
         public RobustHGGroupsServerHandler(IConfig ownSection)
             : base(ownSection)
         {
             MethodHandlers.Add("POSTGROUP", HandlePostGroup);
         }
 
-        protected override string UrlPath
-        {
-            get
-            {
-                return "/hg-groups";
-            }
-        }
+        protected override string UrlPath => "/hg-groups";
 
         public void GetServiceURLs(Dictionary<string, string> dict)
         {
-            dict["GroupsServerURI"] = m_HttpServer.ServerURI;
+            dict["GroupsServerURI"] = HttpServer.ServerURI;
         }
 
         public override void Startup(ConfigurationLoader loader)
@@ -63,10 +57,10 @@ namespace SilverSim.BackendHandlers.Robust.Groups
             base.Startup(loader);
         }
 
-        void HandlePostGroup(HttpRequest req, Dictionary<string, object> reqdata)
+        private void HandlePostGroup(HttpRequest req, Dictionary<string, object> reqdata)
         {
-            GroupInfo grec_new = new GroupInfo();
-            GroupInvite ginvite = new GroupInvite();
+            var grec_new = new GroupInfo();
+            var ginvite = new GroupInvite();
             UUI agent;
             UUI requestingAgent;
             string accessToken;
@@ -86,11 +80,11 @@ namespace SilverSim.BackendHandlers.Robust.Groups
             }
 
             GroupInfo grec;
-            if(!m_GroupsService.Groups.TryGetValue(requestingAgent, grec_new.ID, out grec))
+            if(!GroupsService.Groups.TryGetValue(requestingAgent, grec_new.ID, out grec))
             {
                 try
                 {
-                    m_GroupsService.Groups.Update(requestingAgent, grec_new);
+                    GroupsService.Groups.Update(requestingAgent, grec_new);
                 }
                 catch(Exception e)
                 {
@@ -112,7 +106,7 @@ namespace SilverSim.BackendHandlers.Robust.Groups
             ginvite.Principal = agent;
             try
             {
-                m_GroupsService.Invites.Add(requestingAgent, ginvite);
+                GroupsService.Invites.Add(requestingAgent, ginvite);
             }
             catch(Exception e)
             {
@@ -120,24 +114,24 @@ namespace SilverSim.BackendHandlers.Robust.Groups
                 return;
             }
 
-            GridInstantMessage gim = new GridInstantMessage();
-            gim.FromGroup = grec.ID;
-            gim.ToAgent = agent;
-            gim.FromAgent = requestingAgent;
-            gim.Dialog = GridInstantMessageDialog.GroupInvitation;
-            gim.IsFromGroup = true;
-            gim.Message = "Please confirm your acceptance to join group " + grec.ID.FullName;
-
-            if(!m_IMRouter.SendSync(gim))
+            var gim = new GridInstantMessage()
+            {
+                FromGroup = grec.ID,
+                ToAgent = agent,
+                FromAgent = requestingAgent,
+                Dialog = GridInstantMessageDialog.GroupInvitation,
+                IsFromGroup = true,
+                Message = "Please confirm your acceptance to join group " + grec.ID.FullName
+            };
+            if (!IMRouter.SendSync(gim))
             {
                 SendBooleanResponse(req, false);
                 return;
             }
 
-            
             try
             {
-                m_GroupsService.Members.Add(requestingAgent, grec.ID, agent, UUID.Zero, accessToken);
+                GroupsService.Members.Add(requestingAgent, grec.ID, agent, UUID.Zero, accessToken);
             }
             catch(Exception e)
             {
@@ -148,12 +142,12 @@ namespace SilverSim.BackendHandlers.Robust.Groups
             SendBooleanResponse(req, true);
         }
 
-        bool VerifyAccessToken(UUI requestingAgent, UGI group, string accessToken)
+        private bool VerifyAccessToken(UUI requestingAgent, UGI group, string accessToken)
         {
             GroupMember gmem;
             try
             {
-                if(!m_GroupsService.Members.TryGetValue(requestingAgent, group, requestingAgent, out gmem))
+                if(!GroupsService.Members.TryGetValue(requestingAgent, group, requestingAgent, out gmem))
                 {
                     return false;
                 }
@@ -245,15 +239,8 @@ namespace SilverSim.BackendHandlers.Robust.Groups
     [PluginName("HGGroupsHandler")]
     public sealed class RobustHGGroupsServerHandlerFactory : IPluginFactory
     {
-        public RobustHGGroupsServerHandlerFactory()
-        {
-
-        }
-
-        public IPlugin Initialize(ConfigurationLoader loader, IConfig ownSection)
-        {
-            return new RobustHGGroupsServerHandler(ownSection);
-        }
+        public IPlugin Initialize(ConfigurationLoader loader, IConfig ownSection) =>
+            new RobustHGGroupsServerHandler(ownSection);
     }
     #endregion
 }

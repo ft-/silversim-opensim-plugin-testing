@@ -32,22 +32,24 @@ namespace SilverSim.BackendConnectors.Flotsam.Groups
     {
         GroupInfo IGroupsInterface.Create(UUI requestingAgent, GroupInfo group)
         {
-            Map m = new Map();
-            m.Add("GroupID", group.ID.ID);
-            m.Add("Name", group.ID.GroupName);
-            m.Add("Charter", group.Charter);
-            m.Add("InsigniaID", group.InsigniaID);
-            m.Add("FounderID", group.Founder.ID);
-            m.Add("MembershipFee", group.MembershipFee);
-            m.Add("OpenEnrollment", group.IsOpenEnrollment.ToString());
-            m.Add("ShowInList", group.IsShownInList ? 1 : 0);
-            m.Add("AllowPublish", group.IsAllowPublish ? 1 : 0);
-            m.Add("MaturePublish", group.IsMaturePublish ? 1 : 0);
-            m.Add("OwnerRoleID", group.OwnerRoleID);
-            m.Add("EveryonePowers", ((ulong)GroupPowers.DefaultEveryonePowers).ToString());
-            m.Add("OwnersPowers", ((ulong)GroupPowers.OwnerPowers).ToString());
-            Map res = FlotsamXmlRpcCall(requestingAgent, "groups.createGroup", m) as Map;
-            if(null == res)
+            var m = new Map
+            {
+                { "GroupID", group.ID.ID },
+                { "Name", group.ID.GroupName },
+                { "Charter", group.Charter },
+                { "InsigniaID", group.InsigniaID },
+                { "FounderID", group.Founder.ID },
+                { "MembershipFee", group.MembershipFee },
+                { "OpenEnrollment", group.IsOpenEnrollment.ToString() },
+                { "ShowInList", group.IsShownInList ? 1 : 0 },
+                { "AllowPublish", group.IsAllowPublish ? 1 : 0 },
+                { "MaturePublish", group.IsMaturePublish ? 1 : 0 },
+                { "OwnerRoleID", group.OwnerRoleID },
+                { "EveryonePowers", ((ulong)GroupPowers.DefaultEveryonePowers).ToString() },
+                { "OwnersPowers", ((ulong)GroupPowers.OwnerPowers).ToString() }
+            };
+            var res = FlotsamXmlRpcCall(requestingAgent, "groups.createGroup", m) as Map;
+            if(res == null)
             {
                 throw new InvalidDataException();
             }
@@ -56,15 +58,17 @@ namespace SilverSim.BackendConnectors.Flotsam.Groups
 
         GroupInfo IGroupsInterface.Update(UUI requestingAgent, GroupInfo group)
         {
-            Map m = new Map();
-            m.Add("GroupID", group.ID.ID);
-            m.Add("Charter", group.Charter);
-            m.Add("InsigniaID", group.InsigniaID);
-            m.Add("MembershipFee", group.MembershipFee);
-            m.Add("OpenEnrollment", group.IsOpenEnrollment.ToString());
-            m.Add("ShowInList", group.IsShownInList ? 1 : 0);
-            m.Add("AllowPublish", group.IsAllowPublish ? 1 : 0);
-            m.Add("MaturePublish", group.IsMaturePublish ? 1 : 0);
+            var m = new Map
+            {
+                { "GroupID", group.ID.ID },
+                { "Charter", group.Charter },
+                { "InsigniaID", group.InsigniaID },
+                { "MembershipFee", group.MembershipFee },
+                { "OpenEnrollment", group.IsOpenEnrollment.ToString() },
+                { "ShowInList", group.IsShownInList ? 1 : 0 },
+                { "AllowPublish", group.IsAllowPublish ? 1 : 0 },
+                { "MaturePublish", group.IsMaturePublish ? 1 : 0 }
+            };
             FlotsamXmlRpcCall(requestingAgent, "groups.updateGroup", m);
             return Groups[requestingAgent, group.ID];
         }
@@ -76,10 +80,12 @@ namespace SilverSim.BackendConnectors.Flotsam.Groups
 
         bool IGroupsInterface.TryGetValue(UUI requestingAgent, UUID groupID, out UGI ugi)
         {
-            Map m = new Map();
-            m.Add("GroupID", groupID);
+            var m = new Map
+            {
+                ["GroupID"] = groupID
+            };
             m = FlotsamXmlRpcGetCall(requestingAgent, "groups.getGroup", m) as Map;
-            if (null == m)
+            if (m == null)
             {
                 ugi = default(UGI);
                 return false;
@@ -90,10 +96,12 @@ namespace SilverSim.BackendConnectors.Flotsam.Groups
 
         bool IGroupsInterface.ContainsKey(UUI requestingAgent, UUID groupID)
         {
-            Map m = new Map();
-            m.Add("GroupID", groupID);
+            var m = new Map
+            {
+                ["GroupID"] = groupID
+            };
             m = FlotsamXmlRpcGetCall(requestingAgent, "groups.getGroup", m) as Map;
-            if (null == m)
+            if (m == null)
             {
                 return false;
             }
@@ -104,10 +112,12 @@ namespace SilverSim.BackendConnectors.Flotsam.Groups
         {
             get
             {
-                Map m = new Map();
-                m.Add("GroupID", groupID);
+                var m = new Map
+                {
+                    ["GroupID"] = groupID
+                };
                 m = FlotsamXmlRpcGetCall(requestingAgent, "groups.getGroup", m) as Map;
-                if(null == m)
+                if(m == null)
                 {
                     throw new InvalidDataException();
                 }
@@ -117,10 +127,12 @@ namespace SilverSim.BackendConnectors.Flotsam.Groups
 
         bool IGroupsInterface.TryGetValue(UUI requestingAgent, UGI group, out GroupInfo groupInfo)
         {
-            Map m = new Map();
-            m.Add("GroupID", group.ID);
+            var m = new Map
+            {
+                ["GroupID"] = group.ID
+            };
             m = FlotsamXmlRpcGetCall(requestingAgent, "groups.getGroup", m) as Map;
-            if (null == m)
+            if (m == null)
             {
                 groupInfo = default(GroupInfo);
                 return false;
@@ -131,10 +143,12 @@ namespace SilverSim.BackendConnectors.Flotsam.Groups
 
         bool IGroupsInterface.ContainsKey(UUI requestingAgent, UGI group)
         {
-            Map m = new Map();
-            m.Add("GroupID", group.ID);
+            var m = new Map
+            {
+                ["GroupID"] = group.ID
+            };
             m = FlotsamXmlRpcGetCall(requestingAgent, "groups.getGroup", m) as Map;
-            if (null == m)
+            if (m == null)
             {
                 return false;
             }
@@ -143,12 +157,14 @@ namespace SilverSim.BackendConnectors.Flotsam.Groups
 
         GroupInfo IGroupsInterface.this[UUI requestingAgent, UGI group]
         {
-            get 
+            get
             {
-                Map m = new Map();
-                m.Add("GroupID", group.ID);
+                var m = new Map
+                {
+                    ["GroupID"] = group.ID
+                };
                 m = FlotsamXmlRpcGetCall(requestingAgent, "groups.getGroup", m) as Map;
-                if(null == m)
+                if(m == null)
                 {
                     throw new InvalidDataException();
                 }
@@ -158,10 +174,12 @@ namespace SilverSim.BackendConnectors.Flotsam.Groups
 
         bool IGroupsInterface.TryGetValue(UUI requestingAgent, string groupName, out GroupInfo groupInfo)
         {
-            Map m = new Map();
-            m.Add("Name", groupName);
+            var m = new Map
+            {
+                { "Name", groupName }
+            };
             m = FlotsamXmlRpcGetCall(requestingAgent, "groups.getGroup", m) as Map;
-            if (null == m)
+            if (m == null)
             {
                 groupInfo = default(GroupInfo);
                 return false;
@@ -172,10 +190,12 @@ namespace SilverSim.BackendConnectors.Flotsam.Groups
 
         bool IGroupsInterface.ContainsKey(UUI requestingAgent, string groupName)
         {
-            Map m = new Map();
-            m.Add("Name", groupName);
+            var m = new Map
+            {
+                { "Name", groupName }
+            };
             m = FlotsamXmlRpcGetCall(requestingAgent, "groups.getGroup", m) as Map;
-            if (null == m)
+            if (m == null)
             {
                 return false;
             }
@@ -184,12 +204,14 @@ namespace SilverSim.BackendConnectors.Flotsam.Groups
 
         GroupInfo IGroupsInterface.this[UUI requestingAgent, string groupName]
         {
-            get 
+            get
             {
-                Map m = new Map();
-                m.Add("Name", groupName);
+                var m = new Map
+                {
+                    { "Name", groupName }
+                };
                 m = FlotsamXmlRpcGetCall(requestingAgent, "groups.getGroup", m) as Map;
-                if(null == m)
+                if(m == null)
                 {
                     throw new InvalidDataException();
                 }
@@ -199,15 +221,17 @@ namespace SilverSim.BackendConnectors.Flotsam.Groups
 
         List<DirGroupInfo> IGroupsInterface.GetGroupsByName(UUI requestingAgent, string query)
         {
-            Map m = new Map();
-            m.Add("Search", query);
-            AnArray results = (AnArray)FlotsamXmlRpcCall(requestingAgent, "groups.findGroups", m);
+            var m = new Map
+            {
+                { "Search", query }
+            };
+            var results = (AnArray)FlotsamXmlRpcCall(requestingAgent, "groups.findGroups", m);
 
-            List<DirGroupInfo> groups = new List<DirGroupInfo>();
+            var groups = new List<DirGroupInfo>();
             foreach(IValue iv in results)
             {
-                Map data = iv as Map;
-                if (null != data)
+                var data = iv as Map;
+                if (data != null)
                 {
                     groups.Add(data.ToDirGroupInfo());
                 }

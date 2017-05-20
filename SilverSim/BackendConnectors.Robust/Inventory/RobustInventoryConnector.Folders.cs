@@ -35,19 +35,15 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
     public partial class RobustInventoryConnector : IInventoryFolderServiceInterface
     {
         #region Accessors
-        IInventoryFolderContentServiceInterface IInventoryFolderServiceInterface.Content
-        {
-            get
-            {
-                return this;
-            }
-        }
+        IInventoryFolderContentServiceInterface IInventoryFolderServiceInterface.Content => this;
 
         bool IInventoryFolderServiceInterface.TryGetValue(UUID key, out InventoryFolder folder)
         {
-            Dictionary<string, string> post = new Dictionary<string, string>();
-            post["ID"] = (string)key;
-            post["METHOD"] = "GETFOLDER";
+            var post = new Dictionary<string, string>
+            {
+                ["ID"] = (string)key,
+                ["METHOD"] = "GETFOLDER"
+            };
             Map map;
             using (Stream s = HttpClient.DoStreamPostRequest(m_InventoryURI, null, post, false, TimeoutMs))
             {
@@ -59,8 +55,8 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
                 return false;
             }
 
-            Map foldermap = map["folder"] as Map;
-            if (null == foldermap)
+            var foldermap = map["folder"] as Map;
+            if (foldermap == null)
             {
                 folder = default(InventoryFolder);
                 return false;
@@ -72,9 +68,11 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
 
         bool IInventoryFolderServiceInterface.ContainsKey(UUID key)
         {
-            Dictionary<string, string> post = new Dictionary<string, string>();
-            post["ID"] = (string)key;
-            post["METHOD"] = "GETFOLDER";
+            var post = new Dictionary<string, string>
+            {
+                ["ID"] = (string)key,
+                ["METHOD"] = "GETFOLDER"
+            };
             Map map;
             using (Stream s = HttpClient.DoStreamPostRequest(m_InventoryURI, null, post, false, TimeoutMs))
             {
@@ -85,8 +83,8 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
                 return false;
             }
 
-            Map foldermap = map["folder"] as Map;
-            if (null == foldermap)
+            var foldermap = map["folder"] as Map;
+            if (foldermap == null)
             {
                 return false;
             }
@@ -110,10 +108,12 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
 
         bool IInventoryFolderServiceInterface.TryGetValue(UUID principalID, UUID key, out InventoryFolder folder)
         {
-            Dictionary<string, string> post = new Dictionary<string, string>();
-            post["PRINCIPAL"] = (string)principalID;
-            post["ID"] = (string)key;
-            post["METHOD"] = "GETFOLDER";
+            var post = new Dictionary<string, string>
+            {
+                ["PRINCIPAL"] = (string)principalID,
+                ["ID"] = (string)key,
+                ["METHOD"] = "GETFOLDER"
+            };
             Map map;
             using (Stream s = HttpClient.DoStreamPostRequest(m_InventoryURI, null, post, false, TimeoutMs))
             {
@@ -125,8 +125,8 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
                 return false;
             }
 
-            Map foldermap = map["folder"] as Map;
-            if (null == foldermap)
+            var foldermap = map["folder"] as Map;
+            if (foldermap == null)
             {
                 folder = default(InventoryFolder);
                 return false;
@@ -138,10 +138,12 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
 
         bool IInventoryFolderServiceInterface.ContainsKey(UUID principalID, UUID key)
         {
-            Dictionary<string, string> post = new Dictionary<string, string>();
-            post["PRINCIPAL"] = (string)principalID;
-            post["ID"] = (string)key;
-            post["METHOD"] = "GETFOLDER";
+            var post = new Dictionary<string, string>
+            {
+                ["PRINCIPAL"] = (string)principalID,
+                ["ID"] = (string)key,
+                ["METHOD"] = "GETFOLDER"
+            };
             Map map;
             using (Stream s = HttpClient.DoStreamPostRequest(m_InventoryURI, null, post, false, TimeoutMs))
             {
@@ -152,8 +154,8 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
                 return false;
             }
 
-            Map foldermap = map["folder"] as Map;
-            return (null != foldermap);
+            var foldermap = map["folder"] as Map;
+            return foldermap != null;
         }
 
         InventoryFolder IInventoryFolderServiceInterface.this[UUID principalID, UUID key]
@@ -171,8 +173,10 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
 
         bool IInventoryFolderServiceInterface.TryGetValue(UUID principalID, AssetType type, out InventoryFolder folder)
         {
-            Dictionary<string, string> post = new Dictionary<string, string>();
-            post["PRINCIPAL"] = (string)principalID;
+            var post = new Dictionary<string, string>
+            {
+                ["PRINCIPAL"] = (string)principalID
+            };
             if (type == AssetType.RootFolder)
             {
                 post["METHOD"] = "GETROOTFOLDER";
@@ -188,8 +192,8 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
                 map = OpenSimResponse.Deserialize(s);
             }
 
-            Map foldermap = map["folder"] as Map;
-            if (null == foldermap)
+            var foldermap = map["folder"] as Map;
+            if (foldermap == null)
             {
                 folder = default(InventoryFolder);
                 return false;
@@ -201,8 +205,10 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
 
         bool IInventoryFolderServiceInterface.ContainsKey(UUID principalID, AssetType type)
         {
-            Dictionary<string, string> post = new Dictionary<string, string>();
-            post["PRINCIPAL"] = (string)principalID;
+            var post = new Dictionary<string, string>
+            {
+                ["PRINCIPAL"] = (string)principalID
+            };
             if (type == AssetType.RootFolder)
             {
                 post["METHOD"] = "GETROOTFOLDER";
@@ -218,8 +224,8 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
                 map = OpenSimResponse.Deserialize(s);
             }
 
-            Map foldermap = map["folder"] as Map;
-            return (null != foldermap);
+            var foldermap = map["folder"] as Map;
+            return foldermap != null;
         }
 
         InventoryFolder IInventoryFolderServiceInterface.this[UUID principalID, AssetType type]
@@ -237,27 +243,29 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
 
         List<InventoryFolder> IInventoryFolderServiceInterface.GetFolders(UUID principalID, UUID key)
         {
-            Dictionary<string, string> post = new Dictionary<string, string>();
-            post["PRINCIPAL"] = (string)principalID;
-            post["FOLDER"] = (string)key;
-            post["METHOD"] = "GETFOLDERCONTENT";
+            var post = new Dictionary<string, string>
+            {
+                ["PRINCIPAL"] = (string)principalID,
+                ["FOLDER"] = (string)key,
+                ["METHOD"] = "GETFOLDERCONTENT"
+            };
             Map map;
             using(Stream s = HttpClient.DoStreamPostRequest(m_InventoryURI, null, post, false, TimeoutMs))
             {
                 map = OpenSimResponse.Deserialize(s);
             }
 
-            Map foldersmap = map["FOLDERS"] as Map;
-            if (null == foldersmap)
+            var foldersmap = map["FOLDERS"] as Map;
+            if (foldersmap == null)
             {
                 throw new InventoryInaccessibleException();
             }
 
-            List<InventoryFolder> items = new List<InventoryFolder>();
+            var items = new List<InventoryFolder>();
             foreach (KeyValuePair<string, IValue> i in foldersmap)
             {
-                Map folderdata = i.Value as Map;
-                if (null != folderdata)
+                var folderdata = i.Value as Map;
+                if (folderdata != null)
                 {
                     items.Add(RobustInventoryConnector.FolderFromMap(folderdata));
                 }
@@ -267,26 +275,28 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
 
         List<InventoryItem> IInventoryFolderServiceInterface.GetItems(UUID principalID, UUID key)
         {
-            Dictionary<string, string> post = new Dictionary<string, string>();
-            post["PRINCIPAL"] = (string)principalID;
-            post["FOLDER"] = (string)key;
-            post["METHOD"] = "GETFOLDERITEMS";
+            var post = new Dictionary<string, string>
+            {
+                ["PRINCIPAL"] = (string)principalID,
+                ["FOLDER"] = (string)key,
+                ["METHOD"] = "GETFOLDERITEMS"
+            };
             Map map;
             using(Stream s = HttpClient.DoStreamPostRequest(m_InventoryURI, null, post, false, TimeoutMs))
             {
                 map = OpenSimResponse.Deserialize(s);
             }
-            Map itemsmap = map["ITEMS"] as Map;
-            if(null == itemsmap)
+            var itemsmap = map["ITEMS"] as Map;
+            if(itemsmap == null)
             {
                 throw new InventoryInaccessibleException();
             }
 
-            List<InventoryItem> items = new List<InventoryItem>();
+            var items = new List<InventoryItem>();
             foreach (KeyValuePair<string, IValue> i in itemsmap)
             {
-                Map itemdata = i.Value as Map;
-                if (null != itemdata)
+                var itemdata = i.Value as Map;
+                if (itemdata != null)
                 {
                     items.Add(RobustInventoryConnector.ItemFromMap(itemdata, m_GroupsService));
                 }
@@ -299,13 +309,15 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
         #region Methods
         private Dictionary<string, string> SerializeFolder(InventoryFolder folder)
         {
-            Dictionary<string, string> post = new Dictionary<string, string>();
-            post["ID"] = (string)folder.ID;
-            post["ParentID"] = (string)folder.ParentFolderID;
-            post["Type"] = ((int)folder.InventoryType).ToString();
-            post["Version"] = folder.Version.ToString();
-            post["Name"] = folder.Name;
-            post["Owner"] = (string)folder.Owner.ID;
+            var post = new Dictionary<string, string>
+            {
+                ["ID"] = (string)folder.ID,
+                ["ParentID"] = (string)folder.ParentFolderID,
+                ["Type"] = ((int)folder.InventoryType).ToString(),
+                ["Version"] = folder.Version.ToString(),
+                ["Name"] = folder.Name,
+                ["Owner"] = (string)folder.Owner.ID
+            };
             return post;
         }
 
@@ -341,11 +353,13 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
 
         void IInventoryFolderServiceInterface.Move(UUID principalID, UUID folderID, UUID toFolderID)
         {
-            Dictionary<string, string> post = new Dictionary<string,string>();
-            post["ParentID"] = (string)toFolderID;
-            post["ID"] = (string)folderID;
-            post["PRINCIPAL"] = (string)principalID;
-            post["METHOD"] = "MOVEFOLDER";
+            var post = new Dictionary<string, string>
+            {
+                ["ParentID"] = (string)toFolderID,
+                ["ID"] = (string)folderID,
+                ["PRINCIPAL"] = (string)principalID,
+                ["METHOD"] = "MOVEFOLDER"
+            };
             Map map;
             using(Stream s = HttpClient.DoStreamPostRequest(m_InventoryURI, null, post, false, TimeoutMs))
             {
@@ -361,17 +375,18 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
         {
 #warning TODO: race condition here with FolderVersion, needs a checkup against Robust HTTP API xinventory
             InventoryFolder folder = Folder[principalID, folderID];
-            folder.Version += 1;
+            ++folder.Version;
             Folder.Update(folder);
         }
 
-
         void IInventoryFolderServiceInterface.Delete(UUID principalID, UUID folderID)
         {
-            Dictionary<string, string> post = new Dictionary<string, string>();
-            post["FOLDERS[]"] = (string)folderID;
-            post["PRINCIPAL"] = (string)principalID;
-            post["METHOD"] = "DELETEFOLDERS";
+            var post = new Dictionary<string, string>
+            {
+                ["FOLDERS[]"] = (string)folderID,
+                ["PRINCIPAL"] = (string)principalID,
+                ["METHOD"] = "DELETEFOLDERS"
+            };
             Map map;
             using(Stream s = HttpClient.DoStreamPostRequest(m_InventoryURI, null, post, false, TimeoutMs))
             {
@@ -385,9 +400,11 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
 
         void IInventoryFolderServiceInterface.Purge(UUID folderID)
         {
-            Dictionary<string, string> post = new Dictionary<string, string>();
-            post["ID"] = (string)folderID;
-            post["METHOD"] = "PURGEFOLDER";
+            var post = new Dictionary<string, string>
+            {
+                ["ID"] = (string)folderID,
+                ["METHOD"] = "PURGEFOLDER"
+            };
             Map map;
             using(Stream s = HttpClient.DoStreamPostRequest(m_InventoryURI, null, post, false, TimeoutMs))
             {
@@ -401,10 +418,12 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
 
         void IInventoryFolderServiceInterface.Purge(UUID principalID, UUID folderID)
         {
-            Dictionary<string, string> post = new Dictionary<string, string>();
-            post["ID"] = (string)folderID;
-            post["PRINCIPAL"] = (string)principalID;
-            post["METHOD"] = "PURGEFOLDER";
+            var post = new Dictionary<string, string>
+            {
+                ["ID"] = (string)folderID,
+                ["PRINCIPAL"] = (string)principalID,
+                ["METHOD"] = "PURGEFOLDER"
+            };
             Map map;
             using(Stream s = HttpClient.DoStreamPostRequest(m_InventoryURI, null, post, false, TimeoutMs))
             {
@@ -420,7 +439,7 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
         [SuppressMessage("Gendarme.Rules.Exceptions", "DoNotSwallowErrorsCatchingNonSpecificExceptionsRule")]
         List<UUID> IInventoryFolderServiceInterface.Delete(UUID principalID, List<UUID> folderIDs)
         {
-            List<UUID> deleted = new List<UUID>();
+            var deleted = new List<UUID>();
             foreach (UUID id in folderIDs)
             {
                 try

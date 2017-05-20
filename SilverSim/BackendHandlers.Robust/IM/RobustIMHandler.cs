@@ -37,10 +37,10 @@ namespace SilverSim.BackendConnectors.Robust.IM
     #region Service Implementation
     public class RobustIMMessage : GridInstantMessage
     {
-        Func<bool> SignalEvent;
-        readonly object m_Lock = new object();
+        private Func<bool> SignalEvent;
+        private readonly object m_Lock = new object();
 
-        void IMProcessed(GridInstantMessage im, bool result)
+        private void IMProcessed(GridInstantMessage im, bool result)
         {
             lock(m_Lock)
             {
@@ -77,9 +77,10 @@ namespace SilverSim.BackendConnectors.Robust.IM
     [Description("OpenSim InstantMessage Server")]
     public sealed class RobustIMHandler : IPlugin, IServiceURLsGetInterface
     {
-        readonly bool m_DisallowOfflineIM;
-        IMServiceInterface m_IMService;
-        BaseHttpServer m_HttpServer;
+        private readonly bool m_DisallowOfflineIM;
+        private IMServiceInterface m_IMService;
+        private BaseHttpServer m_HttpServer;
+
         public RobustIMHandler(bool disallowOfflineIM)
         {
             m_DisallowOfflineIM = disallowOfflineIM;
@@ -98,14 +99,14 @@ namespace SilverSim.BackendConnectors.Robust.IM
             dict["IMServerURI"] = m_HttpServer.ServerURI;
         }
 
-        XmlRpc.XmlRpcResponse IMReceived(XmlRpc.XmlRpcRequest req)
+        private XmlRpc.XmlRpcResponse IMReceived(XmlRpc.XmlRpcRequest req)
         {
-            RobustIMMessage im = new RobustIMMessage();
-            XmlRpc.XmlRpcResponse res = new XmlRpc.XmlRpcResponse();
+            var im = new RobustIMMessage();
+            var res = new XmlRpc.XmlRpcResponse();
             try
             {
                 im.NoOfflineIMStore = m_DisallowOfflineIM;
-                Map d = (Map)req.Params[0];
+                var d = (Map)req.Params[0];
 
                 im.FromAgent.ID = d["from_agent_id"].AsUUID;
                 im.FromGroup.ID = d["from_agent_id"].AsUUID;
@@ -137,8 +138,8 @@ namespace SilverSim.BackendConnectors.Robust.IM
                 throw new XmlRpc.XmlRpcFaultException(-32602, "invalid method parameters");
             }
 
-            Map p = new Map();
-            using (ManualResetEvent e = new ManualResetEvent(false))
+            var p = new Map();
+            using (var e = new ManualResetEvent(false))
             {
                 im.ActivateIMEvent(e.Set);
                 m_IMService.Send(im);
@@ -158,7 +159,6 @@ namespace SilverSim.BackendConnectors.Robust.IM
                 }
             }
 
-            
             p.Add("result", im.ResultInfo ? "TRUE" : "FALSE");
             res.ReturnValue = p;
 
@@ -171,15 +171,8 @@ namespace SilverSim.BackendConnectors.Robust.IM
     [PluginName("IMHandler")]
     public sealed class RobustIMHandlerFactory : IPluginFactory
     {
-        public RobustIMHandlerFactory()
-        {
-
-        }
-
-        public IPlugin Initialize(ConfigurationLoader loader, IConfig ownSection)
-        {
-            return new RobustIMHandler(ownSection.GetBoolean("DisallowOfflineIM", true));
-        }
+        public IPlugin Initialize(ConfigurationLoader loader, IConfig ownSection) =>
+            new RobustIMHandler(ownSection.GetBoolean("DisallowOfflineIM", true));
     }
     #endregion
 }

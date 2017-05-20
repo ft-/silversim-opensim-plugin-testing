@@ -42,11 +42,11 @@ namespace SilverSim.BackendHandlers.Robust.Grid
     [ServerParamStartsWith("HGRegionRedirect_")]
     public class GatekeeperHandler : IPlugin, IServerParamListener, IServerParamAnyListener
     {
-        readonly string m_GridServiceName;
-        GridServiceInterface m_GridService;
-        bool m_AllowTeleportsToAnyRegion = true;
-        readonly RwLockedDictionary<UUID, UUID> m_RegionRedirects = new RwLockedDictionary<UUID, UUID>();
-        readonly RwLockedDictionary<UUID, string> m_RegionRedirectMessages = new RwLockedDictionary<UUID, string>();
+        private readonly string m_GridServiceName;
+        private GridServiceInterface m_GridService;
+        private bool m_AllowTeleportsToAnyRegion = true;
+        private readonly RwLockedDictionary<UUID, UUID> m_RegionRedirects = new RwLockedDictionary<UUID, UUID>();
+        private readonly RwLockedDictionary<UUID, string> m_RegionRedirectMessages = new RwLockedDictionary<UUID, string>();
 
         public GatekeeperHandler(IConfig ownSection)
         {
@@ -61,12 +61,14 @@ namespace SilverSim.BackendHandlers.Robust.Grid
             xmlRpcServer.XmlRpcMethods.Add("get_region", GetRegion);
         }
 
-        XmlRpc.XmlRpcResponse LinkRegion(XmlRpc.XmlRpcRequest req)
+        private XmlRpc.XmlRpcResponse LinkRegion(XmlRpc.XmlRpcRequest req)
         {
             Map reqdata;
-            Map resdata = new Map();
             IValue iv;
-            resdata.Add("result", "False");
+            var resdata = new Map
+            {
+                { "result", "False" }
+            };
             RegionInfo ri;
             if(!(req.Params.Count == 1 && req.Params.TryGetValue(0, out reqdata) &&
                 reqdata.TryGetValue("region_name", out iv) &&
@@ -83,7 +85,7 @@ namespace SilverSim.BackendHandlers.Robust.Grid
                 }
             }
 
-            if (null != ri)
+            if (ri != null)
             {
                 resdata["result"] = new AString("True");
                 resdata.Add("uuid", ri.ID);
@@ -97,14 +99,16 @@ namespace SilverSim.BackendHandlers.Robust.Grid
             return new XmlRpc.XmlRpcResponse { ReturnValue = resdata };
         }
 
-        XmlRpc.XmlRpcResponse GetRegion(XmlRpc.XmlRpcRequest req)
+        private XmlRpc.XmlRpcResponse GetRegion(XmlRpc.XmlRpcRequest req)
         {
             Map reqdata;
-            Map resdata = new Map();
             IValue iv;
             UUID regionid;
             RegionInfo ri;
-            resdata.Add("result", "false");
+            var resdata = new Map
+            {
+                { "result", "false" }
+            };
             if (req.Params.Count == 1 && req.Params.TryGetValue(0, out reqdata) &&
                 reqdata.TryGetValue("region_uuid", out iv) &&
                 UUID.TryParse(iv.ToString(), out regionid)
@@ -123,7 +127,7 @@ namespace SilverSim.BackendHandlers.Robust.Grid
                 }
                 if (m_GridService.TryGetValue(UUID.Zero, regionid, out ri))
                 {
-                    if (!m_AllowTeleportsToAnyRegion && !ri.Flags.HasFlag(RegionFlags.DefaultHGRegion))
+                    if (!m_AllowTeleportsToAnyRegion && (ri.Flags & RegionFlags.DefaultHGRegion) == 0)
                     {
                         List<RegionInfo> ris = m_GridService.GetDefaultHypergridRegions(UUID.Zero);
                         if (ris.Count != 0)
@@ -137,7 +141,7 @@ namespace SilverSim.BackendHandlers.Robust.Grid
                         }
                     }
 
-                    if (null != ri)
+                    if (ri != null)
                     {
                         resdata["result"] = new AString("true");
                         if(!string.IsNullOrEmpty(message))
@@ -150,7 +154,7 @@ namespace SilverSim.BackendHandlers.Robust.Grid
                         resdata.Add("size_x", ri.Size.X.ToString());
                         resdata.Add("size_y", ri.Size.Y.ToString());
                         resdata.Add("region_name", ri.Name);
-                        resdata.Add("hostname", ri.ServerIP.ToString());
+                        resdata.Add("hostname", ri.ServerIP);
                         resdata.Add("http_port", ri.ServerHttpPort.ToString());
                         resdata.Add("internal_port", ri.ServerPort.ToString());
                         resdata.Add("server_uri", ri.ServerURI);
@@ -173,13 +177,7 @@ namespace SilverSim.BackendHandlers.Robust.Grid
             m_AllowTeleportsToAnyRegion = (value.Length == 0) || (bool.TryParse(value, out b) && b);
         }
 
-        public IReadOnlyDictionary<string, ServerParamAttribute> ServerParams
-        {
-            get
-            {
-                return new Dictionary<string, ServerParamAttribute>();
-            }
-        }
+        public IReadOnlyDictionary<string, ServerParamAttribute> ServerParams => new Dictionary<string, ServerParamAttribute>();
 
         public void TriggerParameterUpdated(UUID regionID, string parametername, string value)
         {
@@ -212,14 +210,7 @@ namespace SilverSim.BackendHandlers.Robust.Grid
     [PluginName("GatekeeperHandler")]
     public class GatekeeperHandlerFactory : IPluginFactory
     {
-        public GatekeeperHandlerFactory()
-        {
-
-        }
-
-        public IPlugin Initialize(ConfigurationLoader loader, IConfig ownSection)
-        {
-            return new GatekeeperHandler(ownSection);
-        }
+        public IPlugin Initialize(ConfigurationLoader loader, IConfig ownSection) =>
+            new GatekeeperHandler(ownSection);
     }
 }

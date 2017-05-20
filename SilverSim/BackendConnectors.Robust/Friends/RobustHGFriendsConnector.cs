@@ -35,10 +35,10 @@ namespace SilverSim.BackendConnectors.Robust.Friends
     [Description("Robust HGFriends Connector")]
     public class RobustHGFriendsConnector : FriendsServiceInterface, IPlugin
     {
-        readonly string m_Uri;
+        private readonly string m_Uri;
         public int TimeoutMs = 20000;
-        readonly UUID m_SessionID;
-        readonly string m_ServiceKey;
+        private readonly UUID m_SessionID;
+        private readonly string m_ServiceKey;
 
         public RobustHGFriendsConnector(string uri, UUID sessionID, string serviceKey)
         {
@@ -66,13 +66,14 @@ namespace SilverSim.BackendConnectors.Robust.Friends
 
         public override bool TryGetValue(UUI user, UUI friend, out FriendInfo fInfo)
         {
-            Dictionary<string, string> post = new Dictionary<string, string>();
-            post["METHOD"] = "getfriendperms";
-            post["PRINCIPALID"] = (string)user.ID;
-            post["FRIENDID"] = (string)friend.ID;
-            post["KEY"] = m_ServiceKey;
-            post["SESSIONID"] = (string)m_SessionID;
-
+            var post = new Dictionary<string, string>
+            {
+                ["METHOD"] = "getfriendperms",
+                ["PRINCIPALID"] = (string)user.ID,
+                ["FRIENDID"] = (string)friend.ID,
+                ["KEY"] = m_ServiceKey,
+                ["SESSIONID"] = (string)m_SessionID
+            };
             Map res;
             using (Stream s = HttpClient.DoStreamPostRequest(m_Uri, null, post, false, TimeoutMs))
             {
@@ -80,10 +81,12 @@ namespace SilverSim.BackendConnectors.Robust.Friends
             }
             if (res.ContainsKey("Value") && res["Value"] != null)
             {
-                fInfo = new FriendInfo();
-                fInfo.User = user;
-                fInfo.Friend = friend;
-                fInfo.UserGivenFlags = (FriendRightFlags)res["Value"].AsInt;
+                fInfo = new FriendInfo()
+                {
+                    User = user,
+                    Friend = friend,
+                    UserGivenFlags = (FriendRightFlags)res["Value"].AsInt
+                };
                 return true;
             }
             fInfo = default(FriendInfo);
@@ -92,7 +95,7 @@ namespace SilverSim.BackendConnectors.Robust.Friends
 
         public override FriendInfo this[UUI user, UUI friend]
         {
-            get 
+            get
             {
                 FriendInfo fi;
                 if (!TryGetValue(user, friend, out fi))
@@ -103,27 +106,22 @@ namespace SilverSim.BackendConnectors.Robust.Friends
             }
         }
 
-        public override List<FriendInfo> this[UUI user]
-        {
-            get
-            {
-                return new List<FriendInfo>();
-            }
-        }
+        public override List<FriendInfo> this[UUI user] => new List<FriendInfo>();
 
         public override void Store(FriendInfo fi)
         {
-            Dictionary<string, string> post = new Dictionary<string, string>();
-            post["METHOD"] = "newfriendship";
-            post["KEY"] = m_ServiceKey;
-            post["SESSIONID"] = (string)m_SessionID;
-            post["PrincipalID"] = (string)fi.User.ID;
-            post["Friend"] = fi.Friend.ToString();
-            post["SECRET"] = fi.Secret;
-            post["MyFlags"] = ((int)fi.UserGivenFlags).ToString();
-            post["TheirFlags"] = ((int)fi.FriendGivenFlags).ToString();
-
-            using(Stream s = HttpClient.DoStreamPostRequest(m_Uri, null, post, false, TimeoutMs))
+            var post = new Dictionary<string, string>
+            {
+                ["METHOD"] = "newfriendship",
+                ["KEY"] = m_ServiceKey,
+                ["SESSIONID"] = (string)m_SessionID,
+                ["PrincipalID"] = (string)fi.User.ID,
+                ["Friend"] = fi.Friend.ToString(),
+                ["SECRET"] = fi.Secret,
+                ["MyFlags"] = ((int)fi.UserGivenFlags).ToString(),
+                ["TheirFlags"] = ((int)fi.FriendGivenFlags).ToString()
+            };
+            using (Stream s = HttpClient.DoStreamPostRequest(m_Uri, null, post, false, TimeoutMs))
             {
                 CheckResult(OpenSimResponse.Deserialize(s));
             }
@@ -131,15 +129,16 @@ namespace SilverSim.BackendConnectors.Robust.Friends
 
         public override void Delete(FriendInfo fi)
         {
-            Dictionary<string, string> post = new Dictionary<string, string>();
-            post["METHOD"] = "deletefriendship";
-            post["PrincipalID"] = (string)fi.User.ID;
-            post["Friend"] = fi.Friend.ToString();
-            post["SECRET"] = fi.Secret;
-            post["MyFlags"] = "0";
-            post["TheirFlags"] = "0";
-
-            using(Stream s = HttpClient.DoStreamPostRequest(m_Uri, null, post, false, TimeoutMs))
+            var post = new Dictionary<string, string>
+            {
+                ["METHOD"] = "deletefriendship",
+                ["PrincipalID"] = (string)fi.User.ID,
+                ["Friend"] = fi.Friend.ToString(),
+                ["SECRET"] = fi.Secret,
+                ["MyFlags"] = "0",
+                ["TheirFlags"] = "0"
+            };
+            using (Stream s = HttpClient.DoStreamPostRequest(m_Uri, null, post, false, TimeoutMs))
             {
                 CheckResult(OpenSimResponse.Deserialize(s));
             }
@@ -152,14 +151,15 @@ namespace SilverSim.BackendConnectors.Robust.Friends
 
         public override void StoreRights(FriendInfo fi)
         {
-            Dictionary<string, string> post = new Dictionary<string, string>();
-            post["METHOD"] = "grant_rights";
-            post["FromID"] = (string)fi.User.ID;
-            post["ToID"] = fi.Friend.ToString();
-            post["SECRET"] = fi.Secret;
-            post["UserFlags"] = "-1";
-            post["Rights"] = ((int)fi.UserGivenFlags).ToString();
-
+            var post = new Dictionary<string, string>
+            {
+                ["METHOD"] = "grant_rights",
+                ["FromID"] = (string)fi.User.ID,
+                ["ToID"] = fi.Friend.ToString(),
+                ["SECRET"] = fi.Secret,
+                ["UserFlags"] = "-1",
+                ["Rights"] = ((int)fi.UserGivenFlags).ToString()
+            };
             using (Stream s = HttpClient.DoStreamPostRequest(m_Uri, null, post, false, TimeoutMs))
             {
                 CheckResult(OpenSimResponse.Deserialize(s));

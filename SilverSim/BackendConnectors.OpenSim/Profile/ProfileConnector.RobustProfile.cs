@@ -30,8 +30,8 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
     {
         public class RobustProfileConnector : IProfileConnectorImplementation
         {
-            readonly string m_Uri;
-            readonly ProfileConnector m_Connector;
+            private readonly string m_Uri;
+            private readonly ProfileConnector m_Connector;
 
             public RobustProfileConnector(ProfileConnector connector, string uri)
             {
@@ -41,13 +41,14 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
 
             Dictionary<UUID, string> IClassifiedsInterface.GetClassifieds(UUI user)
             {
-                Dictionary<UUID, string> data = new Dictionary<UUID, string>();
-                Map m = new Map();
-                m["creatorId"] = user.ID;
-                AnArray reslist = (AnArray)RPC.DoJson20RpcRequest(m_Uri, "avatarclassifiedsrequest", (string)UUID.Random, m, m_Connector.TimeoutMs);
-                foreach(IValue iv in reslist)
+                var data = new Dictionary<UUID, string>();
+                var m = new Map
                 {
-                    Map c = (Map)iv;
+                    ["creatorId"] = user.ID
+                };
+                foreach(IValue iv in (AnArray)RPC.DoJson20RpcRequest(m_Uri, "avatarclassifiedsrequest", (string)UUID.Random, m, m_Connector.TimeoutMs))
+                {
+                    var c = (Map)iv;
                     data[c["classifieduuid"].AsUUID] = c["name"].ToString();
                 }
                 return data;
@@ -57,25 +58,29 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
             {
                 try
                 {
-                    Map m = new Map();
-                    m["ClassifiedId"] = id;
-                    Map reslist = (Map)RPC.DoJson20RpcRequest(m_Uri, "classifieds_info_query", (string)UUID.Random, m, m_Connector.TimeoutMs);
-                    classified = new ProfileClassified();
-                    classified.ClassifiedID = id;
-                    classified.Creator.ID = reslist["CreatorId"].AsUUID;
-                    classified.CreationDate = Date.UnixTimeToDateTime(reslist["CreationDate"].AsULong);
-                    classified.ExpirationDate = Date.UnixTimeToDateTime(reslist["ExpirationDate"].AsULong);
-                    classified.Category = reslist["Category"].AsInt;
-                    classified.Name = reslist["Name"].ToString();
-                    classified.Description = reslist["Description"].ToString();
-                    classified.ParcelID = reslist["ParcelId"].AsUUID;
-                    classified.ParentEstate = reslist["ParentEstate"].AsInt;
-                    classified.SnapshotID = reslist["SnapshotId"].AsUUID;
-                    classified.SimName = reslist["SimName"].ToString();
-                    classified.GlobalPos = reslist["GlobalPos"].AsVector3;
-                    classified.ParcelName = reslist["ParcelName"].ToString();
-                    classified.Flags = (byte)reslist["Flags"].AsUInt;
-                    classified.Price = reslist["Price"].AsInt;
+                    var m = new Map
+                    {
+                        ["ClassifiedId"] = id
+                    };
+                    var reslist = (Map)RPC.DoJson20RpcRequest(m_Uri, "classifieds_info_query", (string)UUID.Random, m, m_Connector.TimeoutMs);
+                    classified = new ProfileClassified()
+                    {
+                        ClassifiedID = id,
+                        Creator = new UUI(reslist["CreatorId"].AsUUID),
+                        CreationDate = Date.UnixTimeToDateTime(reslist["CreationDate"].AsULong),
+                        ExpirationDate = Date.UnixTimeToDateTime(reslist["ExpirationDate"].AsULong),
+                        Category = reslist["Category"].AsInt,
+                        Name = reslist["Name"].ToString(),
+                        Description = reslist["Description"].ToString(),
+                        ParcelID = reslist["ParcelId"].AsUUID,
+                        ParentEstate = reslist["ParentEstate"].AsInt,
+                        SnapshotID = reslist["SnapshotId"].AsUUID,
+                        SimName = reslist["SimName"].ToString(),
+                        GlobalPos = reslist["GlobalPos"].AsVector3,
+                        ParcelName = reslist["ParcelName"].ToString(),
+                        Flags = (byte)reslist["Flags"].AsUInt,
+                        Price = reslist["Price"].AsInt
+                    };
                     return true;
                 }
                 catch
@@ -89,8 +94,10 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
             {
                 try
                 {
-                    Map m = new Map();
-                    m["ClassifiedId"] = id;
+                    var m = new Map
+                    {
+                        ["ClassifiedId"] = id
+                    };
                     RPC.DoJson20RpcRequest(m_Uri, "classifieds_info_query", (string)UUID.Random, m, m_Connector.TimeoutMs);
                     return true;
                 }
@@ -102,7 +109,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
 
             ProfileClassified IClassifiedsInterface.this[UUI user, UUID id]
             {
-                get 
+                get
                 {
                     ProfileClassified classified;
                     if (!((IClassifiedsInterface)this).TryGetValue(user, id, out classified))
@@ -113,45 +120,48 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
                 }
             }
 
-
             void IClassifiedsInterface.Update(ProfileClassified classified)
             {
-                Map m = new Map();
-                m.Add("ClassifiedId", classified.ClassifiedID);
-                m.Add("CreatorId", classified.Creator.ID);
-                m.Add("CreationDate", classified.CreationDate.AsInt);
-                m.Add("ExpirationDate", classified.ExpirationDate.AsInt);
-                m.Add("Category", classified.Category);
-                m.Add("Name", classified.Name);
-                m.Add("Description", classified.Description);
-                m.Add("ParcelId", classified.ParcelID);
-                m.Add("ParentEstate", classified.ParentEstate);
-                m.Add("SnapshotId", classified.SnapshotID);
-                m.Add("SimName", classified.SimName);
-                m.Add("GlobalPos", classified.GlobalPos);
-                m.Add("ParcelName", classified.ParcelName);
-                m.Add("Flags", (int)classified.Flags);
-                m.Add("Price", classified.Price);
-
+                var m = new Map
+                {
+                    { "ClassifiedId", classified.ClassifiedID },
+                    { "CreatorId", classified.Creator.ID },
+                    { "CreationDate", classified.CreationDate.AsInt },
+                    { "ExpirationDate", classified.ExpirationDate.AsInt },
+                    { "Category", classified.Category },
+                    { "Name", classified.Name },
+                    { "Description", classified.Description },
+                    { "ParcelId", classified.ParcelID },
+                    { "ParentEstate", classified.ParentEstate },
+                    { "SnapshotId", classified.SnapshotID },
+                    { "SimName", classified.SimName },
+                    { "GlobalPos", classified.GlobalPos },
+                    { "ParcelName", classified.ParcelName },
+                    { "Flags", (int)classified.Flags },
+                    { "Price", classified.Price }
+                };
                 RPC.DoJson20RpcRequest(m_Uri, "classified_update", (string)UUID.Random, m, m_Connector.TimeoutMs);
             }
 
             void IClassifiedsInterface.Delete(UUID id)
             {
-                Map m = new Map();
-                m["ClassifiedId"] = id;
+                var m = new Map
+                {
+                    ["ClassifiedId"] = id
+                };
                 RPC.DoJson20RpcRequest(m_Uri, "classified_delete", (string)UUID.Random, m, m_Connector.TimeoutMs);
             }
 
             Dictionary<UUID, string> IPicksInterface.GetPicks(UUI user)
             {
-                Dictionary<UUID, string> data = new Dictionary<UUID, string>();
-                Map m = new Map();
-                m["creatorId"] = user.ID;
-                AnArray reslist = (AnArray)RPC.DoJson20RpcRequest(m_Uri, "avatarpicksrequest", (string)UUID.Random, m, m_Connector.TimeoutMs);
-                foreach (IValue iv in reslist)
+                var data = new Dictionary<UUID, string>();
+                var m = new Map
                 {
-                    Map c = (Map)iv;
+                    ["creatorId"] = user.ID
+                };
+                foreach (IValue iv in (AnArray)RPC.DoJson20RpcRequest(m_Uri, "avatarpicksrequest", (string)UUID.Random, m, m_Connector.TimeoutMs))
+                {
+                    var c = (Map)iv;
                     data[c["pickuuid"].AsUUID] = c["name"].ToString();
                 }
                 return data;
@@ -161,25 +171,29 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
             {
                 try
                 {
-                    pick = new ProfilePick();
-                    Map m = new Map();
-                    m["ClassifiedId"] = id;
-                    m["CreatorId"] = user.ID;
-                    Map reslist = (Map)RPC.DoJson20RpcRequest(m_Uri, "pickinforequest", (string)UUID.Random, m, m_Connector.TimeoutMs);
+                    var m = new Map
+                    {
+                        ["ClassifiedId"] = id,
+                        ["CreatorId"] = user.ID
+                    };
+                    var reslist = (Map)RPC.DoJson20RpcRequest(m_Uri, "pickinforequest", (string)UUID.Random, m, m_Connector.TimeoutMs);
 
-                    pick.PickID = reslist["PickId"].AsUUID;
-                    pick.Creator = user;
-                    pick.TopPick = (ABoolean)reslist["TopPick"];
-                    pick.Name = reslist["Name"].ToString();
-                    pick.OriginalName = reslist["OriginalName"].ToString();
-                    pick.Description = reslist["Desc"].ToString();
-                    pick.ParcelID = reslist["ParcelId"].AsUUID;
-                    pick.SnapshotID = reslist["SnapshotId"].AsUUID;
-                    pick.ParcelName = reslist["ParcelName"].ToString();
-                    pick.SimName = reslist["SimName"].ToString();
-                    pick.GlobalPosition = reslist["GlobalPos"].AsVector3;
-                    pick.SortOrder = reslist["SortOrder"].AsInt;
-                    pick.Enabled = (ABoolean)reslist["Enabled"];
+                    pick = new ProfilePick()
+                    {
+                        PickID = reslist["PickId"].AsUUID,
+                        Creator = user,
+                        TopPick = (ABoolean)reslist["TopPick"],
+                        Name = reslist["Name"].ToString(),
+                        OriginalName = reslist["OriginalName"].ToString(),
+                        Description = reslist["Desc"].ToString(),
+                        ParcelID = reslist["ParcelId"].AsUUID,
+                        SnapshotID = reslist["SnapshotId"].AsUUID,
+                        ParcelName = reslist["ParcelName"].ToString(),
+                        SimName = reslist["SimName"].ToString(),
+                        GlobalPosition = reslist["GlobalPos"].AsVector3,
+                        SortOrder = reslist["SortOrder"].AsInt,
+                        Enabled = (ABoolean)reslist["Enabled"]
+                    };
                     if (reslist.ContainsKey("Gatekeeper"))
                     {
                         pick.GatekeeperURI = reslist["Gatekeeper"].ToString();
@@ -191,16 +205,17 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
                     pick = default(ProfilePick);
                     return false;
                 }
-
             }
 
             bool IPicksInterface.ContainsKey(UUI user, UUID id)
             {
                 try
                 {
-                    Map m = new Map();
-                    m["ClassifiedId"] = id;
-                    m["CreatorId"] = user.ID;
+                    var m = new Map
+                    {
+                        ["ClassifiedId"] = id,
+                        ["CreatorId"] = user.ID
+                    };
                     RPC.DoJson20RpcRequest(m_Uri, "pickinforequest", (string)UUID.Random, m, m_Connector.TimeoutMs);
                     return true;
                 }
@@ -208,32 +223,35 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
                 {
                     return false;
                 }
-
             }
 
             ProfilePick IPicksInterface.this[UUI user, UUID id]
             {
                 get
                 {
-                    ProfilePick pick = new ProfilePick();
-                    Map m = new Map();
-                    m["ClassifiedId"] = id;
-                    m["CreatorId"] = user.ID;
-                    Map reslist = (Map)RPC.DoJson20RpcRequest(m_Uri, "pickinforequest", (string)UUID.Random, m, m_Connector.TimeoutMs);
+                    var m = new Map
+                    {
+                        ["ClassifiedId"] = id,
+                        ["CreatorId"] = user.ID
+                    };
+                    var reslist = (Map)RPC.DoJson20RpcRequest(m_Uri, "pickinforequest", (string)UUID.Random, m, m_Connector.TimeoutMs);
 
-                    pick.PickID = reslist["PickId"].AsUUID;
-                    pick.Creator = user;
-                    pick.TopPick = (ABoolean)reslist["TopPick"];
-                    pick.Name = reslist["Name"].ToString();
-                    pick.OriginalName = reslist["OriginalName"].ToString();
-                    pick.Description = reslist["Desc"].ToString();
-                    pick.ParcelID = reslist["ParcelId"].AsUUID;
-                    pick.SnapshotID = reslist["SnapshotId"].AsUUID;
-                    pick.ParcelName = reslist["ParcelName"].ToString();
-                    pick.SimName = reslist["SimName"].ToString();
-                    pick.GlobalPosition = reslist["GlobalPos"].AsVector3;
-                    pick.SortOrder = reslist["SortOrder"].AsInt;
-                    pick.Enabled = (ABoolean)reslist["Enabled"];
+                    var pick = new ProfilePick()
+                    {
+                        PickID = reslist["PickId"].AsUUID,
+                        Creator = user,
+                        TopPick = (ABoolean)reslist["TopPick"],
+                        Name = reslist["Name"].ToString(),
+                        OriginalName = reslist["OriginalName"].ToString(),
+                        Description = reslist["Desc"].ToString(),
+                        ParcelID = reslist["ParcelId"].AsUUID,
+                        SnapshotID = reslist["SnapshotId"].AsUUID,
+                        ParcelName = reslist["ParcelName"].ToString(),
+                        SimName = reslist["SimName"].ToString(),
+                        GlobalPosition = reslist["GlobalPos"].AsVector3,
+                        SortOrder = reslist["SortOrder"].AsInt,
+                        Enabled = (ABoolean)reslist["Enabled"]
+                    };
                     if (reslist.ContainsKey("Gatekeeper"))
                     {
                         pick.GatekeeperURI = reslist["Gatekeeper"].ToString();
@@ -242,31 +260,33 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
                 }
             }
 
-
             void IPicksInterface.Update(ProfilePick pick)
             {
-                Map m = new Map();
-                m.Add("PickId", pick.PickID);
-                m.Add("CreatorId", pick.Creator.ID);
-                m.Add("TopPick", pick.TopPick);
-                m.Add("Name", pick.Name);
-                m.Add("Desc", pick.Description);
-                m.Add("ParcelId", pick.ParcelID);
-                m.Add("SnapshotId", pick.SnapshotID);
-                m.Add("ParcelName", pick.ParcelName);
-                m.Add("SimName", pick.SimName);
-                m.Add("Gatekeeper", pick.GatekeeperURI);
-                m.Add("GlobalPos", pick.GlobalPosition.ToString());
-                m.Add("SortOrder", pick.SortOrder);
-                m.Add("Enabled", pick.Enabled);
-
+                var m = new Map
+                {
+                    { "PickId", pick.PickID },
+                    { "CreatorId", pick.Creator.ID },
+                    { "TopPick", pick.TopPick },
+                    { "Name", pick.Name },
+                    { "Desc", pick.Description },
+                    { "ParcelId", pick.ParcelID },
+                    { "SnapshotId", pick.SnapshotID },
+                    { "ParcelName", pick.ParcelName },
+                    { "SimName", pick.SimName },
+                    { "Gatekeeper", pick.GatekeeperURI },
+                    { "GlobalPos", pick.GlobalPosition.ToString() },
+                    { "SortOrder", pick.SortOrder },
+                    { "Enabled", pick.Enabled }
+                };
                 RPC.DoJson20RpcRequest(m_Uri, "picks_update", (string)UUID.Random, m, m_Connector.TimeoutMs);
             }
 
             void IPicksInterface.Delete(UUID id)
             {
-                Map m = new Map();
-                m["pickId"] = id;
+                var m = new Map
+                {
+                    ["pickId"] = id
+                };
                 RPC.DoJson20RpcRequest(m_Uri, "picks_delete", (string)UUID.Random, m, m_Connector.TimeoutMs);
             }
 
@@ -274,10 +294,12 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
             {
                 try
                 {
-                    Map m = new Map();
-                    m["UserId"] = user.ID;
-                    m["TargetId"] = target.ID;
-                    Map reslist = (Map)RPC.DoJson20RpcRequest(m_Uri, "avatarnotesrequest", (string)UUID.Random, m, m_Connector.TimeoutMs);
+                    var m = new Map
+                    {
+                        ["UserId"] = user.ID,
+                        ["TargetId"] = target.ID
+                    };
+                    var reslist = (Map)RPC.DoJson20RpcRequest(m_Uri, "avatarnotesrequest", (string)UUID.Random, m, m_Connector.TimeoutMs);
                     notes = reslist["Notes"].ToString();
                     return true;
                 }
@@ -292,9 +314,11 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
             {
                 try
                 {
-                    Map m = new Map();
-                    m["UserId"] = user.ID;
-                    m["TargetId"] = target.ID;
+                    var m = new Map
+                    {
+                        ["UserId"] = user.ID,
+                        ["TargetId"] = target.ID
+                    };
                     RPC.DoJson20RpcRequest(m_Uri, "avatarnotesrequest", (string)UUID.Random, m, m_Connector.TimeoutMs);
                     return true;
                 }
@@ -308,18 +332,22 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
             {
                 get
                 {
-                    Map m = new Map();
-                    m["UserId"] = user.ID;
-                    m["TargetId"] = target.ID;
-                    Map reslist = (Map)RPC.DoJson20RpcRequest(m_Uri, "avatarnotesrequest", (string)UUID.Random, m, m_Connector.TimeoutMs);
+                    var m = new Map
+                    {
+                        ["UserId"] = user.ID,
+                        ["TargetId"] = target.ID
+                    };
+                    var reslist = (Map)RPC.DoJson20RpcRequest(m_Uri, "avatarnotesrequest", (string)UUID.Random, m, m_Connector.TimeoutMs);
                     return reslist["Notes"].ToString();
                 }
                 set
                 {
-                    Map m = new Map();
-                    m["UserId"] = user.ID;
-                    m["TargetId"] = target.ID;
-                    m.Add("Notes", value);
+                    var m = new Map
+                    {
+                        { "UserId", user.ID },
+                        { "TargetId", target.ID },
+                        { "Notes", value }
+                    };
                     RPC.DoJson20RpcRequest(m_Uri, "avatar_notes_update", (string)UUID.Random, m, m_Connector.TimeoutMs);
                 }
             }
@@ -328,13 +356,17 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
             {
                 try
                 {
-                    prefs = new ProfilePreferences();
-                    Map m = new Map();
-                    m["UserId"] = user.ID;
-                    Map reslist = (Map)RPC.DoJson20RpcRequest(m_Uri, "user_preferences_request", (string)UUID.Random, m, m_Connector.TimeoutMs);
-                    prefs.User = user;
-                    prefs.IMviaEmail = (ABoolean)reslist["IMViaEmail"];
-                    prefs.Visible = (ABoolean)reslist["Visible"];
+                    var m = new Map
+                    {
+                        ["UserId"] = user.ID
+                    };
+                    var reslist = (Map)RPC.DoJson20RpcRequest(m_Uri, "user_preferences_request", (string)UUID.Random, m, m_Connector.TimeoutMs);
+                    prefs = new ProfilePreferences()
+                    {
+                        User = user,
+                        IMviaEmail = (ABoolean)reslist["IMViaEmail"],
+                        Visible = (ABoolean)reslist["Visible"]
+                    };
                     return true;
                 }
                 catch
@@ -348,8 +380,10 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
             {
                 try
                 {
-                    Map m = new Map();
-                    m["UserId"] = user.ID;
+                    var m = new Map
+                    {
+                        ["UserId"] = user.ID
+                    };
                     RPC.DoJson20RpcRequest(m_Uri, "user_preferences_request", (string)UUID.Random, m, m_Connector.TimeoutMs);
                     return true;
                 }
@@ -363,21 +397,27 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
             {
                 get
                 {
-                    ProfilePreferences prefs = new ProfilePreferences();
-                    Map m = new Map();
-                    m["UserId"] = user.ID;
+                    var m = new Map
+                    {
+                        ["UserId"] = user.ID
+                    };
                     Map reslist = (Map)RPC.DoJson20RpcRequest(m_Uri, "user_preferences_request", (string)UUID.Random, m, m_Connector.TimeoutMs);
-                    prefs.User = user;
-                    prefs.IMviaEmail = (ABoolean)reslist["IMViaEmail"];
-                    prefs.Visible = (ABoolean)reslist["Visible"];
+                    ProfilePreferences prefs = new ProfilePreferences()
+                    {
+                        User = user,
+                        IMviaEmail = (ABoolean)reslist["IMViaEmail"],
+                        Visible = (ABoolean)reslist["Visible"]
+                    };
                     return prefs;
                 }
                 set
                 {
-                    Map m = new Map();
-                    m["UserId"] = user.ID;
-                    m.Add("IMViaEmail", value.IMviaEmail);
-                    m.Add("Visible", value.Visible);
+                    var m = new Map
+                    {
+                        { "UserId", user.ID },
+                        { "IMViaEmail", value.IMviaEmail },
+                        { "Visible", value.Visible }
+                    };
                     RPC.DoJson20RpcRequest(m_Uri, "user_preferences_update", (string)UUID.Random, m, m_Connector.TimeoutMs);
                 }
             }
@@ -386,51 +426,53 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
             {
                 get
                 {
-                    Map m = new Map();
-                    m.Add("UserId", user.ID);
-                    Map reslist = (Map)RPC.DoJson20RpcRequest(m_Uri, "avatar_properties_request", (string)UUID.Random, m, m_Connector.TimeoutMs);
-                    ProfileProperties props = new ProfileProperties();
-
-                    props.User = user;
-                    props.Partner = UUI.Unknown;
-                    props.Partner.ID = reslist["PartnerId"].AsUUID;
-                    props.PublishProfile = (ABoolean)reslist["PublishProfile"];
-                    props.PublishMature = (ABoolean)reslist["PublishMature"];
-                    props.WebUrl = reslist["WebUrl"].ToString();
-                    props.WantToMask = reslist["WantToMask"].AsUInt;
-                    props.WantToText = reslist["WantToText"].ToString();
-                    props.SkillsMask = reslist["SkillsMask"].AsUInt;
-                    props.SkillsText = reslist["SkillsText"].ToString();
-                    props.Language = reslist["Language"].ToString();
-                    props.ImageID = reslist["ImageId"].AsUUID;
-                    props.AboutText = reslist["AboutText"].ToString();
-                    props.FirstLifeImageID = reslist["FirstLifeImageId"].AsUUID;
-                    props.FirstLifeText = reslist["FirstLifeText"].ToString();
-
-                    return props;
+                    var m = new Map
+                    {
+                        ["UserId"] = user.ID
+                    };
+                    var reslist = (Map)RPC.DoJson20RpcRequest(m_Uri, "avatar_properties_request", (string)UUID.Random, m, m_Connector.TimeoutMs);
+                    return new ProfileProperties()
+                    {
+                        User = user,
+                        Partner = new UUI(reslist["PartnerId"].AsUUID),
+                        PublishProfile = (ABoolean)reslist["PublishProfile"],
+                        PublishMature = (ABoolean)reslist["PublishMature"],
+                        WebUrl = reslist["WebUrl"].ToString(),
+                        WantToMask = reslist["WantToMask"].AsUInt,
+                        WantToText = reslist["WantToText"].ToString(),
+                        SkillsMask = reslist["SkillsMask"].AsUInt,
+                        SkillsText = reslist["SkillsText"].ToString(),
+                        Language = reslist["Language"].ToString(),
+                        ImageID = reslist["ImageId"].AsUUID,
+                        AboutText = reslist["AboutText"].ToString(),
+                        FirstLifeImageID = reslist["FirstLifeImageId"].AsUUID,
+                        FirstLifeText = reslist["FirstLifeText"].ToString()
+                    };
                 }
             }
 
-            ProfileProperties IPropertiesInterface.this[UUI user, PropertiesUpdateFlags flags] 
-            { 
+            ProfileProperties IPropertiesInterface.this[UUI user, PropertiesUpdateFlags flags]
+            {
                 set
                 {
-                    Map m = new Map();
-                    m.Add("UserId", user.ID);
-                    m.Add("PartnerId", value.Partner.ID);
-                    m.Add("PublishProfile", value.PublishProfile);
-                    m.Add("PublishMature", value.PublishMature);
-                    m.Add("WebUrl", value.WebUrl);
-                    m.Add("WantToMask", (int)value.WantToMask);
-                    m.Add("WantToText", value.WantToText);
-                    m.Add("SkillsMask", (int)value.SkillsMask);
-                    m.Add("SkillsText", value.SkillsText);
-                    m.Add("Language", value.Language);
-                    m.Add("ImageId", value.ImageID);
-                    m.Add("AboutText", value.AboutText);
-                    m.Add("FirstLifeImageId", value.FirstLifeImageID);
-                    m.Add("FirstLifeText", value.FirstLifeText);
-                    if((flags & PropertiesUpdateFlags.Interests) != 0)
+                    var m = new Map
+                    {
+                        { "UserId", user.ID },
+                        { "PartnerId", value.Partner.ID },
+                        { "PublishProfile", value.PublishProfile },
+                        { "PublishMature", value.PublishMature },
+                        { "WebUrl", value.WebUrl },
+                        { "WantToMask", (int)value.WantToMask },
+                        { "WantToText", value.WantToText },
+                        { "SkillsMask", (int)value.SkillsMask },
+                        { "SkillsText", value.SkillsText },
+                        { "Language", value.Language },
+                        { "ImageId", value.ImageID },
+                        { "AboutText", value.AboutText },
+                        { "FirstLifeImageId", value.FirstLifeImageID },
+                        { "FirstLifeText", value.FirstLifeText }
+                    };
+                    if ((flags & PropertiesUpdateFlags.Interests) != 0)
                     {
                         RPC.DoJson20RpcRequest(m_Uri, "avatar_interests_update", (string)UUID.Random, m, m_Connector.TimeoutMs);
                     }

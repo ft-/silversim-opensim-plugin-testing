@@ -48,19 +48,30 @@ namespace SilverSim.BackendConnectors.Robust.Asset
         [Serializable]
         public class RobustAssetProtocolErrorException : Exception
         {
-            public RobustAssetProtocolErrorException() { }
-            public RobustAssetProtocolErrorException(string msg) : base(msg) {}
-            public RobustAssetProtocolErrorException(string msg, Exception innerException) : base(msg, innerException) { }
-            protected RobustAssetProtocolErrorException(SerializationInfo info, StreamingContext context) : base(info, context) { }
+            public RobustAssetProtocolErrorException()
+            {
+            }
+
+            public RobustAssetProtocolErrorException(string msg) : base(msg)
+            {
+            }
+
+            public RobustAssetProtocolErrorException(string msg, Exception innerException) : base(msg, innerException)
+            {
+            }
+
+            protected RobustAssetProtocolErrorException(SerializationInfo info, StreamingContext context) : base(info, context)
+            {
+            }
         }
 
-        static int MAX_ASSET_BASE64_CONVERSION_SIZE = 9 * 1024; /* must be an integral multiple of 3 */
+        private const int MAX_ASSET_BASE64_CONVERSION_SIZE = 9 * 1024; /* must be an integral multiple of 3 */
         public int TimeoutMs { get; set; }
-        readonly string m_AssetURI;
-        readonly DefaultAssetReferencesService m_ReferencesService;
-        readonly bool m_EnableCompression;
-        readonly bool m_EnableLocalStorage;
-        readonly bool m_EnableTempStorage;
+        private readonly string m_AssetURI;
+        private readonly DefaultAssetReferencesService m_ReferencesService;
+        private readonly bool m_EnableCompression;
+        private readonly bool m_EnableLocalStorage;
+        private readonly bool m_EnableTempStorage;
 
         #region Constructor
         public RobustAssetConnector(string uri, bool enableCompression = false, bool enableLocalStorage = false, bool enableTempStorage = false)
@@ -108,7 +119,7 @@ namespace SilverSim.BackendConnectors.Robust.Asset
             return true;
         }
 
-        static bool ParseBoolean(XmlTextReader reader)
+        private static bool ParseBoolean(XmlTextReader reader)
         {
             while (true)
             {
@@ -138,9 +149,9 @@ namespace SilverSim.BackendConnectors.Robust.Asset
             }
         }
 
-        static List<bool> ParseArrayOfBoolean(XmlTextReader reader)
+        private static List<bool> ParseArrayOfBoolean(XmlTextReader reader)
         {
-            List<bool> result = new List<bool>();
+            var result = new List<bool>();
             while(true)
             {
                 if(!reader.Read())
@@ -171,7 +182,7 @@ namespace SilverSim.BackendConnectors.Robust.Asset
             }
         }
 
-        static List<bool> ParseAssetsExistResponse(XmlTextReader reader)
+        private static List<bool> ParseAssetsExistResponse(XmlTextReader reader)
         {
             while(true)
             {
@@ -194,8 +205,8 @@ namespace SilverSim.BackendConnectors.Robust.Asset
 
         public override Dictionary<UUID, bool> Exists(List<UUID> assets)
         {
-            Dictionary<UUID, bool> res = new Dictionary<UUID,bool>();
-            StringBuilder xmlreq = new StringBuilder("<?xml version=\"1.0\"?>");
+            var res = new Dictionary<UUID,bool>();
+            var xmlreq = new StringBuilder("<?xml version=\"1.0\"?>");
             xmlreq.Append("<ArrayOfString>");
             foreach(UUID asset in assets)
             {
@@ -205,14 +216,13 @@ namespace SilverSim.BackendConnectors.Robust.Asset
             }
             xmlreq.Append("</ArrayOfString>");
 
-            
             try
             {
                 using (Stream xmlres = HttpClient.DoStreamRequest("POST", m_AssetURI + "get_assets_exist", null, "text/xml", xmlreq.ToString(), false, TimeoutMs))
                 {
                     try
                     {
-                        using (XmlTextReader xmlreader = new XmlTextReader(xmlres))
+                        using (var xmlreader = new XmlTextReader(xmlres))
                         {
                             List<bool> response = ParseAssetsExistResponse(xmlreader);
                             if (response.Count != assets.Count)
@@ -280,13 +290,7 @@ namespace SilverSim.BackendConnectors.Robust.Asset
         #endregion
 
         #region Metadata interface
-        public override IAssetMetadataServiceInterface Metadata
-        {
-            get
-            {
-                return this;
-            }
-        }
+        public override IAssetMetadataServiceInterface Metadata => this;
 
         bool IAssetMetadataServiceInterface.TryGetValue(UUID key, out AssetMetadata metadata)
         {
@@ -324,23 +328,11 @@ namespace SilverSim.BackendConnectors.Robust.Asset
         #endregion
 
         #region References interface
-        public override AssetReferencesServiceInterface References
-        {
-            get
-            {
-                return m_ReferencesService;
-            }
-        }
+        public override AssetReferencesServiceInterface References => m_ReferencesService;
         #endregion
 
         #region Data interface
-        public override IAssetDataServiceInterface Data
-        {
-            get
-            {
-                return this;
-            }
-        }
+        public override IAssetDataServiceInterface Data => this;
 
         bool IAssetDataServiceInterface.TryGetValue(UUID key, out Stream s)
         {
@@ -444,7 +436,7 @@ namespace SilverSim.BackendConnectors.Robust.Asset
                     compressedAsset = ms.ToArray();
                 }
                 HttpClient.DoRequest("POST", m_AssetURI + "assets",
-                    null, "text/xml", compressedAsset.Length, delegate(Stream st)
+                    null, "text/xml", compressedAsset.Length, (Stream st) =>
                     {
                         /* Stream based asset conversion method here */
                         st.Write(compressedAsset, 0, compressedAsset.Length);
@@ -454,17 +446,17 @@ namespace SilverSim.BackendConnectors.Robust.Asset
             {
                 int base64_codegroups = (asset.Data.Length + 2) / 3;
                 HttpClient.DoRequest("POST", m_AssetURI + "assets",
-                    null, "text/xml", 4 * base64_codegroups + header.Length + footer.Length, delegate(Stream st)
-                {
-                    /* Stream based asset conversion method here */
-                    st.Write(header, 0, header.Length);
-                    WriteAssetDataAsBase64(st, asset);
-                    st.Write(footer, 0, footer.Length);
-                }, m_EnableCompression, TimeoutMs);
+                    null, "text/xml", 4 * base64_codegroups + header.Length + footer.Length, (Stream st) =>
+                    {
+                        /* Stream based asset conversion method here */
+                        st.Write(header, 0, header.Length);
+                        WriteAssetDataAsBase64(st, asset);
+                        st.Write(footer, 0, footer.Length);
+                    }, m_EnableCompression, TimeoutMs);
             }
         }
 
-        void WriteAssetDataAsBase64(Stream st, AssetData asset)
+        private void WriteAssetDataAsBase64(Stream st, AssetData asset)
         {
             int pos = 0;
             while (asset.Data.Length - pos >= MAX_ASSET_BASE64_CONVERSION_SIZE)
@@ -504,10 +496,6 @@ namespace SilverSim.BackendConnectors.Robust.Asset
     public class RobustAssetConnectorFactory : IPluginFactory
     {
         private static readonly ILog m_Log = LogManager.GetLogger("ROBUST ASSET CONNECTOR");
-        public RobustAssetConnectorFactory()
-        {
-
-        }
 
         public IPlugin Initialize(ConfigurationLoader loader, IConfig ownSection)
         {
@@ -517,7 +505,7 @@ namespace SilverSim.BackendConnectors.Robust.Asset
                 throw new ConfigurationLoader.ConfigurationErrorException();
             }
             return new RobustAssetConnector(
-                ownSection.GetString("URI"), 
+                ownSection.GetString("URI"),
                 ownSection.GetBoolean("EnableCompressedStoreRequest", false),
                 ownSection.GetBoolean("EnableLocalAssetStorage", false),
                 ownSection.GetBoolean("EnableTempAssetStorage", false));

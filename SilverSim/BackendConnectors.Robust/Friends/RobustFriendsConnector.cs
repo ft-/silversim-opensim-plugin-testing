@@ -36,8 +36,8 @@ namespace SilverSim.BackendConnectors.Robust.Friends
     [Description("Robust Friends Connector")]
     public sealed class RobustFriendsConnector : FriendsServiceInterface, IPlugin
     {
-        readonly string m_Uri;
-        string m_HomeUri;
+        private readonly string m_Uri;
+        private string m_HomeUri;
         public int TimeoutMs = 20000;
 
         public RobustFriendsConnector(string uri, string homeuri)
@@ -77,8 +77,7 @@ namespace SilverSim.BackendConnectors.Robust.Friends
 
         public override bool TryGetValue(UUI user, UUI friend, out FriendInfo fInfo)
         {
-            List<FriendInfo> filist = this[user];
-            foreach (FriendInfo fi in filist)
+            foreach (FriendInfo fi in this[user])
             {
                 if (fi.Friend.Equals(friend))
                 {
@@ -92,7 +91,7 @@ namespace SilverSim.BackendConnectors.Robust.Friends
 
         public override FriendInfo this[UUI user, UUI friend]
         {
-            get 
+            get
             {
                 FriendInfo fi;
                 if(!TryGetValue(user, friend, out fi))
@@ -105,13 +104,14 @@ namespace SilverSim.BackendConnectors.Robust.Friends
 
         public override List<FriendInfo> this[UUI user]
         {
-            get 
+            get
             {
-                List<FriendInfo> reslist = new List<FriendInfo>();
-                Dictionary<string, string> post = new Dictionary<string, string>();
-                post["METHOD"] = "getfriends_string";
-                post["PRINCIPALID"] = (string)user.ID;
-
+                var reslist = new List<FriendInfo>();
+                var post = new Dictionary<string, string>
+                {
+                    ["METHOD"] = "getfriends_string",
+                    ["PRINCIPALID"] = (string)user.ID
+                };
                 Map res;
                 using(Stream s = HttpClient.DoStreamPostRequest(m_Uri, null, post, false, TimeoutMs))
                 {
@@ -121,9 +121,11 @@ namespace SilverSim.BackendConnectors.Robust.Friends
                 {
                     if(kvp.Key.StartsWith("friend"))
                     {
-                        Map m = (Map)kvp.Value;
-                        FriendInfo fi = new FriendInfo();
-                        fi.User = user;
+                        var m = (Map)kvp.Value;
+                        var fi = new FriendInfo()
+                        {
+                            User = user
+                        };
                         try
                         {
                             string friend = m["Friend"].ToString();
@@ -160,10 +162,12 @@ namespace SilverSim.BackendConnectors.Robust.Friends
 
         public override void Delete(FriendInfo fi)
         {
-            Dictionary<string, string> post = new Dictionary<string, string>();
-            post["METHOD"] = "deletefriend_string";
-            post["PRINCIPALID"] = fi.User.ToString();
-            post["FRIEND"] = fi.Friend.ToString();
+            var post = new Dictionary<string, string>
+            {
+                ["METHOD"] = "deletefriend_string",
+                ["PRINCIPALID"] = fi.User.ToString(),
+                ["FRIEND"] = fi.Friend.ToString()
+            };
             if (fi.Friend.HomeURI != null)
             {
                 post["FRIEND"] += ";" + fi.Secret;
@@ -186,25 +190,25 @@ namespace SilverSim.BackendConnectors.Robust.Friends
             StoreEntry(fi.User, fi.Friend, fi.Secret, fi.FriendGivenFlags);
         }
 
-        void StoreEntry(UUI user, UUI friend, string secret, FriendRightFlags flags)
+        private void StoreEntry(UUI user, UUI friend, string secret, FriendRightFlags flags)
         {
-            Dictionary<string, string> post = new Dictionary<string, string>();
-            post["METHOD"] = "storefriend";
-            post["PrincipalID"] = (user.HomeURI != null && !user.HomeURI.ToString().StartsWith(m_HomeUri)) ?
+            var post = new Dictionary<string, string>
+            {
+                ["METHOD"] = "storefriend",
+                ["PrincipalID"] = (user.HomeURI != null && !user.HomeURI.ToString().StartsWith(m_HomeUri)) ?
                 user.ToString() + ";" + secret :
-                user.ID.ToString();
+                user.ID.ToString(),
 
-            post["Friend"] = (friend.HomeURI != null && !friend.HomeURI.ToString().StartsWith(m_HomeUri)) ?
+                ["Friend"] = (friend.HomeURI != null && !friend.HomeURI.ToString().StartsWith(m_HomeUri)) ?
                 friend.ToString() + ";" + secret :
-                friend.ID.ToString();
+                friend.ID.ToString(),
 
-            post["MyFlags"] = ((int)flags).ToString();
-
+                ["MyFlags"] = ((int)flags).ToString()
+            };
             using (Stream s = HttpClient.DoStreamPostRequest(m_Uri, null, post, false, TimeoutMs))
             {
                 CheckResult(OpenSimResponse.Deserialize(s));
             }
-
         }
 
         public override void StoreOffer(FriendInfo fi)
@@ -218,10 +222,6 @@ namespace SilverSim.BackendConnectors.Robust.Friends
     public class RobustFriendsConnectorFactory : IPluginFactory
     {
         private static readonly ILog m_Log = LogManager.GetLogger("ROBUST FRIENDS CONNECTOR");
-        public RobustFriendsConnectorFactory()
-        {
-
-        }
 
         public IPlugin Initialize(ConfigurationLoader loader, IConfig ownSection)
         {

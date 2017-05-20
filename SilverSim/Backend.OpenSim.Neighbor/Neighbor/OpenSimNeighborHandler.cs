@@ -39,9 +39,9 @@ namespace SilverSim.Backend.OpenSim.Neighbor.Neighbor
     public class OpenSimNeighborHandler : IPlugin
     {
         protected static readonly ILog m_Log = LogManager.GetLogger("OPENSIM NEIGHBOR HANDLER");
-        BaseHttpServer m_HttpServer;
-        readonly OpenSimNeighbor m_NeighborHandler;
-        SceneList m_Scenes;
+        private BaseHttpServer m_HttpServer;
+        private readonly OpenSimNeighbor m_NeighborHandler;
+        private SceneList m_Scenes;
 
         public OpenSimNeighborHandler(OpenSimNeighbor neighborHandler)
         {
@@ -128,7 +128,7 @@ namespace SilverSim.Backend.OpenSim.Neighbor.Neighbor
                 return;
             }
 
-            if (null == m)
+            if (m == null)
             {
                 req.ErrorResponse(HttpStatusCode.BadRequest);
                 return;
@@ -140,8 +140,7 @@ namespace SilverSim.Backend.OpenSim.Neighbor.Neighbor
                 return;
             }
 
-            RegionInfo fromRegion = new RegionInfo();
-            
+            var fromRegion = new RegionInfo();
 
             try
             {
@@ -176,8 +175,10 @@ namespace SilverSim.Backend.OpenSim.Neighbor.Neighbor
             }
             catch
             {
-                m = new Map();
-                m.Add("success", false);
+                m = new Map
+                {
+                    { "success", false }
+                };
                 using (HttpResponse resp = req.BeginResponse())
                 {
                     resp.ContentType = "application/json";

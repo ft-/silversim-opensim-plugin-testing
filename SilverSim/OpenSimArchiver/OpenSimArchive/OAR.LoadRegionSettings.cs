@@ -30,9 +30,9 @@ namespace SilverSim.OpenSimArchiver.RegionArchiver
 {
     public static partial class OAR
     {
-        static class RegionSettingsLoader
+        private static class RegionSettingsLoader
         {
-            static void LoadRegionSettingsGeneral(XmlTextReader reader, SceneInterface scene)
+            private static void LoadRegionSettingsGeneral(XmlTextReader reader, SceneInterface scene)
             {
                 if(reader.IsEmptyElement)
                 {
@@ -158,7 +158,7 @@ namespace SilverSim.OpenSimArchiver.RegionArchiver
                 }
             }
 
-            static void LoadRegionSettingsGroundTextures(XmlTextReader reader, SceneInterface scene)
+            private static void LoadRegionSettingsGroundTextures(XmlTextReader reader, SceneInterface scene)
             {
                 if (reader.IsEmptyElement)
                 {
@@ -247,13 +247,12 @@ namespace SilverSim.OpenSimArchiver.RegionArchiver
                 }
             }
 
-            static void LoadRegionSettingsTerrain(XmlTextReader reader, SceneInterface scene)
+            private static void LoadRegionSettingsTerrain(XmlTextReader reader, SceneInterface scene)
             {
                 if (reader.IsEmptyElement)
                 {
                     return;
                 }
-
 
                 for (; ; )
                 {
@@ -313,7 +312,7 @@ namespace SilverSim.OpenSimArchiver.RegionArchiver
                 }
             }
 
-            static void LoadRegionSettingsTelehub(XmlTextReader reader, SceneInterface scene)
+            private static void LoadRegionSettingsTelehub(XmlTextReader reader, SceneInterface scene)
             {
                 if (reader.IsEmptyElement)
                 {
@@ -372,7 +371,7 @@ namespace SilverSim.OpenSimArchiver.RegionArchiver
                 }
             }
 
-            static void LoadRegionSettingsInner(XmlTextReader reader, SceneInterface scene)
+            private static void LoadRegionSettingsInner(XmlTextReader reader, SceneInterface scene)
             {
                 /* reset telehub on load */
                 scene.RegionSettings.TelehubObject = UUID.Zero;
@@ -428,7 +427,7 @@ namespace SilverSim.OpenSimArchiver.RegionArchiver
                 }
             }
 
-            static void LoadRegionSettings(XmlTextReader reader, SceneInterface scene)
+            private static void LoadRegionSettings(XmlTextReader reader, SceneInterface scene)
             {
                 for(;;)
                 {
@@ -462,7 +461,7 @@ namespace SilverSim.OpenSimArchiver.RegionArchiver
 
             public static void LoadRegionSettings(Stream s, SceneInterface scene)
             {
-                using(XmlTextReader reader = new XmlTextReader(s))
+                using(var reader = new XmlTextReader(s))
                 {
                     LoadRegionSettings(reader, scene);
                 }

@@ -42,17 +42,17 @@ namespace SilverSim.OpenSimArchiver
     public sealed class InventoryArchiverLoadStore : IPlugin
     {
         private static readonly ILog m_Log = LogManager.GetLogger("IAR ARCHIVER");
-        AuthInfoServiceInterface m_AuthInfoService;
-        AssetServiceInterface m_AssetService;
-        InventoryServiceInterface m_InventoryService;
-        UserAccountServiceInterface m_UserAccountService;
-        readonly List<AvatarNameServiceInterface> m_AvatarNameServices = new List<AvatarNameServiceInterface>();
+        private AuthInfoServiceInterface m_AuthInfoService;
+        private AssetServiceInterface m_AssetService;
+        private InventoryServiceInterface m_InventoryService;
+        private UserAccountServiceInterface m_UserAccountService;
+        private readonly List<AvatarNameServiceInterface> m_AvatarNameServices = new List<AvatarNameServiceInterface>();
 
-        readonly string m_AuthInfoServiceName;
-        readonly string m_AssetServiceName;
-        readonly string m_InventoryServiceName;
-        readonly string m_UserAccountServiceName;
-        readonly string m_AvatarNameServiceNames;
+        private readonly string m_AuthInfoServiceName;
+        private readonly string m_AssetServiceName;
+        private readonly string m_InventoryServiceName;
+        private readonly string m_UserAccountServiceName;
+        private readonly string m_AvatarNameServiceNames;
 
         public InventoryArchiverLoadStore(IConfig ownSection)
         {
@@ -80,7 +80,7 @@ namespace SilverSim.OpenSimArchiver
             }
         }
 
-        UserAccount Authenticate(string firstName, string lastName, string password, out UUID token)
+        private UserAccount Authenticate(string firstName, string lastName, string password, out UUID token)
         {
             UserAccount accountInfo = m_UserAccountService[UUID.Zero, firstName, lastName];
             token = m_AuthInfoService.Authenticate(UUID.Zero, accountInfo.Principal.ID, password, 30);
@@ -89,7 +89,7 @@ namespace SilverSim.OpenSimArchiver
         }
 
         #region Save IAR
-        void SaveIarCommand(List<string> args, TTY io, UUID limitedToScene)
+        private void SaveIarCommand(List<string> args, TTY io, UUID limitedToScene)
         {
             if (args[0] == "help")
             {
@@ -103,7 +103,7 @@ namespace SilverSim.OpenSimArchiver
             string lastname = null;
             string filename = null;
             string inventorypath = null;
-            InventoryArchiver.IAR.SaveOptions options = InventoryArchiver.IAR.SaveOptions.None;
+            var options = InventoryArchiver.IAR.SaveOptions.None;
 
             for (int argi = 2; argi < args.Count; ++argi)
             {
@@ -130,7 +130,7 @@ namespace SilverSim.OpenSimArchiver
                 }
             }
 
-            if(null == filename)
+            if(string.IsNullOrEmpty(filename))
             {
                 io.Write("missing parameters");
                 return;
@@ -150,7 +150,7 @@ namespace SilverSim.OpenSimArchiver
 
             try
             {
-                using (Stream s = new FileStream(filename, FileMode.Create, FileAccess.Write))
+                using (var s = new FileStream(filename, FileMode.Create, FileAccess.Write))
                 {
                     InventoryArchiver.IAR.Save(account.Principal, m_InventoryService, m_AssetService, m_AvatarNameServices, options, filename, inventorypath, io);
                 }
@@ -168,7 +168,7 @@ namespace SilverSim.OpenSimArchiver
         #endregion
 
         #region Load IAR
-        void LoadIarCommand(List<string> args, TTY io, UUID limitedToScene)
+        private void LoadIarCommand(List<string> args, TTY io, UUID limitedToScene)
         {
             if (args[0] == "help")
             {
@@ -182,7 +182,7 @@ namespace SilverSim.OpenSimArchiver
             string firstname = null;
             string lastname = null;
             string inventorypath = null;
-            InventoryArchiver.IAR.LoadOptions options = InventoryArchiver.IAR.LoadOptions.None;
+            var options = InventoryArchiver.IAR.LoadOptions.None;
 
             for (int argi = 2; argi < args.Count; ++argi)
             {

@@ -38,10 +38,10 @@ namespace SilverSim.BackendConnectors.Simian.Inventory
     [Description("Simian Inventory Connector")]
     public sealed partial class SimianInventoryConnector : InventoryServiceInterface, IPlugin
     {
-        readonly string m_InventoryURI;
-        readonly DefaultInventoryFolderContentService m_ContentService;
-        readonly GroupsServiceInterface m_GroupsService;
-        readonly string m_InventoryCapability;
+        private readonly string m_InventoryURI;
+        private readonly DefaultInventoryFolderContentService m_ContentService;
+        private readonly GroupsServiceInterface m_GroupsService;
+        private readonly string m_InventoryCapability;
 
         public override void Remove(UUID scopeID, UUID accountID)
         {
@@ -81,45 +81,26 @@ namespace SilverSim.BackendConnectors.Simian.Inventory
         #endregion
 
         #region Accessors
-        IInventoryFolderContentServiceInterface IInventoryFolderServiceInterface.Content
-        {
-            get
-            {
-                return m_ContentService;
-            }
-        }
-
+        IInventoryFolderContentServiceInterface IInventoryFolderServiceInterface.Content => m_ContentService;
 
         public int TimeoutMs { get; set; }
 
-        public override IInventoryFolderServiceInterface Folder
-        {
-            get
-            {
-                return this;
-            }
-        }
+        public override IInventoryFolderServiceInterface Folder => this;
 
-        public override IInventoryItemServiceInterface Item
-        {
-            get
-            {
-                return this;
-            }
-        }
+        public override IInventoryItemServiceInterface Item => this;
 
         public override List<InventoryItem> GetActiveGestures(UUID principalID)
         {
-            List<InventoryItem> item = new List<InventoryItem>();
-            Dictionary<string, string> post = new Dictionary<string, string>();
-            post["RequestMethod"] = "GetUser";
-            post["UserID"] = (string)principalID;
-
+            var item = new List<InventoryItem>();
+            var post = new Dictionary<string, string>
+            {
+                ["RequestMethod"] = "GetUser",
+                ["UserID"] = (string)principalID
+            };
             Map res = SimianGrid.PostToService(m_InventoryURI, m_InventoryCapability, post, TimeoutMs);
             if (res["Success"].AsBoolean && res.ContainsKey("Gestures") && res["Gestures"] is AnArray)
             {
-                AnArray gestures = (AnArray)res["Gestures"];
-                foreach(IValue v in gestures)
+                foreach(IValue v in (AnArray)res["Gestures"])
                 {
                     try
                     {
@@ -169,7 +150,6 @@ namespace SilverSim.BackendConnectors.Simian.Inventory
                 case AssetType.MyOutfitsFolder: return "application/vnd.ll.myoutfitsfolder";
                 case AssetType.Mesh: return "application/vnd.ll.mesh";
                 case AssetType.Material: return "application/llsd+xml";
-                case AssetType.Unknown: 
                 default: return "application/octet-stream";
             }
         }
@@ -178,7 +158,7 @@ namespace SilverSim.BackendConnectors.Simian.Inventory
         {
             switch(contenttype)
             {
-                case "image/x-j2c": 
+                case "image/x-j2c":
                 case "image/jp2": return AssetType.Texture;
                 case "image/tga": return AssetType.TextureTGA;
                 case "image/jpeg": return AssetType.ImageJPEG;
@@ -188,24 +168,24 @@ namespace SilverSim.BackendConnectors.Simian.Inventory
                 case "application/vnd.ll.callingcard":
                 case "application/x-metaverse-callingcard": return AssetType.CallingCard;
 
-                case "application/vnd.ll.landmark": 
+                case "application/vnd.ll.landmark":
                 case "application/x-metaverse-landmark": return AssetType.Landmark;
 
-                case "application/vnd.ll.clothing": 
+                case "application/vnd.ll.clothing":
                 case "application/x-metaverse-clothing": return AssetType.Clothing;
 
-                case "application/vnd.ll.primitive": 
+                case "application/vnd.ll.primitive":
                 case "application/x-metaverse-primitive": return AssetType.Object;
 
-                case "application/vnd.ll.notecard": 
+                case "application/vnd.ll.notecard":
                 case "application/x-metaverse-notecard": return AssetType.Notecard;
 
                 case "application/vnd.ll.rootfolder": return AssetType.RootFolder;
 
-                case "application/vnd.ll.lsltext": 
+                case "application/vnd.ll.lsltext":
                 case "application/x-metaverse-lsl": return AssetType.LSLText;
 
-                case "application/vnd.ll.lslbyte": 
+                case "application/vnd.ll.lslbyte":
                 case "application/x-metaverse-lso": return AssetType.LSLBytecode;
 
                 case "application/vnd.ll.bodypart":
@@ -218,7 +198,7 @@ namespace SilverSim.BackendConnectors.Simian.Inventory
                 case "application/vnd.ll.animation":
                 case "application/x-metaverse-animation": return AssetType.Animation;
 
-                case "application/vnd.ll.gesture": 
+                case "application/vnd.ll.gesture":
                 case "application/x-metaverse-gesture": return AssetType.Gesture;
 
                 case "application/x-metaverse-simstate": return AssetType.Simstate;
@@ -228,7 +208,7 @@ namespace SilverSim.BackendConnectors.Simian.Inventory
                 case "application/vnd.ll.link": return AssetType.Link;
 
                 case "application/vnd.ll.linkfolder": return AssetType.LinkFolder;
-                    
+
                 case "application/vnd.ll.currentoutfitfolder": return AssetType.CurrentOutfitFolder;
 
                 case "application/vnd.ll.outfitfolder": return AssetType.OutfitFolder;
@@ -238,8 +218,6 @@ namespace SilverSim.BackendConnectors.Simian.Inventory
                 case "application/vnd.ll.mesh": return AssetType.Mesh;
 
                 case "application/llsd+xml": return AssetType.Material;
-
-                case "application/octet-stream": 
                 default: return AssetType.Unknown;
             }
         }
@@ -272,7 +250,6 @@ namespace SilverSim.BackendConnectors.Simian.Inventory
                 case InventoryType.OutfitFolder: return "application/vnd.ll.outfitfolder";
                 case InventoryType.MyOutfitsFolder: return "application/vnd.ll.myoutfitsfolder";
                 case InventoryType.Mesh: return "application/vnd.ll.mesh";
-                case InventoryType.Unknown: 
                 default: return "application/octet-stream";
             }
         }
@@ -281,35 +258,35 @@ namespace SilverSim.BackendConnectors.Simian.Inventory
         {
             switch (contenttype)
             {
-                case "image/x-j2c": 
+                case "image/x-j2c":
                 case "image/jp2":
                 case "image/jpeg": return InventoryType.Texture;
                 case "image/tga": return InventoryType.TextureTGA;
-                case "audio/ogg": 
+                case "audio/ogg":
                 case "audio/x-wav": return InventoryType.Sound;
 
                 case "application/vnd.ll.callingcard":
                 case "application/x-metaverse-callingcard": return InventoryType.CallingCard;
 
-                case "application/vnd.ll.landmark": 
+                case "application/vnd.ll.landmark":
                 case "application/x-metaverse-landmark": return InventoryType.Landmark;
 
                 case "application/vnd.ll.clothing":
                 case "application/x-metaverse-clothing": return InventoryType.Clothing;
 
-                case "application/vnd.ll.primitive": 
+                case "application/vnd.ll.primitive":
                 case "application/x-metaverse-primitive": return InventoryType.Object;
 
-                case "application/vnd.ll.notecard": 
+                case "application/vnd.ll.notecard":
                 case "application/x-metaverse-notecard": return InventoryType.Notecard;
 
                 case "application/vnd.ll.folder": return InventoryType.Folder;
                 case "application/vnd.ll.rootfolder": return InventoryType.RootFolder;
 
-                case "application/vnd.ll.lsltext": 
+                case "application/vnd.ll.lsltext":
                 case "application/x-metaverse-lsl": return InventoryType.LSLText;
 
-                case "application/vnd.ll.lslbyte": 
+                case "application/vnd.ll.lslbyte":
                 case "application/x-metaverse-lso": return InventoryType.LSLBytecode;
 
                 case "application/vnd.ll.bodypart":
@@ -322,7 +299,7 @@ namespace SilverSim.BackendConnectors.Simian.Inventory
                 case "application/vnd.ll.animation":
                 case "application/x-metaverse-animation": return InventoryType.Animation;
 
-                case "application/vnd.ll.gesture": 
+                case "application/vnd.ll.gesture":
                 case "application/x-metaverse-gesture": return InventoryType.Gesture;
 
                 case "application/x-metaverse-simstate": return InventoryType.Simstate;
@@ -336,30 +313,34 @@ namespace SilverSim.BackendConnectors.Simian.Inventory
                 case "application/vnd.ll.myoutfitsfolder": return InventoryType.MyOutfitsFolder;
 
                 case "application/vnd.ll.mesh": return InventoryType.Mesh;
-
-                case "application/octet-stream": 
                 default: return InventoryType.Unknown;
             }
         }
 
-        internal static InventoryFolder FolderFromMap(Map map)
+        internal static InventoryFolder FolderFromMap(Map map) => new InventoryFolder()
         {
-            InventoryFolder folder = new InventoryFolder();
-            folder.ID = map["ID"].AsUUID;
-            folder.Owner.ID = map["OwnerID"].AsUUID;
-            folder.Name = map["Name"].AsString.ToString();
-            folder.Version = map["Version"].AsInteger;
-            folder.InventoryType = InventoryTypeFromContentType(map["ContentType"].ToString());
-            folder.ParentFolderID = map["ParentID"].AsUUID;
-            return folder;
-        }
+            ID = map["ID"].AsUUID,
+            Owner = new UUI(map["OwnerID"].AsUUID),
+            Name = map["Name"].AsString.ToString(),
+            Version = map["Version"].AsInteger,
+            InventoryType = InventoryTypeFromContentType(map["ContentType"].ToString()),
+            ParentFolderID = map["ParentID"].AsUUID
+        };
 
         internal static InventoryItem ItemFromMap(Map map, GroupsServiceInterface groupsService)
         {
-            InventoryItem item = new InventoryItem();
-            item.AssetID = map["AssetID"].AsUUID;
-            item.AssetType = AssetTypeFromContentType(map["ContentType"].ToString());
-            item.CreationDate = Date.UnixTimeToDateTime(map["CreationDate"].AsULong);
+            var item = new InventoryItem()
+            {
+                AssetID = map["AssetID"].AsUUID,
+                AssetType = AssetTypeFromContentType(map["ContentType"].ToString()),
+                CreationDate = Date.UnixTimeToDateTime(map["CreationDate"].AsULong),
+                Description = map["Description"].AsString.ToString(),
+                ParentFolderID = map["ParentID"].AsUUID,
+                ID = map["ID"].AsUUID,
+                InventoryType = InventoryTypeFromContentType(map["ContentType"].ToString()),
+                Name = map["Name"].AsString.ToString(),
+                Owner = new UUI(map["OwnerID"].AsUUID)
+            };
             string creatorData = map["CreatorData"].AsString.ToString();
             if (creatorData.Length == 0)
             {
@@ -369,14 +350,8 @@ namespace SilverSim.BackendConnectors.Simian.Inventory
             {
                 item.Creator = new UUI(map["CreatorID"].AsUUID, map["CreatorData"].AsString.ToString());
             }
-            item.Description = map["Description"].AsString.ToString();
-            item.ParentFolderID = map["ParentID"].AsUUID;
-            item.ID = map["ID"].AsUUID;
-            item.InventoryType = InventoryTypeFromContentType(map["ContentType"].ToString());
-            item.Name = map["Name"].AsString.ToString();
-            item.Owner.ID = map["OwnerID"].AsUUID;
 
-            Map extraData = map["ExtraData"] as Map;
+            var extraData = map["ExtraData"] as Map;
             if (extraData != null && extraData.Count > 0)
             {
                 item.Flags = (InventoryFlags)extraData["Flags"].AsUInt;
@@ -399,7 +374,7 @@ namespace SilverSim.BackendConnectors.Simian.Inventory
                 item.SaleInfo.Price = extraData["SalePrice"].AsInt;
                 item.SaleInfo.Type = (InventoryItem.SaleInfoData.SaleType)extraData["SaleType"].AsUInt;
 
-                Map perms = extraData["Permissions"] as Map;
+                var perms = extraData["Permissions"] as Map;
                 if (perms != null)
                 {
                     item.Permissions.Base = (InventoryPermissionsMask)perms["BaseMask"].AsUInt;
@@ -430,16 +405,11 @@ namespace SilverSim.BackendConnectors.Simian.Inventory
     }
     #endregion
 
-
     #region Factory
     [PluginName("Inventory")]
     public sealed class SimianInventoryConnectorFactory : IPluginFactory
     {
         private static readonly ILog m_Log = LogManager.GetLogger("SIMIAN INVENTORY CONNECTOR");
-        public SimianInventoryConnectorFactory()
-        {
-
-        }
 
         public IPlugin Initialize(ConfigurationLoader loader, IConfig ownSection)
         {

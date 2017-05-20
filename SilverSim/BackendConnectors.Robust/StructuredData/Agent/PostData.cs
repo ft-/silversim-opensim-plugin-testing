@@ -49,40 +49,31 @@ namespace SilverSim.BackendConnectors.Robust.StructuredData.Agent
         {
             public InvalidAgentPostSerializationException()
             {
-
             }
 
             public InvalidAgentPostSerializationException(string message)
                 : base(message)
             {
-
             }
 
             protected InvalidAgentPostSerializationException(SerializationInfo info, StreamingContext context)
                 : base(info, context)
             {
-
             }
 
             public InvalidAgentPostSerializationException(string message, Exception innerException)
                 : base(message, innerException)
             {
-
             }
-        }
-
-        public PostData()
-        {
-
         }
 
         [SuppressMessage("Gendarme.Rules.Performance", "AvoidRepetitiveCallsToPropertiesRule")]
         [SuppressMessage("Gendarme.Rules.Exceptions", "DoNotSwallowErrorsCatchingNonSpecificExceptionsRule")]
         public static PostData Deserialize(Stream input)
         {
-            PostData agentparams = new PostData();
-            Map parms = Json.Deserialize(input) as Map;
-            if (null == parms)
+            var agentparams = new PostData();
+            var parms = Json.Deserialize(input) as Map;
+            if (parms == null)
             {
                 throw new InvalidAgentPostSerializationException("Invalid JSON AgentPostData");
             }
@@ -103,10 +94,9 @@ namespace SilverSim.BackendConnectors.Robust.StructuredData.Agent
             agentparams.Circuit.IsChild = parms.ContainsKey("child") && parms["child"].AsBoolean;
             if(parms.ContainsKey("children_seeds"))
             {
-                AnArray children_seeds = (AnArray)parms["children_seeds"];
-                foreach(IValue seedv in children_seeds)
+                foreach(IValue seedv in (AnArray)parms["children_seeds"])
                 {
-                    Map seed = (Map)seedv;
+                    var seed = (Map)seedv;
                     UInt64 regionhandle;
                     if (!UInt64.TryParse(seed["handle"].ToString(), out regionhandle))
                     {
@@ -118,12 +108,13 @@ namespace SilverSim.BackendConnectors.Robust.StructuredData.Agent
 
             /*-----------------------------------------------------------------*/
             /* Destination */
-            agentparams.Destination = new DestinationInfo();
-            agentparams.Destination.ID = parms["destination_uuid"].AsUUID;
-            agentparams.Destination.Location.X = parms["destination_x"].AsUInt;
-            agentparams.Destination.Location.Y = parms["destination_y"].AsUInt;
-            agentparams.Destination.Name = "HG Destination";
-            agentparams.Destination.Position = parms["start_pos"].AsVector3;
+            agentparams.Destination = new DestinationInfo()
+            {
+                ID = parms["destination_uuid"].AsUUID,
+                Location = new GridVector { X = parms["destination_x"].AsUInt, Y = parms["destination_y"].AsUInt },
+                Name = "HG Destination",
+                Position = parms["start_pos"].AsVector3
+            };
             if (parms.ContainsKey("teleport_flags"))
             {
                 uint tpflags = parms["teleport_flags"].AsUInt;
@@ -147,21 +138,23 @@ namespace SilverSim.BackendConnectors.Robust.StructuredData.Agent
 
             /*-----------------------------------------------------------------*/
             /* Account */
-            agentparams.Account = new UserAccount();
-            agentparams.Account.Principal.ID = parms["agent_id"].AsUUID;
-            agentparams.Account.Principal.FirstName = parms["first_name"].ToString();
-            agentparams.Account.Principal.LastName = parms["last_name"].ToString();
-            agentparams.Account.IsLocalToGrid = false;
-            agentparams.Account.UserLevel = 0;
+            agentparams.Account = new UserAccount()
+            {
+                Principal = new UUI { ID = parms["agent_id"].AsUUID, FirstName = parms["first_name"].ToString(), LastName = parms["last_name"].ToString() },
+                IsLocalToGrid = false,
+                UserLevel = 0
+            };
 
             /*-----------------------------------------------------------------*/
             /* Client Info */
-            agentparams.Client = new ClientInfo();
-            agentparams.Client.ClientIP = parms["client_ip"].ToString();
-            agentparams.Client.ClientVersion = parms["viewer"].ToString();
-            agentparams.Client.Channel = parms["channel"].ToString();
-            agentparams.Client.Mac = parms["mac"].ToString();
-            agentparams.Client.ID0 = parms["id0"].ToString();
+            agentparams.Client = new ClientInfo()
+            {
+                ClientIP = parms["client_ip"].ToString(),
+                ClientVersion = parms["viewer"].ToString(),
+                Channel = parms["channel"].ToString(),
+                Mac = parms["mac"].ToString(),
+                ID0 = parms["id0"].ToString()
+            };
 
             /*-----------------------------------------------------------------*/
             /* Service URLs */
@@ -174,7 +167,7 @@ namespace SilverSim.BackendConnectors.Robust.StructuredData.Agent
             }
             else if (parms.ContainsKey("service_urls") && parms["service_urls"] is AnArray)
             {
-                AnArray array = (AnArray)parms["service_urls"];
+                var array = (AnArray)parms["service_urls"];
                 if (array.Count % 2 != 0)
                 {
                     throw new InvalidAgentPostSerializationException("Invalid service_urls block in AgentPostData");
@@ -193,7 +186,7 @@ namespace SilverSim.BackendConnectors.Robust.StructuredData.Agent
             }
 
             if(!(agentparams.Account.ServiceURLs.ContainsKey("HomeURI") &&
-                Uri.TryCreate(agentparams.Account.ServiceURLs["HomeURI"], 
+                Uri.TryCreate(agentparams.Account.ServiceURLs["HomeURI"],
                     UriKind.Absolute, out agentparams.Account.Principal.HomeURI)))
             {
                 agentparams.Account.Principal.HomeURI = null;
@@ -203,7 +196,7 @@ namespace SilverSim.BackendConnectors.Robust.StructuredData.Agent
             /* Appearance */
             if (parms.ContainsKey("packed_appearance"))
             {
-                Map appearancePack = (Map)parms["packed_appearance"];
+                var appearancePack = (Map)parms["packed_appearance"];
                 if (appearancePack.ContainsKey("height"))
                 {
                     agentparams.Appearance.AvatarHeight = appearancePack["height"].AsReal;
@@ -215,8 +208,8 @@ namespace SilverSim.BackendConnectors.Robust.StructuredData.Agent
 
                 if(appearancePack.ContainsKey("visualparams"))
                 {
-                    AnArray vParams = (AnArray)appearancePack["visualparams"];
-                    byte[] visualParams = new byte[vParams.Count];
+                    var vParams = (AnArray)appearancePack["visualparams"];
+                    var visualParams = new byte[vParams.Count];
 
                     int i;
                     for (i = 0; i < vParams.Count; ++i)
@@ -228,7 +221,7 @@ namespace SilverSim.BackendConnectors.Robust.StructuredData.Agent
 
                 if(appearancePack.ContainsKey("textures"))
                 {
-                    AnArray texArray = (AnArray)appearancePack["textures"];
+                    var texArray = (AnArray)appearancePack["textures"];
                     int i;
                     for (i = 0; i < AppearanceInfo.AvatarTextureData.TextureCount; ++i)
                     {
@@ -240,7 +233,7 @@ namespace SilverSim.BackendConnectors.Robust.StructuredData.Agent
                 {
                     int i;
                     uint n;
-                    AnArray wearables = (AnArray)appearancePack["wearables"];
+                    var wearables = (AnArray)appearancePack["wearables"];
                     for (i = 0; i < (int)WearableType.NumWearables; ++i)
                     {
                         AnArray ar;
@@ -255,14 +248,15 @@ namespace SilverSim.BackendConnectors.Robust.StructuredData.Agent
                         n = 0;
                         foreach (IValue val in ar)
                         {
-                            AgentWearables.WearableInfo wi = new AgentWearables.WearableInfo();
-                            Map wp = (Map)val;
-                            wi.ItemID = wp["item"].AsUUID;
-                            wi.AssetID = (wp.ContainsKey("asset")) ?
+                            var wp = (Map)val;
+                            var wi = new AgentWearables.WearableInfo()
+                            {
+                                ItemID = wp["item"].AsUUID,
+                                AssetID = (wp.ContainsKey("asset")) ?
                                 wp["asset"].AsUUID :
-                                UUID.Zero;
-
-                            WearableType type = (WearableType)i;
+                                UUID.Zero
+                            };
+                            var type = (WearableType)i;
                             agentparams.Appearance.Wearables[type, n++] = wi;
                         }
                     }
@@ -272,7 +266,7 @@ namespace SilverSim.BackendConnectors.Robust.StructuredData.Agent
                 {
                     foreach (IValue apv in (AnArray)appearancePack["attachments"])
                     {
-                        Map ap = (Map)apv;
+                        var ap = (Map)apv;
                         uint apid;
                         if (!uint.TryParse(ap["point"].ToString(), out apid))
                         {
@@ -290,18 +284,22 @@ namespace SilverSim.BackendConnectors.Robust.StructuredData.Agent
         {
             w.Write(string.Format("\"{0}\":\"{1}\"", Json.SerializeString(name), Json.SerializeString(value)));
         }
+
         private void WriteJSONString(TextWriter w, string name, UUID value)
         {
             w.Write(string.Format("\"{0}\":\"{1}\"", Json.SerializeString(name), Json.SerializeString((string)value)));
         }
+
         private void WriteJSONValue(TextWriter w, string name, uint value)
         {
             w.Write(string.Format("\"{0}\":{1}", Json.SerializeString(name), value));
         }
+
         private void WriteJSONValue(TextWriter w, string name, double value)
         {
             w.Write(string.Format("\"{0}\":{1}", Json.SerializeString(name), value));
         }
+
         private void WriteJSONValue(TextWriter w, string name, bool value)
         {
             w.Write(string.Format("\"{0}\":{1}", Json.SerializeString(name), value ? "true" : "false"));
@@ -338,7 +336,7 @@ namespace SilverSim.BackendConnectors.Robust.StructuredData.Agent
                     w.Write("{");
                     WriteJSONString(w, "handle", kvp.Key.ToString());
                     w.Write(",");
-                    WriteJSONString(w, "seed", kvp.Value.ToString());
+                    WriteJSONString(w, "seed", kvp.Value);
                     w.Write("}");
                     prefix = ",";
                 }
@@ -412,7 +410,7 @@ namespace SilverSim.BackendConnectors.Robust.StructuredData.Agent
                 w.Write(",");
                 WriteJSONValue(w, "serial", Appearance.Serial);
                 w.Write(",");
-                StringBuilder vParams = new StringBuilder();
+                var vParams = new StringBuilder();
                 foreach (byte v in Appearance.VisualParams)
                 {
                     if (vParams.Length != 0)

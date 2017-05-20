@@ -72,11 +72,11 @@ namespace SilverSim.BackendConnectors.Flotsam.Groups
     [Description("XmlRpc Groups Connector")]
     public partial class FlotsamGroupsConnector : GroupsServiceInterface, IPlugin
     {
-        AvatarNameServiceInterface m_AvatarNameService;
-        readonly string m_AvatarNameServiceNames;
-        readonly string m_ReadKey = string.Empty;
-        readonly string m_WriteKey = string.Empty;
-        readonly string m_Uri;
+        private AvatarNameServiceInterface m_AvatarNameService;
+        private readonly string m_AvatarNameServiceNames;
+        private readonly string m_ReadKey = string.Empty;
+        private readonly string m_WriteKey = string.Empty;
+        private readonly string m_Uri;
 
         public int TimeoutMs { get; set; }
 
@@ -89,7 +89,7 @@ namespace SilverSim.BackendConnectors.Flotsam.Groups
 
         public void Startup(ConfigurationLoader loader)
         {
-            RwLockedList<AvatarNameServiceInterface> list = new RwLockedList<AvatarNameServiceInterface>();
+            var list = new RwLockedList<AvatarNameServiceInterface>();
             foreach(string name in m_AvatarNameServiceNames.Split(','))
             {
                 list.Add(loader.GetService<AvatarNameServiceInterface>(name.Trim()));
@@ -97,11 +97,12 @@ namespace SilverSim.BackendConnectors.Flotsam.Groups
             m_AvatarNameService = new AggregatingAvatarNameService(list);
         }
 
-
         protected IValue FlotsamXmlRpcCall(UUI requestingAgent, string methodName, Map structparam)
         {
-            XmlRpc.XmlRpcRequest req = new XmlRpc.XmlRpcRequest();
-            req.MethodName = methodName;
+            var req = new XmlRpc.XmlRpcRequest()
+            {
+                MethodName = methodName
+            };
             structparam.Add("RequestingAgentID", requestingAgent.ID);
             structparam.Add("RequestingAgentUserService", requestingAgent.HomeURI);
             structparam.Add("RequestingSessionID", UUID.Zero);
@@ -113,7 +114,7 @@ namespace SilverSim.BackendConnectors.Flotsam.Groups
             {
                 throw new InvalidDataException("Unexpected FlotsamGroups return value");
             }
-            Map p = (Map)res.ReturnValue;
+            var p = (Map)res.ReturnValue;
             if (!p.ContainsKey("success"))
             {
                 throw new InvalidDataException("Unexpected FlotsamGroups return value");
@@ -128,8 +129,10 @@ namespace SilverSim.BackendConnectors.Flotsam.Groups
 
         protected IValue FlotsamXmlRpcGetCall(UUI requestingAgent, string methodName, Map structparam)
         {
-            XmlRpc.XmlRpcRequest req = new XmlRpc.XmlRpcRequest();
-            req.MethodName = methodName;
+            var req = new XmlRpc.XmlRpcRequest()
+            {
+                MethodName = methodName
+            };
             structparam.Add("RequestingAgentID", requestingAgent.ID);
             structparam.Add("RequestingAgentUserService", requestingAgent.HomeURI);
             structparam.Add("RequestingSessionID", UUID.Zero);
@@ -137,85 +140,31 @@ namespace SilverSim.BackendConnectors.Flotsam.Groups
             structparam.Add("WriteKey", m_WriteKey);
             req.Params.Add(structparam);
             XmlRpc.XmlRpcResponse res = RPC.DoXmlRpcRequest(m_Uri, req, TimeoutMs);
-            Map p = res.ReturnValue as Map;
-            if (null != p && p.ContainsKey("error"))
+            var p = res.ReturnValue as Map;
+            if (p != null && p.ContainsKey("error"))
             {
                 throw new InvalidDataException("Unexpected FlotsamGroups return value");
             }
-                
+
             return res.ReturnValue;
         }
 
-        public override IGroupsInterface Groups
-        {
-            get
-            {
-                return this;
-            }
-        }
+        public override IGroupsInterface Groups => this;
 
-        public override IGroupRolesInterface Roles
-        {
-            get
-            {
-                return this;
-            }
-        }
+        public override IGroupRolesInterface Roles => this;
 
-        public override IGroupMembersInterface Members
-        {
-            get
-            {
-                return this;
-            }
-        }
+        public override IGroupMembersInterface Members => this;
 
-        public override IGroupMembershipsInterface Memberships
-        {
-            get 
-            {
-                return this;
-            }
-        }
+        public override IGroupMembershipsInterface Memberships => this;
 
-        public override IGroupRolemembersInterface Rolemembers
-        {
-            get
-            {
-                return this;
-            }
-        }
+        public override IGroupRolemembersInterface Rolemembers => this;
 
-        public override IGroupSelectInterface ActiveGroup
-        {
-            get
-            {
-                return this;
-            }
-        }
+        public override IGroupSelectInterface ActiveGroup => this;
 
-        public override IActiveGroupMembershipInterface ActiveMembership
-        {
-            get 
-            {
-                return this;
-            }
-        }
+        public override IActiveGroupMembershipInterface ActiveMembership => this;
 
-        public override IGroupInvitesInterface Invites
-        {
-            get
-            {
-                return this;
-            }
-        }
+        public override IGroupInvitesInterface Invites => this;
 
-        public override IGroupNoticesInterface Notices
-        {
-            get
-            {
-                return this;
-            }
-        }
+        public override IGroupNoticesInterface Notices => this;
     }
 }

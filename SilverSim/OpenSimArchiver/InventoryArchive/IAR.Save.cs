@@ -45,9 +45,9 @@ namespace SilverSim.OpenSimArchiver.InventoryArchiver
             NoAssets = 0x00000001
         }
 
-        static byte[] WriteArchiveXml(bool assetsIncluded)
+        private static byte[] WriteArchiveXml(bool assetsIncluded)
         {
-            using (MemoryStream ms = new MemoryStream())
+            using (var ms = new MemoryStream())
             {
                 using (XmlTextWriter writer = ms.UTF8XmlTextWriter())
                 {
@@ -65,9 +65,9 @@ namespace SilverSim.OpenSimArchiver.InventoryArchiver
             }
         }
 
-        static byte[] WriteInventoryItem(InventoryItem item)
+        private static byte[] WriteInventoryItem(InventoryItem item)
         {
-            using (MemoryStream ms = new MemoryStream())
+            using (var ms = new MemoryStream())
             {
                 using (XmlTextWriter writer = ms.UTF8XmlTextWriter())
                 {
@@ -108,8 +108,7 @@ namespace SilverSim.OpenSimArchiver.InventoryArchiver
             string frompath,
             TTY console_io = null)
         {
-            UUID parentFolder;
-            parentFolder = inventoryService.Folder[principal.ID, AssetType.RootFolder].ID;
+            UUID parentFolder = inventoryService.Folder[principal.ID, AssetType.RootFolder].ID;
 
             if (!frompath.StartsWith("/"))
             {
@@ -136,10 +135,10 @@ namespace SilverSim.OpenSimArchiver.InventoryArchiver
             }
         }
 
-        static string GetFolderPath(Dictionary<UUID, KeyValuePair<string, UUID>> folders, InventoryItem item)
+        private static string GetFolderPath(Dictionary<UUID, KeyValuePair<string, UUID>> folders, InventoryItem item)
         {
             UUID parentFolderId = item.ParentFolderID;
-            StringBuilder sb = new StringBuilder(item.Name + "__" + item.ID.ToString() + ".xml");
+            var sb = new StringBuilder(item.Name + "__" + item.ID.ToString() + ".xml");
             while(UUID.Zero != parentFolderId)
             {
                 KeyValuePair<string, UUID> data = folders[parentFolderId];

@@ -46,25 +46,21 @@ namespace SilverSim.OpenSimArchiver.InventoryArchiver
         {
             public IARFormatException()
             {
-
             }
 
             public IARFormatException(string message)
                 : base(message)
             {
-
             }
 
             public IARFormatException(string message, Exception innerException)
                 : base(message, innerException)
             {
-
             }
 
             protected IARFormatException(SerializationInfo info, StreamingContext context)
                 : base(info, context)
             {
-
             }
         }
 
@@ -73,25 +69,21 @@ namespace SilverSim.OpenSimArchiver.InventoryArchiver
         {
             public InvalidInventoryPathException()
             {
-
             }
 
             public InvalidInventoryPathException(string message)
                 : base(message)
             {
-
             }
 
             public InvalidInventoryPathException(string message, Exception innerException)
                 : base(message, innerException)
             {
-
             }
 
             protected InvalidInventoryPathException(SerializationInfo info, StreamingContext context)
                 : base(info, context)
             {
-
             }
         }
 
@@ -104,7 +96,7 @@ namespace SilverSim.OpenSimArchiver.InventoryArchiver
         }
 
         public static void Load(
-            UUI principal, 
+            UUI principal,
             InventoryServiceInterface inventoryService,
             AssetServiceInterface assetService,
             List<AvatarNameServiceInterface> nameServices,
@@ -113,13 +105,13 @@ namespace SilverSim.OpenSimArchiver.InventoryArchiver
             string topath,
             TTY console_io = null)
         {
-            using (GZipStream gzipStream = new GZipStream(inputFile, CompressionMode.Decompress))
+            using (var gzipStream = new GZipStream(inputFile, CompressionMode.Decompress))
             {
-                using (TarArchiveReader reader = new TarArchiveReader(gzipStream))
+                using (var reader = new TarArchiveReader(gzipStream))
                 {
-                    Dictionary<string, UUID> inventoryPath = new Dictionary<string, UUID>();
-                    Dictionary<UUID, UUID> reassignedIds = new Dictionary<UUID, UUID>();
-                    List<InventoryItem> linkItems = new List<InventoryItem>();
+                    var inventoryPath = new Dictionary<string, UUID>();
+                    var reassignedIds = new Dictionary<UUID, UUID>();
+                    var linkItems = new List<InventoryItem>();
 
                     UUID parentFolder;
                     try
@@ -232,23 +224,22 @@ namespace SilverSim.OpenSimArchiver.InventoryArchiver
             }
         }
 
-        static UUID GetPath(
-            UUI principalID, 
-            InventoryServiceInterface inventoryService, 
-            Dictionary<string, UUID> folders, 
-            string path, 
+        private static UUID GetPath(
+            UUI principalID,
+            InventoryServiceInterface inventoryService,
+            Dictionary<string, UUID> folders,
+            string path,
             LoadOptions options)
         {
             path = path.Substring(10); /* Get Rid of inventory/ */
             path = path.Substring(0, path.LastIndexOf('/'));
             string[] pathcomps = path.Split('/');
-            StringBuilder finalpath = new StringBuilder();
+            var finalpath = new StringBuilder();
             UUID folderID = folders[string.Empty];
-
 
             int pathidx = 0;
             if ((options & LoadOptions.Merge) != 0 &&
-                pathcomps[0].StartsWith("MyInventory") && 
+                pathcomps[0].StartsWith("MyInventory") &&
                 pathcomps[0].Length == 13 + 36)
             {
                 pathidx = 1;
@@ -264,10 +255,12 @@ namespace SilverSim.OpenSimArchiver.InventoryArchiver
                 finalpath.Append(pname);
                 if (!folders.ContainsKey(finalpath.ToString()))
                 {
-                    InventoryFolder folder = new InventoryFolder();
-                    folder.Owner = principalID;
-                    folder.ParentFolderID = folderID;
-                    folder.Name = pname;
+                    var folder = new InventoryFolder()
+                    {
+                        Owner = principalID,
+                        ParentFolderID = folderID,
+                        Name = pname
+                    };
                     inventoryService.Folder.Add(folder);
                     folderID = folder.ID;
                     folders[finalpath.ToString()] = folderID;
@@ -276,8 +269,8 @@ namespace SilverSim.OpenSimArchiver.InventoryArchiver
             return folderID;
         }
 
-        static InventoryItem LoadInventoryItem(
-            Stream s, 
+        private static InventoryItem LoadInventoryItem(
+            Stream s,
             UUI principal,
             List<AvatarNameServiceInterface> nameServices)
         {
@@ -306,15 +299,16 @@ namespace SilverSim.OpenSimArchiver.InventoryArchiver
             }
         }
 
-        static InventoryItem LoadInventoryItemData(
-            XmlTextReader reader, 
+        private static InventoryItem LoadInventoryItemData(
+            XmlTextReader reader,
             UUI principal,
             List<AvatarNameServiceInterface> nameServices)
         {
-            InventoryItem item = new InventoryItem();
-            item.Owner = principal;
-
-            for(;;)
+            var item = new InventoryItem()
+            {
+                Owner = principal
+            };
+            for (;;)
             {
                 if(!reader.Read())
                 {

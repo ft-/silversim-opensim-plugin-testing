@@ -41,7 +41,7 @@ namespace SilverSim.BackendConnectors.Robust.Presence
     public class RobustPresenceConnector : PresenceServiceInterface, IPlugin
     {
         public int TimeoutMs { get; set; }
-        readonly string m_PresenceUri;
+        private readonly string m_PresenceUri;
 
         #region Constructor
         public RobustPresenceConnector(string uri, string homeuri)
@@ -65,31 +65,33 @@ namespace SilverSim.BackendConnectors.Robust.Presence
         {
             get
             {
-                List<PresenceInfo> presences = new List<PresenceInfo>();
-                Dictionary<string, string> post = new Dictionary<string, string>();
-                post["uuids[]"] = (string)userID;
-                post["VERSIONMIN"] = "0";
-                post["VERSIONMAX"] = "0";
-                post["METHOD"] = "getagents";
-
+                var presences = new List<PresenceInfo>();
+                var post = new Dictionary<string, string>
+                {
+                    ["uuids[]"] = (string)userID,
+                    ["VERSIONMIN"] = "0",
+                    ["VERSIONMAX"] = "0",
+                    ["METHOD"] = "getagents"
+                };
                 Map map;
                 using(Stream s = HttpClient.DoStreamPostRequest(m_PresenceUri, null, post, false, TimeoutMs))
                 {
                     map = OpenSimResponse.Deserialize(s);
                 }
 
-                Map m = map["result"] as Map;
-                if (null == m)
+                var m = map["result"] as Map;
+                if (m == null)
                 {
                     throw new PresenceNotFoundException();
                 }
                 foreach (IValue iv in m.Values)
                 {
-                    PresenceInfo p = new PresenceInfo();
-                    Map pm = (Map)iv;
-                    p.RegionID = pm["RegionID"].ToString();
-                    p.UserID.ID = pm["UserID"].ToString();
-                    presences.Add(p);
+                    var pm = (Map)iv;
+                    presences.Add(new PresenceInfo()
+                    {
+                        RegionID = pm["RegionID"].ToString(),
+                        UserID = new UUI(pm["UserID"].ToString())
+                    });
                 }
                 return presences;
             }
@@ -99,38 +101,41 @@ namespace SilverSim.BackendConnectors.Robust.Presence
         {
             get
             {
-                Dictionary<string, string> post = new Dictionary<string, string>();
-                post["SessionID"] = (string)sessionID;
-                post["VERSIONMIN"] = "0";
-                post["VERSIONMAX"] = "0";
-                post["METHOD"] = "getagent";
-
+                var post = new Dictionary<string, string>
+                {
+                    ["SessionID"] = (string)sessionID,
+                    ["VERSIONMIN"] = "0",
+                    ["VERSIONMAX"] = "0",
+                    ["METHOD"] = "getagent"
+                };
                 Map map;
                 using(Stream s = HttpClient.DoStreamPostRequest(m_PresenceUri, null, post, false, TimeoutMs))
                 {
                     map = OpenSimResponse.Deserialize(s);
                 }
-                Map m = map["result"] as Map;
-                if(null == m)
+                var m = map["result"] as Map;
+                if(m == null)
                 {
                     throw new PresenceNotFoundException();
                 }
-                PresenceInfo p = new PresenceInfo();
-                p.RegionID = m["RegionID"].ToString();
-                p.UserID.ID = m["UserID"].ToString();
-                p.SessionID = sessionID;
-                return p;
+                return new PresenceInfo()
+                {
+                    RegionID = m["RegionID"].ToString(),
+                    UserID = new UUI(m["UserID"].ToString()),
+                    SessionID = sessionID
+                };
             }
             set
             {
                 if(value == null)
                 {
-                    Dictionary<string, string> post = new Dictionary<string, string>();
-                    post["VERSIONMIN"] = "0";
-                    post["VERSIONMAX"] = "0";
-                    post["SessionID"] = (string)sessionID;
-                    post["METHOD"] = "logout";
-
+                    var post = new Dictionary<string, string>
+                    {
+                        ["VERSIONMIN"] = "0",
+                        ["VERSIONMAX"] = "0",
+                        ["SessionID"] = (string)sessionID,
+                        ["METHOD"] = "logout"
+                    };
                     Map map;
                     using(Stream s = HttpClient.DoStreamPostRequest(m_PresenceUri, null, post, false, TimeoutMs))
                     {
@@ -158,12 +163,13 @@ namespace SilverSim.BackendConnectors.Robust.Presence
             {
                 if (value == null)
                 {
-                    Dictionary<string, string> post = new Dictionary<string, string>();
-                    post["VERSIONMIN"] = "0";
-                    post["VERSIONMAX"] = "0";
-                    post["SessionID"] = (string)sessionID;
-                    post["METHOD"] = "logout";
-
+                    var post = new Dictionary<string, string>
+                    {
+                        ["VERSIONMIN"] = "0",
+                        ["VERSIONMAX"] = "0",
+                        ["SessionID"] = (string)sessionID,
+                        ["METHOD"] = "logout"
+                    };
                     Map map;
                     using(Stream s = HttpClient.DoStreamPostRequest(m_PresenceUri, null, post, false, TimeoutMs))
                     {
@@ -180,14 +186,15 @@ namespace SilverSim.BackendConnectors.Robust.Presence
                 }
                 else if(reportType == SetType.Login)
                 {
-                    Dictionary<string, string> post = new Dictionary<string, string>();
-                    post["VERSIONMIN"] = "0";
-                    post["VERSIONMAX"] = "0";
-                    post["UserID"] = (string)value.UserID;
-                    post["SessionID"] = (string)value.SessionID;
-                    post["SecureSessionID"] = (string)value.SecureSessionID;
-                    post["METHOD"] = "login";
-
+                    var post = new Dictionary<string, string>
+                    {
+                        ["VERSIONMIN"] = "0",
+                        ["VERSIONMAX"] = "0",
+                        ["UserID"] = (string)value.UserID,
+                        ["SessionID"] = (string)value.SessionID,
+                        ["SecureSessionID"] = (string)value.SecureSessionID,
+                        ["METHOD"] = "login"
+                    };
                     Map map;
                     using(Stream s = HttpClient.DoStreamPostRequest(m_PresenceUri, null, post, false, TimeoutMs))
                     {
@@ -204,13 +211,14 @@ namespace SilverSim.BackendConnectors.Robust.Presence
                 }
                 else if(reportType == SetType.Report)
                 {
-                    Dictionary<string, string> post = new Dictionary<string, string>();
-                    post["VERSIONMIN"] = "0";
-                    post["VERSIONMAX"] = "0";
-                    post["METHOD"] = "report";
-                    post["SessionID"] = (string)value.SessionID;
-                    post["RegionID"] = (string)value.RegionID;
-
+                    var post = new Dictionary<string, string>
+                    {
+                        ["VERSIONMIN"] = "0",
+                        ["VERSIONMAX"] = "0",
+                        ["METHOD"] = "report",
+                        ["SessionID"] = (string)value.SessionID,
+                        ["RegionID"] = (string)value.RegionID
+                    };
                     Map map;
                     using(Stream s = HttpClient.DoStreamPostRequest(m_PresenceUri, null, post, false, TimeoutMs))
                     {
@@ -234,10 +242,11 @@ namespace SilverSim.BackendConnectors.Robust.Presence
 
         public override void LogoutRegion(UUID regionID)
         {
-            Dictionary<string, string> post = new Dictionary<string, string>();
-            post["RegionID"] = (string)regionID;
-            post["METHOD"] = "logoutregion";
-
+            var post = new Dictionary<string, string>
+            {
+                ["RegionID"] = (string)regionID,
+                ["METHOD"] = "logoutregion"
+            };
             Map map;
             using(Stream s = HttpClient.DoStreamPostRequest(m_PresenceUri, null, post, false, TimeoutMs))
             {
@@ -270,10 +279,6 @@ namespace SilverSim.BackendConnectors.Robust.Presence
     public class RobustPresenceConnectorFactory : IPluginFactory
     {
         private static readonly ILog m_Log = LogManager.GetLogger("ROBUST PRESENCE CONNECTOR");
-        public RobustPresenceConnectorFactory()
-        {
-
-        }
 
         public IPlugin Initialize(ConfigurationLoader loader, IConfig ownSection)
         {

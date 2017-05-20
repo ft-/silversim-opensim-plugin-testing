@@ -39,47 +39,46 @@ namespace SilverSim.BackendHandlers.Robust.Inventory
 {
     #region Internal Extension methods and exceptions
 
-    static class ExtensionMethods
+    internal static class ExtensionMethods
     {
         public static InventoryItem ToItem(this Dictionary<string, object> dict)
         {
-            InventoryItem item = new InventoryItem();
-            item.AssetID = dict.GetUUID("AssetID");
-            item.AssetType = (AssetType)dict.GetInt("AssetType");
-            item.Name = dict.GetString("Name");
-            item.Owner.ID = dict.GetUUID("Owner");
-            item.ID = dict.GetUUID("ID");
-            item.InventoryType = (InventoryType)dict.GetInt("InvType");
-            item.ParentFolderID = dict.GetUUID("Folder");
-            item.Creator.ID = dict.GetUUID("CreatorId");
-            item.Creator.CreatorData = dict.GetString("CreatorData");
-            item.Description = dict.GetString("Description");
+            var item = new InventoryItem()
+            {
+                AssetID = dict.GetUUID("AssetID"),
+                AssetType = (AssetType)dict.GetInt("AssetType"),
+                Name = dict.GetString("Name"),
+                Owner = new UUI(dict.GetUUID("Owner")),
+                ID = dict.GetUUID("ID"),
+                InventoryType = (InventoryType)dict.GetInt("InvType"),
+                ParentFolderID = dict.GetUUID("Folder"),
+                Creator = new UUI { ID = dict.GetUUID("CreatorId"), CreatorData = dict.GetString("CreatorData") },
+                Description = dict.GetString("Description"),
+                Group = new UGI(dict.GetUUID("GroupID")),
+                IsGroupOwned = bool.Parse(dict.GetString("GroupOwned")),
+                Flags = (InventoryFlags)dict.GetUInt("Flags"),
+                CreationDate = Date.UnixTimeToDateTime(dict.GetULong("CreationDate"))
+            };
             item.Permissions.NextOwner = (InventoryPermissionsMask)dict.GetUInt("NextPermissions");
             item.Permissions.Current = (InventoryPermissionsMask)dict.GetUInt("CurrentPermissions");
             item.Permissions.Base = (InventoryPermissionsMask)dict.GetUInt("BasePermissions");
             item.Permissions.EveryOne = (InventoryPermissionsMask)dict.GetUInt("EveryOnePermissions");
             item.Permissions.Group = (InventoryPermissionsMask)dict.GetUInt("groupPermissions");
-            item.Group.ID = dict.GetUUID("GroupID");
-            item.IsGroupOwned = bool.Parse(dict.GetString("GroupOwned"));
             item.SaleInfo.Price = dict.GetInt("SalePrice");
             item.SaleInfo.Type = (InventoryItem.SaleInfoData.SaleType)dict.GetInt("SaleType");
-            item.Flags = (InventoryFlags)dict.GetUInt("Flags");
-            item.CreationDate = Date.UnixTimeToDateTime(dict.GetULong("CreationDate"));
 
             return item;
         }
 
-        public static InventoryFolder ToFolder(this Dictionary<string, object> dict)
+        public static InventoryFolder ToFolder(this Dictionary<string, object> dict) => new InventoryFolder()
         {
-            InventoryFolder folder = new InventoryFolder();
-            folder.ParentFolderID = dict.GetUUID("ParentID");
-            folder.InventoryType = (InventoryType)dict.GetInt("Type");
-            folder.Version = dict.GetInt("Version");
-            folder.Name = dict.GetString("Name");
-            folder.Owner.ID = dict.GetUUID("Owner");
-            folder.ID = dict.GetUUID("ID");
-            return folder;
-        }
+            ParentFolderID = dict.GetUUID("ParentID"),
+            InventoryType = (InventoryType)dict.GetInt("Type"),
+            Version = dict.GetInt("Version"),
+            Name = dict.GetString("Name"),
+            Owner = new UUI(dict.GetUUID("Owner")),
+            ID = dict.GetUUID("ID")
+        };
 
         public static void WriteFolder(this XmlTextWriter writer, string name, InventoryFolder folder)
         {
@@ -179,9 +178,9 @@ namespace SilverSim.BackendHandlers.Robust.Inventory
         protected static readonly ILog m_Log = LogManager.GetLogger("ROBUST INVENTORY HANDLER");
         private BaseHttpServer m_HttpServer;
         private InventoryServiceInterface m_InventoryService;
-        readonly string m_InventoryServiceName;
-        readonly bool m_AdvertiseInventoryServerURI;
-        readonly Dictionary<string, Action<HttpRequest, Dictionary<string, object>>> m_Handlers = new Dictionary<string, Action<HttpRequest, Dictionary<string, object>>>();
+        private readonly string m_InventoryServiceName;
+        private readonly bool m_AdvertiseInventoryServerURI;
+        private readonly Dictionary<string, Action<HttpRequest, Dictionary<string, object>>> m_Handlers = new Dictionary<string, Action<HttpRequest, Dictionary<string, object>>>();
 
         public RobustInventoryServerHandler(string inventoryServiceName, bool advertiseInventoryServerURI)
         {
@@ -230,7 +229,7 @@ namespace SilverSim.BackendHandlers.Robust.Inventory
             dict["InventoryServerURI"] = m_HttpServer.ServerURI;
         }
 
-        void SuccessResult(HttpRequest httpreq)
+        private void SuccessResult(HttpRequest httpreq)
         {
             using (HttpResponse res = httpreq.BeginResponse("text/xml"))
             {
@@ -245,7 +244,7 @@ namespace SilverSim.BackendHandlers.Robust.Inventory
             }
         }
 
-        void InventoryHandler(HttpRequest httpreq)
+        private void InventoryHandler(HttpRequest httpreq)
         {
             if (httpreq.ContainsHeader("X-SecondLife-Shard"))
             {
@@ -325,7 +324,7 @@ namespace SilverSim.BackendHandlers.Robust.Inventory
             }
         }
 
-        void CreateUserInventory(HttpRequest httpreq, Dictionary<string, object> reqdata)
+        private void CreateUserInventory(HttpRequest httpreq, Dictionary<string, object> reqdata)
         {
             UUID principalID = reqdata.GetUUID("PRINCIPAL");
             try
@@ -339,7 +338,7 @@ namespace SilverSim.BackendHandlers.Robust.Inventory
             SuccessResult(httpreq);
         }
 
-        void GetInventorySkeleton(HttpRequest httpreq, Dictionary<string, object> reqdata)
+        private void GetInventorySkeleton(HttpRequest httpreq, Dictionary<string, object> reqdata)
         {
             UUID principalID = reqdata.GetUUID("PRINCIPAL");
             List<InventoryFolder> folders;
@@ -367,7 +366,7 @@ namespace SilverSim.BackendHandlers.Robust.Inventory
             }
         }
 
-        void GetRootFolder(HttpRequest httpreq, Dictionary<string, object> reqdata)
+        private void GetRootFolder(HttpRequest httpreq, Dictionary<string, object> reqdata)
         {
             UUID principalID = reqdata.GetUUID("PRINCIPAL");
             InventoryFolder folder;
@@ -391,7 +390,7 @@ namespace SilverSim.BackendHandlers.Robust.Inventory
             }
         }
 
-        void GetFolderForType(HttpRequest httpreq, Dictionary<string, object> reqdata)
+        private void GetFolderForType(HttpRequest httpreq, Dictionary<string, object> reqdata)
         {
             UUID principalID = reqdata.GetUUID("PRINCIPAL");
             AssetType type = (AssetType) reqdata.GetInt("TYPE");
@@ -416,7 +415,7 @@ namespace SilverSim.BackendHandlers.Robust.Inventory
             }
         }
 
-        void GetFolderContent(HttpRequest httpreq, Dictionary<string, object> reqdata)
+        private void GetFolderContent(HttpRequest httpreq, Dictionary<string, object> reqdata)
         {
             UUID principalID = reqdata.GetUUID("PRINCIPAL");
             UUID folderID = reqdata.GetUUID("FOLDER");
@@ -442,7 +441,7 @@ namespace SilverSim.BackendHandlers.Robust.Inventory
             }
         }
 
-        void GetMultipleFoldersContent(HttpRequest httpreq, Dictionary<string, object> reqdata)
+        private void GetMultipleFoldersContent(HttpRequest httpreq, Dictionary<string, object> reqdata)
         {
             UUID principalID = reqdata.GetUUID("PRINCIPAL");
             string folderIDstring = reqdata.GetString("FOLDERS");
@@ -481,7 +480,7 @@ namespace SilverSim.BackendHandlers.Robust.Inventory
             }
         }
 
-        void GetFolderItems(HttpRequest httpreq, Dictionary<string, object> reqdata)
+        private void GetFolderItems(HttpRequest httpreq, Dictionary<string, object> reqdata)
         {
             UUID principalID = reqdata.GetUUID("PRINCIPAL");
             UUID folderID = reqdata.GetUUID("FOLDER");
@@ -514,7 +513,7 @@ namespace SilverSim.BackendHandlers.Robust.Inventory
             }
         }
 
-        void AddFolder(HttpRequest httpreq, Dictionary<string, object> reqdata)
+        private void AddFolder(HttpRequest httpreq, Dictionary<string, object> reqdata)
         {
             InventoryFolder folder = reqdata.ToFolder();
 
@@ -529,7 +528,7 @@ namespace SilverSim.BackendHandlers.Robust.Inventory
             SuccessResult(httpreq);
         }
 
-        void UpdateFolder(HttpRequest httpreq, Dictionary<string, object> reqdata)
+        private void UpdateFolder(HttpRequest httpreq, Dictionary<string, object> reqdata)
         {
             InventoryFolder folder = reqdata.ToFolder();
 
@@ -544,7 +543,7 @@ namespace SilverSim.BackendHandlers.Robust.Inventory
             SuccessResult(httpreq);
         }
 
-        void MoveFolder(HttpRequest httpreq, Dictionary<string, object> reqdata)
+        private void MoveFolder(HttpRequest httpreq, Dictionary<string, object> reqdata)
         {
             UUID parentID = reqdata.GetUUID("ParentID");
             UUID principalID = reqdata.GetUUID("PRINCIPAL");
@@ -561,7 +560,7 @@ namespace SilverSim.BackendHandlers.Robust.Inventory
             SuccessResult(httpreq);
         }
 
-        void DeleteFolders(HttpRequest httpreq, Dictionary<string, object> reqdata)
+        private void DeleteFolders(HttpRequest httpreq, Dictionary<string, object> reqdata)
         {
             UUID principalID = reqdata.GetUUID("PRINCIPAL");
             List<UUID> folderIDs = reqdata.GetUUIDList("FOLDERS");
@@ -577,7 +576,7 @@ namespace SilverSim.BackendHandlers.Robust.Inventory
             SuccessResult(httpreq);
         }
 
-        void PurgeFolder(HttpRequest httpreq, Dictionary<string, object> reqdata)
+        private void PurgeFolder(HttpRequest httpreq, Dictionary<string, object> reqdata)
         {
             UUID folderID = reqdata.GetUUID("ID");
             if (reqdata.ContainsKey("PRINCIPAL")) /* OpenSim is not sending this. So, we have to be prepared for that on HG. */
@@ -607,7 +606,7 @@ namespace SilverSim.BackendHandlers.Robust.Inventory
             }
         }
 
-        void AddItem(HttpRequest httpreq, Dictionary<string, object> reqdata)
+        private void AddItem(HttpRequest httpreq, Dictionary<string, object> reqdata)
         {
             InventoryItem item = reqdata.ToItem();
 
@@ -622,7 +621,7 @@ namespace SilverSim.BackendHandlers.Robust.Inventory
             SuccessResult(httpreq);
         }
 
-        void UpdateItem(HttpRequest httpreq, Dictionary<string, object> reqdata)
+        private void UpdateItem(HttpRequest httpreq, Dictionary<string, object> reqdata)
         {
             InventoryItem item = reqdata.ToItem();
 
@@ -637,7 +636,7 @@ namespace SilverSim.BackendHandlers.Robust.Inventory
             SuccessResult(httpreq);
         }
 
-        void MoveItems(HttpRequest httpreq, Dictionary<string, object> reqdata)
+        private void MoveItems(HttpRequest httpreq, Dictionary<string, object> reqdata)
         {
             List<UUID> idList = reqdata.GetUUIDList("IDLIST");
             List<UUID> destList = reqdata.GetUUIDList("DESTLIST");
@@ -661,7 +660,7 @@ namespace SilverSim.BackendHandlers.Robust.Inventory
             SuccessResult(httpreq);
         }
 
-        void DeleteItems(HttpRequest httpreq, Dictionary<string, object> reqdata)
+        private void DeleteItems(HttpRequest httpreq, Dictionary<string, object> reqdata)
         {
             UUID principalID = reqdata.GetUUID("PRINCIPAL");
             List<UUID> idList = reqdata.GetUUIDList("ITEMS");
@@ -676,7 +675,7 @@ namespace SilverSim.BackendHandlers.Robust.Inventory
             SuccessResult(httpreq);
         }
 
-        void GetItem(HttpRequest httpreq, Dictionary<string, object> reqdata)
+        private void GetItem(HttpRequest httpreq, Dictionary<string, object> reqdata)
         {
             UUID itemID = reqdata.GetUUID("ID");
             InventoryItem item;
@@ -715,12 +714,12 @@ namespace SilverSim.BackendHandlers.Robust.Inventory
             }
         }
 
-        void GetMultipleItems(HttpRequest httpreq, Dictionary<string, object> reqdata)
+        private void GetMultipleItems(HttpRequest httpreq, Dictionary<string, object> reqdata)
         {
             UUID principalID = reqdata.GetUUID("PRINCIPAL");
             string itemIDstring = reqdata.GetString("ITEMS");
             string[] uuidstrs = itemIDstring.Split(',');
-            UUID[] uuids = new UUID[uuidstrs.Length];
+            var uuids = new UUID[uuidstrs.Length];
 
             List<InventoryItem> items;
             try
@@ -732,7 +731,7 @@ namespace SilverSim.BackendHandlers.Robust.Inventory
                 throw new FailureResultException();
             }
 
-            Dictionary<UUID, InventoryItem> keyeditems = new Dictionary<UUID,InventoryItem>();
+            var keyeditems = new Dictionary<UUID,InventoryItem>();
             foreach(InventoryItem i in items)
             {
                 keyeditems[i.ID] = i;
@@ -764,7 +763,7 @@ namespace SilverSim.BackendHandlers.Robust.Inventory
             }
         }
 
-        void GetFolder(HttpRequest httpreq, Dictionary<string, object> reqdata)
+        private void GetFolder(HttpRequest httpreq, Dictionary<string, object> reqdata)
         {
             UUID folderID = reqdata.GetUUID("ID");
             InventoryFolder folder;
@@ -803,7 +802,7 @@ namespace SilverSim.BackendHandlers.Robust.Inventory
             }
         }
 
-        void GetActiveGestures(HttpRequest httpreq, Dictionary<string, object> reqdata)
+        private void GetActiveGestures(HttpRequest httpreq, Dictionary<string, object> reqdata)
         {
             UUID principalID = reqdata.GetUUID("PRINCIPAL");
             List<InventoryItem> gestures;
@@ -838,17 +837,10 @@ namespace SilverSim.BackendHandlers.Robust.Inventory
     [PluginName("InventoryHandler")]
     public sealed class RobustInventoryServerHandlerFactory : IPluginFactory
     {
-        public RobustInventoryServerHandlerFactory()
-        {
-
-        }
-
-        public IPlugin Initialize(ConfigurationLoader loader, IConfig ownSection)
-        {
-            return new RobustInventoryServerHandler(
+        public IPlugin Initialize(ConfigurationLoader loader, IConfig ownSection) =>
+            new RobustInventoryServerHandler(
                 ownSection.GetString("InventoryService", "InventoryService"),
                 ownSection.GetBoolean("AdvertiseServerURI", true));
-        }
     }
     #endregion
 }

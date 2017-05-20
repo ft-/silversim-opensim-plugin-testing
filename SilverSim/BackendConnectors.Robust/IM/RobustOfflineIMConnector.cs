@@ -40,7 +40,7 @@ namespace SilverSim.BackendConnectors.Robust.IM
     public class RobustOfflineIMConnector : OfflineIMServiceInterface, IPlugin
     {
         public int TimeoutMs { get; set; }
-        readonly string m_OfflineIMURI;
+        private readonly string m_OfflineIMURI;
         public RobustOfflineIMConnector(string uri)
         {
             TimeoutMs = 20000;
@@ -59,20 +59,22 @@ namespace SilverSim.BackendConnectors.Robust.IM
 
         public override void StoreOfflineIM(GridInstantMessage im)
         {
-            Dictionary<string, string> post = new Dictionary<string, string>();
             bool isFromGroup = im.IsFromGroup;
-            post["BinaryBucket"] = im.BinaryBucket.ToHexString();
-            post["Dialog"] = ((int)im.Dialog).ToString();
-            post["FromAgentID"] = isFromGroup ? (string)im.FromGroup.ID : (string)im.FromAgent.ID;
-            post["FromAgentName"] = im.FromAgent.FullName;
-            post["FromGroup"] = isFromGroup.ToString();
-            post["Message"] = im.Message;
-            post["EstateID"] = im.ParentEstateID.ToString();
-            post["Position"] = im.Position.ToString();
-            post["RegionID"] = (string)im.RegionID;
-            post["Timestamp"] = im.Timestamp.DateTimeToUnixTime().ToString();
-            post["ToAgentID"] = (string)im.ToAgent.ID;
-            post["METHOD"] = "STORE";
+            var post = new Dictionary<string, string>
+            {
+                ["BinaryBucket"] = im.BinaryBucket.ToHexString(),
+                ["Dialog"] = ((int)im.Dialog).ToString(),
+                ["FromAgentID"] = isFromGroup ? (string)im.FromGroup.ID : (string)im.FromAgent.ID,
+                ["FromAgentName"] = im.FromAgent.FullName,
+                ["FromGroup"] = isFromGroup.ToString(),
+                ["Message"] = im.Message,
+                ["EstateID"] = im.ParentEstateID.ToString(),
+                ["Position"] = im.Position.ToString(),
+                ["RegionID"] = (string)im.RegionID,
+                ["Timestamp"] = im.Timestamp.DateTimeToUnixTime().ToString(),
+                ["ToAgentID"] = (string)im.ToAgent.ID,
+                ["METHOD"] = "STORE"
+            };
             Map map;
             using(Stream s = HttpClient.DoStreamPostRequest(m_OfflineIMURI, null, post, false, TimeoutMs))
             {
@@ -90,9 +92,11 @@ namespace SilverSim.BackendConnectors.Robust.IM
 
         public override List<GridInstantMessage> GetOfflineIMs(UUID principalID)
         {
-            Dictionary<string, string> post = new Dictionary<string, string>();
-            post["PrincipalID"] = (string)principalID;
-            post["METHOD"] = "GET";
+            var post = new Dictionary<string, string>
+            {
+                ["PrincipalID"] = (string)principalID,
+                ["METHOD"] = "GET"
+            };
             Map map;
             using(Stream s = HttpClient.DoStreamPostRequest(m_OfflineIMURI, null, post, false, TimeoutMs))
             {
@@ -102,35 +106,36 @@ namespace SilverSim.BackendConnectors.Robust.IM
             {
                 throw new IMOfflineStoreFailedException();
             }
-            Map resultmap = map["RESULT"] as Map;
-            if (null == resultmap || map["RESULT"].ToString().ToLower() == "false")
+            var resultmap = map["RESULT"] as Map;
+            if (resultmap == null || map["RESULT"].ToString().ToLower() == "false")
             {
                 throw new IMOfflineStoreFailedException(map.ContainsKey("REASON") ? map["REASON"].ToString() : "Unknown Error");
             }
-            List<GridInstantMessage> ims = new List<GridInstantMessage>();
+            var ims = new List<GridInstantMessage>();
             foreach(IValue v in resultmap.Values)
             {
-                Map m = v as Map;
-                if (null == m)
+                var m = v as Map;
+                if (m == null)
                 {
                     continue;
                 }
 
-                GridInstantMessage im = new GridInstantMessage();
-                im.BinaryBucket = m["BinaryBucket"].ToString().FromHexStringToByteArray();
-                im.Dialog = (GridInstantMessageDialog) m["Dialog"].AsInt;
-                im.FromAgent.ID = m["FromAgentID"].ToString();
-                im.FromAgent.FullName = m["FromAgentName"].ToString();
-                im.FromGroup.ID = m["FromAgentID"].ToString();
-                im.IsFromGroup = m["FromGroup"].AsBoolean;
-                im.IMSessionID = m["SessionID"].ToString();
-                im.Message = m["Message"].ToString();
-                im.IsOffline = m["Offline"].AsBoolean;
-                im.ParentEstateID = m["EstateID"].AsUInt;
-                im.Position = m["Position"].AsVector3;
-                im.RegionID = m["RegionID"].AsString.ToString();
-                im.Timestamp = Date.UnixTimeToDateTime(m["Timestamp"].AsULong);
-                im.ToAgent.ID = m["ToAgentID"].ToString();
+                var im = new GridInstantMessage()
+                {
+                    BinaryBucket = m["BinaryBucket"].ToString().FromHexStringToByteArray(),
+                    Dialog = (GridInstantMessageDialog)m["Dialog"].AsInt,
+                    FromAgent = new UUI { ID = m["FromAgentID"].ToString(), FullName = m["FromAgentName"].ToString() },
+                    FromGroup = new UGI(m["FromAgentID"].ToString()),
+                    IsFromGroup = m["FromGroup"].AsBoolean,
+                    IMSessionID = m["SessionID"].ToString(),
+                    Message = m["Message"].ToString(),
+                    IsOffline = m["Offline"].AsBoolean,
+                    ParentEstateID = m["EstateID"].AsUInt,
+                    Position = m["Position"].AsVector3,
+                    RegionID = m["RegionID"].AsString.ToString(),
+                    Timestamp = Date.UnixTimeToDateTime(m["Timestamp"].AsULong),
+                    ToAgent = new UUI(m["ToAgentID"].ToString())
+                };
                 ims.Add(im);
             }
             return ims;
@@ -140,7 +145,6 @@ namespace SilverSim.BackendConnectors.Robust.IM
         {
             /* no action required */
         }
-
     }
     #endregion
 
@@ -149,10 +153,6 @@ namespace SilverSim.BackendConnectors.Robust.IM
     public class RobustOfflineIMConnectorFactory : IPluginFactory
     {
         private static readonly ILog m_Log = LogManager.GetLogger("ROBUST OFFLINE IM CONNECTOR");
-        public RobustOfflineIMConnectorFactory()
-        {
-
-        }
 
         public IPlugin Initialize(ConfigurationLoader loader, IConfig ownSection)
         {

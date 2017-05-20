@@ -39,11 +39,6 @@ namespace SilverSim.OpenSimArchiver
         private static readonly ILog m_Log = LogManager.GetLogger("OAR ARCHIVER");
         SceneList m_Scenes;
 
-        public OpenSimArchiverLoadStore()
-        {
-
-        }
-
         public void Startup(ConfigurationLoader loader)
         {
             m_Scenes = loader.Scenes;
@@ -52,7 +47,7 @@ namespace SilverSim.OpenSimArchiver
         }
 
         #region Save OAR
-        public void SaveOarCommand(List<string> args, TTY io, UUID limitedToScene)
+        private void SaveOarCommand(List<string> args, TTY io, UUID limitedToScene)
         {
             if (args[0] == "help")
             {
@@ -88,7 +83,7 @@ namespace SilverSim.OpenSimArchiver
             }
 
             string filename = null;
-            RegionArchiver.OAR.SaveOptions options = RegionArchiver.OAR.SaveOptions.None;
+            var options = RegionArchiver.OAR.SaveOptions.None;
 
             for (int argi = 2; argi < args.Count; ++argi)
             {
@@ -123,7 +118,7 @@ namespace SilverSim.OpenSimArchiver
         #endregion
 
         #region Load OAR
-        public void LoadOarCommand(List<string> args, TTY io, UUID limitedToScene)
+        private void LoadOarCommand(List<string> args, TTY io, UUID limitedToScene)
         {
             if (args[0] == "help")
             {
@@ -156,7 +151,7 @@ namespace SilverSim.OpenSimArchiver
             }
 
             string filename = null;
-            RegionArchiver.OAR.LoadOptions options = RegionArchiver.OAR.LoadOptions.None;
+            var options = RegionArchiver.OAR.LoadOptions.None;
 
             for (int argi = 2; argi < args.Count; ++argi)
             {

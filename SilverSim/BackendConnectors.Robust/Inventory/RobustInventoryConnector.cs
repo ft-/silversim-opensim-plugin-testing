@@ -42,8 +42,8 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
     [Description("Robust Inventory Connector")]
     public sealed partial class RobustInventoryConnector : InventoryServiceInterface, IPlugin
     {
-        readonly string m_InventoryURI;
-        readonly GroupsServiceInterface m_GroupsService;
+        private readonly string m_InventoryURI;
+        private readonly GroupsServiceInterface m_GroupsService;
 
         #region Constructor
         public RobustInventoryConnector(string uri)
@@ -78,21 +78,9 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
         #region Accessors
         public int TimeoutMs { get; set; }
 
-        public override IInventoryFolderServiceInterface Folder
-        {
-            get
-            {
-                return this;
-            }
-        }
+        public override IInventoryFolderServiceInterface Folder => this;
 
-        public override IInventoryItemServiceInterface Item
-        {
-            get
-            {
-                return this;
-            }
-        }
+        public override IInventoryItemServiceInterface Item => this;
 
         public override void Remove(UUID scopeID, UUID accountID)
         {
@@ -101,9 +89,11 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
 
         public override void CheckInventory(UUID principalID)
         {
-            Dictionary<string, string> post = new Dictionary<string, string>();
-            post["PRINCIPAL"] = (string)principalID;
-            post["METHOD"] = "CREATEUSERINVENTORY";
+            var post = new Dictionary<string, string>
+            {
+                ["PRINCIPAL"] = (string)principalID,
+                ["METHOD"] = "CREATEUSERINVENTORY"
+            };
             Map map;
             using(Stream s = HttpClient.DoStreamPostRequest(m_InventoryURI, null, post, false, TimeoutMs))
             {
@@ -117,25 +107,27 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
 
         public override List<InventoryItem> GetActiveGestures(UUID principalID)
         {
-            Dictionary<string, string> post = new Dictionary<string,string>();
-            post["PRINCIPAL"] = (string)principalID;
-            post["METHOD"] = "GETACTIVEGESTURES";
+            var post = new Dictionary<string, string>
+            {
+                ["PRINCIPAL"] = (string)principalID,
+                ["METHOD"] = "GETACTIVEGESTURES"
+            };
             Map map;
             using(Stream s = HttpClient.DoStreamPostRequest(m_InventoryURI, null, post, false, TimeoutMs))
             {
                 map = OpenSimResponse.Deserialize(s);
             }
-            Map itemmap = map["ITEMS"] as Map;
-            if (null == itemmap)
+            var itemmap = map["ITEMS"] as Map;
+            if (itemmap == null)
             {
                 throw new InventoryInaccessibleException();
             }
 
-            List<InventoryItem> items = new List<InventoryItem>();
+            var items = new List<InventoryItem>();
             foreach(KeyValuePair<string, IValue> i in itemmap)
             {
-                Map itemdata = i.Value as Map;
-                if(null != itemdata)
+                var itemdata = i.Value as Map;
+                if(itemdata != null)
                 {
                     items.Add(ItemFromMap(itemdata, m_GroupsService));
                 }
@@ -145,25 +137,32 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
         #endregion
 
         #region Map converson
-        internal static InventoryFolder FolderFromMap(Map map)
+        internal static InventoryFolder FolderFromMap(Map map) => new InventoryFolder()
         {
-            InventoryFolder folder = new InventoryFolder();
-            folder.ID = map["ID"].AsUUID;
-            folder.Owner.ID = map["Owner"].AsUUID;
-            folder.Name = map["Name"].AsString.ToString();
-            folder.Version = map["Version"].AsInteger;
-            folder.InventoryType = (InventoryType)map["Type"].AsInt;
-            folder.ParentFolderID = map["ParentID"].AsUUID;
-            return folder;
-        }
+            ID = map["ID"].AsUUID,
+            Owner = new UUI(map["Owner"].AsUUID),
+            Name = map["Name"].AsString.ToString(),
+            Version = map["Version"].AsInteger,
+            InventoryType = (InventoryType)map["Type"].AsInt,
+            ParentFolderID = map["ParentID"].AsUUID
+        };
         internal static InventoryItem ItemFromMap(Map map, GroupsServiceInterface groupsService)
         {
-            InventoryItem item = new InventoryItem();
-            item.ID = map["ID"].AsUUID;
-            item.AssetID = map["AssetID"].AsUUID;
-            item.AssetType = (AssetType)map["AssetType"].AsInt;
-            item.Permissions.Base = (InventoryPermissionsMask)map["BasePermissions"].AsUInt;
-            item.CreationDate = Date.UnixTimeToDateTime(map["CreationDate"].AsULong);
+            var item = new InventoryItem()
+            {
+                ID = map["ID"].AsUUID,
+                AssetID = map["AssetID"].AsUUID,
+                AssetType = (AssetType)map["AssetType"].AsInt,
+                CreationDate = Date.UnixTimeToDateTime(map["CreationDate"].AsULong),
+                Description = map["Description"].AsString.ToString(),
+                Flags = (InventoryFlags)map["Flags"].AsUInt,
+                ParentFolderID = map["Folder"].AsUUID,
+                InventoryType = (InventoryType)map["InvType"].AsInt,
+                Name = map["Name"].AsString.ToString(),
+                Owner = new UUI(map["Owner"].AsUUID),
+                IsGroupOwned = map["GroupOwned"].ToString().ToLower() == "true"
+            };
+
             string creatorData = map["CreatorData"].AsString.ToString();
             if (creatorData.Length == 0)
             {
@@ -173,11 +172,13 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
             {
                 item.Creator = new UUI(map["CreatorId"].AsUUID, creatorData);
             }
+
+            item.Permissions.Base = (InventoryPermissionsMask)map["BasePermissions"].AsUInt;
             item.Permissions.Current = (InventoryPermissionsMask)map["CurrentPermissions"].AsUInt;
-            item.Description = map["Description"].AsString.ToString();
             item.Permissions.EveryOne = (InventoryPermissionsMask)map["EveryOnePermissions"].AsUInt;
-            item.Flags = (InventoryFlags)map["Flags"].AsUInt;
-            item.ParentFolderID = map["Folder"].AsUUID;
+            item.Permissions.Group = (InventoryPermissionsMask)map["GroupPermissions"].AsUInt;
+            item.Permissions.NextOwner = (InventoryPermissionsMask)map["NextPermissions"].AsUInt;
+
             if (groupsService != null)
             {
                 try
@@ -193,12 +194,6 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
             {
                 item.Group.ID = map["GroupID"].AsUUID;
             }
-            item.IsGroupOwned = map["GroupOwned"].ToString().ToLower() == "true";
-            item.Permissions.Group = (InventoryPermissionsMask)map["GroupPermissions"].AsUInt;
-            item.InventoryType = (InventoryType) map["InvType"].AsInt;
-            item.Name = map["Name"].AsString.ToString();
-            item.Permissions.NextOwner = (InventoryPermissionsMask)map["NextPermissions"].AsUInt;
-            item.Owner.ID = map["Owner"].AsUUID;
             item.SaleInfo.Price = map["SalePrice"].AsInt;
             item.SaleInfo.Type = (InventoryItem.SaleInfoData.SaleType) map["SaleType"].AsUInt;
             return item;
@@ -212,10 +207,6 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
     public class RobustInventoryConnectorFactory : IPluginFactory
     {
         private static readonly ILog m_Log = LogManager.GetLogger("ROBUST INVENTORY CONNECTOR");
-        public RobustInventoryConnectorFactory()
-        {
-
-        }
 
         public IPlugin Initialize(ConfigurationLoader loader, IConfig ownSection)
         {

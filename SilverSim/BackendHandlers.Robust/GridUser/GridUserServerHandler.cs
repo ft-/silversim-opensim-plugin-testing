@@ -44,12 +44,12 @@ namespace SilverSim.BackendHandlers.Robust.GridUser
     {
         private static readonly ILog m_Log = LogManager.GetLogger("ROBUST GRIDUSER HANDLER");
         private BaseHttpServer m_HttpServer;
-        GridUserServiceInterface m_GridUserService;
-        AvatarNameServiceInterface m_AvatarNameService;
-        UserAccountServiceInterface m_UserAccountService;
-        readonly string m_GridUserServiceName;
-        readonly string m_UserAccountServiceName;
-        readonly string m_AvatarNameStorageName;
+        private GridUserServiceInterface m_GridUserService;
+        private AvatarNameServiceInterface m_AvatarNameService;
+        private UserAccountServiceInterface m_UserAccountService;
+        private readonly string m_GridUserServiceName;
+        private readonly string m_UserAccountServiceName;
+        private readonly string m_AvatarNameStorageName;
 
         public RobustGridUserServerHandler(string gridUserService, string userAccountService, string avatarNameService)
         {
@@ -76,7 +76,7 @@ namespace SilverSim.BackendHandlers.Robust.GridUser
             }
         }
 
-        void GridUserHandler(HttpRequest req)
+        private void GridUserHandler(HttpRequest req)
         {
             if (req.ContainsHeader("X-SecondLife-Shard"))
             {
@@ -96,8 +96,8 @@ namespace SilverSim.BackendHandlers.Robust.GridUser
             }
         }
 
-        readonly byte[] SuccessResult = "<?xml version=\"1.0\"?><ServerResponse><result>Success</result></ServerResponse>".ToUTF8Bytes();
-        readonly byte[] FailureResult = "<?xml version=\"1.0\"?><ServerResponse><result>Failure</result></ServerResponse>".ToUTF8Bytes();
+        private readonly byte[] SuccessResult = "<?xml version=\"1.0\"?><ServerResponse><result>Success</result></ServerResponse>".ToUTF8Bytes();
+        private readonly byte[] FailureResult = "<?xml version=\"1.0\"?><ServerResponse><result>Failure</result></ServerResponse>".ToUTF8Bytes();
 
         public void PostGridUserHandler(HttpRequest req)
         {
@@ -135,7 +135,7 @@ namespace SilverSim.BackendHandlers.Robust.GridUser
                     case "getgriduserinfo":
                         GetGridUserInfo(data, req);
                         return;
-                        
+
                     case "getgriduserinfos":
                         GetGridUserInfos(data, req);
                         return;
@@ -144,7 +144,6 @@ namespace SilverSim.BackendHandlers.Robust.GridUser
                         req.ErrorResponse(HttpStatusCode.BadRequest, "Unknown GridUser method");
                         return;
                 }
-
 
                 using (HttpResponse res = req.BeginResponse())
                 {
@@ -172,9 +171,9 @@ namespace SilverSim.BackendHandlers.Robust.GridUser
             }
         }
 
-        UUI FindUser(string userID)
+        private UUI FindUser(string userID)
         {
-            UUI uui = new UUI(userID);
+            var uui = new UUI(userID);
             try
             {
                 UserAccount account = m_UserAccountService[UUID.Zero, uui.ID];
@@ -191,32 +190,32 @@ namespace SilverSim.BackendHandlers.Robust.GridUser
             }
         }
 
-        void LoggedIn(Dictionary<string, object> req)
+        private void LoggedIn(Dictionary<string, object> req)
         {
             m_GridUserService.LoggedIn(FindUser(req["UserID"].ToString()));
         }
 
-        void LoggedOut(Dictionary<string, object> req)
+        private void LoggedOut(Dictionary<string, object> req)
         {
-            UUID region = new UUID(req["RegionID"].ToString());
+            var region = new UUID(req["RegionID"].ToString());
             Vector3 position = Vector3.Parse(req["Position"].ToString());
             Vector3 lookAt = Vector3.Parse(req["LookAt"].ToString());
 
             m_GridUserService.LoggedOut(FindUser(req["UserID"].ToString()), region, position, lookAt);
         }
 
-        void SetHome(Dictionary<string, object> req)
+        private void SetHome(Dictionary<string, object> req)
         {
-            UUID region = new UUID(req["RegionID"].ToString());
+            var region = new UUID(req["RegionID"].ToString());
             Vector3 position = Vector3.Parse(req["Position"].ToString());
             Vector3 lookAt = Vector3.Parse(req["LookAt"].ToString());
 
             m_GridUserService.SetHome(FindUser(req["UserID"].ToString()), region, position, lookAt);
         }
 
-        void SetPosition(Dictionary<string, object> req)
+        private void SetPosition(Dictionary<string, object> req)
         {
-            UUID region = new UUID(req["RegionID"].ToString());
+            var region = new UUID(req["RegionID"].ToString());
             Vector3 position = Vector3.Parse(req["Position"].ToString());
             Vector3 lookAt = Vector3.Parse(req["LookAt"].ToString());
 
@@ -224,7 +223,7 @@ namespace SilverSim.BackendHandlers.Robust.GridUser
         }
 
         #region getgriduserinfo
-        void WriteXmlGridUserEntry(XmlTextWriter w, GridUserInfo ui, string outerTagName)
+        private void WriteXmlGridUserEntry(XmlTextWriter w, GridUserInfo ui, string outerTagName)
         {
             w.WriteStartElement(outerTagName);
             w.WriteNamedValue("UserID", (string)ui.User);
@@ -240,7 +239,7 @@ namespace SilverSim.BackendHandlers.Robust.GridUser
             w.WriteEndElement();
         }
 
-        void WriteXmlGridUserEntry(XmlTextWriter w, UUI ui, string outerTagName)
+        private void WriteXmlGridUserEntry(XmlTextWriter w, UUI ui, string outerTagName)
         {
             w.WriteStartElement(outerTagName);
             w.WriteNamedValue("UserID", (string)ui);
@@ -256,7 +255,7 @@ namespace SilverSim.BackendHandlers.Robust.GridUser
             w.WriteEndElement();
         }
 
-        UUI CheckGetUUI(Dictionary<string, object> req, HttpRequest httpreq)
+        private UUI CheckGetUUI(Dictionary<string, object> req, HttpRequest httpreq)
         {
             try
             {
@@ -275,7 +274,7 @@ namespace SilverSim.BackendHandlers.Robust.GridUser
                     aui = null;
                 }
 
-                if(null != aui)
+                if(aui != null)
                 {
                     using(HttpResponse resp = httpreq.BeginResponse("text/xml"))
                     {
@@ -305,7 +304,7 @@ namespace SilverSim.BackendHandlers.Robust.GridUser
             return null;
         }
 
-        bool WriteUserInfo(XmlTextWriter writer, UUI uui, string outertagname, bool writeNullEntry)
+        private bool WriteUserInfo(XmlTextWriter writer, UUI uui, string outertagname, bool writeNullEntry)
         {
             if (uui.HomeURI == null)
             {
@@ -354,10 +353,10 @@ namespace SilverSim.BackendHandlers.Robust.GridUser
             return true;
         }
 
-        void GetGridUserInfo(Dictionary<string, object> req, HttpRequest httpreq)
+        private void GetGridUserInfo(Dictionary<string, object> req, HttpRequest httpreq)
         {
             UUI uui = CheckGetUUI(req, httpreq);
-            if(null == uui)
+            if(uui == null)
             {
                 return;
             }
@@ -373,14 +372,14 @@ namespace SilverSim.BackendHandlers.Robust.GridUser
             }
         }
 
-        void GetGridUserInfos(Dictionary<string, object> req, HttpRequest httpreq)
+        private void GetGridUserInfos(Dictionary<string, object> req, HttpRequest httpreq)
         {
             bool anyFound = false;
             using (HttpResponse resp = httpreq.BeginResponse("text/xml"))
             {
                 using(XmlTextWriter writer = resp.GetOutputStream().UTF8XmlTextWriter())
                 {
-                    List<string> userIDs = (List<string>)req["AgentIDs"];
+                    var userIDs = (List<string>)req["AgentIDs"];
 
                     writer.WriteStartElement("ServerResponse");
                     writer.WriteStartElement("result");
@@ -429,17 +428,10 @@ namespace SilverSim.BackendHandlers.Robust.GridUser
     [PluginName("GridUserHandler")]
     public class RobustGridUserHandlerFactory : IPluginFactory
     {
-        public RobustGridUserHandlerFactory()
-        {
-
-        }
-
-        public IPlugin Initialize(ConfigurationLoader loader, IConfig ownSection)
-        {
-            return new RobustGridUserServerHandler(ownSection.GetString("GridUserService", "GridUserService"),
+        public IPlugin Initialize(ConfigurationLoader loader, IConfig ownSection) =>
+            new RobustGridUserServerHandler(ownSection.GetString("GridUserService", "GridUserService"),
                 ownSection.GetString("UserAccountService", "UserAccountService"),
                 ownSection.GetString("AvatarNameStorage", "AvatarNameStorage"));
-        }
     }
     #endregion
 }

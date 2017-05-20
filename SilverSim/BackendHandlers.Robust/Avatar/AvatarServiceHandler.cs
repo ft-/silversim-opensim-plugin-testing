@@ -33,11 +33,11 @@ using System.Xml;
 
 namespace SilverSim.BackendHandlers.Robust.Avatar
 {
-    static class RobustAvatarServiceExtensionMethods
+    internal static class RobustAvatarServiceExtensionMethods
     {
         public static Dictionary<string, string> ToAvatarData(this Dictionary<string, object> reqdata)
         {
-            Dictionary<string, string> resdata = new Dictionary<string, string>();
+            var resdata = new Dictionary<string, string>();
 
             foreach(string key in reqdata.Keys)
             {
@@ -65,8 +65,8 @@ namespace SilverSim.BackendHandlers.Robust.Avatar
     {
         protected static readonly ILog m_Log = LogManager.GetLogger("ROBUST AVATAR HANDLER");
         private BaseHttpServer m_HttpServer;
-        AvatarServiceInterface m_AvatarService;
-        readonly string m_AvatarServiceName;
+        private AvatarServiceInterface m_AvatarService;
+        private readonly string m_AvatarServiceName;
 
         public RobustAvatarServerHandler(string avatarServiceName)
         {
@@ -89,7 +89,7 @@ namespace SilverSim.BackendHandlers.Robust.Avatar
             }
         }
 
-        void SuccessResult(HttpRequest req)
+        private void SuccessResult(HttpRequest req)
         {
             using (HttpResponse res = req.BeginResponse("text/xml"))
             {
@@ -104,7 +104,7 @@ namespace SilverSim.BackendHandlers.Robust.Avatar
             }
         }
 
-        void AvatarHandler(HttpRequest req)
+        private void AvatarHandler(HttpRequest req)
         {
             if (req.ContainsHeader("X-SecondLife-Shard"))
             {
@@ -180,7 +180,7 @@ namespace SilverSim.BackendHandlers.Robust.Avatar
             }
         }
 
-        void GetAvatar(HttpRequest req, Dictionary<string, object> reqdata)
+        private void GetAvatar(HttpRequest req, Dictionary<string, object> reqdata)
         {
             UUID avatarID = reqdata.GetUUID("UserID");
             Dictionary<string, string> result;
@@ -211,7 +211,7 @@ namespace SilverSim.BackendHandlers.Robust.Avatar
             }
         }
 
-        void ResetAvatar(HttpRequest req, Dictionary<string, object> reqdata)
+        private void ResetAvatar(HttpRequest req, Dictionary<string, object> reqdata)
         {
             UUID avatarID = reqdata.GetUUID("UserID");
             try
@@ -225,7 +225,7 @@ namespace SilverSim.BackendHandlers.Robust.Avatar
             SuccessResult(req);
         }
 
-        void RemoveItems(HttpRequest req, Dictionary<string, object> reqdata)
+        private void RemoveItems(HttpRequest req, Dictionary<string, object> reqdata)
         {
             UUID avatarID = reqdata.GetUUID("UserID");
             List<string> names = reqdata.GetList("Names");
@@ -240,7 +240,7 @@ namespace SilverSim.BackendHandlers.Robust.Avatar
             SuccessResult(req);
         }
 
-        void SetAvatar(HttpRequest req, Dictionary<string, object> reqdata)
+        private void SetAvatar(HttpRequest req, Dictionary<string, object> reqdata)
         {
             Dictionary<string, string> avatarData = reqdata.ToAvatarData();
             UUID principalID = reqdata.GetUUID("UserID");
@@ -255,7 +255,7 @@ namespace SilverSim.BackendHandlers.Robust.Avatar
             SuccessResult(req);
         }
 
-        void SetItems(HttpRequest req, Dictionary<string, object> reqdata)
+        private void SetItems(HttpRequest req, Dictionary<string, object> reqdata)
         {
             List<string> names = reqdata.GetList("Names");
             List<string> values = reqdata.GetList("Values");
@@ -277,15 +277,8 @@ namespace SilverSim.BackendHandlers.Robust.Avatar
     [PluginName("AvatarHandler")]
     public class RobustAvatarHandlerFactory : IPluginFactory
     {
-        public RobustAvatarHandlerFactory()
-        {
-
-        }
-
-        public IPlugin Initialize(ConfigurationLoader loader, IConfig ownSection)
-        {
-            return new RobustAvatarServerHandler(ownSection.GetString("AvatarService", "AvatarService"));
-        }
+        public IPlugin Initialize(ConfigurationLoader loader, IConfig ownSection) =>
+            new RobustAvatarServerHandler(ownSection.GetString("AvatarService", "AvatarService"));
     }
     #endregion
 }

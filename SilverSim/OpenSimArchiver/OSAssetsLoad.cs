@@ -19,7 +19,6 @@
 // obligated to do so. If you do not wish to do so, delete this
 // exception statement from your version.
 
-using log4net;
 using SilverSim.Http.Client;
 using SilverSim.Main.Common;
 using SilverSim.Main.Common.CmdIO;
@@ -37,12 +36,7 @@ namespace SilverSim.OpenSimArchiver
     [Description("OS Assets Load Plugin")]
     public sealed class OSAssetsLoad : IPlugin
     {
-        SceneList m_Scenes;
-
-        public OSAssetsLoad()
-        {
-
-        }
+        private SceneList m_Scenes;
 
         public void Startup(ConfigurationLoader loader)
         {
@@ -51,7 +45,7 @@ namespace SilverSim.OpenSimArchiver
         }
 
         #region Load Assets
-        public void LoadAssetsCommand(List<string> args, TTY io, UUID limitedToScene)
+        private void LoadAssetsCommand(List<string> args, TTY io, UUID limitedToScene)
         {
             if (args[0] == "help")
             {

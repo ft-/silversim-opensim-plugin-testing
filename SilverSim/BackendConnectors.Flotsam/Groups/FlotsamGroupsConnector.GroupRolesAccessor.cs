@@ -56,7 +56,7 @@ namespace SilverSim.BackendConnectors.Flotsam.Groups
 
         GroupRole IGroupRolesInterface.this[UUI requestingAgent, UGI group, UUID roleID]
         {
-            get 
+            get
             {
                 GroupRole role;
                 if (!Roles.TryGetValue(requestingAgent, group, roleID, out role))
@@ -69,19 +69,21 @@ namespace SilverSim.BackendConnectors.Flotsam.Groups
 
         List<GroupRole> IGroupRolesInterface.this[UUI requestingAgent, UGI group]
         {
-            get 
+            get
             {
-                List<GroupRole> roles = new List<GroupRole>();
-                Map m = new Map();
-                m.Add("GroupID", group.ID);
-                AnArray res = FlotsamXmlRpcGetCall(requestingAgent, "groups.getGroupRoles", m) as AnArray;
-                if(null == res)
+                var roles = new List<GroupRole>();
+                var m = new Map
+                {
+                    ["GroupID"] = group.ID
+                };
+                var res = FlotsamXmlRpcGetCall(requestingAgent, "groups.getGroupRoles", m) as AnArray;
+                if(res == null)
                 {
                     throw new AccessFailedException();
                 }
                 foreach(IValue v in res)
                 {
-                    Map data = v as Map;
+                    var data = v as Map;
                     if(data != null)
                     {
                         roles.Add(data.ToGroupRole(group));
@@ -93,19 +95,21 @@ namespace SilverSim.BackendConnectors.Flotsam.Groups
 
         List<GroupRole> IGroupRolesInterface.this[UUI requestingAgent, UGI group, UUI principal]
         {
-            get 
+            get
             {
-                Map m = new Map();
-                m.Add("GroupID", group.ID);
-                m.Add("AgentID", principal.ID); 
-                AnArray res = FlotsamXmlRpcGetCall(requestingAgent, "groups.getAgentRoles", m) as AnArray;
-                List<GroupRole> rolemems = new List<GroupRole>();
-                if (null != res)
+                var m = new Map
+                {
+                    ["GroupID"] = group.ID,
+                    ["AgentID"] = principal.ID
+                };
+                var res = FlotsamXmlRpcGetCall(requestingAgent, "groups.getAgentRoles", m) as AnArray;
+                var rolemems = new List<GroupRole>();
+                if (res != null)
                 {
                     foreach (IValue v in res)
                     {
-                        Map data = v as Map;
-                        if (null != data)
+                        var data = v as Map;
+                        if (data != null)
                         {
                             rolemems.Add(data.ToGroupRole(group));
                         }
@@ -117,33 +121,39 @@ namespace SilverSim.BackendConnectors.Flotsam.Groups
 
         void IGroupRolesInterface.Add(UUI requestingAgent, GroupRole role)
         {
-            Map m = new Map();
-            m.Add("GroupID", role.Group.ID);
-            m.Add("RoleID", role.ID);
-            m.Add("Name", role.Name);
-            m.Add("Description", role.Description);
-            m.Add("Title", role.Title);
-            m.Add("Powers", ((ulong)role.Powers).ToString());
+            var m = new Map
+            {
+                { "GroupID", role.Group.ID },
+                { "RoleID", role.ID },
+                { "Name", role.Name },
+                { "Description", role.Description },
+                { "Title", role.Title },
+                { "Powers", ((ulong)role.Powers).ToString() }
+            };
             FlotsamXmlRpcCall(requestingAgent, "groups.addRoleToGroup", m);
         }
 
         void IGroupRolesInterface.Update(UUI requestingAgent, GroupRole role)
         {
-            Map m = new Map();
-            m.Add("GroupID", role.Group.ID);
-            m.Add("RoleID", role.ID);
-            m.Add("Name", role.Name);
-            m.Add("Description", role.Description);
-            m.Add("Title", role.Title);
-            m.Add("Powers", ((ulong)role.Powers).ToString());
+            var m = new Map
+            {
+                { "GroupID", role.Group.ID },
+                { "RoleID", role.ID },
+                { "Name", role.Name },
+                { "Description", role.Description },
+                { "Title", role.Title },
+                { "Powers", ((ulong)role.Powers).ToString() }
+            };
             FlotsamXmlRpcCall(requestingAgent, "groups.updateGroupRole", m);
         }
 
         void IGroupRolesInterface.Delete(UUI requestingAgent, UGI group, UUID roleID)
         {
-            Map m = new Map();
-            m.Add("GroupID", group.ID);
-            m.Add("RoleID", roleID);
+            var m = new Map
+            {
+                ["GroupID"] = group.ID,
+                ["RoleID"] = roleID
+            };
             FlotsamXmlRpcCall(requestingAgent, "groups.removeRoleFromGroup", m);
         }
     }

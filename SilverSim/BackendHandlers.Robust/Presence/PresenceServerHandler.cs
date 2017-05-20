@@ -38,11 +38,11 @@ namespace SilverSim.BackendHandlers.Robust.Presence
     [Description("Robust Presence Protocol Server")]
     public sealed class RobustPresenceServerHandler : IPlugin
     {
-        PresenceServiceInterface m_PresenceService;
-        TravelingDataServiceInterface m_TravelingDataService;
-        readonly string m_TravelingDataServiceName;
-        readonly string m_PresenceServiceName;
-        BaseHttpServer m_HttpServer;
+        private PresenceServiceInterface m_PresenceService;
+        private TravelingDataServiceInterface m_TravelingDataService;
+        private readonly string m_TravelingDataServiceName;
+        private readonly string m_PresenceServiceName;
+        private BaseHttpServer m_HttpServer;
 
         public RobustPresenceServerHandler(IConfig ownSection)
         {
@@ -66,7 +66,7 @@ namespace SilverSim.BackendHandlers.Robust.Presence
             }
         }
 
-        void FailureResult(HttpRequest req)
+        private void FailureResult(HttpRequest req)
         {
             using (HttpResponse res = req.BeginResponse("text/xml"))
             {
@@ -79,7 +79,7 @@ namespace SilverSim.BackendHandlers.Robust.Presence
             }
         }
 
-        void SuccessResult(HttpRequest req)
+        private void SuccessResult(HttpRequest req)
         {
             using (HttpResponse res = req.BeginResponse("text/xml"))
             {
@@ -92,7 +92,7 @@ namespace SilverSim.BackendHandlers.Robust.Presence
             }
         }
 
-        void PresenceHandler(HttpRequest httpreq)
+        private void PresenceHandler(HttpRequest httpreq)
         {
             if (httpreq.ContainsHeader("X-SecondLife-Shard"))
             {
@@ -155,10 +155,10 @@ namespace SilverSim.BackendHandlers.Robust.Presence
             }
         }
 
-        void HandleLogin(HttpRequest httpreq, Dictionary<string, object> reqdata)
+        private void HandleLogin(HttpRequest httpreq, Dictionary<string, object> reqdata)
         {
             object o;
-            PresenceInfo pInfo = new PresenceInfo();
+            var pInfo = new PresenceInfo();
             if(!reqdata.TryGetValue("UserID", out o) || !UUI.TryParse(o.ToString(), out pInfo.UserID))
             {
                 FailureResult(httpreq);
@@ -187,7 +187,7 @@ namespace SilverSim.BackendHandlers.Robust.Presence
             SuccessResult(httpreq);
         }
 
-        void HandleLogout(HttpRequest req, Dictionary<string, object> reqdata)
+        private void HandleLogout(HttpRequest req, Dictionary<string, object> reqdata)
         {
             UUID sessionID;
             object o;
@@ -210,7 +210,7 @@ namespace SilverSim.BackendHandlers.Robust.Presence
             SuccessResult(req);
         }
 
-        void HandleLogoutRegion(HttpRequest req, Dictionary<string, object> reqdata)
+        private void HandleLogoutRegion(HttpRequest req, Dictionary<string, object> reqdata)
         {
             UUID regionID;
             object o;
@@ -237,7 +237,7 @@ namespace SilverSim.BackendHandlers.Robust.Presence
             SuccessResult(req);
         }
 
-        void HandleReport(HttpRequest req, Dictionary<string, object> reqdata)
+        private void HandleReport(HttpRequest req, Dictionary<string, object> reqdata)
         {
             UUID sessionID;
             UUID regionID;
@@ -267,7 +267,7 @@ namespace SilverSim.BackendHandlers.Robust.Presence
             SuccessResult(req);
         }
 
-        void HandleGetAgent(HttpRequest req, Dictionary<string, object> reqdata)
+        private void HandleGetAgent(HttpRequest req, Dictionary<string, object> reqdata)
         {
             UUID sessionID;
             object o;
@@ -302,7 +302,7 @@ namespace SilverSim.BackendHandlers.Robust.Presence
             }
         }
 
-        void HandleGetAgents(HttpRequest req, Dictionary<string, object> reqdata)
+        private void HandleGetAgents(HttpRequest req, Dictionary<string, object> reqdata)
         {
             object o;
             if (!reqdata.TryGetValue("uuids", out o) || !(o is List<string>))
@@ -310,8 +310,8 @@ namespace SilverSim.BackendHandlers.Robust.Presence
                 FailureResult(req);
                 return;
             }
-            List<string> uuids = o as List<string>;
-            List<UUI> uuis = new List<UUI>();
+            var uuids = o as List<string>;
+            var uuis = new List<UUI>();
             foreach(string s in uuids)
             {
                 UUI uui;
@@ -321,7 +321,7 @@ namespace SilverSim.BackendHandlers.Robust.Presence
                 }
             }
 
-            List<PresenceInfo> results = new List<PresenceInfo>();
+            var results = new List<PresenceInfo>();
             foreach(UUI uui in uuis)
             {
                 results.AddRange(m_PresenceService[uui.ID]);
@@ -355,15 +355,8 @@ namespace SilverSim.BackendHandlers.Robust.Presence
     [PluginName("PresenceHandler")]
     public sealed class RobustPresenceServerHandlerFactory : IPluginFactory
     {
-        public RobustPresenceServerHandlerFactory()
-        {
-
-        }
-
-        public IPlugin Initialize(ConfigurationLoader loader, IConfig ownSection)
-        {
-            return new RobustPresenceServerHandler(ownSection);
-        }
+        public IPlugin Initialize(ConfigurationLoader loader, IConfig ownSection) =>
+            new RobustPresenceServerHandler(ownSection);
     }
     #endregion
 }

@@ -33,8 +33,8 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
     {
         public class OpenSimProfileConnector : IProfileConnectorImplementation
         {
-            readonly string m_Uri;
-            readonly ProfileConnector m_Connector;
+            private readonly string m_Uri;
+            private readonly ProfileConnector m_Connector;
 
             public OpenSimProfileConnector(ProfileConnector connector, string uri)
             {
@@ -44,12 +44,14 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
 
             protected IValue OpenSimXmlRpcCall(string methodName, Map structparam)
             {
-                XmlRpc.XmlRpcRequest req = new XmlRpc.XmlRpcRequest();
-                req.MethodName = methodName;
+                var req = new XmlRpc.XmlRpcRequest()
+                {
+                    MethodName = methodName
+                };
                 req.Params.Add(structparam);
                 XmlRpc.XmlRpcResponse res = RPC.DoXmlRpcRequest(m_Uri, req, m_Connector.TimeoutMs);
-                Map p = res.ReturnValue as Map;
-                if (null == p)
+                var p = res.ReturnValue as Map;
+                if (p == null)
                 {
                     throw new InvalidDataException("Unexpected OpenSimProfile return value");
                 }
@@ -67,12 +69,14 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
 
             protected bool TryOpenSimXmlRpcCall(string methodName, Map structparam, out IValue iv)
             {
-                XmlRpc.XmlRpcRequest req = new XmlRpc.XmlRpcRequest();
-                req.MethodName = methodName;
+                var req = new XmlRpc.XmlRpcRequest()
+                {
+                    MethodName = methodName
+                };
                 req.Params.Add(structparam);
                 XmlRpc.XmlRpcResponse res = RPC.DoXmlRpcRequest(m_Uri, req, m_Connector.TimeoutMs);
-                Map p = res.ReturnValue as Map;
-                if (null == p)
+                var p = res.ReturnValue as Map;
+                if (p == null)
                 {
                     throw new InvalidDataException("Unexpected OpenSimProfile return value");
                 }
@@ -92,12 +96,14 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
 
             protected bool TryOpenSimXmlRpcCall(string methodName, Map structparam)
             {
-                XmlRpc.XmlRpcRequest req = new XmlRpc.XmlRpcRequest();
-                req.MethodName = methodName;
+                var req = new XmlRpc.XmlRpcRequest()
+                {
+                    MethodName = methodName
+                };
                 req.Params.Add(structparam);
                 XmlRpc.XmlRpcResponse res = RPC.DoXmlRpcRequest(m_Uri, req, m_Connector.TimeoutMs);
-                Map p = res.ReturnValue as Map;
-                if (null == p)
+                var p = res.ReturnValue as Map;
+                if (p == null)
                 {
                     throw new InvalidDataException("Unexpected OpenSimProfile return value");
                 }
@@ -115,13 +121,15 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
 
             Dictionary<UUID, string> IClassifiedsInterface.GetClassifieds(UUI user)
             {
-                Map map = new Map();
-                map.Add("uuid", user.ID);
-                AnArray res = (AnArray)OpenSimXmlRpcCall("avatarclassifiedsrequest", map);
-                Dictionary<UUID, string> classifieds = new Dictionary<UUID, string>();
+                var map = new Map
+                {
+                    ["uuid"] = user.ID
+                };
+                var res = (AnArray)OpenSimXmlRpcCall("avatarclassifiedsrequest", map);
+                var classifieds = new Dictionary<UUID, string>();
                 foreach(IValue iv in res)
                 {
-                    Map m = (Map)iv;
+                    var m = (Map)iv;
                     classifieds.Add(m["classifiedid"].AsUUID, m["name"].ToString());
                 }
                 return classifieds;
@@ -130,38 +138,44 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
             bool IClassifiedsInterface.TryGetValue(UUI user, UUID id, out ProfileClassified classified)
             {
                 IValue iv;
-                Map map = new Map();
-                map.Add("classifiedID", user.ID);
-                if(!TryOpenSimXmlRpcCall("classifieds_info_query", map, out iv))
+                var map = new Map
+                {
+                    ["classifiedID"] = user.ID
+                };
+                if (!TryOpenSimXmlRpcCall("classifieds_info_query", map, out iv))
                 {
                     classified = default(ProfileClassified);
                     return false;
                 }
-                Map res = (Map)(((AnArray)iv)[0]);
+                var res = (Map)(((AnArray)iv)[0]);
 
-                classified = new ProfileClassified();
-                classified.ClassifiedID = res["classifieduuid"].AsUUID;
-                classified.Creator.ID = res["creatoruuid"].AsUUID;
-                classified.CreationDate = Date.UnixTimeToDateTime(res["creationdate"].AsULong);
-                classified.ExpirationDate = Date.UnixTimeToDateTime(res["expirationdate"].AsULong);
-                classified.Category = res["category"].AsInt;
-                classified.Name = res["name"].ToString();
-                classified.Description = res["description"].ToString();
-                classified.ParcelID = res["parceluuid"].AsUUID;
-                classified.ParentEstate = res["parentestate"].AsInt;
-                classified.SnapshotID = res["snapshotuuid"].AsUUID;
-                classified.SimName = res["simname"].ToString();
-                classified.GlobalPos = res["posglobal"].AsVector3;
-                classified.ParcelName = res["parcelname"].ToString();
-                classified.Flags = (byte)res["classifiedflags"].AsUInt;
-                classified.Price = res["priceforlisting"].AsInt;
+                classified = new ProfileClassified()
+                {
+                    ClassifiedID = res["classifieduuid"].AsUUID,
+                    Creator = new UUI(res["creatoruuid"].AsUUID),
+                    CreationDate = Date.UnixTimeToDateTime(res["creationdate"].AsULong),
+                    ExpirationDate = Date.UnixTimeToDateTime(res["expirationdate"].AsULong),
+                    Category = res["category"].AsInt,
+                    Name = res["name"].ToString(),
+                    Description = res["description"].ToString(),
+                    ParcelID = res["parceluuid"].AsUUID,
+                    ParentEstate = res["parentestate"].AsInt,
+                    SnapshotID = res["snapshotuuid"].AsUUID,
+                    SimName = res["simname"].ToString(),
+                    GlobalPos = res["posglobal"].AsVector3,
+                    ParcelName = res["parcelname"].ToString(),
+                    Flags = (byte)res["classifiedflags"].AsUInt,
+                    Price = res["priceforlisting"].AsInt
+                };
                 return true;
             }
 
             bool IClassifiedsInterface.ContainsKey(UUI user, UUID id)
             {
-                Map map = new Map();
-                map.Add("classifiedID", user.ID);
+                var map = new Map
+                {
+                    ["classifiedID"] = user.ID
+                };
                 return TryOpenSimXmlRpcCall("classifieds_info_query", map);
             }
 
@@ -178,87 +192,94 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
                 }
             }
 
-
             void IClassifiedsInterface.Update(ProfileClassified classified)
             {
-                Map map = new Map();
-                map.Add("parcelname", classified.ParcelName);
-                map.Add("creatorUUID", classified.Creator.ID);
-                map.Add("classifiedUUID", classified.ClassifiedID);
-                map.Add("category", ((int)classified.Category).ToString());
-                map.Add("name", classified.Name);
-                map.Add("description", classified.Description);
-                map.Add("parentestate", classified.ParentEstate.ToString());
-                map.Add("snapshotUUID", classified.SnapshotID);
-                map.Add("sim_name", classified.SimName);
-                map.Add("globalpos", classified.GlobalPos.ToString());
-                map.Add("classifiedFlags", ((uint)classified.Flags).ToString());
-                map.Add("classifiedPrice", classified.Price.ToString());
-                map.Add("parcelUUID", classified.ParcelID.ToString());
-                map.Add("pos_global", classified.GlobalPos.ToString());
+                var map = new Map
+                {
+                    { "parcelname", classified.ParcelName },
+                    { "creatorUUID", classified.Creator.ID },
+                    { "classifiedUUID", classified.ClassifiedID },
+                    { "category", ((int)classified.Category).ToString() },
+                    { "name", classified.Name },
+                    { "description", classified.Description },
+                    { "parentestate", classified.ParentEstate.ToString() },
+                    { "snapshotUUID", classified.SnapshotID },
+                    { "sim_name", classified.SimName },
+                    { "globalpos", classified.GlobalPos.ToString() },
+                    { "classifiedFlags", ((uint)classified.Flags).ToString() },
+                    { "classifiedPrice", classified.Price.ToString() },
+                    { "parcelUUID", classified.ParcelID.ToString() },
+                    { "pos_global", classified.GlobalPos.ToString() }
+                };
                 OpenSimXmlRpcCall("classified_update", map);
             }
 
             void IClassifiedsInterface.Delete(UUID id)
             {
-                Map map = new Map();
-                map["classifiedID"] = id;
+                var map = new Map
+                {
+                    ["classifiedID"] = id
+                };
                 OpenSimXmlRpcCall("classified_delete", map);
             }
 
             Dictionary<UUID, string> IPicksInterface.GetPicks(UUI user)
             {
-                Map map = new Map();
-                map.Add("uuid", user.ID);
-                AnArray res = (AnArray)OpenSimXmlRpcCall("avatarpicksrequest", map);
-                Dictionary<UUID, string> classifieds = new Dictionary<UUID, string>();
+                var map = new Map
+                {
+                    ["uuid"] = user.ID
+                };
+                var res = (AnArray)OpenSimXmlRpcCall("avatarpicksrequest", map);
+                var classifieds = new Dictionary<UUID, string>();
                 foreach (IValue iv in res)
                 {
-                    Map m = (Map)iv;
+                    var m = (Map)iv;
                     classifieds.Add(m["pickid"].AsUUID, m["name"].ToString());
                 }
                 return classifieds;
             }
 
-            ProfilePick ConvertToProfilePick(Map res)
+            private ProfilePick ConvertToProfilePick(Map res) => new ProfilePick()
             {
-                ProfilePick pick = new ProfilePick();
-                pick.PickID = res["pickuuid"].AsUUID;
-                pick.Creator.ID = res["creatoruuid"].AsUUID;
-                pick.TopPick = Convert.ToBoolean(res["toppick"].ToString());
-                pick.ParcelID = res["parceluuid"].AsUUID;
-                pick.Name = res["name"].ToString();
-                pick.Description = res["description"].ToString();
-                pick.SnapshotID = res["snapshotuuid"].AsUUID;
-                pick.OriginalName = res["originalname"].ToString();
-                pick.SimName = res["simname"].ToString();
-                pick.GlobalPosition = res["posglobal"].AsVector3;
-                pick.SortOrder = res["sortorder"].AsInt;
-                pick.Enabled = Convert.ToBoolean(res["enabled"].ToString());
-                return pick;
-            }
+                PickID = res["pickuuid"].AsUUID,
+                Creator = new UUI(res["creatoruuid"].AsUUID),
+                TopPick = Convert.ToBoolean(res["toppick"].ToString()),
+                ParcelID = res["parceluuid"].AsUUID,
+                Name = res["name"].ToString(),
+                Description = res["description"].ToString(),
+                SnapshotID = res["snapshotuuid"].AsUUID,
+                OriginalName = res["originalname"].ToString(),
+                SimName = res["simname"].ToString(),
+                GlobalPosition = res["posglobal"].AsVector3,
+                SortOrder = res["sortorder"].AsInt,
+                Enabled = Convert.ToBoolean(res["enabled"].ToString())
+            };
 
             bool IPicksInterface.TryGetValue(UUI user, UUID id, out ProfilePick pick)
             {
-                Map map = new Map();
-                map.Add("avatar_id", user.ID);
-                map.Add("pick_id", id);
+                var map = new Map
+                {
+                    ["avatar_id"] = user.ID,
+                    ["pick_id"] = id
+                };
                 IValue iv;
                 if(!TryOpenSimXmlRpcCall("pickinforequest", map, out iv))
                 {
                     pick = default(ProfilePick);
                     return false;
                 }
-                Map res = (Map)(((AnArray)iv)[0]);
+                var res = (Map)(((AnArray)iv)[0]);
                 pick = ConvertToProfilePick(res);
                 return true;
             }
 
             bool IPicksInterface.ContainsKey(UUI user, UUID id)
             {
-                Map map = new Map();
-                map.Add("avatar_id", user.ID);
-                map.Add("pick_id", id);
+                var map = new Map
+                {
+                    ["avatar_id"] = user.ID,
+                    ["pick_id"] = id
+                };
                 IValue iv;
                 if (!TryOpenSimXmlRpcCall("pickinforequest", map, out iv))
                 {
@@ -269,65 +290,73 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
 
             ProfilePick IPicksInterface.this[UUI user, UUID id]
             {
-                get 
+                get
                 {
-                    Map map = new Map();
-                    map.Add("avatar_id", user.ID);
-                    map.Add("pick_id", id);
-                    Map res = (Map)(((AnArray)OpenSimXmlRpcCall("pickinforequest", map))[0]);
-                    ProfilePick pick = ConvertToProfilePick(res);
-                    return pick;
+                    var map = new Map
+                    {
+                        ["avatar_id"] = user.ID,
+                        ["pick_id"] = id
+                    };
+                    var res = (Map)(((AnArray)OpenSimXmlRpcCall("pickinforequest", map))[0]);
+                    return ConvertToProfilePick(res);
                 }
             }
 
-
             void IPicksInterface.Update(ProfilePick pick)
             {
-                Map m = new Map();
-                m.Add("agent_id", pick.Creator.ID);
-                m.Add("pick_id", pick.PickID);
-                m.Add("creator_id", pick.Creator.ID);
-                m.Add("top_pick", pick.TopPick.ToString());
-                m.Add("name", pick.Name);
-                m.Add("desc", pick.Description);
-                m.Add("snapshot_id", pick.SnapshotID);
-                m.Add("sort_order", pick.SortOrder.ToString());
-                m.Add("enabled", pick.Enabled.ToString());
-                m.Add("sim_name", pick.SimName);
-                m.Add("parcel_uuid", pick.ParcelID);
-                m.Add("parcel_name", pick.ParcelName);
-                m.Add("pos_global", pick.GlobalPosition);
+                var m = new Map
+                {
+                    { "agent_id", pick.Creator.ID },
+                    { "pick_id", pick.PickID },
+                    { "creator_id", pick.Creator.ID },
+                    { "top_pick", pick.TopPick.ToString() },
+                    { "name", pick.Name },
+                    { "desc", pick.Description },
+                    { "snapshot_id", pick.SnapshotID },
+                    { "sort_order", pick.SortOrder.ToString() },
+                    { "enabled", pick.Enabled.ToString() },
+                    { "sim_name", pick.SimName },
+                    { "parcel_uuid", pick.ParcelID },
+                    { "parcel_name", pick.ParcelName },
+                    { "pos_global", pick.GlobalPosition }
+                };
                 OpenSimXmlRpcCall("picks_update", m);
             }
 
             void IPicksInterface.Delete(UUID id)
             {
-                Map m = new Map();
-                m.Add("pick_id", id);
+                var m = new Map
+                {
+                    ["pick_id"] = id
+                };
                 OpenSimXmlRpcCall("picks_delete", m);
             }
 
             bool INotesInterface.TryGetValue(UUI user, UUI target, out string notes)
             {
-                Map map = new Map();
-                map.Add("avatar_id", user.ID);
-                map.Add("uuid", target.ID);
+                var map = new Map
+                {
+                    ["avatar_id"] = user.ID,
+                    ["uuid"] = target.ID
+                };
                 IValue iv;
                 if(!TryOpenSimXmlRpcCall("avatarnotesrequest", map, out iv))
                 {
                     notes = string.Empty;
                     return false;
                 }
-                Map res = (Map)(((AnArray)iv)[0]);
+                var res = (Map)(((AnArray)iv)[0]);
                 notes = res["notes"].ToString();
                 return true;
             }
 
             bool INotesInterface.ContainsKey(UUI user, UUI target)
             {
-                Map map = new Map();
-                map.Add("avatar_id", user.ID);
-                map.Add("uuid", target.ID);
+                var map = new Map
+                {
+                    ["avatar_id"] = user.ID,
+                    ["uuid"] = target.ID
+                };
                 return TryOpenSimXmlRpcCall("avatarnotesrequest", map);
             }
 
@@ -335,44 +364,54 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
             {
                 get
                 {
-                    Map map = new Map();
-                    map.Add("avatar_id", user.ID);
-                    map.Add("uuid", target.ID);
-                    Map res = (Map)(((AnArray)OpenSimXmlRpcCall("avatarnotesrequest", map))[0]);
+                    var map = new Map
+                    {
+                        ["avatar_id"] = user.ID,
+                        ["uuid"] = target.ID
+                    };
+                    var res = (Map)(((AnArray)OpenSimXmlRpcCall("avatarnotesrequest", map))[0]);
                     return res["notes"].ToString();
                 }
                 set
                 {
-                    Map map = new Map();
-                    map.Add("avatar_id", user.ID);
-                    map.Add("target_id", target.ID);
-                    map.Add("notes", value);
+                    var map = new Map
+                    {
+                        { "avatar_id", user.ID },
+                        { "target_id", target.ID },
+                        { "notes", value }
+                    };
                     OpenSimXmlRpcCall("avatar_notes_update", map);
                 }
             }
 
             bool IUserPreferencesInterface.TryGetValue(UUI user, out ProfilePreferences prefs)
             {
-                Map map = new Map();
-                map.Add("avatar_id", user.ID);
+                var map = new Map
+                {
+                    ["avatar_id"] = user.ID
+                };
                 IValue iv;
                 if(!TryOpenSimXmlRpcCall("user_preferences_request", map, out iv))
                 {
                     prefs = default(ProfilePreferences);
                     return false;
                 }
-                Map res = (Map)(((AnArray)iv)[0]);
-                prefs = new ProfilePreferences();
-                prefs.User = user;
-                prefs.IMviaEmail = Convert.ToBoolean(res["imviaemail"].ToString());
-                prefs.Visible = Convert.ToBoolean(res["visible"].ToString());
+                var res = (Map)(((AnArray)iv)[0]);
+                prefs = new ProfilePreferences()
+                {
+                    User = user,
+                    IMviaEmail = Convert.ToBoolean(res["imviaemail"].ToString()),
+                    Visible = Convert.ToBoolean(res["visible"].ToString())
+                };
                 return true;
             }
 
             bool IUserPreferencesInterface.ContainsKey(UUI user)
             {
-                Map map = new Map();
-                map.Add("avatar_id", user.ID);
+                var map = new Map
+                {
+                    ["avatar_id"] = user.ID
+                };
                 IValue iv;
                 if (!TryOpenSimXmlRpcCall("user_preferences_request", map, out iv))
                 {
@@ -385,21 +424,26 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
             {
                 get
                 {
-                    Map map = new Map();
-                    map.Add("avatar_id", user.ID);
-                    Map res = (Map)(((AnArray)OpenSimXmlRpcCall("user_preferences_request", map))[0]);
-                    ProfilePreferences prefs = new ProfilePreferences();
-                    prefs.User = user;
-                    prefs.IMviaEmail = Convert.ToBoolean(res["imviaemail"].ToString());
-                    prefs.Visible = Convert.ToBoolean(res["visible"].ToString());
-                    return prefs;
+                    var map = new Map
+                    {
+                        ["avatar_id"] = user.ID
+                    };
+                    var res = (Map)(((AnArray)OpenSimXmlRpcCall("user_preferences_request", map))[0]);
+                    return new ProfilePreferences()
+                    {
+                        User = user,
+                        IMviaEmail = Convert.ToBoolean(res["imviaemail"].ToString()),
+                        Visible = Convert.ToBoolean(res["visible"].ToString())
+                    };
                 }
                 set
                 {
-                    Map m = new Map();
-                    m.Add("avatar_id", user.ID);
-                    m.Add("imViaEmail", value.IMviaEmail.ToString());
-                    m.Add("visible", value.Visible.ToString());
+                    var m = new Map
+                    {
+                        { "avatar_id", user.ID },
+                        { "imViaEmail", value.IMviaEmail.ToString() },
+                        { "visible", value.Visible.ToString() }
+                    };
                     OpenSimXmlRpcCall("user_preferences_update", m);
                 }
             }
@@ -408,24 +452,26 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
             {
                 get
                 {
-                    Map map = new Map();
-                    map.Add("avatar_id", user.ID);
-                    Map res = (Map)(((AnArray)OpenSimXmlRpcCall("avatar_properties_request", map))[0]);
-                    ProfileProperties props = new ProfileProperties();
-                    props.User = user;
-                    props.Partner = UUI.Unknown;
-                    props.Partner.ID = res["Partner"].AsUUID;
-                    props.WebUrl = res["ProfileUrl"].ToString();
-                    props.WantToMask = res["wantmask"].AsUInt;
-                    props.WantToText = res["wanttext"].ToString();
-                    props.SkillsMask = res["skillsmask"].AsUInt;
-                    props.SkillsText = res["skillstext"].ToString();
-                    props.Language = res["languages"].ToString();
-                    props.ImageID = res["Image"].AsUUID;
-                    props.AboutText = res["AboutText"].ToString();
-                    props.FirstLifeImageID = res["FirstLifeImage"].AsUUID;
-                    props.FirstLifeText = res["FirstLifeAboutText"].ToString();
-                    return props;
+                    var map = new Map
+                    {
+                        ["avatar_id"] = user.ID
+                    };
+                    var res = (Map)(((AnArray)OpenSimXmlRpcCall("avatar_properties_request", map))[0]);
+                    return new ProfileProperties()
+                    {
+                        User = user,
+                        Partner = new UUI(res["Partner"].AsUUID),
+                        WebUrl = res["ProfileUrl"].ToString(),
+                        WantToMask = res["wantmask"].AsUInt,
+                        WantToText = res["wanttext"].ToString(),
+                        SkillsMask = res["skillsmask"].AsUInt,
+                        SkillsText = res["skillstext"].ToString(),
+                        Language = res["languages"].ToString(),
+                        ImageID = res["Image"].AsUUID,
+                        AboutText = res["AboutText"].ToString(),
+                        FirstLifeImageID = res["FirstLifeImage"].AsUUID,
+                        FirstLifeText = res["FirstLifeAboutText"].ToString()
+                    };
                 }
             }
 
@@ -435,26 +481,29 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
                 {
                     if ((flags & PropertiesUpdateFlags.Interests) != 0)
                     {
-                        Map m = new Map();
-                        m.Add("avatar_id", user.ID);
-                        m.Add("wantmask", ((uint)value.WantToMask).ToString());
-                        m.Add("wanttext", value.WantToText);
-                        m.Add("skillsmask", ((uint)value.SkillsMask).ToString());
-                        m.Add("skillstext", value.SkillsText);
-                        m.Add("languages", value.Language);
-
+                        var m = new Map
+                        {
+                            { "avatar_id", user.ID },
+                            { "wantmask", ((uint)value.WantToMask).ToString() },
+                            { "wanttext", value.WantToText },
+                            { "skillsmask", ((uint)value.SkillsMask).ToString() },
+                            { "skillstext", value.SkillsText },
+                            { "languages", value.Language }
+                        };
                         OpenSimXmlRpcCall("avatar_interests_update", m);
                     }
 
                     if((flags & PropertiesUpdateFlags.Properties) != 0)
                     {
-                        Map m = new Map();
-                        m.Add("avatar_id", user.ID);
-                        m.Add("ProfileUrl", value.WebUrl);
-                        m.Add("Image", value.ImageID);
-                        m.Add("AboutText", value.AboutText);
-                        m.Add("FirstLifeImage", value.FirstLifeImageID);
-                        m.Add("FirstLifeText", value.FirstLifeText);
+                        var m = new Map
+                        {
+                            { "avatar_id", user.ID },
+                            { "ProfileUrl", value.WebUrl },
+                            { "Image", value.ImageID },
+                            { "AboutText", value.AboutText },
+                            { "FirstLifeImage", value.FirstLifeImageID },
+                            { "FirstLifeText", value.FirstLifeText }
+                        };
                         OpenSimXmlRpcCall("avatar_properties_update", m);
                     }
                 }

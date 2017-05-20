@@ -37,9 +37,9 @@ namespace SilverSim.BackendConnectors.Robust.GroupsV2
         public sealed class RoleMembersAccessor : IGroupRolemembersInterface
         {
             public int TimeoutMs = 20000;
-            readonly string m_Uri;
-            readonly IGroupMembershipsInterface m_MembershipsAccessor;
-            readonly Func<UUI, string> m_GetGroupsAgentID;
+            private readonly string m_Uri;
+            private readonly IGroupMembershipsInterface m_MembershipsAccessor;
+            private readonly Func<UUI, string> m_GetGroupsAgentID;
 
             public RoleMembersAccessor(string uri, IGroupMembershipsInterface membershipsAccessor, Func<UUI, string> getGroupsAgentID)
             {
@@ -89,22 +89,19 @@ namespace SilverSim.BackendConnectors.Robust.GroupsV2
                 }
             }
 
-            public List<GroupRolemember> this[UUI requestingAgent, UGI group, UUID roleID]
-            {
-                get
-                {
-                    return new List<GroupRolemember>(this[requestingAgent, group].Where((member) => member.RoleID.Equals(roleID)));
-                }
-            }
+            public List<GroupRolemember> this[UUI requestingAgent, UGI group, UUID roleID] =>
+                new List<GroupRolemember>(this[requestingAgent, group].Where((member) => member.RoleID.Equals(roleID)));
 
             public List<GroupRolemember> this[UUI requestingAgent, UGI group]
             {
                 get
                 {
-                    Dictionary<string, string> post = new Dictionary<string, string>();
-                    post["GroupID"] = (string)group.ID;
-                    post["RequestingAgentID"] = m_GetGroupsAgentID(requestingAgent);
-                    post["METHOD"] = "GETROLEMEMBERS";
+                    var post = new Dictionary<string, string>
+                    {
+                        ["GroupID"] = (string)group.ID,
+                        ["RequestingAgentID"] = m_GetGroupsAgentID(requestingAgent),
+                        ["METHOD"] = "GETROLEMEMBERS"
+                    };
                     Map m;
                     using(Stream s = HttpClient.DoStreamPostRequest(m_Uri, null, post, false, TimeoutMs))
                     {
@@ -119,13 +116,13 @@ namespace SilverSim.BackendConnectors.Robust.GroupsV2
                         throw new KeyNotFoundException();
                     }
 
-                    Map resultmap = m["RESULT"] as Map;
-                    if(null == resultmap)
+                    var resultmap = m["RESULT"] as Map;
+                    if(resultmap == null)
                     {
                         throw new KeyNotFoundException();
                     }
 
-                    List<GroupRolemember> rolemembers = new List<GroupRolemember>();
+                    var rolemembers = new List<GroupRolemember>();
                     foreach (IValue iv in resultmap.Values)
                     {
                         if (iv is Map)
@@ -142,11 +139,13 @@ namespace SilverSim.BackendConnectors.Robust.GroupsV2
 
             List<GroupRolemembership> GetRolememberships(UUI requestingAgent, UGI group, UUI principal)
             {
-                Dictionary<string, string> post = new Dictionary<string, string>();
-                post["AgentID"] = m_GetGroupsAgentID(principal);
-                post["GroupID"] = (string)group.ID;
-                post["RequestingAgentID"] = m_GetGroupsAgentID(requestingAgent);
-                post["METHOD"] = "GETAGENTROLES";
+                var post = new Dictionary<string, string>
+                {
+                    ["AgentID"] = m_GetGroupsAgentID(principal),
+                    ["GroupID"] = (string)group.ID,
+                    ["RequestingAgentID"] = m_GetGroupsAgentID(requestingAgent),
+                    ["METHOD"] = "GETAGENTROLES"
+                };
                 Map m;
                 using(Stream s = HttpClient.DoStreamPostRequest(m_Uri, null, post, false, TimeoutMs))
                 {
@@ -161,23 +160,25 @@ namespace SilverSim.BackendConnectors.Robust.GroupsV2
                     throw new KeyNotFoundException();
                 }
 
-                Map resultmap = m["RESULT"] as Map;
+                var resultmap = m["RESULT"] as Map;
                 if(null == resultmap)
                 {
                     throw new KeyNotFoundException();
                 }
 
-                List<GroupRolemembership> rolemembers = new List<GroupRolemembership>();
+                var rolemembers = new List<GroupRolemembership>();
                 foreach (IValue iv in resultmap.Values)
                 {
-                    Map data = iv as Map;
+                    var data = iv as Map;
                     if (null != data)
                     {
-                        GroupRolemembership member = new GroupRolemembership();
-                        member.RoleID = data["RoleID"].AsUUID;
-                        member.Group = group;
-                        member.Principal = principal;
-                        member.GroupTitle = data["Title"].ToString();
+                        var member = new GroupRolemembership()
+                        {
+                            RoleID = data["RoleID"].AsUUID,
+                            Group = group,
+                            Principal = principal,
+                            GroupTitle = data["Title"].ToString()
+                        };
                         rolemembers.Add(member);
                     }
                 }
@@ -191,7 +192,7 @@ namespace SilverSim.BackendConnectors.Robust.GroupsV2
                 get
                 {
                     List<GroupMembership> gmems = m_MembershipsAccessor[requestingAgent, principal];
-                    List<GroupRolemembership> grm = new List<GroupRolemembership>();
+                    var grm = new List<GroupRolemembership>();
                     foreach(GroupMembership gmem in gmems)
                     {
                         grm.AddRange(GetRolememberships(requestingAgent, gmem.Group, principal));
@@ -212,13 +213,15 @@ namespace SilverSim.BackendConnectors.Robust.GroupsV2
 
             public void Delete(UUI requestingAgent, UGI group, UUID roleID, UUI principal)
             {
-                Dictionary<string, string> post = new Dictionary<string,string>();
-                post["GroupID"] = (string)group.ID;
-                post["RoleID"] = (string)roleID;
-                post["AgentID"] = m_GetGroupsAgentID(principal);
-                post["RequestingAgentID"] = m_GetGroupsAgentID(requestingAgent);
-                post["OP"] = "DELETE";
-                post["METHOD"] = "AGENTROLE";
+                var post = new Dictionary<string, string>
+                {
+                    ["GroupID"] = (string)group.ID,
+                    ["RoleID"] = (string)roleID,
+                    ["AgentID"] = m_GetGroupsAgentID(principal),
+                    ["RequestingAgentID"] = m_GetGroupsAgentID(requestingAgent),
+                    ["OP"] = "DELETE",
+                    ["METHOD"] = "AGENTROLE"
+                };
                 BooleanResponseRequest(m_Uri, post, false, TimeoutMs);
             }
         }

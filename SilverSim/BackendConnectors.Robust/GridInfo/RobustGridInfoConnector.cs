@@ -36,12 +36,12 @@ namespace SilverSim.BackendConnectors.Robust.GridInfo
     [Description("Robust GridInfo Connector")]
     public class RobustGridInfoConnector : GridInfoServiceInterface, IPlugin
     {
-        readonly string m_GridURI;
+        private readonly string m_GridURI;
         public int TimeoutMs { get; set; }
-        readonly object m_UpdateLock = new object();
-        Map m_CachedGridInfo = new Map();
+        private readonly object m_UpdateLock = new object();
+        private Map m_CachedGridInfo = new Map();
 
-        Date m_LastUpdate = new Date();
+        private Date m_LastUpdate = new Date();
 
         #region Constructor
         public RobustGridInfoConnector(string uri)
@@ -99,6 +99,7 @@ namespace SilverSim.BackendConnectors.Robust.GridInfo
                 }
             }
         }
+
         public override string HomeURI
         {
             get
@@ -111,6 +112,7 @@ namespace SilverSim.BackendConnectors.Robust.GridInfo
                 }
             }
         }
+
         public override string this[string key]
         {
             get
@@ -119,6 +121,7 @@ namespace SilverSim.BackendConnectors.Robust.GridInfo
                 return m_CachedGridInfo[key].ToString();
             }
         }
+
         public override bool ContainsKey(string key)
         {
             CheckCache();
@@ -138,7 +141,7 @@ namespace SilverSim.BackendConnectors.Robust.GridInfo
             return false;
         }
 
-        void CheckCache()
+        private void CheckCache()
         {
             ulong age;
 
@@ -182,10 +185,6 @@ namespace SilverSim.BackendConnectors.Robust.GridInfo
     public class RobustGridInfoConnectorFactory : IPluginFactory
     {
         private static readonly ILog m_Log = LogManager.GetLogger("ROBUST GRIDINFO CONNECTOR");
-        public RobustGridInfoConnectorFactory()
-        {
-
-        }
 
         public IPlugin Initialize(ConfigurationLoader loader, IConfig ownSection)
         {

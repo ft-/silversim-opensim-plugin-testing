@@ -36,8 +36,8 @@ namespace SilverSim.BackendConnectors.Robust.GroupsV2
         public sealed class NoticesAccessor : IGroupNoticesInterface
         {
             public int TimeoutMs = 20000;
-            readonly string m_Uri;
-            readonly Func<UUI, string> m_GetGroupsAgentID;
+            private readonly string m_Uri;
+            private readonly Func<UUI, string> m_GetGroupsAgentID;
 
             public NoticesAccessor(string uri, Func<UUI, string> getGroupsAgentID)
             {
@@ -47,10 +47,12 @@ namespace SilverSim.BackendConnectors.Robust.GroupsV2
 
             public List<GroupNotice> GetNotices(UUI requestingAgent, UGI group)
             {
-                Dictionary<string, string> post = new Dictionary<string, string>();
-                post["GroupID"] = (string)group.ID;
-                post["RequestingAgentID"] = m_GetGroupsAgentID(requestingAgent);
-                post["METHOD"] = "GETNOTICES";
+                var post = new Dictionary<string, string>
+                {
+                    ["GroupID"] = (string)group.ID,
+                    ["RequestingAgentID"] = m_GetGroupsAgentID(requestingAgent),
+                    ["METHOD"] = "GETNOTICES"
+                };
                 Map m;
                 using(Stream s = HttpClient.DoStreamPostRequest(m_Uri, null, post, false, TimeoutMs))
                 {
@@ -65,15 +67,17 @@ namespace SilverSim.BackendConnectors.Robust.GroupsV2
                     throw new KeyNotFoundException();
                 }
 
-                Map resultmap = m["RESULT"] as Map;
+                var resultmap = m["RESULT"] as Map;
 
-                List<GroupNotice> groupnotices = new List<GroupNotice>();
+                var groupnotices = new List<GroupNotice>();
                 foreach (IValue iv in resultmap.Values)
                 {
                     if (iv is Map)
                     {
-                        GroupNotice notice = new GroupNotice();
-                        notice.Group = group;
+                        var notice = new GroupNotice()
+                        {
+                            Group = group
+                        };
                         groupnotices.Add(notice);
                     }
                 }
@@ -83,11 +87,13 @@ namespace SilverSim.BackendConnectors.Robust.GroupsV2
 
             public bool TryGetValue(UUI requestingAgent, UUID groupNoticeID, out GroupNotice notice)
             {
-                Dictionary<string, string> post = new Dictionary<string, string>();
-                post["InviteID"] = (string)groupNoticeID;
-                post["RequestingAgentID"] = m_GetGroupsAgentID(requestingAgent);
-                post["OP"] = "GET";
-                post["METHOD"] = "INVITE";
+                var post = new Dictionary<string, string>
+                {
+                    ["InviteID"] = (string)groupNoticeID,
+                    ["RequestingAgentID"] = m_GetGroupsAgentID(requestingAgent),
+                    ["OP"] = "GET",
+                    ["METHOD"] = "INVITE"
+                };
                 Map m;
                 using (Stream s = HttpClient.DoStreamPostRequest(m_Uri, null, post, false, TimeoutMs))
                 {
@@ -111,11 +117,13 @@ namespace SilverSim.BackendConnectors.Robust.GroupsV2
 
             public bool ContainsKey(UUI requestingAgent, UUID groupNoticeID)
             {
-                Dictionary<string, string> post = new Dictionary<string, string>();
-                post["InviteID"] = (string)groupNoticeID;
-                post["RequestingAgentID"] = m_GetGroupsAgentID(requestingAgent);
-                post["OP"] = "GET";
-                post["METHOD"] = "INVITE";
+                var post = new Dictionary<string, string>
+                {
+                    ["InviteID"] = (string)groupNoticeID,
+                    ["RequestingAgentID"] = m_GetGroupsAgentID(requestingAgent),
+                    ["OP"] = "GET",
+                    ["METHOD"] = "INVITE"
+                };
                 Map m;
                 using (Stream s = HttpClient.DoStreamPostRequest(m_Uri, null, post, false, TimeoutMs))
                 {
@@ -135,13 +143,15 @@ namespace SilverSim.BackendConnectors.Robust.GroupsV2
 
             public GroupNotice this[UUI requestingAgent, UUID groupNoticeID]
             {
-                get 
+                get
                 {
-                    Dictionary<string, string> post = new Dictionary<string, string>();
-                    post["InviteID"] = (string)groupNoticeID;
-                    post["RequestingAgentID"] = m_GetGroupsAgentID(requestingAgent);
-                    post["OP"] = "GET";
-                    post["METHOD"] = "INVITE";
+                    var post = new Dictionary<string, string>
+                    {
+                        ["InviteID"] = (string)groupNoticeID,
+                        ["RequestingAgentID"] = m_GetGroupsAgentID(requestingAgent),
+                        ["OP"] = "GET",
+                        ["METHOD"] = "INVITE"
+                    };
                     Map m;
                     using(Stream s = HttpClient.DoStreamPostRequest(m_Uri, null, post, false, TimeoutMs))
                     {

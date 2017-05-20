@@ -38,15 +38,10 @@ namespace SilverSim.OpenSimArchiver.RegionArchiver
                 public bool IsMegaregion;
                 public GridVector Location = new GridVector(0, 0);
                 public GridVector RegionSize = new GridVector(256, 256);
-                
-                public RegionInfo()
-                {
-
-                }
             }
 
             #region Major Version 0
-            static void LoadArchiveXmlVersion0_CreationInfo(XmlTextReader reader, RegionInfo rinfo)
+            private static void LoadArchiveXmlVersion0_CreationInfo(XmlTextReader reader, RegionInfo rinfo)
             {
                 for(;;)
                 {
@@ -63,7 +58,7 @@ namespace SilverSim.OpenSimArchiver.RegionArchiver
                                 case "datetime":
                                     rinfo.CreationDate = Date.UnixTimeToDateTime(reader.ReadElementValueAsULong());
                                     break;
-                                    
+
                                 case "id":
                                     rinfo.ID = reader.ReadElementValueAsString();
                                     break;
@@ -90,7 +85,7 @@ namespace SilverSim.OpenSimArchiver.RegionArchiver
                 }
             }
 
-            static void LoadArchiveXmlVersion0_RegionInfo(XmlTextReader reader, RegionInfo rinfo)
+            private static void LoadArchiveXmlVersion0_RegionInfo(XmlTextReader reader, RegionInfo rinfo)
             {
                 for (; ; )
                 {
@@ -134,9 +129,9 @@ namespace SilverSim.OpenSimArchiver.RegionArchiver
                 }
             }
 
-            static RegionInfo LoadArchiveXmlVersion0(XmlTextReader reader)
+            private static RegionInfo LoadArchiveXmlVersion0(XmlTextReader reader)
             {
-                RegionInfo rinfo = new RegionInfo();
+                var rinfo = new RegionInfo();
                 for(;;)
                 {
                     if(!reader.Read())
@@ -189,9 +184,9 @@ namespace SilverSim.OpenSimArchiver.RegionArchiver
             #endregion
 
             #region Major Version 1
-            static Date LoadArchiveXmlVersion1_CreationInfo(XmlTextReader reader)
+            private static Date LoadArchiveXmlVersion1_CreationInfo(XmlTextReader reader)
             {
-                Date creationDate = new Date();
+                var creationDate = new Date();
                 for (; ; )
                 {
                     if (!reader.Read())
@@ -230,10 +225,12 @@ namespace SilverSim.OpenSimArchiver.RegionArchiver
                 }
             }
 
-            static GridVector LoadArchiveXmlVersion1_Region(XmlTextReader reader, List<RegionInfo> regionInfos, GridVector loc)
+            private static GridVector LoadArchiveXmlVersion1_Region(XmlTextReader reader, List<RegionInfo> regionInfos, GridVector loc)
             {
-                RegionInfo rinfo = new RegionInfo();
-                rinfo.Location = loc;
+                var rinfo = new RegionInfo()
+                {
+                    Location = loc
+                };
                 for (; ; )
                 {
                     if (!reader.Read())
@@ -285,7 +282,7 @@ namespace SilverSim.OpenSimArchiver.RegionArchiver
                 }
             }
 
-            static void LoadArchiveXmlVersion1_Row(XmlTextReader reader, List<RegionInfo> regionInfos, GridVector loc)
+            private static void LoadArchiveXmlVersion1_Row(XmlTextReader reader, List<RegionInfo> regionInfos, GridVector loc)
             {
                 for (; ; )
                 {
@@ -329,9 +326,9 @@ namespace SilverSim.OpenSimArchiver.RegionArchiver
                 }
             }
 
-            static void LoadArchiveXmlVersion1_Regions(XmlTextReader reader, List<RegionInfo> regionInfos)
+            private static void LoadArchiveXmlVersion1_Regions(XmlTextReader reader, List<RegionInfo> regionInfos)
             {
-                GridVector loc = new GridVector(0, 0);
+                var loc = new GridVector(0, 0);
                 for (; ; )
                 {
                     if(!reader.Read())
@@ -375,7 +372,7 @@ namespace SilverSim.OpenSimArchiver.RegionArchiver
                 }
             }
 
-            static RegionInfo LoadArchiveXmlVersion1(XmlTextReader reader, List<RegionInfo> regionInfos)
+            private static RegionInfo LoadArchiveXmlVersion1(XmlTextReader reader, List<RegionInfo> regionInfos)
             {
                 for (; ; )
                 {
@@ -427,7 +424,7 @@ namespace SilverSim.OpenSimArchiver.RegionArchiver
             }
             #endregion
 
-            static RegionInfo LoadArchiveXml(
+            private static RegionInfo LoadArchiveXml(
                 XmlTextReader reader,
                 List<RegionInfo> regionInfos)
             {
@@ -500,7 +497,7 @@ namespace SilverSim.OpenSimArchiver.RegionArchiver
             }
 
             public static RegionInfo LoadArchiveXml(
-                Stream s, 
+                Stream s,
                 List<RegionInfo> regionInfos)
             {
                 using (XmlTextReader reader = new XmlTextReader(s))

@@ -33,8 +33,10 @@ namespace SilverSim.BackendConnectors.Flotsam.Groups
     {
         bool IActiveGroupMembershipInterface.TryGetValue(UUI requestingAgent, UUI principal, out GroupActiveMembership gam)
         {
-            Map m = new Map();
-            m["AgentID"] = principal.ID;
+            var m = new Map
+            {
+                ["AgentID"] = principal.ID
+            };
             m = FlotsamXmlRpcGetCall(requestingAgent, "groups.getAgentActiveMembership", m) as Map;
             if (m == null)
             {
@@ -46,31 +48,33 @@ namespace SilverSim.BackendConnectors.Flotsam.Groups
             {
                 if (m["error"].ToString() == "No Active Group Specified")
                 {
-                    gam = new GroupActiveMembership();
-                    gam.Group = UGI.Unknown;
-                    gam.SelectedRoleID = UUID.Zero;
-                    gam.User = principal;
+                    gam = new GroupActiveMembership()
+                    {
+                        Group = UGI.Unknown,
+                        SelectedRoleID = UUID.Zero,
+                        User = principal
+                    };
                     return true;
                 }
                 gam = default(GroupActiveMembership);
                 return false;
             }
 
-            gam = new GroupActiveMembership();
-            gam.Group = UGI.Unknown;
-            gam.SelectedRoleID = UUID.Zero;
-            gam.User = principal;
-            gam.Group.ID = m["GroupID"].AsUUID;
-            gam.Group.GroupName = m["GroupName"].ToString();
-            gam.SelectedRoleID = m["SelectedRoleID"].AsUUID;
-            gam.User = m_AvatarNameService.ResolveName(gam.User);
+            gam = new GroupActiveMembership()
+            {
+                User = m_AvatarNameService.ResolveName(principal),
+                Group = new UGI { ID = m["GroupID"].AsUUID, GroupName = m["GroupName"].ToString() },
+                SelectedRoleID = m["SelectedRoleID"].AsUUID
+            };
             return true;
         }
 
         bool IActiveGroupMembershipInterface.ContainsKey(UUI requestingAgent, UUI principal)
         {
-            Map m = new Map();
-            m["AgentID"] = principal.ID;
+            var m = new Map
+            {
+                ["AgentID"] = principal.ID
+            };
             m = FlotsamXmlRpcGetCall(requestingAgent, "groups.getAgentActiveMembership", m) as Map;
             if (m == null)
             {
@@ -91,7 +95,7 @@ namespace SilverSim.BackendConnectors.Flotsam.Groups
 
         GroupActiveMembership IActiveGroupMembershipInterface.this[UUI requestingAgent, UUI principal]
         {
-            get 
+            get
             {
                 GroupActiveMembership gam;
                 if(!ActiveMembership.TryGetValue(requestingAgent, principal, out gam))

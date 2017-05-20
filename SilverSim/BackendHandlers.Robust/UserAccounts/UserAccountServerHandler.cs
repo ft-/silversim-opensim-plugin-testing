@@ -36,7 +36,7 @@ using System.Xml;
 namespace SilverSim.BackendHandlers.Robust.UserAccounts
 {
     #region Service Implementation
-    static class ExtensionMethods
+    internal static class ExtensionMethods
     {
         public static void WriteUserAccount(this XmlTextWriter writer, string tagname, UserAccount ua)
         {
@@ -54,7 +54,7 @@ namespace SilverSim.BackendHandlers.Robust.UserAccounts
                 writer.WriteNamedValue("UserTitle", ua.UserTitle);
                 writer.WriteNamedValue("LocalToGrid", ua.IsLocalToGrid);
 
-                StringBuilder str = new StringBuilder();
+                var str = new StringBuilder();
                 foreach(KeyValuePair<string, string> kvp in ua.ServiceURLs)
                 {
                     str.Append(kvp.Key);
@@ -73,8 +73,8 @@ namespace SilverSim.BackendHandlers.Robust.UserAccounts
     {
         private static readonly ILog m_Log = LogManager.GetLogger("ROBUST USERACCOUNT HANDLER");
         private BaseHttpServer m_HttpServer;
-        UserAccountServiceInterface m_UserAccountService;
-        readonly string m_UserAccountServiceName;
+        private UserAccountServiceInterface m_UserAccountService;
+        private readonly string m_UserAccountServiceName;
 
         public RobustUserAccountServerHandler(string userAccountServiceName)
         {
@@ -97,7 +97,7 @@ namespace SilverSim.BackendHandlers.Robust.UserAccounts
             }
         }
 
-        void UserAccountHandler(HttpRequest req)
+        private void UserAccountHandler(HttpRequest req)
         {
             if (req.ContainsHeader("X-SecondLife-Shard"))
             {
@@ -117,10 +117,10 @@ namespace SilverSim.BackendHandlers.Robust.UserAccounts
             }
         }
 
-        readonly byte[] SuccessResult = "<?xml version=\"1.0\"?><ServerResponse><result>Success</result></ServerResponse>".ToUTF8Bytes();
-        readonly byte[] FailureResult = "<?xml version=\"1.0\"?><ServerResponse><result>Failure</result></ServerResponse>".ToUTF8Bytes();
+        private readonly byte[] SuccessResult = "<?xml version=\"1.0\"?><ServerResponse><result>Success</result></ServerResponse>".ToUTF8Bytes();
+        private readonly byte[] FailureResult = "<?xml version=\"1.0\"?><ServerResponse><result>Failure</result></ServerResponse>".ToUTF8Bytes();
 
-        void PostUserAccountHandler(HttpRequest req)
+        private void PostUserAccountHandler(HttpRequest req)
         {
             Dictionary<string, object> data;
             try
@@ -163,7 +163,7 @@ namespace SilverSim.BackendHandlers.Robust.UserAccounts
             }
         }
 
-        void GetAccount(HttpRequest req, Dictionary<string, object> reqdata)
+        private void GetAccount(HttpRequest req, Dictionary<string, object> reqdata)
         {
             UUID scopeID = reqdata.GetUUID("ScopeID");
             UserAccount ua = null;
@@ -222,7 +222,7 @@ namespace SilverSim.BackendHandlers.Robust.UserAccounts
             }
         }
 
-        void GetAccounts(HttpRequest req, Dictionary<string, object> reqdata)
+        private void GetAccounts(HttpRequest req, Dictionary<string, object> reqdata)
         {
             UUID scopeID = reqdata.GetUUID("ScopeID");
             string query = reqdata.GetString("query");
@@ -269,15 +269,8 @@ namespace SilverSim.BackendHandlers.Robust.UserAccounts
     [PluginName("UserAccountHandler")]
     public sealed class RobustUserAccountServerHandlerFactory : IPluginFactory
     {
-        public RobustUserAccountServerHandlerFactory()
-        {
-
-        }
-
-        public IPlugin Initialize(ConfigurationLoader loader, IConfig ownSection)
-        {
-            return new RobustUserAccountServerHandler(ownSection.GetString("UserAccountService", "UserAccountService"));
-        }
+        public IPlugin Initialize(ConfigurationLoader loader, IConfig ownSection) =>
+            new RobustUserAccountServerHandler(ownSection.GetString("UserAccountService", "UserAccountService"));
     }
     #endregion
 }

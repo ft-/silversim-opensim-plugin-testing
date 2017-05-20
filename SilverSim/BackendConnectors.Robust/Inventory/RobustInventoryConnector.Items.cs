@@ -35,14 +35,16 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
     [SuppressMessage("Gendarme.Rules.Exceptions", "DoNotThrowInUnexpectedLocationRule")]
     public partial class RobustInventoryConnector : IInventoryItemServiceInterface
     {
-        bool m_isMultipleSupported = true;
+        private bool m_isMultipleSupported = true;
 
         #region Accessors
         bool IInventoryItemServiceInterface.TryGetValue(UUID key, out InventoryItem item)
         {
-            Dictionary<string, string> post = new Dictionary<string, string>();
-            post["ID"] = (string)key;
-            post["METHOD"] = "GETITEM";
+            var post = new Dictionary<string, string>
+            {
+                ["ID"] = (string)key,
+                ["METHOD"] = "GETITEM"
+            };
             Map map;
             using (Stream s = HttpClient.DoStreamPostRequest(m_InventoryURI, null, post, false, TimeoutMs))
             {
@@ -54,22 +56,24 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
                 return false;
             }
 
-            Map itemmap = map["item"] as Map;
-            if (null == itemmap)
+            var itemmap = map["item"] as Map;
+            if (itemmap == null)
             {
                 item = default(InventoryItem);
                 return false;
             }
 
-            item = RobustInventoryConnector.ItemFromMap(itemmap, m_GroupsService);
+            item = ItemFromMap(itemmap, m_GroupsService);
             return true;
         }
 
         bool IInventoryItemServiceInterface.ContainsKey(UUID key)
         {
-            Dictionary<string, string> post = new Dictionary<string, string>();
-            post["ID"] = (string)key;
-            post["METHOD"] = "GETITEM";
+            var post = new Dictionary<string, string>
+            {
+                ["ID"] = (string)key,
+                ["METHOD"] = "GETITEM"
+            };
             Map map;
             using (Stream s = HttpClient.DoStreamPostRequest(m_InventoryURI, null, post, false, TimeoutMs))
             {
@@ -79,8 +83,8 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
             {
                 return false;
             }
-            Map itemmap = map["item"] as Map;
-            if (null == itemmap)
+            var itemmap = map["item"] as Map;
+            if (itemmap == null)
             {
                 return false;
             }
@@ -101,13 +105,14 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
             }
         }
 
-
         bool IInventoryItemServiceInterface.TryGetValue(UUID principalID, UUID key, out InventoryItem item)
         {
-            Dictionary<string, string> post = new Dictionary<string, string>();
-            post["PRINCIPAL"] = (string)principalID;
-            post["ID"] = (string)key;
-            post["METHOD"] = "GETITEM";
+            var post = new Dictionary<string, string>
+            {
+                ["PRINCIPAL"] = (string)principalID,
+                ["ID"] = (string)key,
+                ["METHOD"] = "GETITEM"
+            };
             Map map;
             using (Stream s = HttpClient.DoStreamPostRequest(m_InventoryURI, null, post, false, TimeoutMs))
             {
@@ -120,23 +125,25 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
                 return false;
             }
 
-            Map itemmap = map["item"] as Map;
-            if (null == itemmap)
+            var itemmap = map["item"] as Map;
+            if (itemmap == null)
             {
                 item = default(InventoryItem);
                 return false;
             }
 
-            item = RobustInventoryConnector.ItemFromMap(itemmap, m_GroupsService);
+            item = ItemFromMap(itemmap, m_GroupsService);
             return true;
         }
 
         bool IInventoryItemServiceInterface.ContainsKey(UUID principalID, UUID key)
         {
-            Dictionary<string, string> post = new Dictionary<string, string>();
-            post["PRINCIPAL"] = (string)principalID;
-            post["ID"] = (string)key;
-            post["METHOD"] = "GETITEM";
+            var post = new Dictionary<string, string>
+            {
+                ["PRINCIPAL"] = (string)principalID,
+                ["ID"] = (string)key,
+                ["METHOD"] = "GETITEM"
+            };
             Map map;
             using (Stream s = HttpClient.DoStreamPostRequest(m_InventoryURI, null, post, false, TimeoutMs))
             {
@@ -148,25 +155,27 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
                 return false;
             }
 
-            Map itemmap = map["item"] as Map;
-            return (null != itemmap);
+            var itemmap = map["item"] as Map;
+            return itemmap != null;
         }
 
         InventoryItem IInventoryItemServiceInterface.this[UUID principalID, UUID key]
         {
             get
             {
-                Dictionary<string, string> post = new Dictionary<string, string>();
-                post["PRINCIPAL"] = (string)principalID;
-                post["ID"] = (string)key;
-                post["METHOD"] = "GETITEM";
+                var post = new Dictionary<string, string>
+                {
+                    ["PRINCIPAL"] = (string)principalID,
+                    ["ID"] = (string)key,
+                    ["METHOD"] = "GETITEM"
+                };
                 Map map;
                 using(Stream s = HttpClient.DoStreamPostRequest(m_InventoryURI, null, post, false, TimeoutMs))
                 {
                     map = OpenSimResponse.Deserialize(s);
                 }
-                Map itemmap = map["item"] as Map;
-                if (null == itemmap)
+                var itemmap = map["item"] as Map;
+                if (itemmap == null)
                 {
                     throw new InventoryInaccessibleException();
                 }
@@ -176,9 +185,9 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
         }
 
         [SuppressMessage("Gendarme.Rules.Exceptions", "DoNotSwallowErrorsCatchingNonSpecificExceptionsRule")]
-        List<InventoryItem> GetItemsBySingleRequests(UUID principalID, List<UUID> itemids)
+        private List<InventoryItem> GetItemsBySingleRequests(UUID principalID, List<UUID> itemids)
         {
-            List<InventoryItem> res = new List<InventoryItem>();
+            var res = new List<InventoryItem>();
             foreach(UUID itemid in itemids)
             {
                 try
@@ -209,11 +218,13 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
                     return GetItemsBySingleRequests(principalID, itemids);
                 }
 
-                Dictionary<string, string> post = new Dictionary<string, string>();
-                post["PRINCIPAL"] = (string)principalID;
-                post["ITEMS"] = string.Join(",", itemids);
-                post["COUNT"] = itemids.Count.ToString(); /* <- some redundancy here for whatever unknown reason, it could have been derived from ITEMS anyways */
-                post["METHOD"] = "GETMULTIPLEITEMS";
+                var post = new Dictionary<string, string>
+                {
+                    ["PRINCIPAL"] = (string)principalID,
+                    ["ITEMS"] = string.Join(",", itemids),
+                    ["COUNT"] = itemids.Count.ToString(), /* <- some redundancy here for whatever unknown reason, it could have been derived from ITEMS anyways */
+                    ["METHOD"] = "GETMULTIPLEITEMS"
+                };
                 Map map;
 
                 try
@@ -241,17 +252,17 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
                     }
                 }
 
-                List<InventoryItem> items = new List<InventoryItem>();
+                var items = new List<InventoryItem>();
                 bool anyResponse = false;
                 foreach(KeyValuePair<string, IValue> kvp in map)
                 {
                     if(kvp.Key.StartsWith("item_"))
                     {
                         anyResponse = true;
-                        Map itemmap = kvp.Value as Map;
-                        if(null != itemmap)
+                        var itemmap = kvp.Value as Map;
+                        if(itemmap != null)
                         {
-                            items.Add(RobustInventoryConnector.ItemFromMap(itemmap, m_GroupsService));
+                            items.Add(ItemFromMap(itemmap, m_GroupsService));
                         }
                     }
                 }
@@ -265,39 +276,36 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
                         m_isMultipleSupported = false;
                     }
                 }
-                
+
                 return items;
             }
         }
         #endregion
 
-        Dictionary<string, string> SerializeItem(InventoryItem item)
+        private Dictionary<string, string> SerializeItem(InventoryItem item) => new Dictionary<string, string>
         {
-            Dictionary<string, string> post = new Dictionary<string,string>();
-            post["ID"] = (string)item.ID;
-            post["AssetID"] = (string)item.AssetID;
-            post["CreatorId"] = (string)item.Creator.ID;
-            post["GroupID"] = (string)item.Group.ID;
-            post["GroupOwned"] = item.IsGroupOwned.ToString();
-            post["Folder"] = (string)item.ParentFolderID;
-            post["Owner"] = (string)item.Owner.ID;
-            post["Name"] = item.Name;
-            post["InvType"] = ((int)item.InventoryType).ToString();
-            post["AssetType"] = ((uint)item.AssetType).ToString();
-            post["BasePermissions"] = ((uint)item.Permissions.Base).ToString();
-            post["CreationDate"] = ((uint)item.CreationDate.DateTimeToUnixTime()).ToString();
-            post["CreatorData"] = item.Creator.CreatorData;
-            post["CurrentPermissions"] = ((uint)item.Permissions.Current).ToString();
-            post["GroupPermissions"] = ((uint)item.Permissions.Group).ToString();
-            post["Description"] = item.Description;
-            post["EveryOnePermissions"] = ((uint)item.Permissions.EveryOne).ToString();
-            post["Flags"] = item.Flags.ToString();
-            post["NextPermissions"] = ((uint)item.Permissions.NextOwner).ToString();
-            post["SalePrice"] = ((uint)item.SaleInfo.Price).ToString();
-            post["SaleType"] = ((uint)item.SaleInfo.Type).ToString();
-
-            return post;
-        }
+            ["ID"] = (string)item.ID,
+            ["AssetID"] = (string)item.AssetID,
+            ["CreatorId"] = (string)item.Creator.ID,
+            ["GroupID"] = (string)item.Group.ID,
+            ["GroupOwned"] = item.IsGroupOwned.ToString(),
+            ["Folder"] = (string)item.ParentFolderID,
+            ["Owner"] = (string)item.Owner.ID,
+            ["Name"] = item.Name,
+            ["InvType"] = ((int)item.InventoryType).ToString(),
+            ["AssetType"] = ((uint)item.AssetType).ToString(),
+            ["BasePermissions"] = ((uint)item.Permissions.Base).ToString(),
+            ["CreationDate"] = ((uint)item.CreationDate.DateTimeToUnixTime()).ToString(),
+            ["CreatorData"] = item.Creator.CreatorData,
+            ["CurrentPermissions"] = ((uint)item.Permissions.Current).ToString(),
+            ["GroupPermissions"] = ((uint)item.Permissions.Group).ToString(),
+            ["Description"] = item.Description,
+            ["EveryOnePermissions"] = ((uint)item.Permissions.EveryOne).ToString(),
+            ["Flags"] = item.Flags.ToString(),
+            ["NextPermissions"] = ((uint)item.Permissions.NextOwner).ToString(),
+            ["SalePrice"] = ((uint)item.SaleInfo.Price).ToString(),
+            ["SaleType"] = ((uint)item.SaleInfo.Type).ToString()
+        };
 
         void IInventoryItemServiceInterface.Add(InventoryItem item)
         {
@@ -331,10 +339,12 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
 
         void IInventoryItemServiceInterface.Delete(UUID principalID, UUID id)
         {
-            Dictionary<string, string> post = new Dictionary<string, string>();
-            post["ITEMS[]"] = (string)id;
-            post["PRINCIPAL"] = (string)principalID;
-            post["METHOD"] = "DELETEITEMS";
+            var post = new Dictionary<string, string>
+            {
+                ["ITEMS[]"] = (string)id,
+                ["PRINCIPAL"] = (string)principalID,
+                ["METHOD"] = "DELETEITEMS"
+            };
             Map map;
             using(Stream s = HttpClient.DoStreamPostRequest(m_InventoryURI, null, post, false, TimeoutMs))
             {
@@ -348,11 +358,13 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
 
         void IInventoryItemServiceInterface.Move(UUID principalID, UUID id, UUID newFolder)
         {
-            Dictionary<string, string> post = new Dictionary<string, string>();
-            post["IDLIST[]"] = (string)id;
-            post["DESTLIST[]"] = (string)newFolder;
-            post["PRINCIPAL"] = (string)principalID;
-            post["METHOD"] = "MOVEITEMS";
+            var post = new Dictionary<string, string>
+            {
+                ["IDLIST[]"] = (string)id,
+                ["DESTLIST[]"] = (string)newFolder,
+                ["PRINCIPAL"] = (string)principalID,
+                ["METHOD"] = "MOVEITEMS"
+            };
             Map map;
             using(Stream s = HttpClient.DoStreamPostRequest(m_InventoryURI, null, post, false, TimeoutMs))
             {
@@ -367,7 +379,7 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
         [SuppressMessage("Gendarme.Rules.Exceptions", "DoNotSwallowErrorsCatchingNonSpecificExceptionsRule")]
         List<UUID> IInventoryItemServiceInterface.Delete(UUID principalID, List<UUID> itemids)
         {
-            List<UUID> deleted = new List<UUID>();
+            var deleted = new List<UUID>();
             foreach (UUID id in itemids)
             {
                 try

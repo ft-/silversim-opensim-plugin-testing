@@ -40,17 +40,25 @@ namespace SilverSim.BackendConnectors.Robust.AuthInfo
     {
         public RobustAuthInfoConnectorFailureException()
         {
-
         }
-        public RobustAuthInfoConnectorFailureException(string msg) : base(msg) { }
-        public RobustAuthInfoConnectorFailureException(string msg, Exception innerException) : base(msg, innerException) { }
-        protected RobustAuthInfoConnectorFailureException(SerializationInfo info, StreamingContext context) : base(info, context) { }
+
+        public RobustAuthInfoConnectorFailureException(string msg) : base(msg)
+        {
+        }
+
+        public RobustAuthInfoConnectorFailureException(string msg, Exception innerException) : base(msg, innerException)
+        {
+        }
+
+        protected RobustAuthInfoConnectorFailureException(SerializationInfo info, StreamingContext context) : base(info, context)
+        {
+        }
     }
 
     [Description("Robust AuthInfo Connector")]
     public class RobustAuthInfoConnector : AuthInfoServiceInterface, IPlugin
     {
-        readonly string m_Uri;
+        private readonly string m_Uri;
         public int TimeoutMs { get; set; }
 
         public RobustAuthInfoConnector(string uri)
@@ -66,10 +74,7 @@ namespace SilverSim.BackendConnectors.Robust.AuthInfo
 
         public override UserAuthInfo this[UUID accountid]
         {
-            get
-            {
-                throw new NotSupportedException();
-            }
+            get { throw new NotSupportedException(); }
         }
 
         public override UUID AddToken(UUID principalId, UUID sessionid, int lifetime_in_minutes)
@@ -79,10 +84,12 @@ namespace SilverSim.BackendConnectors.Robust.AuthInfo
 
         public override void ReleaseToken(UUID accountId, UUID secureSessionId)
         {
-            Dictionary<string, string> postvals = new Dictionary<string, string>();
-            postvals.Add("METHOD", "release");
-            postvals.Add("PRINCIPALID", accountId.ToString());
-            postvals.Add("TOKEN", secureSessionId.ToString());
+            var postvals = new Dictionary<string, string>
+            {
+                ["METHOD"] = "release",
+                ["PRINCIPALID"] = accountId.ToString(),
+                ["TOKEN"] = secureSessionId.ToString()
+            };
             Map map;
             using (Stream s = HttpClient.DoStreamPostRequest(m_Uri, null, postvals, false, TimeoutMs))
             {
@@ -111,11 +118,13 @@ namespace SilverSim.BackendConnectors.Robust.AuthInfo
 
         public override void VerifyToken(UUID principalId, UUID token, int lifetime_extension_in_minutes)
         {
-            Dictionary<string, string> postvals = new Dictionary<string, string>();
-            postvals.Add("METHOD", "verify");
-            postvals.Add("PRINCIPALID", principalId.ToString());
-            postvals.Add("TOKEN", token.ToString());
-            postvals.Add("LIFETIME", lifetime_extension_in_minutes.ToString());
+            var postvals = new Dictionary<string, string>
+            {
+                ["METHOD"] = "verify",
+                ["PRINCIPALID"] = principalId.ToString(),
+                ["TOKEN"] = token.ToString(),
+                ["LIFETIME"] = lifetime_extension_in_minutes.ToString()
+            };
             Map map;
             using (Stream s = HttpClient.DoStreamPostRequest(m_Uri, null, postvals, false, TimeoutMs))
             {
@@ -129,11 +138,13 @@ namespace SilverSim.BackendConnectors.Robust.AuthInfo
 
         public override UUID Authenticate(UUID sessionId, UUID principalId, string password, int lifetime_in_minutes)
         {
-            Dictionary<string, string> postvals = new Dictionary<string, string>();
-            postvals.Add("METHOD", "authenticate");
-            postvals.Add("PRINCIPALID", principalId.ToString());
-            postvals.Add("PASSWORD", password);
-            postvals.Add("LIFETIME", lifetime_in_minutes.ToString());
+            var postvals = new Dictionary<string, string>
+            {
+                ["METHOD"] = "authenticate",
+                ["PRINCIPALID"] = principalId.ToString(),
+                ["PASSWORD"] = password,
+                ["LIFETIME"] = lifetime_in_minutes.ToString()
+            };
             Map map;
             using (Stream s = HttpClient.DoStreamPostRequest(m_Uri, null, postvals, false, TimeoutMs))
             {
@@ -152,10 +163,6 @@ namespace SilverSim.BackendConnectors.Robust.AuthInfo
     public class RobustAuthInfoConnectorFactory : IPluginFactory
     {
         private static readonly ILog m_Log = LogManager.GetLogger("ROBUST AUTHINFO CONNECTOR");
-        public RobustAuthInfoConnectorFactory()
-        {
-
-        }
 
         public IPlugin Initialize(ConfigurationLoader loader, IConfig ownSection)
         {

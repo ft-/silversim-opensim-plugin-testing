@@ -40,11 +40,11 @@ namespace SilverSim.BackendHandlers.Robust.Profile
     [Description("Robust CoreProfile/OpenSimProfile Protocol Server")]
     public class ProfileServerHandler : IPlugin, IServiceURLsGetInterface
     {
-        ProfileServiceInterface m_ProfileService;
-        UserAccountServiceInterface m_UserAccountService;
-        readonly string m_ProfileServiceName;
-        readonly string m_UserAccountServiceName;
-        BaseHttpServer m_HttpServer;
+        private ProfileServiceInterface m_ProfileService;
+        private UserAccountServiceInterface m_UserAccountService;
+        private readonly string m_ProfileServiceName;
+        private readonly string m_UserAccountServiceName;
+        private BaseHttpServer m_HttpServer;
 
         public ProfileServerHandler(IConfig ownSection)
         {
@@ -94,67 +94,62 @@ namespace SilverSim.BackendHandlers.Robust.Profile
         }
 
         #region CoreProfile V2
-        Map PropertiesToMap(ProfileProperties props)
+        private Map PropertiesToMap(ProfileProperties props) => new Map
         {
-            Map resdata = new Map();
-            resdata.Add("UserId", props.User.ID.ToString());
-            resdata.Add("WebUrl", props.WebUrl);
-            resdata.Add("ImageId", props.ImageID);
-            resdata.Add("AboutText", props.AboutText);
-            resdata.Add("FirstLifeImageId", props.FirstLifeImageID);
-            resdata.Add("FirstLifeText", props.FirstLifeText);
-            return resdata;
-        }
+            { "UserId", props.User.ID.ToString() },
+            { "WebUrl", props.WebUrl },
+            { "ImageId", props.ImageID },
+            { "AboutText", props.AboutText },
+            { "FirstLifeImageId", props.FirstLifeImageID },
+            { "FirstLifeText", props.FirstLifeText }
+        };
 
-        Map ClassifiedToMap(ProfileClassified classified)
+        private Map ClassifiedToMap(ProfileClassified classified) => new Map
         {
-            Map resdata = new Map();
-            resdata.Add("CreatorId", classified.Creator.ToString());
-            resdata.Add("ParcelId", classified.ParcelID);
-            resdata.Add("SnapshotId", classified.SnapshotID);
-            resdata.Add("CreationDate", classified.CreationDate);
-            resdata.Add("ParentEstate", classified.ParentEstate);
-            resdata.Add("Flags", classified.Flags);
-            resdata.Add("Category", classified.Category);
-            resdata.Add("Price", classified.Price);
-            resdata.Add("Name", classified.Name);
-            resdata.Add("Description", classified.Description);
-            resdata.Add("SimName", classified.SimName);
-            resdata.Add("GlobalPos", classified.GlobalPos.ToString());
-            resdata.Add("ParcelName", classified.ParcelName);
-            return resdata;
-        }
-        Map PickToMap(ProfilePick pick)
-        {
-            Map resdata = new Map();
-            resdata.Add("PickId", pick.PickID);
-            resdata.Add("CreatorId", pick.Creator.ToString());
-            resdata.Add("TopPick", pick.TopPick);
-            resdata.Add("Name", pick.Name);
-            resdata.Add("OriginalName", pick.OriginalName);
-            resdata.Add("Desc", pick.Description);
-            resdata.Add("ParcelId", pick.ParcelID);
-            resdata.Add("SnapshotId", pick.SnapshotID);
-            resdata.Add("User", pick.Creator.ToString());
-            resdata.Add("SimName", pick.SimName);
-            resdata.Add("GlobalPos", pick.GlobalPosition.ToString());
-            resdata.Add("SortOrder", pick.SortOrder);
-            resdata.Add("Enabled", pick.Enabled);
-            return resdata;
-        }
+            { "CreatorId", classified.Creator.ToString() },
+            { "ParcelId", classified.ParcelID },
+            { "SnapshotId", classified.SnapshotID },
+            { "CreationDate", classified.CreationDate },
+            { "ParentEstate", classified.ParentEstate },
+            { "Flags", classified.Flags },
+            { "Category", classified.Category },
+            { "Price", classified.Price },
+            { "Name", classified.Name },
+            { "Description", classified.Description },
+            { "SimName", classified.SimName },
+            { "GlobalPos", classified.GlobalPos.ToString() },
+            { "ParcelName", classified.ParcelName }
+        };
 
-        IValue Json_ImageAssetsRequest(string method, IValue req)
+        private Map PickToMap(ProfilePick pick) => new Map
+        {
+            { "PickId", pick.PickID },
+            { "CreatorId", pick.Creator.ToString() },
+            { "TopPick", pick.TopPick },
+            { "Name", pick.Name },
+            { "OriginalName", pick.OriginalName },
+            { "Desc", pick.Description },
+            { "ParcelId", pick.ParcelID },
+            { "SnapshotId", pick.SnapshotID },
+            { "User", pick.Creator.ToString() },
+            { "SimName", pick.SimName },
+            { "GlobalPos", pick.GlobalPosition.ToString() },
+            { "SortOrder", pick.SortOrder },
+            { "Enabled", pick.Enabled }
+        };
+
+        private IValue Json_ImageAssetsRequest(string method, IValue req)
         {
             Map reqdata = req as Map;
             UUID userId;
-            if (null == reqdata ||
+            if (reqdata == null ||
                 !reqdata.TryGetValue("avatarId", out userId))
             {
                 throw new HttpJson20RpcHandler.JSON20RpcException(-32602, "Missing parameters");
             }
 
             List<UUID> assetids = m_ProfileService.GetUserImageAssets(new UUI(userId));
-            AnArray resdata = new AnArray();
+            var resdata = new AnArray();
             foreach(UUID id in assetids)
             {
                 resdata.Add(id);
@@ -162,13 +157,13 @@ namespace SilverSim.BackendHandlers.Robust.Profile
             return resdata;
         }
 
-        IValue Json_AvatarNotesUpdate(string method, IValue req)
+        private IValue Json_AvatarNotesUpdate(string method, IValue req)
         {
-            Map reqdata = req as Map;
+            var reqdata = req as Map;
             UUID userId;
             UUID targetId;
             AString notes;
-            if (null == reqdata || 
+            if (reqdata == null ||
                 !reqdata.TryGetValue("UserId", out userId) ||
                 !reqdata.TryGetValue("TargetId", out targetId) ||
                 !reqdata.TryGetValue("Notes",out notes))
@@ -177,18 +172,19 @@ namespace SilverSim.BackendHandlers.Robust.Profile
             }
 
             m_ProfileService.Notes[new UUI(userId), new UUI(targetId)] = notes.ToString();
-            Map resdata = new Map();
-            resdata.Add("UserID", userId);
-            resdata.Add("TargetID", targetId);
-            resdata.Add("Notes", notes.ToString());
-            return resdata;
+            return new Map
+            {
+                { "UserID", userId },
+                { "TargetID", targetId },
+                { "Notes", notes.ToString() }
+            };
         }
 
-        IValue Json_AvatarPropertiesRequest(string method, IValue req)
+        private IValue Json_AvatarPropertiesRequest(string method, IValue req)
         {
-            Map reqdata = req as Map;
+            var reqdata = req as Map;
             UUID userId;
-            if (null == reqdata || !reqdata.TryGetValue("UserId", out userId))
+            if (reqdata == null || !reqdata.TryGetValue("UserId", out userId))
             {
                 throw new HttpJson20RpcHandler.JSON20RpcException(-32602, "Missing UserId");
             }
@@ -196,11 +192,11 @@ namespace SilverSim.BackendHandlers.Robust.Profile
             return PropertiesToMap(m_ProfileService.Properties[new UUI(userId)]);
         }
 
-        IValue Json_AvatarInterestsUpdate(string method, IValue req)
+        private IValue Json_AvatarInterestsUpdate(string method, IValue req)
         {
-            Map reqdata = req as Map;
+            var reqdata = req as Map;
             UUID userId;
-            if (null == reqdata || !reqdata.TryGetValue("UserId", out userId))
+            if (reqdata == null || !reqdata.TryGetValue("UserId", out userId))
             {
                 throw new HttpJson20RpcHandler.JSON20RpcException(-32602, "Missing UserId");
             }
@@ -230,21 +226,22 @@ namespace SilverSim.BackendHandlers.Robust.Profile
                 props.Language = stringval.ToString();
             }
             m_ProfileService.Properties[new UUI(userId), ProfileServiceInterface.PropertiesUpdateFlags.Interests] = props;
-            Map resdata = new Map();
-            resdata.Add("UserId", userId);
-            resdata.Add("WantToMask", (int)props.WantToMask);
-            resdata.Add("WantToText", props.WantToText);
-            resdata.Add("SkillsMask", (int)props.SkillsMask);
-            resdata.Add("SkillsText", props.SkillsText);
-            resdata.Add("Language", props.Language);
-            return resdata;
+            return new Map
+            {
+                { "UserId", userId },
+                { "WantToMask", (int)props.WantToMask },
+                { "WantToText", props.WantToText },
+                { "SkillsMask", (int)props.SkillsMask },
+                { "SkillsText", props.SkillsText },
+                { "Language", props.Language }
+            };
         }
 
-        IValue Json_AvatarPropertiesUpdate(string method, IValue req)
+        private IValue Json_AvatarPropertiesUpdate(string method, IValue req)
         {
-            Map reqdata = req as Map;
+            var reqdata = req as Map;
             UUID userId;
-            if (null == reqdata || !reqdata.TryGetValue("UserId", out userId))
+            if (reqdata == null || !reqdata.TryGetValue("UserId", out userId))
             {
                 throw new HttpJson20RpcHandler.JSON20RpcException(-32602, "Missing UserId");
             }
@@ -276,33 +273,35 @@ namespace SilverSim.BackendHandlers.Robust.Profile
             return PropertiesToMap(props);
         }
 
-        IValue Json_AvatarClassifiedsRequest(string method, IValue req)
+        private IValue Json_AvatarClassifiedsRequest(string method, IValue req)
         {
-            Map reqdata = req as Map;
+            var reqdata = req as Map;
             UUID creatorId;
-            if (null == reqdata || !reqdata.TryGetValue("creatorId", out creatorId))
+            if (reqdata == null || !reqdata.TryGetValue("creatorId", out creatorId))
             {
                 throw new HttpJson20RpcHandler.JSON20RpcException(-32602, "Missing creatorId");
             }
 
             Dictionary<UUID, string> classifieds = m_ProfileService.Classifieds.GetClassifieds(new UUI(creatorId));
-            AnArray resdata = new AnArray();
+            var resdata = new AnArray();
             foreach(KeyValuePair<UUID, string> kvp in classifieds)
             {
-                Map r = new Map();
-                r.Add("classifieduuid", kvp.Key);
-                r.Add("name", kvp.Value);
+                var r = new Map
+                {
+                    { "classifieduuid", kvp.Key },
+                    { "name", kvp.Value }
+                };
                 resdata.Add(r);
             }
             return resdata;
         }
 
-        IValue Json_AvatarNotesRequest(string method, IValue req)
+        private IValue Json_AvatarNotesRequest(string method, IValue req)
         {
-            Map reqdata = req as Map;
+            var reqdata = req as Map;
             UUID userId;
             UUID targetId;
-            if (null == reqdata || !reqdata.TryGetValue("UserId", out userId) ||
+            if (reqdata == null || !reqdata.TryGetValue("UserId", out userId) ||
                 !reqdata.TryGetValue("TargetId", out targetId))
             {
                 throw new HttpJson20RpcHandler.JSON20RpcException(-32602, "Missing parameters");
@@ -313,37 +312,40 @@ namespace SilverSim.BackendHandlers.Robust.Profile
             {
                 notes = "";
             }
-            Map resdata = new Map();
-            resdata.Add("notes", notes);
-            return resdata;
+            return new Map
+            {
+                { "notes", notes }
+            };
         }
 
-        IValue Json_AvatarPicksRequest(string method, IValue req)
+        private IValue Json_AvatarPicksRequest(string method, IValue req)
         {
-            Map reqdata = req as Map;
+            var reqdata = req as Map;
             UUID creatorId;
-            if (null == reqdata || !reqdata.TryGetValue("creatorId", out creatorId))
+            if (reqdata == null || !reqdata.TryGetValue("creatorId", out creatorId))
             {
                 throw new HttpJson20RpcHandler.JSON20RpcException(-32602, "Missing creatorId");
             }
 
             Dictionary<UUID, string> picks = m_ProfileService.Picks.GetPicks(new UUI(creatorId));
-            AnArray resdata = new AnArray();
+            var resdata = new AnArray();
             foreach(KeyValuePair<UUID, string> kvp in picks)
             {
-                Map r = new Map();
-                r.Add("pickuuid", kvp.Key);
-                r.Add("name", kvp.Value);
+                var r = new Map
+                {
+                    { "pickuuid", kvp.Key },
+                    { "name", kvp.Value }
+                };
                 resdata.Add(r);
             }
             return resdata;
         }
 
-        IValue Json_ClassifiedDelete(string method, IValue req)
+        private IValue Json_ClassifiedDelete(string method, IValue req)
         {
-            Map reqdata = req as Map;
+            var reqdata = req as Map;
             UUID classifiedID;
-            if (null == reqdata || !reqdata.TryGetValue("ClassifiedId", out classifiedID))
+            if (reqdata == null || !reqdata.TryGetValue("ClassifiedId", out classifiedID))
             {
                 throw new HttpJson20RpcHandler.JSON20RpcException(-32602, "Missing ClassifiedId");
             }
@@ -359,12 +361,12 @@ namespace SilverSim.BackendHandlers.Robust.Profile
             return new AString("success");
         }
 
-        IValue Json_ClassifiedUpdate(string method, IValue req)
+        private IValue Json_ClassifiedUpdate(string method, IValue req)
         {
-            Map reqdata = req as Map;
+            var reqdata = req as Map;
             UUID classifiedID;
             UUID creatorID;
-            if (null == reqdata || !reqdata.TryGetValue("ClassifiedId", out classifiedID) ||
+            if (reqdata == null || !reqdata.TryGetValue("ClassifiedId", out classifiedID) ||
                 !reqdata.TryGetValue("CreatorId", out creatorID))
             {
                 throw new HttpJson20RpcHandler.JSON20RpcException(-32602, "Missing ClassifiedId and/or CreatorId");
@@ -373,9 +375,11 @@ namespace SilverSim.BackendHandlers.Robust.Profile
             ProfileClassified classified;
             if(!m_ProfileService.Classifieds.TryGetValue(new UUI(creatorID), classifiedID, out classified))
             {
-                classified = new ProfileClassified();
-                classified.ClassifiedID = classifiedID;
-                classified.Creator.ID = creatorID;
+                classified = new ProfileClassified()
+                {
+                    ClassifiedID = classifiedID,
+                    Creator = new UUI(creatorID)
+                };
             }
 
             Date date;
@@ -446,11 +450,11 @@ namespace SilverSim.BackendHandlers.Robust.Profile
             return ClassifiedToMap(classified);
         }
 
-        IValue Json_ClassifiedsInfoQuery(string method, IValue req)
+        private IValue Json_ClassifiedsInfoQuery(string method, IValue req)
         {
-            Map reqdata = req as Map;
+            var reqdata = req as Map;
             UUID classifiedId;
-            if (null == reqdata || !reqdata.TryGetValue("ClassifiedId", out classifiedId))
+            if (reqdata == null || !reqdata.TryGetValue("ClassifiedId", out classifiedId))
             {
                 throw new HttpJson20RpcHandler.JSON20RpcException(-32602, "Missing ClassifiedId");
             }
@@ -467,12 +471,12 @@ namespace SilverSim.BackendHandlers.Robust.Profile
             return ClassifiedToMap(classified);
         }
 
-        IValue Json_PickInfoRequest(string method, IValue req)
+        private IValue Json_PickInfoRequest(string method, IValue req)
         {
-            Map reqdata = req as Map;
+            var reqdata = req as Map;
             UUID pickID;
             UUID creatorID;
-            if (null == reqdata || !reqdata.TryGetValue("PickId", out pickID) ||
+            if (reqdata == null || !reqdata.TryGetValue("PickId", out pickID) ||
                 !reqdata.TryGetValue("CreatorId", out creatorID))
             {
                 throw new HttpJson20RpcHandler.JSON20RpcException(-32602, "Missing PickId and/or CreatorId");
@@ -490,11 +494,11 @@ namespace SilverSim.BackendHandlers.Robust.Profile
             return PickToMap(pick);
         }
 
-        IValue Json_PicksDelete(string method, IValue req)
+        private IValue Json_PicksDelete(string method, IValue req)
         {
-            Map reqdata = req as Map;
+            var reqdata = req as Map;
             UUID pickID;
-            if (null == reqdata || !reqdata.TryGetValue("pickId", out pickID))
+            if (reqdata == null || !reqdata.TryGetValue("pickId", out pickID))
             {
                 throw new HttpJson20RpcHandler.JSON20RpcException(-32602, "Missing pickId");
             }
@@ -510,12 +514,12 @@ namespace SilverSim.BackendHandlers.Robust.Profile
             }
         }
 
-        IValue Json_PicksUpdate(string method, IValue req)
+        private IValue Json_PicksUpdate(string method, IValue req)
         {
-            Map reqdata = req as Map;
+            var reqdata = req as Map;
             UUID pickID;
             UUID creatorID;
-            if (null == reqdata || !reqdata.TryGetValue("PickId", out pickID) ||
+            if (reqdata == null || !reqdata.TryGetValue("PickId", out pickID) ||
                 !reqdata.TryGetValue("CreatorId", out creatorID))
             {
                 throw new HttpJson20RpcHandler.JSON20RpcException(-32602, "Missing PickId");
@@ -523,9 +527,11 @@ namespace SilverSim.BackendHandlers.Robust.Profile
             ProfilePick pick;
             if(!m_ProfileService.Picks.TryGetValue(new UUI(creatorID), pickID, out pick))
             {
-                pick = new ProfilePick();
-                pick.PickID = pickID;
-                pick.Creator.ID = creatorID;
+                pick = new ProfilePick()
+                {
+                    PickID = pickID,
+                    Creator = new UUI(creatorID)
+                };
             }
 
             ABoolean boolval;
@@ -580,10 +586,10 @@ namespace SilverSim.BackendHandlers.Robust.Profile
             return PickToMap(pick);
         }
 
-        IValue Json_UserPreferencesRequest(string method, IValue req)
+        private IValue Json_UserPreferencesRequest(string method, IValue req)
         {
-            Map reqdata = req as Map;
-            if (null == reqdata || !reqdata.ContainsKey("UserId"))
+            var reqdata = req as Map;
+            if (reqdata == null || !reqdata.ContainsKey("UserId"))
             {
                 throw new HttpJson20RpcHandler.JSON20RpcException(-32602, "Missing UserId");
             }
@@ -597,23 +603,26 @@ namespace SilverSim.BackendHandlers.Robust.Profile
             ProfilePreferences prefs;
             if(!m_ProfileService.Preferences.TryGetValue(new UUI(id), out prefs))
             {
-                prefs = new ProfilePreferences();
-                prefs.User.ID = id;
-                prefs.Visible = true;
-                prefs.IMviaEmail = false;
+                prefs = new ProfilePreferences()
+                {
+                    User = new UUI(id),
+                    Visible = true,
+                    IMviaEmail = false
+                };
             }
 
-            Map resdata = new Map();
-            resdata.Add("IMViaEmail", prefs.IMviaEmail);
-            resdata.Add("Visible", prefs.Visible);
-            resdata.Add("EMail", string.Empty);
-            return resdata;
+            return new Map
+            {
+                { "IMViaEmail", prefs.IMviaEmail },
+                { "Visible", prefs.Visible },
+                { "EMail", string.Empty }
+            };
         }
 
-        IValue Json_UserPreferencesUpdate(string method, IValue req)
+        private IValue Json_UserPreferencesUpdate(string method, IValue req)
         {
-            Map reqdata = req as Map;
-            if (null == reqdata || !reqdata.ContainsKey("UserId"))
+            var reqdata = req as Map;
+            if (reqdata == null || !reqdata.ContainsKey("UserId"))
             {
                 throw new HttpJson20RpcHandler.JSON20RpcException(-32602, "Missing UserId");
             }
@@ -627,10 +636,12 @@ namespace SilverSim.BackendHandlers.Robust.Profile
             ProfilePreferences prefs;
             if (!m_ProfileService.Preferences.TryGetValue(new UUI(id), out prefs))
             {
-                prefs = new ProfilePreferences();
-                prefs.User.ID = id;
-                prefs.Visible = true;
-                prefs.IMviaEmail = false;
+                prefs = new ProfilePreferences()
+                {
+                    User = new UUI(id),
+                    Visible = true,
+                    IMviaEmail = false
+                };
             }
 
             bool b;
@@ -645,17 +656,18 @@ namespace SilverSim.BackendHandlers.Robust.Profile
 
             m_ProfileService.Preferences[prefs.User] = prefs;
 
-            Map resdata = new Map();
-            resdata.Add("IMViaEmail", prefs.IMviaEmail);
-            resdata.Add("Visible", prefs.Visible);
-            resdata.Add("EMail", string.Empty);
-            return resdata;
+            return new Map
+            {
+                { "IMViaEmail", prefs.IMviaEmail },
+                { "Visible", prefs.Visible },
+                { "EMail", string.Empty }
+            };
         }
 
         #endregion
 
         #region OpenSimProfile
-        bool ToBoolean(IValue v)
+        private bool ToBoolean(IValue v)
         {
             string s = v.ToString().ToLower();
             if(s == "true")
@@ -670,7 +682,7 @@ namespace SilverSim.BackendHandlers.Robust.Profile
             return int.TryParse(s, out i) && i != 0;
         }
 
-        XmlRpc.XmlRpcResponse XmlRpc_UserPreferencesRequest(XmlRpc.XmlRpcRequest req)
+        private XmlRpc.XmlRpcResponse XmlRpc_UserPreferencesRequest(XmlRpc.XmlRpcRequest req)
         {
             Map structParam;
             UUID avatarid;
@@ -688,15 +700,17 @@ namespace SilverSim.BackendHandlers.Robust.Profile
                 prefs.Visible = true;
             }
 
-            Map resdata = new Map();
-            resdata.Add("imviaemail", prefs.IMviaEmail);
-            resdata.Add("visible", prefs.Visible);
-            resdata.Add("email", string.Empty);
-            resdata.Add("success", true);
+            var resdata = new Map
+            {
+                { "imviaemail", prefs.IMviaEmail },
+                { "visible", prefs.Visible },
+                { "email", string.Empty },
+                { "success", true }
+            };
             return new XmlRpc.XmlRpcResponse { ReturnValue = resdata };
         }
 
-        XmlRpc.XmlRpcResponse XmlRpc_UserPreferencesUpdate(XmlRpc.XmlRpcRequest req)
+        private XmlRpc.XmlRpcResponse XmlRpc_UserPreferencesUpdate(XmlRpc.XmlRpcRequest req)
         {
             Map structParam;
             UUID avatarid;
@@ -713,7 +727,7 @@ namespace SilverSim.BackendHandlers.Robust.Profile
                 prefs.User.ID = avatarid;
             }
 
-            Map resdata = new Map();
+            var resdata = new Map();
             try
             {
                 prefs.IMviaEmail = ToBoolean(structParam["imViaEmail"]);
@@ -729,7 +743,7 @@ namespace SilverSim.BackendHandlers.Robust.Profile
             return new XmlRpc.XmlRpcResponse { ReturnValue = resdata };
         }
 
-        XmlRpc.XmlRpcResponse XmlRpc_AvatarInterestsUpdate(XmlRpc.XmlRpcRequest req)
+        private XmlRpc.XmlRpcResponse XmlRpc_AvatarInterestsUpdate(XmlRpc.XmlRpcRequest req)
         {
             Map structParam;
             UUID avatarid;
@@ -739,7 +753,7 @@ namespace SilverSim.BackendHandlers.Robust.Profile
                 throw new XmlRpc.XmlRpcFaultException(-32602, "Missing parameter");
             }
 
-            Map resdata = new Map();
+            var resdata = new Map();
             ProfileProperties props = m_ProfileService.Properties[new UUI(avatarid)];
             try
             {
@@ -758,7 +772,8 @@ namespace SilverSim.BackendHandlers.Robust.Profile
 
             return new XmlRpc.XmlRpcResponse { ReturnValue = resdata };
         }
-        XmlRpc.XmlRpcResponse XmlRpc_AvatarNotesUpdate(XmlRpc.XmlRpcRequest req)
+
+        private XmlRpc.XmlRpcResponse XmlRpc_AvatarNotesUpdate(XmlRpc.XmlRpcRequest req)
         {
             Map structParam;
             UUID avatarid;
@@ -771,7 +786,7 @@ namespace SilverSim.BackendHandlers.Robust.Profile
                 throw new XmlRpc.XmlRpcFaultException(-32602, "Missing parameter");
             }
 
-            Map resdata = new Map();
+            var resdata = new Map();
             if (structParam.TryGetValue("notes", out stringval) && stringval.ToString().Length != 0)
             {
                 try
@@ -799,7 +814,7 @@ namespace SilverSim.BackendHandlers.Robust.Profile
             return new XmlRpc.XmlRpcResponse { ReturnValue = resdata };
         }
 
-        XmlRpc.XmlRpcResponse XmlRpc_AvatarPropertiesRequest(XmlRpc.XmlRpcRequest req)
+        private XmlRpc.XmlRpcResponse XmlRpc_AvatarPropertiesRequest(XmlRpc.XmlRpcRequest req)
         {
             Map structParam;
             UUID avatarid;
@@ -809,24 +824,26 @@ namespace SilverSim.BackendHandlers.Robust.Profile
                 throw new XmlRpc.XmlRpcFaultException(-32602, "Missing parameter");
             }
 
-            Map resdata = new Map();
             ProfileProperties props = m_ProfileService.Properties[new UUI(avatarid)];
-            resdata.Add("Partner", props.Partner.ID);
-            resdata.Add("ProfileUrl", props.WebUrl);
-            resdata.Add("wantmask", (int)props.WantToMask);
-            resdata.Add("wanttext", props.WantToText);
-            resdata.Add("skillsmask", (int)props.SkillsMask);
-            resdata.Add("skillstext", props.SkillsText);
-            resdata.Add("languages", props.Language);
-            resdata.Add("Image", props.ImageID);
-            resdata.Add("AboutText", props.AboutText);
-            resdata.Add("FirstLifeImage", props.FirstLifeImageID);
-            resdata.Add("FirstLifeAboutText", props.FirstLifeText);
-            resdata.Add("success", true);
+            var resdata = new Map
+            {
+                { "Partner", props.Partner.ID },
+                { "ProfileUrl", props.WebUrl },
+                { "wantmask", (int)props.WantToMask },
+                { "wanttext", props.WantToText },
+                { "skillsmask", (int)props.SkillsMask },
+                { "skillstext", props.SkillsText },
+                { "languages", props.Language },
+                { "Image", props.ImageID },
+                { "AboutText", props.AboutText },
+                { "FirstLifeImage", props.FirstLifeImageID },
+                { "FirstLifeAboutText", props.FirstLifeText },
+                { "success", true }
+            };
             return new XmlRpc.XmlRpcResponse { ReturnValue = resdata };
         }
 
-        XmlRpc.XmlRpcResponse XmlRpc_AvatarPropertiesUpdate(XmlRpc.XmlRpcRequest req)
+        private XmlRpc.XmlRpcResponse XmlRpc_AvatarPropertiesUpdate(XmlRpc.XmlRpcRequest req)
         {
             Map structParam;
             UUID avatarid;
@@ -835,7 +852,6 @@ namespace SilverSim.BackendHandlers.Robust.Profile
             {
                 throw new XmlRpc.XmlRpcFaultException(-32602, "Missing parameter");
             }
-
 
             ProfileProperties props;
             try
@@ -847,7 +863,7 @@ namespace SilverSim.BackendHandlers.Robust.Profile
                 props = new ProfileProperties();
                 props.User.ID = avatarid;
             }
-            Map resdata = new Map();
+            var resdata = new Map();
             try
             {
                 props.WebUrl = structParam["ProfileUrl"].ToString();
@@ -865,7 +881,7 @@ namespace SilverSim.BackendHandlers.Robust.Profile
             return new XmlRpc.XmlRpcResponse { ReturnValue = resdata };
         }
 
-        XmlRpc.XmlRpcResponse XmlRpc_AvatarClassifiedsRequest(XmlRpc.XmlRpcRequest req)
+        private XmlRpc.XmlRpcResponse XmlRpc_AvatarClassifiedsRequest(XmlRpc.XmlRpcRequest req)
         {
             Map structParam;
             UUID avatarid;
@@ -876,20 +892,24 @@ namespace SilverSim.BackendHandlers.Robust.Profile
             }
 
             Dictionary<UUID, string> classifieds = m_ProfileService.Classifieds.GetClassifieds(new UUI(avatarid));
-            Map resdata = new Map();
-            AnArray resarray = new AnArray();
+            var resarray = new AnArray();
             foreach(KeyValuePair<UUID, string> kvp in classifieds)
             {
-                Map r = new Map();
-                r.Add("classifiedid", kvp.Key);
-                r.Add("name", kvp.Value);
+                var r = new Map
+                {
+                    { "classifiedid", kvp.Key },
+                    { "name", kvp.Value }
+                };
                 resarray.Add(r);
             }
-            resdata.Add("data", resarray);
+            var resdata = new Map
+            {
+                ["data"] = resarray
+            };
             return new XmlRpc.XmlRpcResponse { ReturnValue = resdata };
         }
 
-        XmlRpc.XmlRpcResponse XmlRpc_AvatarNotesRequest(XmlRpc.XmlRpcRequest req)
+        private XmlRpc.XmlRpcResponse XmlRpc_AvatarNotesRequest(XmlRpc.XmlRpcRequest req)
         {
             Map structParam;
             UUID avatarid;
@@ -902,7 +922,7 @@ namespace SilverSim.BackendHandlers.Robust.Profile
             }
 
             string notes;
-            Map resdata = new Map();
+            var resdata = new Map();
             if(m_ProfileService.Notes.TryGetValue(new UUI(avatarid), new UUI(targetid), out notes))
             {
                 resdata.Add("notes", notes);
@@ -915,7 +935,7 @@ namespace SilverSim.BackendHandlers.Robust.Profile
             return new XmlRpc.XmlRpcResponse { ReturnValue = resdata };
         }
 
-        XmlRpc.XmlRpcResponse XmlRpc_AvatarPicksRequest(XmlRpc.XmlRpcRequest req)
+        private XmlRpc.XmlRpcResponse XmlRpc_AvatarPicksRequest(XmlRpc.XmlRpcRequest req)
         {
             Map structParam;
             UUID avatarid;
@@ -926,20 +946,24 @@ namespace SilverSim.BackendHandlers.Robust.Profile
             }
 
             Dictionary<UUID, string> picks = m_ProfileService.Picks.GetPicks(new UUI(avatarid));
-            Map resdata = new Map();
-            AnArray pickdata = new AnArray();
+            var pickdata = new AnArray();
             foreach(KeyValuePair<UUID, string> kvp in picks)
             {
-                Map pickinfo = new Map();
-                pickinfo.Add("pickid", kvp.Key);
-                pickinfo.Add("name", kvp.Value);
+                var pickinfo = new Map
+                {
+                    { "pickid", kvp.Key },
+                    { "name", kvp.Value }
+                };
                 pickdata.Add(pickinfo);
             }
-            resdata.Add("data", pickdata);
+            var resdata = new Map
+            {
+                ["data"] = pickdata
+            };
             return new XmlRpc.XmlRpcResponse { ReturnValue = resdata };
         }
 
-        XmlRpc.XmlRpcResponse XmlRpc_ClassifiedDelete(XmlRpc.XmlRpcRequest req)
+        private XmlRpc.XmlRpcResponse XmlRpc_ClassifiedDelete(XmlRpc.XmlRpcRequest req)
         {
             Map structParam;
             UUID classifiedid;
@@ -949,7 +973,7 @@ namespace SilverSim.BackendHandlers.Robust.Profile
                 throw new XmlRpc.XmlRpcFaultException(-32602, "Missing parameter");
             }
 
-            Map resdata = new Map();
+            var resdata = new Map();
             try
             {
                 m_ProfileService.Classifieds.Delete(classifiedid);
@@ -963,7 +987,7 @@ namespace SilverSim.BackendHandlers.Robust.Profile
             return new XmlRpc.XmlRpcResponse { ReturnValue = resdata };
         }
 
-        XmlRpc.XmlRpcResponse XmlRpc_ClassifiedUpdate(XmlRpc.XmlRpcRequest req)
+        private XmlRpc.XmlRpcResponse XmlRpc_ClassifiedUpdate(XmlRpc.XmlRpcRequest req)
         {
             Map structParam;
             UUID classifiedid;
@@ -1003,11 +1027,11 @@ namespace SilverSim.BackendHandlers.Robust.Profile
                 }
                 if((classified.Flags & 32) != 0)
                 {
-                    classified.ExpirationDate = Date.UnixTimeToDateTime((Date.Now.AsULong + (ulong)7 * 24 * 3600));
+                    classified.ExpirationDate = Date.UnixTimeToDateTime(Date.Now.AsULong + (ulong)7 * 24 * 3600);
                 }
                 else
                 {
-                    classified.ExpirationDate = Date.UnixTimeToDateTime((Date.Now.AsULong + (ulong)365 * 24 * 3600));
+                    classified.ExpirationDate = Date.UnixTimeToDateTime(Date.Now.AsULong + (ulong)365 * 24 * 3600);
                 }
             }
             catch
@@ -1015,7 +1039,7 @@ namespace SilverSim.BackendHandlers.Robust.Profile
                 throw new XmlRpc.XmlRpcFaultException(-32604, "Missing parameters");
             }
 
-            Map resdata = new Map();
+            var resdata = new Map();
             try
             {
                 m_ProfileService.Classifieds.Update(classified);
@@ -1028,7 +1052,7 @@ namespace SilverSim.BackendHandlers.Robust.Profile
             return new XmlRpc.XmlRpcResponse { ReturnValue = resdata };
         }
 
-        XmlRpc.XmlRpcResponse XmlRpc_ClassifiedsInfoQuery(XmlRpc.XmlRpcRequest req)
+        private XmlRpc.XmlRpcResponse XmlRpc_ClassifiedsInfoQuery(XmlRpc.XmlRpcRequest req)
         {
             Map structParam;
             UUID classifiedid;
@@ -1039,7 +1063,7 @@ namespace SilverSim.BackendHandlers.Robust.Profile
             }
 
             ProfileClassified classified;
-            Map resdata = new Map();
+            var resdata = new Map();
             if (m_ProfileService.Classifieds.TryGetValue(UUI.Unknown, classifiedid, out classified))
             {
                 resdata.Add("classifieduuid", classified.ClassifiedID);
@@ -1065,7 +1089,7 @@ namespace SilverSim.BackendHandlers.Robust.Profile
             return new XmlRpc.XmlRpcResponse { ReturnValue = resdata };
         }
 
-        XmlRpc.XmlRpcResponse XmlRpc_PickInfoRequest(XmlRpc.XmlRpcRequest req)
+        private XmlRpc.XmlRpcResponse XmlRpc_PickInfoRequest(XmlRpc.XmlRpcRequest req)
         {
             Map structParam;
             UUID pickid;
@@ -1077,7 +1101,7 @@ namespace SilverSim.BackendHandlers.Robust.Profile
                 throw new XmlRpc.XmlRpcFaultException(-32602, "Missing parameter");
             }
             ProfilePick pick;
-            Map resdata = new Map();
+            var resdata = new Map();
             if(m_ProfileService.Picks.TryGetValue(new UUI(avatarid), pickid, out pick))
             {
                 resdata.Add("pickuuid", pick.PickID);
@@ -1097,7 +1121,7 @@ namespace SilverSim.BackendHandlers.Robust.Profile
             return new XmlRpc.XmlRpcResponse { ReturnValue = resdata };
         }
 
-        XmlRpc.XmlRpcResponse XmlRpc_PicksDelete(XmlRpc.XmlRpcRequest req)
+        private XmlRpc.XmlRpcResponse XmlRpc_PicksDelete(XmlRpc.XmlRpcRequest req)
         {
             Map structParam;
             UUID pickid;
@@ -1107,7 +1131,7 @@ namespace SilverSim.BackendHandlers.Robust.Profile
                 throw new XmlRpc.XmlRpcFaultException(-32602, "Missing parameter");
             }
 
-            Map resdata = new Map();
+            var resdata = new Map();
             try
             {
                 m_ProfileService.Picks.Delete(pickid);
@@ -1121,31 +1145,35 @@ namespace SilverSim.BackendHandlers.Robust.Profile
             return new XmlRpc.XmlRpcResponse { ReturnValue = resdata };
         }
 
-        XmlRpc.XmlRpcResponse XmlRpc_PicksUpdate(XmlRpc.XmlRpcRequest req)
+        private XmlRpc.XmlRpcResponse XmlRpc_PicksUpdate(XmlRpc.XmlRpcRequest req)
         {
             Map structParam;
             if(!req.Params.TryGetValue(0, out structParam))
             {
                 throw new XmlRpc.XmlRpcFaultException(-32602, "Missing struct param");
             }
-            ProfilePick pick = new ProfilePick();
             try
             {
-                pick.PickID = structParam["pick_id"].AsUUID;
-                pick.Creator.ID = structParam["creator_id"].AsUUID;
-                pick.TopPick = ToBoolean(structParam["TopPick"]);
-                pick.Name = structParam["Name"].ToString();
-                pick.OriginalName = structParam["name"].ToString();
-                pick.Description = structParam["desc"].ToString();
-                pick.ParcelID = structParam["parcel_uuid"].AsUUID;
-                pick.SnapshotID = structParam["snapshot_uuid"].AsUUID;
-                pick.SimName = structParam["sim_name"].ToString();
-                pick.GlobalPosition = Vector3.Parse(structParam["pos_global"].ToString());
-                pick.SortOrder = structParam["sort_order"].AsInt;
-                pick.Enabled = ToBoolean(structParam["enabled"]);
+                var pick = new ProfilePick()
+                {
+                    PickID = structParam["pick_id"].AsUUID,
+                    Creator = new UUI(structParam["creator_id"].AsUUID),
+                    TopPick = ToBoolean(structParam["TopPick"]),
+                    Name = structParam["Name"].ToString(),
+                    OriginalName = structParam["name"].ToString(),
+                    Description = structParam["desc"].ToString(),
+                    ParcelID = structParam["parcel_uuid"].AsUUID,
+                    SnapshotID = structParam["snapshot_uuid"].AsUUID,
+                    SimName = structParam["sim_name"].ToString(),
+                    GlobalPosition = Vector3.Parse(structParam["pos_global"].ToString()),
+                    SortOrder = structParam["sort_order"].AsInt,
+                    Enabled = ToBoolean(structParam["enabled"])
+                };
                 m_ProfileService.Picks.Update(pick);
-                Map resdata = new Map();
-                resdata.Add("success", true);
+                var resdata = new Map
+                {
+                    { "success", true }
+                };
                 return new XmlRpc.XmlRpcResponse { ReturnValue = resdata };
             }
             catch
@@ -1164,14 +1192,7 @@ namespace SilverSim.BackendHandlers.Robust.Profile
     [PluginName("ProfileHandler")]
     public class ProfileServerHandlerFactory : IPluginFactory
     {
-        public ProfileServerHandlerFactory()
-        {
-
-        }
-
-        public IPlugin Initialize(ConfigurationLoader loader, IConfig ownSection)
-        {
-            return new ProfileServerHandler(ownSection);
-        }
+        public IPlugin Initialize(ConfigurationLoader loader, IConfig ownSection) =>
+            new ProfileServerHandler(ownSection);
     }
 }

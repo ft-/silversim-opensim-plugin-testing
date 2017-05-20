@@ -32,8 +32,7 @@ namespace SilverSim.BackendConnectors.Flotsam.Groups
     {
         bool IGroupMembersInterface.TryGetValue(UUI requestingAgent, UGI group, UUI principal, out GroupMember gmem)
         {
-            IEnumerable<GroupMember> e = Members[requestingAgent, group].Where(p => p.Principal.ID == principal.ID);
-            foreach (GroupMember g in e)
+            foreach (GroupMember g in Members[requestingAgent, group].Where(p => p.Principal.ID == principal.ID))
             {
                 gmem = g;
                 return true;
@@ -44,8 +43,7 @@ namespace SilverSim.BackendConnectors.Flotsam.Groups
 
         bool IGroupMembersInterface.ContainsKey(UUI requestingAgent, UGI group, UUI principal)
         {
-            IEnumerable<GroupMember> e = Members[requestingAgent, group].Where(p => p.Principal.ID == principal.ID);
-            foreach (GroupMember g in e)
+            foreach (GroupMember g in Members[requestingAgent, group].Where(p => p.Principal.ID == principal.ID))
             {
                 return true;
             }
@@ -54,10 +52,9 @@ namespace SilverSim.BackendConnectors.Flotsam.Groups
 
         GroupMember IGroupMembersInterface.this[UUI requestingAgent, UGI group, UUI principal]
         {
-            get 
+            get
             {
-                IEnumerable<GroupMember> e = Members[requestingAgent, group].Where(p => p.Principal.ID == principal.ID);
-                foreach(GroupMember g in e)
+                foreach(GroupMember g in Members[requestingAgent, group].Where(p => p.Principal.ID == principal.ID))
                 {
                     return g;
                 }
@@ -67,19 +64,21 @@ namespace SilverSim.BackendConnectors.Flotsam.Groups
 
         List<GroupMember> IGroupMembersInterface.this[UUI requestingAgent, UGI group]
         {
-            get 
+            get
             {
-                Map m = new Map();
-                m.Add("GroupID", group.ID);
-                AnArray res = FlotsamXmlRpcGetCall(requestingAgent, "groups.getGroupMembers", m) as AnArray;
-                if(null == res)
+                var m = new Map
+                {
+                    ["GroupID"] = group.ID
+                };
+                var res = FlotsamXmlRpcGetCall(requestingAgent, "groups.getGroupMembers", m) as AnArray;
+                if(res == null)
                 {
                     throw new AccessFailedException();
                 }
-                List<GroupMember> gmems = new List<GroupMember>();
+                var gmems = new List<GroupMember>();
                 foreach (IValue iv in res)
                 {
-                    Map data = iv as Map;
+                    var data = iv as Map;
                     if (data != null)
                     {
                         gmems.Add(data.ToGroupMember(group, m_AvatarNameService));
@@ -91,20 +90,22 @@ namespace SilverSim.BackendConnectors.Flotsam.Groups
 
         List<GroupMember> IGroupMembersInterface.this[UUI requestingAgent, UUI principal]
         {
-            get 
+            get
             {
-                Map m = new Map();
-                m.Add("AgentID", principal.ID);
-                AnArray v = FlotsamXmlRpcGetCall(requestingAgent, "groups.getAgentGroupMemberships", m) as AnArray;
-                if(null == v)
+                var m = new Map
+                {
+                    ["AgentID"] = principal.ID
+                };
+                var v = FlotsamXmlRpcGetCall(requestingAgent, "groups.getAgentGroupMemberships", m) as AnArray;
+                if(v == null)
                 {
                     throw new AccessFailedException();
                 }
-                List<GroupMember> gmems = new List<GroupMember>();
+                var gmems = new List<GroupMember>();
                 foreach (IValue iv in v)
                 {
-                    Map data = iv as Map;
-                    if(null != data)
+                    var data = iv as Map;
+                    if(data != null)
                     {
                         gmems.Add(data.ToGroupMember(m_AvatarNameService));
                     }
@@ -115,9 +116,11 @@ namespace SilverSim.BackendConnectors.Flotsam.Groups
 
         GroupMember IGroupMembersInterface.Add(UUI requestingAgent, UGI group, UUI principal, UUID roleID, string accessToken)
         {
-            Map m = new Map();
-            m.Add("AgentID", principal.ID);
-            m.Add("GroupID", group.ID);
+            var m = new Map
+            {
+                ["AgentID"] = principal.ID,
+                ["GroupID"] = group.ID
+            };
             FlotsamXmlRpcCall(requestingAgent, "groups.addAgentToGroup", m);
             return Members[requestingAgent, group, principal];
         }
@@ -129,19 +132,23 @@ namespace SilverSim.BackendConnectors.Flotsam.Groups
 
         void IGroupMembersInterface.Update(UUI requestingAgent, UGI group, UUI principal, bool acceptNotices, bool listInProfile)
         {
-            Map m = new Map();
-            m.Add("AgentID", principal.ID);
-            m.Add("GroupID", group.ID);
-            m.Add("AcceptNotices", acceptNotices ? 1 : 0);
-            m.Add("ListInProfile", listInProfile ? 1 : 0);
+            var m = new Map
+            {
+                { "AgentID", principal.ID },
+                { "GroupID", group.ID },
+                { "AcceptNotices", acceptNotices ? 1 : 0 },
+                { "ListInProfile", listInProfile ? 1 : 0 }
+            };
             FlotsamXmlRpcCall(requestingAgent, "groups.setAgentGroupInfo", m);
         }
 
         void IGroupMembersInterface.Delete(UUI requestingAgent, UGI group, UUI principal)
         {
-            Map m = new Map();
-            m.Add("AgentID", principal.ID);
-            m.Add("GroupID", group.ID);
+            var m = new Map
+            {
+                ["AgentID"] = principal.ID,
+                ["GroupID"] = group.ID
+            };
             FlotsamXmlRpcCall(requestingAgent, "groups.removeAgentFromGroup", m);
         }
     }

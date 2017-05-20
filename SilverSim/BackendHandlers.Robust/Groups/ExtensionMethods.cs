@@ -69,7 +69,7 @@ namespace SilverSim.BackendHandlers.Robust.Groups
             writer.WriteNamedValue("MembershipFee", info.MembershipFee);
             writer.WriteNamedValue("OpenEnrollment", Boolean2String(info.IsOpenEnrollment));
             writer.WriteNamedValue("OwnerRoleID", info.OwnerRoleID);
-            writer.WriteNamedValue("ServiceLocation", null != info.ID.HomeURI ? info.ID.HomeURI.ToString() : string.Empty);
+            writer.WriteNamedValue("ServiceLocation", (info.ID.HomeURI != null) ? info.ID.HomeURI.ToString() : string.Empty);
             writer.WriteNamedValue("ShownInList", Boolean2String(info.IsShownInList));
             writer.WriteNamedValue("MemberCount", info.MemberCount);
             writer.WriteNamedValue("RoleCount", info.RoleCount);

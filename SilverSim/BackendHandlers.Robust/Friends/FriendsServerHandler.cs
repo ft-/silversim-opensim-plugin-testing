@@ -39,14 +39,14 @@ namespace SilverSim.BackendHandlers.Robust.Friends
     [Description("Robust Friends Protocol Server")]
     public sealed class RobustFriendsServerHandler : IPlugin
     {
-        BaseHttpServer m_HttpServer;
-        readonly string m_FriendsServiceName;
-        readonly string m_UserAccountServiceName;
+        private BaseHttpServer m_HttpServer;
+        private readonly string m_FriendsServiceName;
+        private readonly string m_UserAccountServiceName;
 
-        UserAccountServiceInterface m_UserAccountService;
-        FriendsServiceInterface m_FriendsService;
+        private UserAccountServiceInterface m_UserAccountService;
+        private FriendsServiceInterface m_FriendsService;
 
-        readonly Dictionary<string, Action<HttpRequest, Dictionary<string, object>>> m_Handlers = new Dictionary<string, Action<HttpRequest, Dictionary<string, object>>>();
+        private readonly Dictionary<string, Action<HttpRequest, Dictionary<string, object>>> m_Handlers = new Dictionary<string, Action<HttpRequest, Dictionary<string, object>>>();
 
         //private static readonly ILog m_Log = LogManager.GetLogger("ROBUST FRIENDS HANDLER");
         public RobustFriendsServerHandler(IConfig ownSection)
@@ -77,7 +77,7 @@ namespace SilverSim.BackendHandlers.Robust.Friends
             }
         }
 
-        void FriendsHandler(HttpRequest httpreq)
+        private void FriendsHandler(HttpRequest httpreq)
         {
             if (httpreq.ContainsHeader("X-SecondLife-Shard"))
             {
@@ -155,7 +155,7 @@ namespace SilverSim.BackendHandlers.Robust.Friends
             }
         }
 
-        void SuccessResult(HttpRequest req)
+        private void SuccessResult(HttpRequest req)
         {
             using (HttpResponse res = req.BeginResponse("text/xml"))
             {
@@ -168,7 +168,7 @@ namespace SilverSim.BackendHandlers.Robust.Friends
             }
         }
 
-        void GetFriendsCommonHandler(HttpRequest req, List<FriendInfo> fis)
+        private void GetFriendsCommonHandler(HttpRequest req, List<FriendInfo> fis)
         {
             using (HttpResponse res = req.BeginResponse("text/xml"))
             {
@@ -199,7 +199,7 @@ namespace SilverSim.BackendHandlers.Robust.Friends
             }
         }
 
-        void GetFriendsHandler(HttpRequest req, Dictionary<string, object> reqdata)
+        private void GetFriendsHandler(HttpRequest req, Dictionary<string, object> reqdata)
         {
             object o;
             UUID id;
@@ -212,7 +212,7 @@ namespace SilverSim.BackendHandlers.Robust.Friends
             GetFriendsCommonHandler(req, fis);
         }
 
-        void GetFriendsStringHandler(HttpRequest req, Dictionary<string, object> reqdata)
+        private void GetFriendsStringHandler(HttpRequest req, Dictionary<string, object> reqdata)
         {
             object o;
             UUI id;
@@ -225,7 +225,7 @@ namespace SilverSim.BackendHandlers.Robust.Friends
             GetFriendsCommonHandler(req, fis);
         }
 
-        void StoreFriendHandler(HttpRequest req, Dictionary<string, object> reqdata)
+        private void StoreFriendHandler(HttpRequest req, Dictionary<string, object> reqdata)
         {
             FriendInfo fi = new FriendInfo();
             object o;
@@ -247,7 +247,7 @@ namespace SilverSim.BackendHandlers.Robust.Friends
             SuccessResult(req);
         }
 
-        void DeleteFriendHandler(HttpRequest req, Dictionary<string, object> reqdata)
+        private void DeleteFriendHandler(HttpRequest req, Dictionary<string, object> reqdata)
         {
             UUID id;
             object o;
@@ -263,11 +263,12 @@ namespace SilverSim.BackendHandlers.Robust.Friends
                 throw new FailureResultException();
             }
 
-            FriendInfo fi = new FriendInfo();
-            fi.User.ID = id;
-            fi.Friend = friend;
-            fi.Secret = GetSecret(o.ToString());
-
+            var fi = new FriendInfo()
+            {
+                User = new UUI(id),
+                Friend = friend,
+                Secret = GetSecret(o.ToString())
+            };
             FriendInfo exist_fi;
             if(!m_FriendsService.TryGetValue(fi.User, fi.Friend, out exist_fi) ||
                 fi.Secret != exist_fi.Secret)
@@ -278,7 +279,7 @@ namespace SilverSim.BackendHandlers.Robust.Friends
             SuccessResult(req);
         }
 
-        void DeleteFriendStringHandler(HttpRequest req, Dictionary<string, object> reqdata)
+        private void DeleteFriendStringHandler(HttpRequest req, Dictionary<string, object> reqdata)
         {
             UUI id;
             object o;
@@ -301,11 +302,12 @@ namespace SilverSim.BackendHandlers.Robust.Friends
                 throw new FailureResultException();
             }
 
-            FriendInfo fi = new FriendInfo();
-            fi.User = id;
-            fi.Friend = friend;
-            fi.Secret = friend_secret.Length != 0 ? friend_secret : id_secret;
-
+            var fi = new FriendInfo()
+            {
+                User = id,
+                Friend = friend,
+                Secret = friend_secret.Length != 0 ? friend_secret : id_secret
+            };
             FriendInfo exist_fi;
             if (!m_FriendsService.TryGetValue(fi.User, fi.Friend, out exist_fi) ||
                 fi.Secret != exist_fi.Secret)
@@ -316,7 +318,7 @@ namespace SilverSim.BackendHandlers.Robust.Friends
             SuccessResult(req);
         }
 
-        string GetSecret(string friendId)
+        private string GetSecret(string friendId)
         {
             string[] parts = friendId.Split(Semicolon, 4);
             return (parts.Length == 4) ? parts[3] : string.Empty;
@@ -330,15 +332,8 @@ namespace SilverSim.BackendHandlers.Robust.Friends
     [PluginName("FriendsHandler")]
     public sealed class RobustFriendsHandlerFactory : IPluginFactory
     {
-        public RobustFriendsHandlerFactory()
-        {
-
-        }
-
-        public IPlugin Initialize(ConfigurationLoader loader, IConfig ownSection)
-        {
-            return new RobustFriendsServerHandler(ownSection);
-        }
+        public IPlugin Initialize(ConfigurationLoader loader, IConfig ownSection) =>
+            new RobustFriendsServerHandler(ownSection);
     }
     #endregion
 }

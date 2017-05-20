@@ -47,34 +47,32 @@ namespace SilverSim.BackendConnectors.Simian.Inventory
 
         InventoryItem IInventoryItemServiceInterface.this[UUID key]
         {
-            get 
-            { 
-                throw new NotSupportedException(); 
-            }
+            get { throw new NotSupportedException(); }
         }
 
         bool IInventoryItemServiceInterface.TryGetValue(UUID principalID, UUID key, out InventoryItem item)
         {
-            Dictionary<string, string> post = new Dictionary<string, string>();
-            post["RequestMethod"] = "GetInventoryNode";
-            post["ItemID"] = (string)key;
-            post["OwnerID"] = (string)principalID;
-            post["IncludeFolders"] = "1";
-            post["IncludeItems"] = "1";
-            post["ChildrenOnly"] = "1";
-
+            var post = new Dictionary<string, string>
+            {
+                ["RequestMethod"] = "GetInventoryNode",
+                ["ItemID"] = (string)key,
+                ["OwnerID"] = (string)principalID,
+                ["IncludeFolders"] = "1",
+                ["IncludeItems"] = "1",
+                ["ChildrenOnly"] = "1"
+            };
             Map res = SimianGrid.PostToService(m_InventoryURI, m_InventoryCapability, post, TimeoutMs);
             if (res["Success"].AsBoolean && res.ContainsKey("Items"))
             {
-                AnArray resarray = res["Items"] as AnArray;
-                if (null != resarray)
+                var resarray = res["Items"] as AnArray;
+                if (resarray != null)
                 {
                     foreach (IValue iv in resarray)
                     {
-                        Map m = iv as Map;
-                        if (null != m && m["Type"].ToString() == "Item")
+                        var m = iv as Map;
+                        if (m != null && m["Type"].ToString() == "Item")
                         {
-                            item = SimianInventoryConnector.ItemFromMap(m, m_GroupsService);
+                            item = ItemFromMap(m, m_GroupsService);
                             return true;
                         }
                     }
@@ -87,24 +85,25 @@ namespace SilverSim.BackendConnectors.Simian.Inventory
 
         bool IInventoryItemServiceInterface.ContainsKey(UUID principalID, UUID key)
         {
-            Dictionary<string, string> post = new Dictionary<string, string>();
-            post["RequestMethod"] = "GetInventoryNode";
-            post["ItemID"] = (string)key;
-            post["OwnerID"] = (string)principalID;
-            post["IncludeFolders"] = "1";
-            post["IncludeItems"] = "1";
-            post["ChildrenOnly"] = "1";
-
+            var post = new Dictionary<string, string>
+            {
+                ["RequestMethod"] = "GetInventoryNode",
+                ["ItemID"] = (string)key,
+                ["OwnerID"] = (string)principalID,
+                ["IncludeFolders"] = "1",
+                ["IncludeItems"] = "1",
+                ["ChildrenOnly"] = "1"
+            };
             Map res = SimianGrid.PostToService(m_InventoryURI, m_InventoryCapability, post, TimeoutMs);
             if (res["Success"].AsBoolean && res.ContainsKey("Items"))
             {
-                AnArray resarray = res["Items"] as AnArray;
-                if (null != resarray)
+                var resarray = res["Items"] as AnArray;
+                if (resarray != null)
                 {
                     foreach (IValue iv in resarray)
                     {
-                        Map m = iv as Map;
-                        if (null != m && m["Type"].ToString() == "Item")
+                        var m = iv as Map;
+                        if (m != null && m["Type"].ToString() == "Item")
                         {
                             return true;
                         }
@@ -133,7 +132,7 @@ namespace SilverSim.BackendConnectors.Simian.Inventory
         {
             get
             {
-                List<InventoryItem> res = new List<InventoryItem>();
+                var res = new List<InventoryItem>();
                 foreach(UUID key in keys)
                 {
                     try
@@ -153,21 +152,23 @@ namespace SilverSim.BackendConnectors.Simian.Inventory
 
         void IInventoryItemServiceInterface.Add(InventoryItem item)
         {
-            Map perms = new Map();
-            perms.Add("BaseMask", (uint)item.Permissions.Base);
-            perms.Add("EveryoneMask", (uint)item.Permissions.EveryOne);
-            perms.Add("GroupMask", (uint)item.Permissions.Group);
-            perms.Add("NextOwnerMask", (uint)item.Permissions.NextOwner);
-            perms.Add("OwnerMask", (uint)item.Permissions.Current);
-
-            Map extraData = new Map();
-            extraData.Add("Flags", (uint)item.Flags);
-            extraData["GroupID"] = item.Group.ID;
-            extraData.Add("GroupOwned", item.IsGroupOwned);
-            extraData.Add("SalePrice", item.SaleInfo.Price);
-            extraData.Add("SaleType", (int)item.SaleInfo.Type);
-            extraData.Add("Permissions", perms);
-
+            var perms = new Map
+            {
+                { "BaseMask", (uint)item.Permissions.Base },
+                { "EveryoneMask", (uint)item.Permissions.EveryOne },
+                { "GroupMask", (uint)item.Permissions.Group },
+                { "NextOwnerMask", (uint)item.Permissions.NextOwner },
+                { "OwnerMask", (uint)item.Permissions.Current }
+            };
+            var extraData = new Map
+            {
+                { "Flags", (uint)item.Flags },
+                { "GroupID", item.Group.ID },
+                { "GroupOwned", item.IsGroupOwned },
+                { "SalePrice", item.SaleInfo.Price },
+                { "SaleType", (int)item.SaleInfo.Type },
+                { "Permissions", perms }
+            };
             string invContentType = SimianInventoryConnector.ContentTypeFromInventoryType(item.InventoryType);
             string assetContentType = SimianInventoryConnector.ContentTypeFromAssetType(item.AssetType);
             if (invContentType != assetContentType)
@@ -175,19 +176,20 @@ namespace SilverSim.BackendConnectors.Simian.Inventory
                 extraData.Add("LinkedItemType", assetContentType);
             }
 
-            Dictionary<string, string> post = new Dictionary<string, string>();
-            post["RequestMethod"] = "AddInventoryItem";
-            post["ItemID"] = (string)item.ID;
-            post["AssetID"] = (string)item.AssetID;
-            post["ParentID"] = (string)item.ParentFolderID;
-            post["OwnerID"] = (string)item.Owner;
-            post["Name"] = item.Name;
-            post["Description"] = item.Description;
-            post["CreatorID"] = (string)item.Creator.ID;
-            post["CreatorData"] = item.Creator.CreatorData;
-            post["ContentType"] = invContentType;
-            post["ExtraData"] = Json.Serialize(extraData);
-
+            var post = new Dictionary<string, string>
+            {
+                ["RequestMethod"] = "AddInventoryItem",
+                ["ItemID"] = (string)item.ID,
+                ["AssetID"] = (string)item.AssetID,
+                ["ParentID"] = (string)item.ParentFolderID,
+                ["OwnerID"] = (string)item.Owner,
+                ["Name"] = item.Name,
+                ["Description"] = item.Description,
+                ["CreatorID"] = (string)item.Creator.ID,
+                ["CreatorData"] = item.Creator.CreatorData,
+                ["ContentType"] = invContentType,
+                ["ExtraData"] = Json.Serialize(extraData)
+            };
             Map m = SimianGrid.PostToService(m_InventoryURI, m_InventoryCapability, post, TimeoutMs);
             if (!m["Success"].AsBoolean)
             {
@@ -206,7 +208,7 @@ namespace SilverSim.BackendConnectors.Simian.Inventory
                     {
                         return;
                     }
-                    List<UUID> gestures = new List<UUID>();
+                    var gestures = new List<UUID>();
                     if ((uint)item.Flags == 1)
                     {
                         gestures.Add(item.ID);
@@ -237,7 +239,7 @@ namespace SilverSim.BackendConnectors.Simian.Inventory
                     {
                         return;
                     }
-                    AnArray json_gestures = new AnArray();
+                    var json_gestures = new AnArray();
                     foreach(UUID u in gestures)
                     {
                         json_gestures.Add(u);
@@ -263,10 +265,12 @@ namespace SilverSim.BackendConnectors.Simian.Inventory
 
         void IInventoryItemServiceInterface.Delete(UUID principalID, UUID id)
         {
-            Dictionary<string, string> post = new Dictionary<string, string>();
-            post["RequestMethod"] = "RemoveInventoryNode";
-            post["OwnerID"] = (string)principalID;
-            post["ItemID"] = (string)id;
+            var post = new Dictionary<string, string>
+            {
+                ["RequestMethod"] = "RemoveInventoryNode",
+                ["OwnerID"] = (string)principalID,
+                ["ItemID"] = (string)id
+            };
             Map m = SimianGrid.PostToService(m_InventoryURI, m_InventoryCapability, post, TimeoutMs);
             if(!m["Success"].AsBoolean)
             {
@@ -276,11 +280,13 @@ namespace SilverSim.BackendConnectors.Simian.Inventory
 
         void IInventoryItemServiceInterface.Move(UUID principalID, UUID id, UUID newFolder)
         {
-            Dictionary<string, string> post = new Dictionary<string, string>();
-            post["RequestMethod"] = "MoveInventoryNodes";
-            post["OwnerID"] = (string)principalID;
-            post["FolderID"] = (string)newFolder;
-            post["Items"] = (string)id;
+            var post = new Dictionary<string, string>
+            {
+                ["RequestMethod"] = "MoveInventoryNodes",
+                ["OwnerID"] = (string)principalID,
+                ["FolderID"] = (string)newFolder,
+                ["Items"] = (string)id
+            };
             Map m = SimianGrid.PostToService(m_InventoryURI, m_InventoryCapability, post, TimeoutMs);
             if(!m["Success"].AsBoolean)
             {
@@ -291,7 +297,7 @@ namespace SilverSim.BackendConnectors.Simian.Inventory
         [SuppressMessage("Gendarme.Rules.Exceptions", "DoNotSwallowErrorsCatchingNonSpecificExceptionsRule")]
         List<UUID> IInventoryItemServiceInterface.Delete(UUID principalID, List<UUID> itemids)
         {
-            List<UUID> deleted = new List<UUID>();
+            var deleted = new List<UUID>();
             foreach (UUID id in itemids)
             {
                 try
@@ -306,6 +312,5 @@ namespace SilverSim.BackendConnectors.Simian.Inventory
             }
             return deleted;
         }
-
     }
 }

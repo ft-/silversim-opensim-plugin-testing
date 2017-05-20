@@ -36,8 +36,8 @@ namespace SilverSim.BackendConnectors.Robust.GroupsV2
         public sealed class MembershipsAccessor : IGroupMembershipsInterface
         {
             public int TimeoutMs = 20000;
-            readonly string m_Uri;
-            readonly Func<UUI, string> m_GetGroupsAgentID;
+            private readonly string m_Uri;
+            private readonly Func<UUI, string> m_GetGroupsAgentID;
 
             public MembershipsAccessor(string uri, Func<UUI, string> getGroupsAgentID)
             {
@@ -47,11 +47,13 @@ namespace SilverSim.BackendConnectors.Robust.GroupsV2
 
             public bool TryGetValue(UUI requestingAgent, UGI group, UUI principal, out GroupMembership gm)
             {
-                Dictionary<string, string> post = new Dictionary<string, string>();
-                post["AgentID"] = m_GetGroupsAgentID(principal);
-                post["GroupID"] = (string)group.ID;
-                post["RequestingAgentID"] = m_GetGroupsAgentID(requestingAgent);
-                post["METHOD"] = "GETMEMBERSHIP";
+                var post = new Dictionary<string, string>
+                {
+                    ["AgentID"] = m_GetGroupsAgentID(principal),
+                    ["GroupID"] = (string)group.ID,
+                    ["RequestingAgentID"] = m_GetGroupsAgentID(requestingAgent),
+                    ["METHOD"] = "GETMEMBERSHIP"
+                };
                 Map m;
                 using (Stream s = HttpClient.DoStreamPostRequest(m_Uri, null, post, false, TimeoutMs))
                 {
@@ -74,11 +76,13 @@ namespace SilverSim.BackendConnectors.Robust.GroupsV2
 
             public bool ContainsKey(UUI requestingAgent, UGI group, UUI principal)
             {
-                Dictionary<string, string> post = new Dictionary<string, string>();
-                post["AgentID"] = m_GetGroupsAgentID(principal);
-                post["GroupID"] = (string)group.ID;
-                post["RequestingAgentID"] = m_GetGroupsAgentID(requestingAgent);
-                post["METHOD"] = "GETMEMBERSHIP";
+                var post = new Dictionary<string, string>
+                {
+                    ["AgentID"] = m_GetGroupsAgentID(principal),
+                    ["GroupID"] = (string)group.ID,
+                    ["RequestingAgentID"] = m_GetGroupsAgentID(requestingAgent),
+                    ["METHOD"] = "GETMEMBERSHIP"
+                };
                 Map m;
                 using (Stream s = HttpClient.DoStreamPostRequest(m_Uri, null, post, false, TimeoutMs))
                 {
@@ -100,11 +104,13 @@ namespace SilverSim.BackendConnectors.Robust.GroupsV2
             {
                 get
                 {
-                    Dictionary<string, string> post = new Dictionary<string, string>();
-                    post["AgentID"] = m_GetGroupsAgentID(principal);
-                    post["GroupID"] = (string)group.ID;
-                    post["RequestingAgentID"] = m_GetGroupsAgentID(requestingAgent);
-                    post["METHOD"] = "GETMEMBERSHIP";
+                    var post = new Dictionary<string, string>
+                    {
+                        ["AgentID"] = m_GetGroupsAgentID(principal),
+                        ["GroupID"] = (string)group.ID,
+                        ["RequestingAgentID"] = m_GetGroupsAgentID(requestingAgent),
+                        ["METHOD"] = "GETMEMBERSHIP"
+                    };
                     Map m;
                     using(Stream s = HttpClient.DoStreamPostRequest(m_Uri, null, post, false, TimeoutMs))
                     {
@@ -125,13 +131,15 @@ namespace SilverSim.BackendConnectors.Robust.GroupsV2
 
             public List<GroupMembership> this[UUI requestingAgent, UUI principal]
             {
-                get 
+                get
                 {
-                    Dictionary<string, string> post = new Dictionary<string, string>();
-                    post["AgentID"] = m_GetGroupsAgentID(principal);
-                    post["ALL"] = "true";
-                    post["RequestingAgentID"] = m_GetGroupsAgentID(requestingAgent);
-                    post["METHOD"] = "GETMEMBERSHIP";
+                    var post = new Dictionary<string, string>
+                    {
+                        ["AgentID"] = m_GetGroupsAgentID(principal),
+                        ["ALL"] = "true",
+                        ["RequestingAgentID"] = m_GetGroupsAgentID(requestingAgent),
+                        ["METHOD"] = "GETMEMBERSHIP"
+                    };
                     Map m;
                     using(Stream s = HttpClient.DoStreamPostRequest(m_Uri, null, post, false, TimeoutMs))
                     {
@@ -150,13 +158,13 @@ namespace SilverSim.BackendConnectors.Robust.GroupsV2
                         throw new AccessFailedException(m["REASON"].ToString());
                     }
 
-                    Map resultmap = m["RESULT"] as Map;
-                    if(null == resultmap)
+                    var resultmap = m["RESULT"] as Map;
+                    if(resultmap == null)
                     {
                         return new List<GroupMembership>();
                     }
 
-                    List<GroupMembership> members = new List<GroupMembership>();
+                    var members = new List<GroupMembership>();
                     foreach (IValue iv in resultmap.Values)
                     {
                         GroupMembership member = iv.ToGroupMembership();

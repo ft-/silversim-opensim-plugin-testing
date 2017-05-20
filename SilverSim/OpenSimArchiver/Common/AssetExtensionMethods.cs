@@ -33,16 +33,18 @@ namespace SilverSim.OpenSimArchiver.Common
             TarArchiveReader.Header hdr,
             UUI creator)
         {
-            AssetData asset = new AssetData();
-            asset.FileName = hdr.FileName;
-            byte[] assetData = new byte[hdr.Length];
-            if(hdr.Length != reader.Read(assetData, 0, hdr.Length))
+            var asset = new AssetData()
+            {
+                FileName = hdr.FileName,
+                Name = "From Archive",
+                Creator = creator,
+                Data = new byte[hdr.Length]
+            };
+
+            if (hdr.Length != reader.Read(asset.Data, 0, hdr.Length))
             {
                 throw new IOException();
             }
-            asset.Name = "From Archive";
-            asset.Data = assetData;
-            asset.Creator = creator;
 
             return asset;
         }

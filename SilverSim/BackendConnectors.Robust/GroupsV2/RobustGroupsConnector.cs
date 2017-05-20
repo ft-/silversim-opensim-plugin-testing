@@ -38,25 +38,23 @@ namespace SilverSim.BackendConnectors.Robust.GroupsV2
     [Description("Robust Groups Connector")]
     public partial class RobustGroupsConnector : GroupsServiceInterface, IPlugin
     {
-        readonly GroupsAccessor m_Groups;
-        readonly GroupRolesAccessor m_GroupRoles;
-        readonly MembersAccessor m_Members;
-        readonly MembershipsAccessor m_Memberships;
-        readonly RoleMembersAccessor m_Rolemembers;
-        readonly ActiveGroupAccessor m_ActiveGroup;
-        readonly InvitesAccessor m_Invites;
-        readonly NoticesAccessor m_Notices;
-        readonly ActiveGroupMembershipAccesor m_ActiveGroupMembership;
-        UserAccountServiceInterface m_UserAccountService;
-        readonly string m_UserAccountServiceName = string.Empty;
-        int m_TimeoutMs = 20000;
+        private readonly GroupsAccessor m_Groups;
+        private readonly GroupRolesAccessor m_GroupRoles;
+        private readonly MembersAccessor m_Members;
+        private readonly MembershipsAccessor m_Memberships;
+        private readonly RoleMembersAccessor m_Rolemembers;
+        private readonly ActiveGroupAccessor m_ActiveGroup;
+        private readonly InvitesAccessor m_Invites;
+        private readonly NoticesAccessor m_Notices;
+        private readonly ActiveGroupMembershipAccesor m_ActiveGroupMembership;
+        private UserAccountServiceInterface m_UserAccountService;
+        private readonly string m_UserAccountServiceName = string.Empty;
+        private int m_TimeoutMs = 20000;
 
         public int TimeoutMs
         {
-            get
-            {
-                return m_TimeoutMs;
-            }
+            get { return m_TimeoutMs; }
+
             set
             {
                 m_TimeoutMs = value;
@@ -72,9 +70,9 @@ namespace SilverSim.BackendConnectors.Robust.GroupsV2
             }
         }
 
-        string GetGroupsAgentID(UUI agent)
+        private string GetGroupsAgentID(UUI agent)
         {
-            if (null == m_UserAccountService)
+            if (m_UserAccountService == null)
             {
                 return agent.ToString();
             }
@@ -116,77 +114,23 @@ namespace SilverSim.BackendConnectors.Robust.GroupsV2
             }
         }
 
-        public override IGroupsInterface Groups
-        {
-            get
-            {
-                return m_Groups;
-            }
-        }
+        public override IGroupsInterface Groups => m_Groups;
 
-        public override IGroupRolesInterface Roles
-        {
-            get 
-            {
-                return m_GroupRoles;
-            }
-        }
+        public override IGroupRolesInterface Roles => m_GroupRoles;
 
-        public override IGroupMembersInterface Members
-        {
-            get 
-            {
-                return m_Members;
-            }
-        }
+        public override IGroupMembersInterface Members => m_Members;
 
-        public override IGroupMembershipsInterface Memberships
-        {
-            get 
-            {
-                return m_Memberships;
-            }
-        }
+        public override IGroupMembershipsInterface Memberships => m_Memberships;
 
-        public override IGroupRolemembersInterface Rolemembers
-        {
-            get 
-            {
-                return m_Rolemembers;
-            }
-        }
+        public override IGroupRolemembersInterface Rolemembers => m_Rolemembers;
 
-        public override IGroupSelectInterface ActiveGroup
-        {
-            get 
-            {
-                return m_ActiveGroup;
-            }
-        }
+        public override IGroupSelectInterface ActiveGroup => m_ActiveGroup;
 
-        public override IActiveGroupMembershipInterface ActiveMembership
-        {
-            get 
-            {
-                return m_ActiveGroupMembership;
-            }
-        }
+        public override IActiveGroupMembershipInterface ActiveMembership => m_ActiveGroupMembership;
 
-        public override IGroupInvitesInterface Invites
-        {
-            get
-            {
-                return m_Invites;
-            }
-        }
+        public override IGroupInvitesInterface Invites => m_Invites;
 
-        public override IGroupNoticesInterface Notices
-        {
-            get 
-            {
-                return m_Notices;
-            }
-        }
+        public override IGroupNoticesInterface Notices => m_Notices;
 
         internal static void BooleanResponseRequest(string uri, Dictionary<string, string> post, bool compressed, int timeoutms)
         {
@@ -205,9 +149,7 @@ namespace SilverSim.BackendConnectors.Robust.GroupsV2
             }
         }
 
-        public override GroupInfo CreateGroup(UUI requestingAgent, GroupInfo ginfo, GroupPowers everyonePowers, GroupPowers ownerPowers)
-        {
-            return Groups.Create(requestingAgent, ginfo);
-        }
+        public override GroupInfo CreateGroup(UUI requestingAgent, GroupInfo ginfo, GroupPowers everyonePowers, GroupPowers ownerPowers) =>
+            Groups.Create(requestingAgent, ginfo);
     }
 }

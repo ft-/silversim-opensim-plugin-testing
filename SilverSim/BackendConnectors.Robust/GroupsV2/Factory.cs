@@ -30,11 +30,6 @@ namespace SilverSim.BackendConnectors.Robust.GroupsV2
     {
         private static readonly ILog m_Log = LogManager.GetLogger("ROBUST GROUPS CONNECTOR");
 
-        public Factory()
-        {
-
-        }
-
         public IPlugin Initialize(ConfigurationLoader loader, IConfig ownSection)
         {
             if (!ownSection.Contains("URI"))

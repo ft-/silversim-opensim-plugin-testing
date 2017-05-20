@@ -31,7 +31,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
     public partial class ProfileConnector
     {
 #if DEBUG
-        static readonly ILog m_Log = LogManager.GetLogger("PROFILE AUTO-DETECT HANDLER");
+        private static readonly ILog m_Log = LogManager.GetLogger("PROFILE AUTO-DETECT HANDLER");
 #endif
 
         public override void Remove(UUID scopeID, UUID accountID)
@@ -39,40 +39,35 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
             throw new NotSupportedException("Remove");
         }
 
-
         [Serializable]
         public class ProfileAutoDetectFailedException : Exception
         {
             public ProfileAutoDetectFailedException()
             {
-
             }
 
             public ProfileAutoDetectFailedException(string message)
                 : base(message)
             {
-
             }
 
             protected ProfileAutoDetectFailedException(SerializationInfo info, StreamingContext context)
                 : base(info, context)
             {
-
             }
 
             public ProfileAutoDetectFailedException(string message, Exception inner)
                 : base(message, inner)
             {
-
             }
         }
 
         public class AutoDetectProfileConnector : IProfileConnectorImplementation
         {
-            readonly OpenSimProfileConnector m_OpenSim;
-            readonly RobustProfileConnector m_Robust;
-            readonly ProfileConnector m_Connector;
-            
+            private readonly OpenSimProfileConnector m_OpenSim;
+            private readonly RobustProfileConnector m_Robust;
+            private readonly ProfileConnector m_Connector;
+
             public AutoDetectProfileConnector(ProfileConnector connector, string url)
             {
                 m_Connector = connector;
@@ -203,7 +198,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
 
             ProfileClassified IClassifiedsInterface.this[UUI user, UUID id]
             {
-                get 
+                get
                 {
                     ProfileClassified res;
                     try
@@ -241,7 +236,6 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
                     throw new ProfileAutoDetectFailedException();
                 }
             }
-
 
             void IClassifiedsInterface.Update(ProfileClassified classified)
             {
@@ -442,7 +436,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
 
             ProfilePick IPicksInterface.this[UUI user, UUID id]
             {
-                get 
+                get
                 {
                     ProfilePick res;
                     try
@@ -480,7 +474,6 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
                     throw new ProfileAutoDetectFailedException();
                 }
             }
-
 
             void IPicksInterface.Update(ProfilePick pick)
             {
@@ -921,8 +914,8 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
                 }
             }
 
-            ProfileProperties IPropertiesInterface.this[UUI user, PropertiesUpdateFlags flags] 
-            { 
+            ProfileProperties IPropertiesInterface.this[UUI user, PropertiesUpdateFlags flags]
+            {
                 set
                 {
                     try

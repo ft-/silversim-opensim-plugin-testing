@@ -32,18 +32,20 @@ namespace SilverSim.BackendConnectors.Flotsam.Groups
     {
         List<GroupNotice> IGroupNoticesInterface.GetNotices(UUI requestingAgent, UGI group)
         {
-            Map m = new Map();
-            m.Add("GroupID", group.ID);
-            AnArray r = FlotsamXmlRpcGetCall(requestingAgent, "groups.getGroupNotices", m) as AnArray;
-            if(null == r)
+            var m = new Map
+            {
+                ["GroupID"] = group.ID
+            };
+            var r = FlotsamXmlRpcGetCall(requestingAgent, "groups.getGroupNotices", m) as AnArray;
+            if(r == null)
             {
                 throw new AccessFailedException();
             }
-            List<GroupNotice> notices = new List<GroupNotice>();
+            var notices = new List<GroupNotice>();
             foreach(IValue iv in r)
             {
-                Map data = iv as Map;
-                if(null != data)
+                var data = iv as Map;
+                if(data != null)
                 {
                     notices.Add(data.ToGroupNotice());
                 }
@@ -53,10 +55,12 @@ namespace SilverSim.BackendConnectors.Flotsam.Groups
 
         bool IGroupNoticesInterface.TryGetValue(UUI requestingAgent, UUID groupNoticeID, out GroupNotice notice)
         {
-            Map m = new Map();
-            m.Add("NoticeID", groupNoticeID);
-            Map r = FlotsamXmlRpcGetCall(requestingAgent, "groups.getGroupNotice", m) as Map;
-            if (null == r)
+            var m = new Map
+            {
+                ["NoticeID"] = groupNoticeID
+            };
+            var r = FlotsamXmlRpcGetCall(requestingAgent, "groups.getGroupNotice", m) as Map;
+            if (r == null)
             {
                 notice = default(GroupNotice);
                 return false;
@@ -67,20 +71,24 @@ namespace SilverSim.BackendConnectors.Flotsam.Groups
 
         bool IGroupNoticesInterface.ContainsKey(UUI requestingAgent, UUID groupNoticeID)
         {
-            Map m = new Map();
-            m.Add("NoticeID", groupNoticeID);
-            Map r = FlotsamXmlRpcGetCall(requestingAgent, "groups.getGroupNotice", m) as Map;
+            var m = new Map
+            {
+                ["NoticeID"] = groupNoticeID
+            };
+            var r = FlotsamXmlRpcGetCall(requestingAgent, "groups.getGroupNotice", m) as Map;
             return r != null;
         }
 
         GroupNotice IGroupNoticesInterface.this[UUI requestingAgent, UUID groupNoticeID]
         {
-            get 
+            get
             {
-                Map m = new Map();
-                m.Add("NoticeID", groupNoticeID);
-                Map r = FlotsamXmlRpcGetCall(requestingAgent, "groups.getGroupNotice", m) as Map;
-                if(null == r)
+                var m = new Map
+                {
+                    ["NoticeID"] = groupNoticeID
+                };
+                var r = FlotsamXmlRpcGetCall(requestingAgent, "groups.getGroupNotice", m) as Map;
+                if(r == null)
                 {
                     throw new InvalidDataException();
                 }
@@ -90,15 +98,17 @@ namespace SilverSim.BackendConnectors.Flotsam.Groups
 
         void IGroupNoticesInterface.Add(UUI requestingAgent, GroupNotice notice)
         {
-            Map m = new Map();
-            m.Add("GroupID", notice.Group.ID);
-            m.Add("NoticeID", notice.ID);
-            m.Add("FromName", notice.FromName);
-            m.Add("Subject", notice.Subject);
 #warning TODO: Binary Bucket conversion
-            m.Add("BinaryBucket", new BinaryData());
-            m.Add("Message", notice.Message);
-            m.Add("TimeStamp", notice.Timestamp.AsULong.ToString());
+            var m = new Map
+            {
+                { "GroupID", notice.Group.ID },
+                { "NoticeID", notice.ID },
+                { "FromName", notice.FromName },
+                { "Subject", notice.Subject },
+                { "BinaryBucket", new BinaryData() },
+                { "Message", notice.Message },
+                { "TimeStamp", notice.Timestamp.AsULong.ToString() }
+            };
             FlotsamXmlRpcCall(requestingAgent, "groups.addGroupNotice", m);
         }
 

@@ -36,7 +36,7 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
     [Description("OpenSim PostAgent Direct HG Handler")]
     [ServerParam("DirectHGEnabled", ParameterType = typeof(bool), DefaultValue = false)]
     [ServerParam("DefaultHGRegion", ParameterType = typeof(string), DefaultValue = "", Type = ServerParamType.GlobalOnly)]
-    public class PostAgentHGDirectHandler : PostAgentHandler, IServerParamListener
+    public class PostAgentHGDirectHandler : PostAgentHandler
     {
         private HttpXmlRpcHandler m_XmlRpcServer;
 
@@ -73,7 +73,7 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
             }
         }
 
-        XmlRpc.XmlRpcResponse LinkRegion(XmlRpc.XmlRpcRequest req)
+        private XmlRpc.XmlRpcResponse LinkRegion(XmlRpc.XmlRpcRequest req)
         {
             string region_name = string.Empty;
             try
@@ -109,19 +109,20 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
                     resdata.Add("result", false);
                 }
             }
-            else 
+            else
             {
                 resdata.Add("result", false);
             }
-            XmlRpc.XmlRpcResponse res = new XmlRpc.XmlRpcResponse();
-            res.ReturnValue = resdata;
-            return res;
+            return new XmlRpc.XmlRpcResponse()
+            {
+                ReturnValue = resdata
+            };
         }
 
-        XmlRpc.XmlRpcResponse GetRegion(XmlRpc.XmlRpcRequest req)
+        private XmlRpc.XmlRpcResponse GetRegion(XmlRpc.XmlRpcRequest req)
         {
             UUID region_uuid = (((Map)req.Params[0])["region_uuid"]).AsUUID;
-            Map resdata = new Map();
+            var resdata = new Map();
             try
             {
                 SceneInterface s = Scenes[region_uuid];
@@ -148,13 +149,14 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
             {
                 resdata.Add("result", false);
             }
-            XmlRpc.XmlRpcResponse res = new XmlRpc.XmlRpcResponse();
-            res.ReturnValue = resdata;
-            return res;
+            return new XmlRpc.XmlRpcResponse()
+            {
+                ReturnValue = resdata
+            };
         }
 
-        string m_DefaultHGRegion;
-        bool GetHGDirectEnabled(UUID regionID)
+        private string m_DefaultHGRegion;
+        private bool GetHGDirectEnabled(UUID regionID)
         {
             bool value;
             if (m_HGDirectEnabled.TryGetValue(regionID, out value) ||
@@ -165,7 +167,7 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
             return false;
         }
 
-        readonly RwLockedDictionary<UUID, bool> m_HGDirectEnabled = new RwLockedDictionary<UUID, bool>();
+        private readonly RwLockedDictionary<UUID, bool> m_HGDirectEnabled = new RwLockedDictionary<UUID, bool>();
 
         [ServerParam("DirectHGEnabled")]
         public void DirectHGEnabledUpdated(UUID regionID, string value)
@@ -193,15 +195,8 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
     [PluginName("RobustDirectHGHandler")]
     public class PostAgentDirectHGHandlerFactory : IPluginFactory
     {
-        public PostAgentDirectHGHandlerFactory()
-        {
-
-        }
-
-        public IPlugin Initialize(ConfigurationLoader loader, IConfig ownSection)
-        {
-            return new PostAgentHGDirectHandler(ownSection);
-        }
+        public IPlugin Initialize(ConfigurationLoader loader, IConfig ownSection) =>
+            new PostAgentHGDirectHandler(ownSection);
     }
     #endregion
 

@@ -39,11 +39,11 @@ namespace SilverSim.BackendHandlers.Robust.OfflineIM
     [Description("Robust OfflineIM Protocol Server")]
     public sealed class RobustOfflineIMServerHandler : IPlugin
     {
-        readonly string m_OfflineIMServiceName;
-        OfflineIMServiceInterface m_OfflineIMService;
+        private readonly string m_OfflineIMServiceName;
+        private OfflineIMServiceInterface m_OfflineIMService;
 
-        readonly string m_UserAccountServiceName;
-        UserAccountServiceInterface m_UserAccountService;
+        private readonly string m_UserAccountServiceName;
+        private UserAccountServiceInterface m_UserAccountService;
 
         public RobustOfflineIMServerHandler(string offlineIMServiceName, string userAccountServiceName)
         {
@@ -66,7 +66,7 @@ namespace SilverSim.BackendHandlers.Robust.OfflineIM
             }
         }
 
-        void BoolResult(HttpRequest httpreq, bool success, string reason = "")
+        private void BoolResult(HttpRequest httpreq, bool success, string reason = "")
         {
             using (HttpResponse res = httpreq.BeginResponse("text/xml"))
             {
@@ -87,7 +87,7 @@ namespace SilverSim.BackendHandlers.Robust.OfflineIM
             }
         }
 
-        void HandleOfflineIM(HttpRequest httpreq)
+        private void HandleOfflineIM(HttpRequest httpreq)
         {
             if (httpreq.ContainsHeader("X-SecondLife-Shard"))
             {
@@ -134,9 +134,9 @@ namespace SilverSim.BackendHandlers.Robust.OfflineIM
             }
         }
 
-        void HandleStoreOfflineIM(HttpRequest httpreq, Dictionary<string, object> reqdata)
+        private void HandleStoreOfflineIM(HttpRequest httpreq, Dictionary<string, object> reqdata)
         {
-            GridInstantMessage im = new GridInstantMessage();
+            var im = new GridInstantMessage();
 
             if (reqdata.ContainsKey("BinaryBucket"))
             {
@@ -227,7 +227,7 @@ namespace SilverSim.BackendHandlers.Robust.OfflineIM
             }
         }
 
-        void NullResult(HttpRequest httpreq, string reason = "")
+        private void NullResult(HttpRequest httpreq, string reason = "")
         {
             using (HttpResponse res = httpreq.BeginResponse("text/xml"))
             {
@@ -245,10 +245,10 @@ namespace SilverSim.BackendHandlers.Robust.OfflineIM
             }
         }
 
-        void HandleGetOfflineIM(HttpRequest httpreq, Dictionary<string, object> reqdata)
+        private void HandleGetOfflineIM(HttpRequest httpreq, Dictionary<string, object> reqdata)
         {
             UUID principalID;
-            if(!reqdata.ContainsKey("PrincipalID") || 
+            if(!reqdata.ContainsKey("PrincipalID") ||
                 !UUID.TryParse(reqdata["PrincipalID"].ToString(), out principalID))
             {
                 NullResult(httpreq, "Invalid request");
@@ -314,17 +314,10 @@ namespace SilverSim.BackendHandlers.Robust.OfflineIM
     [PluginName("OfflineIMHandler")]
     public sealed class RobustOfflineIMServerHandlerFactory : IPluginFactory
     {
-        public RobustOfflineIMServerHandlerFactory()
-        {
-
-        }
-
-        public IPlugin Initialize(ConfigurationLoader loader, IConfig ownSection)
-        {
-            return new RobustOfflineIMServerHandler(
+        public IPlugin Initialize(ConfigurationLoader loader, IConfig ownSection) =>
+            new RobustOfflineIMServerHandler(
                 ownSection.GetString("OfflineIMService", "OfflineIMService"),
                 ownSection.GetString("UserAccountService", "UserAccountService"));
-        }
     }
     #endregion
 }

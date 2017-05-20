@@ -44,13 +44,13 @@ namespace SilverSim.BackendHandlers.Robust.Asset
     {
         protected static readonly ILog m_Log = LogManager.GetLogger("ROBUST ASSET HANDLER");
         private BaseHttpServer m_HttpServer;
-        AssetServiceInterface m_TemporaryAssetService;
-        AssetServiceInterface m_PersistentAssetService;
-        AssetServiceInterface m_ResourceAssetService;
-        readonly string m_TemporaryAssetServiceName;
-        readonly string m_PersistentAssetServiceName;
-        readonly bool m_EnableGet;
-        readonly bool m_EnableLimitedGet;
+        private AssetServiceInterface m_TemporaryAssetService;
+        private AssetServiceInterface m_PersistentAssetService;
+        private AssetServiceInterface m_ResourceAssetService;
+        private readonly string m_TemporaryAssetServiceName;
+        private readonly string m_PersistentAssetServiceName;
+        private readonly bool m_EnableGet;
+        private readonly bool m_EnableLimitedGet;
 
         public RobustAssetServerHandler(string persistentAssetServiceName, string temporaryAssetServiceName, bool enableGet, bool enableLimitedGet)
         {
@@ -88,7 +88,7 @@ namespace SilverSim.BackendHandlers.Robust.Asset
             dict["AssetServerURI"] = m_HttpServer.ServerURI;
         }
 
-        void AssetHandler(HttpRequest req)
+        private void AssetHandler(HttpRequest req)
         {
             if (req.ContainsHeader("X-SecondLife-Shard"))
             {
@@ -118,10 +118,9 @@ namespace SilverSim.BackendHandlers.Robust.Asset
 
         private const int MAX_ASSET_BASE64_CONVERSION_SIZE = 9 * 1024; /* must be an integral multiple of 3 */
 
-        void GetAssetHandler(HttpRequest req)
+        private void GetAssetHandler(HttpRequest req)
         {
-            string uri;
-            uri = req.RawUrl.Trim(new char[] { '/' });
+            string uri = req.RawUrl.Trim(new char[] { '/' });
             string[] parts = uri.Split('/');
             if (parts.Length < 2)
             {
@@ -164,7 +163,7 @@ namespace SilverSim.BackendHandlers.Robust.Asset
             }
         }
 
-        void GetAssetHandler_Xml(HttpRequest req, UUID id)
+        private void GetAssetHandler_Xml(HttpRequest req, UUID id)
         {
             AssetData data;
             try
@@ -282,7 +281,7 @@ namespace SilverSim.BackendHandlers.Robust.Asset
             }
         }
 
-        void GetAssetHandler_Metadata(HttpRequest req, UUID id)
+        private void GetAssetHandler_Metadata(HttpRequest req, UUID id)
         {
             AssetMetadata data;
             try
@@ -325,7 +324,7 @@ namespace SilverSim.BackendHandlers.Robust.Asset
                 }
             }
 
-            string assetbase_header = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<AssetMetadata>";
+            const string assetbase_header = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<AssetMetadata>";
             string flags = string.Empty;
 
             if (0 != (data.Flags & AssetFlags.Maptile))
@@ -378,7 +377,7 @@ namespace SilverSim.BackendHandlers.Robust.Asset
             }
         }
 
-        void GetAssetHandler_Data(HttpRequest req, UUID id)
+        private void GetAssetHandler_Data(HttpRequest req, UUID id)
         {
             AssetData data;
             try
@@ -444,7 +443,7 @@ namespace SilverSim.BackendHandlers.Robust.Asset
             }
         }
 
-        void DeleteAssetHandler(HttpRequest req)
+        private void DeleteAssetHandler(HttpRequest req)
         {
             using (HttpResponse res = req.BeginResponse())
             {
@@ -457,7 +456,7 @@ namespace SilverSim.BackendHandlers.Robust.Asset
             }
         }
 
-        void PostAssetHandler(HttpRequest req)
+        private void PostAssetHandler(HttpRequest req)
         {
             AssetData data;
             try
@@ -470,8 +469,8 @@ namespace SilverSim.BackendHandlers.Robust.Asset
                 return;
             }
 
-            if ((data.Temporary || data.Local) && 
-                null != m_TemporaryAssetService)
+            if ((data.Temporary || data.Local) &&
+                m_TemporaryAssetService != null)
             {
                 try
                 {
@@ -524,7 +523,7 @@ namespace SilverSim.BackendHandlers.Robust.Asset
             }
         }
 
-        static UUID ParseUUID(XmlTextReader reader)
+        private static UUID ParseUUID(XmlTextReader reader)
         {
             while (true)
             {
@@ -554,9 +553,9 @@ namespace SilverSim.BackendHandlers.Robust.Asset
             }
         }
 
-        static List<UUID> ParseArrayOfUUIDs(XmlTextReader reader)
+        private static List<UUID> ParseArrayOfUUIDs(XmlTextReader reader)
         {
-            List<UUID> result = new List<UUID>();
+            var result = new List<UUID>();
             bool haveroot = false;
             while (true)
             {
@@ -599,7 +598,7 @@ namespace SilverSim.BackendHandlers.Robust.Asset
             }
         }
 
-        void GetAssetsExistHandler(HttpRequest req)
+        private void GetAssetsExistHandler(HttpRequest req)
         {
             if (req.Method != "POST")
             {
@@ -610,7 +609,7 @@ namespace SilverSim.BackendHandlers.Robust.Asset
             List<UUID> ids;
             try
             {
-                using (XmlTextReader reader = new XmlTextReader(req.Body))
+                using (var reader = new XmlTextReader(req.Body))
                 {
                     ids = ParseArrayOfUUIDs(reader);
                 }
@@ -685,18 +684,11 @@ namespace SilverSim.BackendHandlers.Robust.Asset
     [PluginName("AssetHandler")]
     public class RobustAssetHandlerFactory : IPluginFactory
     {
-        public RobustAssetHandlerFactory()
-        {
-
-        }
-
-        public IPlugin Initialize(ConfigurationLoader loader, IConfig ownSection)
-        {
-            return new RobustAssetServerHandler(ownSection.GetString("PersistentAssetService", "AssetService"),
-                ownSection.GetString("TemporaryAssetService", string.Empty), 
+        public IPlugin Initialize(ConfigurationLoader loader, IConfig ownSection) =>
+            new RobustAssetServerHandler(ownSection.GetString("PersistentAssetService", "AssetService"),
+                ownSection.GetString("TemporaryAssetService", string.Empty),
                 ownSection.GetBoolean("IsGetEnabled", true),
                 ownSection.GetBoolean("IsLimitedGetEnabled", false));
-        }
     }
     #endregion
 }

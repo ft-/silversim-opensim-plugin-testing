@@ -37,20 +37,14 @@ namespace SilverSim.BackendHandlers.Robust.AuthInfo
     [Description("Robust AuthInfo Protocol Server")]
     public class AuthInfoServiceHandler : IPlugin, IHttpAclListAccess
     {
-        readonly string m_AuthInfoServiceName;
-        AuthInfoServiceInterface m_AuthInfoService;
-        readonly List<HttpAclHandler> m_AclHandlers = new List<HttpAclHandler>();
-        readonly HttpAclHandler m_SetAuthInfoAcl = new HttpAclHandler("setauthinfo");
-        readonly HttpAclHandler m_GetAuthInfoAcl = new HttpAclHandler("getauthinfo");
-        readonly HttpAclHandler m_SetPasswordAcl = new HttpAclHandler("setpassword");
+        private readonly string m_AuthInfoServiceName;
+        private AuthInfoServiceInterface m_AuthInfoService;
+        private readonly List<HttpAclHandler> m_AclHandlers = new List<HttpAclHandler>();
+        private readonly HttpAclHandler m_SetAuthInfoAcl = new HttpAclHandler("setauthinfo");
+        private readonly HttpAclHandler m_GetAuthInfoAcl = new HttpAclHandler("getauthinfo");
+        private readonly HttpAclHandler m_SetPasswordAcl = new HttpAclHandler("setpassword");
 
-        public HttpAclHandler[] HttpAclLists
-        {
-            get
-            {
-                return m_AclHandlers.ToArray();
-            }
-        }
+        public HttpAclHandler[] HttpAclLists => m_AclHandlers.ToArray();
 
         public AuthInfoServiceHandler(IConfig ownSection)
         {
@@ -74,7 +68,7 @@ namespace SilverSim.BackendHandlers.Robust.AuthInfo
             }
         }
 
-        void HandlePlainRequests(HttpRequest httpreq)
+        private void HandlePlainRequests(HttpRequest httpreq)
         {
             if (httpreq.ContainsHeader("X-SecondLife-Shard"))
             {
@@ -175,7 +169,7 @@ namespace SilverSim.BackendHandlers.Robust.AuthInfo
             }
         }
 
-        void SuccessResponse(HttpRequest httpreq, string token)
+        private void SuccessResponse(HttpRequest httpreq, string token)
         {
             using (HttpResponse res = httpreq.BeginResponse("text/xml"))
             {
@@ -189,7 +183,7 @@ namespace SilverSim.BackendHandlers.Robust.AuthInfo
             }
         }
 
-        void SuccessResponse(HttpRequest httpreq)
+        private void SuccessResponse(HttpRequest httpreq)
         {
             using (HttpResponse res = httpreq.BeginResponse("text/xml"))
             {
@@ -202,7 +196,7 @@ namespace SilverSim.BackendHandlers.Robust.AuthInfo
             }
         }
 
-        void HandleAuthenticate(HttpRequest req, Dictionary<string, object> data)
+        private void HandleAuthenticate(HttpRequest req, Dictionary<string, object> data)
         {
             UUID id;
             if(!UUID.TryParse(data["PRINCIPAL"].ToString(), out id))
@@ -232,7 +226,7 @@ namespace SilverSim.BackendHandlers.Robust.AuthInfo
             SuccessResponse(req, token.ToString());
         }
 
-        void HandleSetPassword(HttpRequest req, Dictionary<string, object> data)
+        private void HandleSetPassword(HttpRequest req, Dictionary<string, object> data)
         {
             UUID id;
             object password;
@@ -251,7 +245,7 @@ namespace SilverSim.BackendHandlers.Robust.AuthInfo
             SuccessResponse(req);
         }
 
-        void HandleVerify(HttpRequest req, Dictionary<string, object> data)
+        private void HandleVerify(HttpRequest req, Dictionary<string, object> data)
         {
             UUID id;
             if (!UUID.TryParse(data["PRINCIPAL"].ToString(), out id))
@@ -285,7 +279,7 @@ namespace SilverSim.BackendHandlers.Robust.AuthInfo
             SuccessResponse(req);
         }
 
-        void HandleRelease(HttpRequest req, Dictionary<string, object> data)
+        private void HandleRelease(HttpRequest req, Dictionary<string, object> data)
         {
             UUID id;
             if (!UUID.TryParse(data["PRINCIPAL"].ToString(), out id))
@@ -309,7 +303,7 @@ namespace SilverSim.BackendHandlers.Robust.AuthInfo
             SuccessResponse(req);
         }
 
-        void HandleGetAuthInfo(HttpRequest req, Dictionary<string, object> data)
+        private void HandleGetAuthInfo(HttpRequest req, Dictionary<string, object> data)
         {
             UserAuthInfo ai;
             UUID id;
@@ -339,7 +333,7 @@ namespace SilverSim.BackendHandlers.Robust.AuthInfo
             }
         }
 
-        void HandleSetAuthInfo(HttpRequest req, Dictionary<string, object> data)
+        private void HandleSetAuthInfo(HttpRequest req, Dictionary<string, object> data)
         {
             UserAuthInfo ai;
             UUID id;
@@ -369,15 +363,7 @@ namespace SilverSim.BackendHandlers.Robust.AuthInfo
     [PluginName("AuthInfoHandler")]
     public class AuthInfoServiceHandlerFactory : IPluginFactory
     {
-        public AuthInfoServiceHandlerFactory()
-        {
-
-        }
-
-        public IPlugin Initialize(ConfigurationLoader loader, IConfig ownSection)
-        {
-            return new AuthInfoServiceHandler(ownSection);
-        }
+        public IPlugin Initialize(ConfigurationLoader loader, IConfig ownSection) => new AuthInfoServiceHandler(ownSection);
     }
     #endregion
 }

@@ -55,19 +55,19 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
     [Description("OpenSim Teleport Protocol")]
     public class OpenSimTeleportProtocol : TeleportHandlerServiceInterface, IPlugin
     {
-        const int PROTOCOL_VERSION_MAJOR = 0;
-        const int PROTOCOL_VERSION_MINOR = 6;
+        private const int PROTOCOL_VERSION_MAJOR = 0;
+        private const int PROTOCOL_VERSION_MINOR = 6;
 
         protected static readonly ILog m_Log = LogManager.GetLogger("OPENSIM TELEPORT PROTOCOL");
-        private static Random m_RandomNumber = new Random();
-        private static object m_RandomNumberLock = new object();
+        private static readonly Random m_RandomNumber = new Random();
+        private static readonly object m_RandomNumberLock = new object();
         public int TimeoutMs = 30000;
         private Thread m_TeleportThread;
         private readonly object m_TeleportThreadLock = new object();
         protected CommandRegistry Commands { get; private set; }
-        Main.Common.Caps.CapsHttpRedirector m_CapsRedirector;
-        List<IProtocolExtender> m_PacketHandlerPlugins = new List<IProtocolExtender>();
-        SceneList m_Scenes;
+        private Main.Common.Caps.CapsHttpRedirector m_CapsRedirector;
+        private List<IProtocolExtender> m_PacketHandlerPlugins = new List<IProtocolExtender>();
+        private SceneList m_Scenes;
 
         internal static uint NewCircuitCode
         {
@@ -87,36 +87,28 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
         {
             public TeleportFailedException()
             {
-
             }
 
             public TeleportFailedException(string message)
                 : base(message)
             {
-
             }
 
             protected TeleportFailedException(SerializationInfo info, StreamingContext context)
                 : base(info, context)
             {
-
             }
 
             public TeleportFailedException(string message, Exception innerException)
                 : base(message, innerException)
             {
-
             }
         }
 
-        internal static string NewCapsURL(string serverURI, UUID uuid)
-        {
-            return serverURI + "CAPS/" + uuid.ToString() + "0000/";
-        }
+        internal static string NewCapsURL(string serverURI, UUID uuid) => serverURI + "CAPS/" + uuid.ToString() + "0000/";
 
         public OpenSimTeleportProtocol()
         {
-
         }
 
         public OpenSimTeleportProtocol(
@@ -139,19 +131,13 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
             m_Scenes = loader.Scenes;
         }
 
-        public override GridType GridType
-        {
-            get
-            {
-                return new GridType("opensim");
-            }
-        }
+        public override GridType GridType => new GridType("opensim");
 
         public override void Cancel()
         {
             lock (m_TeleportThreadLock)
             {
-                if (null != m_TeleportThread)
+                if (m_TeleportThread != null)
                 {
                     m_TeleportThread.Abort();
                 }
@@ -190,19 +176,19 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
             agent.ActiveChilds.Remove(regionInfo.ID);
         }
 
-        void PostAgent(UUID fromSceneID, IAgent agent, DestinationInfo destinationRegion, int maxAllowedWearables, out uint circuitCode, out string capsPath)
+        private void PostAgent(UUID fromSceneID, IAgent agent, DestinationInfo destinationRegion, int maxAllowedWearables, out uint circuitCode, out string capsPath)
         {
             PostAgent(fromSceneID, agent, destinationRegion, NewCircuitCode, UUID.Random, maxAllowedWearables, out circuitCode, out capsPath);
         }
 
-        void PostAgent(UUID fromSceneID, IAgent agent, DestinationInfo destinationRegion, uint newCircuitCode, UUID capsId, int maxAllowedWearables, out uint circuitCode, out string capsPath)
+        private void PostAgent(UUID fromSceneID, IAgent agent, DestinationInfo destinationRegion, uint newCircuitCode, UUID capsId, int maxAllowedWearables, out uint circuitCode, out string capsPath)
         {
-            ViewerAgent vagent = (ViewerAgent)agent;
+            var vagent = (ViewerAgent)agent;
             AgentCircuit acirc = vagent.Circuits[fromSceneID];
 
-            PostData agentPostData = new PostData();
+            var agentPostData = new PostData();
 
-            AgentChildInfo childInfo = new AgentChildInfo()
+            var childInfo = new AgentChildInfo()
             {
                 DestinationInfo = destinationRegion,
                 TeleportService = this
@@ -246,10 +232,8 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
             }
             try
             {
-                using (Stream o = HttpClient.DoStreamRequest("POST", agentURL, null, "application/json", compressed_postdata.Length, delegate (Stream ws)
-                {
-                    ws.Write(compressed_postdata, 0, compressed_postdata.Length);
-                }, true, TimeoutMs))
+                using (Stream o = HttpClient.DoStreamRequest("POST", agentURL, null, "application/json", compressed_postdata.Length, (Stream ws) =>
+                    ws.Write(compressed_postdata, 0, compressed_postdata.Length), true, TimeoutMs))
                 {
                     result = (Map)Json.Deserialize(o);
                 }
@@ -258,10 +242,8 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
             {
                 try
                 {
-                    using (Stream o = HttpClient.DoStreamRequest("POST", agentURL, null, "application/x-gzip", compressed_postdata.Length, delegate (Stream ws)
-                    {
-                        ws.Write(compressed_postdata, 0, compressed_postdata.Length);
-                    }, false, TimeoutMs))
+                    using (Stream o = HttpClient.DoStreamRequest("POST", agentURL, null, "application/x-gzip", compressed_postdata.Length, (Stream ws) =>
+                        ws.Write(compressed_postdata, 0, compressed_postdata.Length), false, TimeoutMs))
                     {
                         result = (Map)Json.Deserialize(o);
                     }
@@ -270,10 +252,8 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
                 {
                     try
                     {
-                        using (Stream o = HttpClient.DoStreamRequest("POST", agentURL, null, "application/json", uncompressed_postdata.Length, delegate (Stream ws)
-                        {
-                            ws.Write(uncompressed_postdata, 0, uncompressed_postdata.Length);
-                        }, false, TimeoutMs))
+                        using (Stream o = HttpClient.DoStreamRequest("POST", agentURL, null, "application/json", uncompressed_postdata.Length, (Stream ws) =>
+                            ws.Write(uncompressed_postdata, 0, uncompressed_postdata.Length), false, TimeoutMs))
                         {
                             result = (Map)Json.Deserialize(o);
                         }
@@ -342,11 +322,11 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
         {
             lock (m_TeleportThreadLock)
             {
-                if (null == m_TeleportThread)
+                if (m_TeleportThread == null)
                 {
                     m_Log.DebugFormat("Teleport home requested for {0}", agent.Owner.FullName);
 
-                    m_TeleportThread = ThreadManager.CreateThread(delegate ()
+                    m_TeleportThread = ThreadManager.CreateThread(() =>
                     {
                         try
                         {
@@ -386,11 +366,11 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
             /* foreign grid */
             lock (m_TeleportThreadLock)
             {
-                if (null == m_TeleportThread)
+                if (m_TeleportThread == null)
                 {
                     m_Log.DebugFormat("Teleport to {0} requested for {1}: {2}", regionName, agent.Owner.FullName, flags.ToString());
 
-                    m_TeleportThread = ThreadManager.CreateThread(delegate ()
+                    m_TeleportThread = ThreadManager.CreateThread(() =>
                     {
                         try
                         {
@@ -450,11 +430,11 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
                 /* same grid */
                 lock (m_TeleportThreadLock)
                 {
-                    if (null == m_TeleportThread)
+                    if (m_TeleportThread == null)
                     {
                         m_Log.DebugFormat("Teleport to this grid at {0},{1} requested for {2}: {3}", location.GridX, location.GridY, agent.Owner.FullName, flags.ToString());
 
-                        m_TeleportThread = ThreadManager.CreateThread(delegate ()
+                        m_TeleportThread = ThreadManager.CreateThread(() =>
                         {
                             try
                             {
@@ -510,11 +490,11 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
                 /* foreign grid */
                 lock (m_TeleportThreadLock)
                 {
-                    if (null == m_TeleportThread)
+                    if (m_TeleportThread == null)
                     {
                         m_Log.DebugFormat("Teleport to grid {3} at {0},{1} requested for {2}: {3}", location.GridX, location.GridY, agent.Owner.FullName, gatekeeperURI, flags.ToString());
 
-                        m_TeleportThread = ThreadManager.CreateThread(delegate ()
+                        m_TeleportThread = ThreadManager.CreateThread(() =>
                         {
                             try
                             {
@@ -575,11 +555,11 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
                 /* same grid */
                 lock (m_TeleportThreadLock)
                 {
-                    if (null == m_TeleportThread)
+                    if (m_TeleportThread == null)
                     {
                         m_Log.DebugFormat("Teleport to region {0} at this grid requested for {1}: {2}", regionID.ToString(), agent.Owner.FullName, flags.ToString());
 
-                        m_TeleportThread = ThreadManager.CreateThread(delegate ()
+                        m_TeleportThread = ThreadManager.CreateThread(() =>
                         {
                             try
                             {
@@ -635,11 +615,11 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
                 /* foreign grid */
                 lock (m_TeleportThreadLock)
                 {
-                    if (null == m_TeleportThread)
+                    if (m_TeleportThread == null)
                     {
                         m_Log.DebugFormat("Teleport to region {0} at grid {2} requested for {1}: {3}", regionID.ToString(), agent.Owner.FullName, gatekeeperURI, flags.ToString());
 
-                        m_TeleportThread = ThreadManager.CreateThread(delegate ()
+                        m_TeleportThread = ThreadManager.CreateThread(() =>
                         {
                             try
                             {
@@ -676,10 +656,10 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
         #endregion
 
         #region Teleport variations setup
-        DestinationInfo TeleportTo_Step1_RegionNameLookup(SceneInterface sceneInterface, IAgent agent, string regionName, TeleportFlags flags)
+        private DestinationInfo TeleportTo_Step1_RegionNameLookup(SceneInterface sceneInterface, IAgent agent, string regionName, TeleportFlags flags)
         {
             DestinationInfo dInfo = null;
-            TeleportStart teleStart = new TeleportStart()
+            var teleStart = new TeleportStart()
             {
                 TeleportFlags = flags
             };
@@ -732,7 +712,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
                     }
                 }
 
-                if (null == dInfo)
+                if (dInfo == null)
                 {
                     GridServiceInterface gridService = sceneInterface.GridService;
                     if (gridService != null)
@@ -761,16 +741,16 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
             return dInfo;
         }
 
-        DestinationInfo TeleportTo_Step1_ThisGrid(SceneInterface sceneInterface, IAgent agent, string gatekeeperURI, UUID regionID, TeleportFlags flags)
+        private DestinationInfo TeleportTo_Step1_ThisGrid(SceneInterface sceneInterface, IAgent agent, string gatekeeperURI, UUID regionID, TeleportFlags flags)
         {
             GridServiceInterface gridService = sceneInterface.GridService;
-            TeleportStart teleStart = new TeleportStart()
+            var teleStart = new TeleportStart()
             {
                 TeleportFlags = flags
             };
             agent.SendMessageIfRootAgent(teleStart, sceneInterface.ID);
 
-            if (null == gridService)
+            if (gridService == null)
             {
                 throw new TeleportFailedException("No grid service");
             }
@@ -785,17 +765,16 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
                 throw new TeleportFailedException(this.GetLanguageString(agent.CurrentCulture, "RegionNotFound", "Region not found"));
             }
 
-            DestinationInfo dInfo = new DestinationInfo(rInfo)
+            return new DestinationInfo(rInfo)
             {
                 LocalToGrid = true,
                 GatekeeperURI = gatekeeperURI
             };
-            return dInfo;
         }
 
-        DestinationInfo TeleportTo_Step1_ForeignGrid(SceneInterface sceneInterface, IAgent agent, string gatekeeperURI, UUID regionID, TeleportFlags flags)
+        private DestinationInfo TeleportTo_Step1_ForeignGrid(SceneInterface sceneInterface, IAgent agent, string gatekeeperURI, UUID regionID, TeleportFlags flags)
         {
-            TeleportStart teleStart = new TeleportStart()
+            var teleStart = new TeleportStart()
             {
                 TeleportFlags = flags
             };
@@ -804,16 +783,16 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
             return GetRegionById(gatekeeperURI, agent, regionID);
         }
 
-        DestinationInfo TeleportTo_Step1_ThisGrid(SceneInterface sceneInterface, IAgent agent, string gatekeeperURI, GridVector location, TeleportFlags flags)
+        private DestinationInfo TeleportTo_Step1_ThisGrid(SceneInterface sceneInterface, IAgent agent, string gatekeeperURI, GridVector location, TeleportFlags flags)
         {
             GridServiceInterface gridService = sceneInterface.GridService;
-            TeleportStart teleStart = new TeleportStart()
+            var teleStart = new TeleportStart()
             {
                 TeleportFlags = flags
             };
             agent.SendMessageIfRootAgent(teleStart, sceneInterface.ID);
 
-            if (null == gridService)
+            if (gridService == null)
             {
                 throw new TeleportFailedException("No grid service");
             }
@@ -828,17 +807,16 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
                 throw new TeleportFailedException(this.GetLanguageString(agent.CurrentCulture, "RegionNotFound", "Region not found"));
             }
 
-            DestinationInfo dInfo = new DestinationInfo(rInfo)
+            return new DestinationInfo(rInfo)
             {
                 LocalToGrid = true,
                 GatekeeperURI = gatekeeperURI
             };
-            return dInfo;
         }
 
-        DestinationInfo TeleportTo_Step1_ForeignGrid(SceneInterface sceneInterface, IAgent agent, string gatekeeperURI, GridVector location, TeleportFlags flags)
+        private DestinationInfo TeleportTo_Step1_ForeignGrid(SceneInterface sceneInterface, IAgent agent, string gatekeeperURI, GridVector location, TeleportFlags flags)
         {
-            TeleportStart teleStart = new TeleportStart()
+            var teleStart = new TeleportStart()
             {
                 TeleportFlags = flags
             };
@@ -848,11 +826,11 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
         }
         #endregion
 
-        void TeleportTo_Step2(SceneInterface scene, IAgent agent, DestinationInfo dInfo, Vector3 position, Vector3 lookAt, TeleportFlags flags)
+        private void TeleportTo_Step2(SceneInterface scene, IAgent agent, DestinationInfo dInfo, Vector3 position, Vector3 lookAt, TeleportFlags flags)
         {
             UUID sceneID = scene.ID;
             uint actualCircuitCode;
-            ViewerAgent vagent = (ViewerAgent)agent;
+            var vagent = (ViewerAgent)agent;
             AgentCircuit circ = vagent.Circuits[sceneID];
             actualCircuitCode = circ.CircuitCode;
 
@@ -915,11 +893,10 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
                                 throw new TeleportFailedException(this.GetLanguageString(agent.CurrentCulture, "AddAgentFailed", "Adding agent failed"));
                             }
 
-
                             SendTeleportProgress(agent, sceneID, this.GetLanguageString(agent.CurrentCulture, "TransferingToDestination", "Transfering to destination"), flags);
 
                             /* the moment we send this, there is no way to get the viewer back if something fails and the viewer connected successfully on other side */
-                            TeleportFinish teleFinish = new TeleportFinish()
+                            var teleFinish = new TeleportFinish()
                             {
                                 AgentID = agent.ID,
                                 LocationID = 4,
@@ -1066,9 +1043,9 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
             }
         }
 
-        static void SendTeleportProgress(IAgent agent, UUID sceneID, string message, TeleportFlags flags)
+        private static void SendTeleportProgress(IAgent agent, UUID sceneID, string message, TeleportFlags flags)
         {
-            TeleportProgress progressMsg = new TeleportProgress()
+            var progressMsg = new TeleportProgress()
             {
                 AgentID = agent.ID,
                 TeleportFlags = flags,
@@ -1091,12 +1068,12 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
             }
         }
 
-        ProtocolVersion QueryAccess(DestinationInfo dInfo, IAgent agent, Vector3 position)
+        private ProtocolVersion QueryAccess(DestinationInfo dInfo, IAgent agent, Vector3 position)
         {
             string uri = BuildAgentUri(dInfo, agent);
 
             string versionStr = string.Format("{0}.{1}", PROTOCOL_VERSION_MAJOR, PROTOCOL_VERSION_MINOR);
-            Map req = new Map
+            var req = new Map
             {
                 { "position", position.ToString() },
                 { "my_version", "SIMULATION/" + versionStr },
@@ -1105,16 +1082,16 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
                 { "simulation_service_accepted_min", "0.3" },
                 { "simulation_service_accepted_max", versionStr }
             };
-            Map entityctx = new Map
+            var entityctx = new Map
             {
                 { "InboundVersion", versionStr },
                 { "OutboundVersion", versionStr },
                 { "WearablesCount", (int)WearableType.NumWearables }
             };
             req.Add("context", entityctx);
-            Map features = new Map();
+            var features = new Map();
             req.Add("features", features);
-            if (null != agent.Owner.HomeURI)
+            if (agent.Owner.HomeURI != null)
             {
                 req.Add("agent_home_uri", agent.Owner.HomeURI);
             }
@@ -1150,7 +1127,6 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
                 protoVersion = new ProtocolVersion(version);
             }
 
-
             if (protoVersion.Major > PROTOCOL_VERSION_MAJOR)
             {
                 protoVersion.Major = PROTOCOL_VERSION_MAJOR;
@@ -1165,7 +1141,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
         #endregion
 
         #region Gatekeeper connector
-        DestinationInfo GetRegionByName(string gatekeeperuri, IAgent agent, string name)
+        private DestinationInfo GetRegionByName(string gatekeeperuri, IAgent agent, string name)
         {
             UUID regionId;
             Map req = new Map
@@ -1181,12 +1157,12 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
             return GetRegionById(gatekeeperuri, agent, regionId);
         }
 
-        DestinationInfo GetRegionById(string gatekeeperuri, IAgent agent, UUID regionId)
+        private DestinationInfo GetRegionById(string gatekeeperuri, IAgent agent, UUID regionId)
         {
-            Map req = new Map
+            var req = new Map
             {
-                { "region_uuid", regionId },
-                { "agent_id", agent.ID }
+                ["region_uuid"] = regionId,
+                ["agent_id"] = agent.ID
             };
             if (agent.Owner.HomeURI != null)
             {
@@ -1260,7 +1236,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
             return dInfo;
         }
 
-        Map DoXmlRpcWithHashResponse(string gatekeeperuri, string method, Map reqparams)
+        private Map DoXmlRpcWithHashResponse(string gatekeeperuri, string method, Map reqparams)
         {
             XmlRpc.XmlRpcRequest req = new XmlRpc.XmlRpcRequest(method);
             req.Params.Add(reqparams);
@@ -1277,11 +1253,11 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
         #endregion
 
         #region PutAgent Handler
-        bool PutAgent(UUID fromSceneID, RegionInfo dInfo, IAgent agent, uint circuitcode, int maxAllowedWearables, bool waitForRoot = false, string callbackUri = "")
+        private bool PutAgent(UUID fromSceneID, RegionInfo dInfo, IAgent agent, uint circuitcode, int maxAllowedWearables, bool waitForRoot = false, string callbackUri = "")
         {
             string uri = BuildAgentUri(dInfo, agent);
 
-            Map req = new Map
+            var req = new Map
             {
                 { "destination_x", dInfo.Location.X },
                 { "destination_y", dInfo.Location.Y },
@@ -1314,7 +1290,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
             //req.Add("always_run", )
             //req.Add("prey_agent", );
             //req.Add("agent_access", );
-            if (null != agent.Group)
+            if (agent.Group != null)
             {
                 req.Add("active_group_id", agent.Group.ID);
             }
@@ -1382,9 +1358,9 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
                     AnArray wearablesBlock = new AnArray();
                     foreach(AgentWearables.WearableInfo wearable in wearablesList)
                     {
-                        Map wp = new Map
+                        var wp = new Map
                         {
-                            { "item", wearable.ItemID }
+                            ["item"] = wearable.ItemID
                         };
                         if (wearable.AssetID != UUID.Zero)
                         {
@@ -1477,14 +1453,14 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
             Vector3.TryParse(args["sit_offset"].AsString(), out SitOffset);
             */
             IObject obj = agent.SittingOnObject;
-            if (null != obj)
+            if (obj != null)
             {
                 req.Add("parent_part", obj.LocalID);
                 req.Add("sit_offset", agent.LocalPosition);
             }
 
             byte[] uncompressed_postdata;
-            using (MemoryStream ms = new MemoryStream())
+            using (var ms = new MemoryStream())
             {
                 Json.Serialize(req, ms);
                 uncompressed_postdata = ms.ToArray();
@@ -1508,10 +1484,8 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
             }
             try
             {
-                using (Stream o = HttpClient.DoStreamRequest("PUT", uri, null, "application/json", compressed_postdata.Length, delegate (Stream ws)
-                {
-                    ws.Write(compressed_postdata, 0, compressed_postdata.Length);
-                }, true, TimeoutMs))
+                using (Stream o = HttpClient.DoStreamRequest("PUT", uri, null, "application/json", compressed_postdata.Length, (Stream ws) =>
+                    ws.Write(compressed_postdata, 0, compressed_postdata.Length), true, TimeoutMs))
                 {
                     using (StreamReader reader = o.UTF8StreamReader())
                     {
@@ -1523,10 +1497,8 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
             {
                 try
                 {
-                    using (Stream o = HttpClient.DoStreamRequest("PUT", uri, null, "application/x-gzip", compressed_postdata.Length, delegate (Stream ws)
-                    {
-                        ws.Write(compressed_postdata, 0, compressed_postdata.Length);
-                    }, false, TimeoutMs))
+                    using (Stream o = HttpClient.DoStreamRequest("PUT", uri, null, "application/x-gzip", compressed_postdata.Length, (Stream ws) =>
+                        ws.Write(compressed_postdata, 0, compressed_postdata.Length), false, TimeoutMs))
                     {
                         using (StreamReader reader = o.UTF8StreamReader())
                         {
@@ -1538,10 +1510,8 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
                 {
                     try
                     {
-                        using (Stream o = HttpClient.DoStreamRequest("PUT", uri, null, "application/json", uncompressed_postdata.Length, delegate (Stream ws)
-                        {
-                            ws.Write(uncompressed_postdata, 0, uncompressed_postdata.Length);
-                        }, false, TimeoutMs))
+                        using (Stream o = HttpClient.DoStreamRequest("PUT", uri, null, "application/json", uncompressed_postdata.Length, (Stream ws) =>
+                            ws.Write(uncompressed_postdata, 0, uncompressed_postdata.Length), false, TimeoutMs))
                         {
                             using (StreamReader reader = o.UTF8StreamReader())
                             {

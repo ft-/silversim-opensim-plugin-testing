@@ -32,7 +32,6 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
     {
         public interface IProfileConnectorImplementation : IClassifiedsInterface, IPicksInterface, INotesInterface, IUserPreferencesInterface, IPropertiesInterface
         {
-
         }
 
         [Serializable]
@@ -40,25 +39,21 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
         {
             public RpcFaultException()
             {
-
             }
 
             public RpcFaultException(string message)
                 : base(message)
             {
-
             }
 
             protected RpcFaultException(SerializationInfo info, StreamingContext context)
                 : base(info, context)
             {
-
             }
 
             public RpcFaultException(string message, Exception innerException)
                 : base(message, innerException)
             {
-
             }
         }
 
@@ -76,44 +71,14 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
             /* no action needed */
         }
 
-        public override ProfileServiceInterface.IClassifiedsInterface Classifieds
-        {
-            get 
-            {
-                return m_ConnectorImplementation; 
-            }
-        }
+        public override IClassifiedsInterface Classifieds => m_ConnectorImplementation;
 
-        public override ProfileServiceInterface.IPicksInterface Picks
-        {
-            get 
-            {
-                return m_ConnectorImplementation;
-            }
-        }
+        public override IPicksInterface Picks => m_ConnectorImplementation;
 
-        public override ProfileServiceInterface.INotesInterface Notes
-        {
-            get
-            {
-                return m_ConnectorImplementation;
-            }
-        }
+        public override INotesInterface Notes => m_ConnectorImplementation;
 
-        public override ProfileServiceInterface.IUserPreferencesInterface Preferences
-        {
-            get 
-            {
-                return m_ConnectorImplementation;
-            }
-        }
+        public override IUserPreferencesInterface Preferences => m_ConnectorImplementation;
 
-        public override ProfileServiceInterface.IPropertiesInterface Properties
-        {
-            get 
-            {
-                return m_ConnectorImplementation;
-            }
-        }
+        public override IPropertiesInterface Properties => m_ConnectorImplementation;
     }
 }

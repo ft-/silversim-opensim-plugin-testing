@@ -40,13 +40,13 @@ namespace SilverSim.BackendHandlers.Robust.Friends
     [Description("Robust Friends Protocol Server")]
     public class HGFriendsServerHandler : IPlugin, IServiceURLsGetInterface
     {
-        FriendsServiceInterface m_FriendsService;
-        readonly string m_FriendsServiceName;
-        BaseHttpServer m_HttpServer;
-        readonly string m_PresenceServiceName;
-        PresenceServiceInterface m_PresenceService;
+        private FriendsServiceInterface m_FriendsService;
+        private readonly string m_FriendsServiceName;
+        private BaseHttpServer m_HttpServer;
+        private readonly string m_PresenceServiceName;
+        private PresenceServiceInterface m_PresenceService;
 
-        readonly Dictionary<string, Action<HttpRequest, Dictionary<string, object>>> m_Handlers = new Dictionary<string, Action<HttpRequest, Dictionary<string, object>>>();
+        private readonly Dictionary<string, Action<HttpRequest, Dictionary<string, object>>> m_Handlers = new Dictionary<string, Action<HttpRequest, Dictionary<string, object>>>();
 
         public HGFriendsServerHandler(IConfig ownSection)
         {
@@ -77,7 +77,7 @@ namespace SilverSim.BackendHandlers.Robust.Friends
             }
         }
 
-        string GetSecret(string friendId)
+        private string GetSecret(string friendId)
         {
             string[] parts = friendId.Split(Semicolon, 4);
             return (parts.Length == 4) ? parts[3] : string.Empty;
@@ -85,7 +85,7 @@ namespace SilverSim.BackendHandlers.Robust.Friends
 
         private static readonly char[] Semicolon = new char[1] { ';' };
 
-        void HGFriendsHandler(HttpRequest httpreq)
+        private void HGFriendsHandler(HttpRequest httpreq)
         {
             if (httpreq.ContainsHeader("X-SecondLife-Shard"))
             {
@@ -145,7 +145,7 @@ namespace SilverSim.BackendHandlers.Robust.Friends
             }
         }
 
-        void HandleDeleteFriendship(HttpRequest req, Dictionary<string, object> reqdata)
+        private void HandleDeleteFriendship(HttpRequest req, Dictionary<string, object> reqdata)
         {
             string secret;
             UUID userid;
@@ -170,11 +170,12 @@ namespace SilverSim.BackendHandlers.Robust.Friends
                 return;
             }
 
-            FriendInfo fi = new FriendInfo();
-            fi.User.ID = userid;
-            fi.Friend = friendid;
-            fi.Secret = secret;
-
+            var fi = new FriendInfo()
+            {
+                User = new UUI(userid),
+                Friend = friendid,
+                Secret = secret
+            };
             try
             {
                 m_FriendsService.Delete(fi);
@@ -186,7 +187,7 @@ namespace SilverSim.BackendHandlers.Robust.Friends
             }
         }
 
-        void HandleOnlineStatusNotification(HttpRequest req, Dictionary<string, object> reqdata)
+        private void HandleOnlineStatusNotification(HttpRequest req, Dictionary<string, object> reqdata)
         {
             UUID principalID = UUID.Zero;
             object o;
@@ -206,7 +207,7 @@ namespace SilverSim.BackendHandlers.Robust.Friends
                 FailureResult(req);
             }
 
-            List<KeyValuePair<UUI, string>> friends = new List<KeyValuePair<UUI, string>>();
+            var friends = new List<KeyValuePair<UUI, string>>();
             foreach (KeyValuePair<string, object> kvp in reqdata)
             {
                 if (kvp.Key.StartsWith("friend_"))
@@ -220,7 +221,7 @@ namespace SilverSim.BackendHandlers.Robust.Friends
                 }
             }
 
-            List<UUID> onlineFriends = new List<UUID>();
+            var onlineFriends = new List<UUID>();
 
             foreach(KeyValuePair<UUI, string> kvp in friends)
             {
@@ -261,7 +262,7 @@ namespace SilverSim.BackendHandlers.Robust.Friends
             }
         }
 
-        void SuccessResult(HttpRequest req)
+        private void SuccessResult(HttpRequest req)
         {
             using (HttpResponse res = req.BeginResponse("text/xml"))
             {
@@ -274,7 +275,7 @@ namespace SilverSim.BackendHandlers.Robust.Friends
             }
         }
 
-        void FailureResult(HttpRequest req, string msg = "")
+        private void FailureResult(HttpRequest req, string msg = "")
         {
             using (HttpResponse res = req.BeginResponse("text/xml"))
             {
@@ -292,14 +293,7 @@ namespace SilverSim.BackendHandlers.Robust.Friends
     [PluginName("HGFriendsHandler")]
     public class HGFriendsServerHandlerFactory : IPluginFactory
     {
-        public HGFriendsServerHandlerFactory()
-        {
-
-        }
-
-        public IPlugin Initialize(ConfigurationLoader loader, IConfig ownSection)
-        {
-            return new HGFriendsServerHandler(ownSection);
-        }
+        public IPlugin Initialize(ConfigurationLoader loader, IConfig ownSection) =>
+            new HGFriendsServerHandler(ownSection);
     }
 }

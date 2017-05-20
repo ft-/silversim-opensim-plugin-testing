@@ -40,15 +40,15 @@ namespace SilverSim.OpenSimArchiver
     public class NpcInventoryArchiverLoadStore : IPlugin
     {
         private static readonly ILog m_Log = LogManager.GetLogger("NPC-IAR ARCHIVER");
-        InventoryServiceInterface m_NpcInventoryService;
-        NpcPresenceServiceInterface m_NpcPresenceService;
-        AssetServiceInterface m_NpcAssetService;
-        readonly List<AvatarNameServiceInterface> m_AvatarNameServices = new List<AvatarNameServiceInterface>();
+        private InventoryServiceInterface m_NpcInventoryService;
+        private NpcPresenceServiceInterface m_NpcPresenceService;
+        private AssetServiceInterface m_NpcAssetService;
+        private readonly List<AvatarNameServiceInterface> m_AvatarNameServices = new List<AvatarNameServiceInterface>();
 
-        readonly string m_NpcInventoryServiceName;
-        readonly string m_NpcPresenceServiceName;
-        readonly string m_NpcAssetServiceName;
-        readonly string m_AvatarNameServiceNames;
+        private readonly string m_NpcInventoryServiceName;
+        private readonly string m_NpcPresenceServiceName;
+        private readonly string m_NpcAssetServiceName;
+        private readonly string m_AvatarNameServiceNames;
 
         public NpcInventoryArchiverLoadStore(IConfig ownSection)
         {
@@ -75,7 +75,7 @@ namespace SilverSim.OpenSimArchiver
         }
 
         #region Save IAR
-        void SaveIarCommand(List<string> args, TTY io, UUID limitedToScene)
+        private void SaveIarCommand(List<string> args, TTY io, UUID limitedToScene)
         {
             if (args[0] == "help")
             {
@@ -101,7 +101,7 @@ namespace SilverSim.OpenSimArchiver
             string lastname = null;
             string filename = null;
             string inventorypath = null;
-            InventoryArchiver.IAR.SaveOptions options = InventoryArchiver.IAR.SaveOptions.None;
+            var options = InventoryArchiver.IAR.SaveOptions.None;
 
             for (int argi = 2; argi < args.Count; ++argi)
             {
@@ -128,7 +128,7 @@ namespace SilverSim.OpenSimArchiver
                 }
             }
 
-            if (null == filename)
+            if (string.IsNullOrEmpty(filename))
             {
                 io.Write("missing parameters");
                 return;
@@ -157,7 +157,7 @@ namespace SilverSim.OpenSimArchiver
         #endregion
 
         #region Load IAR
-        void LoadIarCommand(List<string> args, TTY io, UUID limitedToScene)
+        private void LoadIarCommand(List<string> args, TTY io, UUID limitedToScene)
         {
             if (args[0] == "help")
             {
@@ -179,12 +179,11 @@ namespace SilverSim.OpenSimArchiver
                 return;
             }
 
-
             string filename = null;
             string firstname = null;
             string lastname = null;
             string inventorypath = null;
-            InventoryArchiver.IAR.LoadOptions options = InventoryArchiver.IAR.LoadOptions.None;
+            var options = InventoryArchiver.IAR.LoadOptions.None;
 
             for (int argi = 2; argi < args.Count; ++argi)
             {

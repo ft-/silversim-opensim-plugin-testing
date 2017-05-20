@@ -37,27 +37,15 @@ namespace SilverSim.BackendConnectors.Robust.UserAgent
     public class RobustUserAgentConnector : UserAgentServiceInterface, IPlugin, IDisplayNameAccessor
     {
         public int TimeoutMs = 20000;
-        readonly string m_Uri;
+        private readonly string m_Uri;
 
-        public override IDisplayNameAccessor DisplayName
-        {
-            get
-            {
-                return this;
-            }
-        }
+        public override IDisplayNameAccessor DisplayName => this;
 
         string IDisplayNameAccessor.this[UUI agent]
         {
-            get
-            {
-                throw new KeyNotFoundException();
-            }
+            get { throw new KeyNotFoundException(); }
 
-            set
-            {
-                throw new NotSupportedException();
-            }
+            set { throw new NotSupportedException(); }
         }
 
         public RobustUserAgentConnector(string uri)
@@ -72,7 +60,7 @@ namespace SilverSim.BackendConnectors.Robust.UserAgent
 
         public override void VerifyAgent(UUID sessionID, string token)
         {
-            Map hash = new Map
+            var hash = new Map
             {
                 { "sessionID", sessionID },
                 { "token", token }
@@ -82,7 +70,7 @@ namespace SilverSim.BackendConnectors.Robust.UserAgent
 
         public override void VerifyClient(UUID sessionID, string token)
         {
-            Map hash = new Map
+            var hash = new Map
             {
                 { "sessionID", sessionID },
                 { "token", token }
@@ -92,7 +80,7 @@ namespace SilverSim.BackendConnectors.Robust.UserAgent
 
         public override List<UUID> NotifyStatus(List<KeyValuePair<UUI, string>> friends, UUI user, bool online)
         {
-            Map hash = new Map
+            var hash = new Map
             {
                 { "userID", user.ID },
                 { "online", online.ToString() }
@@ -106,7 +94,7 @@ namespace SilverSim.BackendConnectors.Robust.UserAgent
 
             Map res = DoXmlRpcWithHashResponse("status_notification", hash);
 
-            List<UUID> friendsOnline = new List<UUID>();
+            var friendsOnline = new List<UUID>();
 
             foreach(string key in res.Keys)
             {
@@ -126,7 +114,7 @@ namespace SilverSim.BackendConnectors.Robust.UserAgent
         public override UserAgentServiceInterface.UserInfo GetUserInfo(UUI user)
         {
             Dictionary<string, string> info = GetUserInfo_Internal(user);
-            UserInfo userInfo = new UserInfo()
+            var userInfo = new UserInfo()
             {
                 FirstName = info.ContainsKey("user_firstname") ? info["user_firstname"] : user.FirstName,
                 LastName = info.ContainsKey("user_lastname") ? info["user_lastname"] : user.LastName
@@ -135,12 +123,12 @@ namespace SilverSim.BackendConnectors.Robust.UserAgent
             {
                 userInfo.UserFlags = uint.Parse(info["user_flags"]);
             }
-            
+
             if(info.ContainsKey("user_created"))
             {
                 userInfo.UserCreated = Date.UnixTimeToDateTime(ulong.Parse(info["user_created"]));
             }
-            
+
             if(info.ContainsKey("user_title"))
             {
                 userInfo.UserTitle = info["user_title"];
@@ -149,14 +137,14 @@ namespace SilverSim.BackendConnectors.Robust.UserAgent
             return userInfo;
         }
 
-        Dictionary<string, string> GetUserInfo_Internal(UUI user)
+        private Dictionary<string, string> GetUserInfo_Internal(UUI user)
         {
-            Map hash = new Map
+            var hash = new Map
             {
-                { "userID", user.ID }
+                ["userID"] = user.ID
             };
             Map res = DoXmlRpcWithHashResponse("get_user_info", hash);
-            Dictionary<string, string> info = new Dictionary<string, string>();
+            var info = new Dictionary<string, string>();
             foreach (string key in res.Keys)
             {
                 if (res[key] != null)
@@ -170,12 +158,12 @@ namespace SilverSim.BackendConnectors.Robust.UserAgent
 
         public override ServerURIs GetServerURLs(UUI user)
         {
-            Map hash = new Map
+            var hash = new Map
             {
-                { "userID", user.ID }
+                ["userID"] = user.ID
             };
             Map res = DoXmlRpcWithHashResponse("get_server_urls", hash);
-            ServerURIs serverUrls = new ServerURIs();
+            var serverUrls = new ServerURIs();
             foreach (string key in res.Keys)
             {
                 if(key.StartsWith("SRV_") && res[key] != null)
@@ -190,11 +178,11 @@ namespace SilverSim.BackendConnectors.Robust.UserAgent
 
         public override string LocateUser(UUI user)
         {
-            Map hash = new Map
+            var hash = new Map
             {
-                { "userID", user.ID }
+                ["userID"] = user.ID
             };
-            Map res = DoXmlRpcWithHashResponse("locate_user", hash);
+            var res = DoXmlRpcWithHashResponse("locate_user", hash);
 
             if(res.ContainsKey("URL"))
             {
@@ -206,10 +194,10 @@ namespace SilverSim.BackendConnectors.Robust.UserAgent
 
         public override UUI GetUUI(UUI user, UUI targetUserID)
         {
-            Map hash = new Map
+            var hash = new Map
             {
-                { "userID", user.ID },
-                { "targetUserID", targetUserID.ID }
+                ["userID"] = user.ID,
+                ["targetUserID"] = targetUserID.ID
             };
             Map res = DoXmlRpcWithHashResponse("get_uui", hash);
 
@@ -223,7 +211,7 @@ namespace SilverSim.BackendConnectors.Robust.UserAgent
 
         public override DestinationInfo GetHomeRegion(UUI user)
         {
-            Map hash = new Map
+            var hash = new Map
             {
                 { "userID", user.ID.ToString() }
             };
@@ -233,7 +221,7 @@ namespace SilverSim.BackendConnectors.Robust.UserAgent
                 throw new KeyNotFoundException();
             }
 
-            DestinationInfo dInfo = new DestinationInfo()
+            var dInfo = new DestinationInfo()
             {
                 /* assume that HomeURI supports Gatekeeper services */
                 GatekeeperURI = user.HomeURI.ToString(),
@@ -299,18 +287,15 @@ namespace SilverSim.BackendConnectors.Robust.UserAgent
             return dInfo;
         }
 
-        public override bool IsOnline(UUI user)
-        {
-            return false;
-        }
+        public override bool IsOnline(UUI user) => false;
 
-        void DoXmlRpcWithBoolResponse(string method, Map reqparams)
+        private void DoXmlRpcWithBoolResponse(string method, Map reqparams)
         {
-            XmlRpc.XmlRpcRequest req = new XmlRpc.XmlRpcRequest(method);
+            var req = new XmlRpc.XmlRpcRequest(method);
             req.Params.Add(reqparams);
             XmlRpc.XmlRpcResponse res = RPC.DoXmlRpcRequest(m_Uri, req, TimeoutMs);
 
-            Map hash = (Map)res.ReturnValue;
+            var hash = (Map)res.ReturnValue;
             if(hash == null)
             {
                 throw new InvalidOperationException();
@@ -331,13 +316,13 @@ namespace SilverSim.BackendConnectors.Robust.UserAgent
             }
         }
 
-        Map DoXmlRpcWithHashResponse(string method, Map reqparams)
+        private Map DoXmlRpcWithHashResponse(string method, Map reqparams)
         {
-            XmlRpc.XmlRpcRequest req = new XmlRpc.XmlRpcRequest(method);
+            var req = new XmlRpc.XmlRpcRequest(method);
             req.Params.Add(reqparams);
             XmlRpc.XmlRpcResponse res = RPC.DoXmlRpcRequest(m_Uri, req, TimeoutMs);
 
-            Map hash = (Map)res.ReturnValue;
+            var hash = (Map)res.ReturnValue;
             if (hash == null)
             {
                 throw new InvalidOperationException();
@@ -352,9 +337,6 @@ namespace SilverSim.BackendConnectors.Robust.UserAgent
             return false;
         }
 
-        bool IDisplayNameAccessor.ContainsKey(UUI agent)
-        {
-            return false;
-        }
+        bool IDisplayNameAccessor.ContainsKey(UUI agent) => false;
     }
 }

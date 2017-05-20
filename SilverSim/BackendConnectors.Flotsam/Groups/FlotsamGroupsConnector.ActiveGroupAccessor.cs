@@ -28,10 +28,12 @@ namespace SilverSim.BackendConnectors.Flotsam.Groups
     {
         bool IGroupSelectInterface.TryGetValue(UUI requestingAgent, UUI principal, out UGI ugi)
         {
-            Map m = new Map();
-            m["AgentID"] = principal.ID;
+            var m = new Map
+            {
+                ["AgentID"] = principal.ID
+            };
             m = FlotsamXmlRpcGetCall(requestingAgent, "groups.getAgentActiveMembership", m) as Map;
-            if (null == m)
+            if (m == null)
             {
                 ugi = default(UGI);
                 return false;
@@ -48,9 +50,11 @@ namespace SilverSim.BackendConnectors.Flotsam.Groups
                 return false;
             }
 
-            ugi = new UGI();
-            ugi.ID = m["GroupID"].AsUUID;
-            ugi.GroupName = m["GroupName"].ToString();
+            ugi = new UGI()
+            {
+                ID = m["GroupID"].AsUUID,
+                GroupName = m["GroupName"].ToString()
+            };
             return true;
         }
 
@@ -67,17 +71,21 @@ namespace SilverSim.BackendConnectors.Flotsam.Groups
             }
             set
             {
-                Map m = new Map();
-                m["AgentID"] = principal.ID;
-                m["GroupID"] = value.ID;
+                var m = new Map
+                {
+                    ["AgentID"] = principal.ID,
+                    ["GroupID"] = value.ID
+                };
                 FlotsamXmlRpcCall(requestingAgent, "groups.setAgentActiveGroup", m);
             }
         }
 
         bool IGroupSelectInterface.TryGetValue(UUI requestingAgent, UGI group, UUI principal, out UUID id)
         {
-            Map m = new Map();
-            m["AgentID"] = principal.ID;
+            var m = new Map
+            {
+                ["AgentID"] = principal.ID
+            };
             m = FlotsamXmlRpcGetCall(requestingAgent, "groups.getAgentActiveMembership", m) as Map;
             if (m == null)
             {
@@ -114,10 +122,12 @@ namespace SilverSim.BackendConnectors.Flotsam.Groups
 
             set
             {
-                Map m = new Map();
-                m["AgentID"] = principal.ID;
-                m["GroupID"] = group.ID;
-                m["SelectedRoleID"] = value;
+                var m = new Map
+                {
+                    ["AgentID"] = principal.ID,
+                    ["GroupID"] = group.ID,
+                    ["SelectedRoleID"] = value
+                };
                 FlotsamXmlRpcCall(requestingAgent, "groups.setAgentGroupInfo", m);
             }
         }

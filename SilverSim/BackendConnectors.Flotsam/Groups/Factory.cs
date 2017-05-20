@@ -30,11 +30,6 @@ namespace SilverSim.BackendConnectors.Flotsam.Groups
     {
         private static readonly ILog m_Log = LogManager.GetLogger("FLOTSAM GROUPS CONNECTOR");
 
-        public Factory()
-        {
-
-        }
-
         public IPlugin Initialize(ConfigurationLoader loader, IConfig ownSection)
         {
             if(!ownSection.Contains("URI"))

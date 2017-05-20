@@ -40,11 +40,11 @@ namespace SilverSim.BackendHandlers.Robust.Maptile
     [Description("Robust Maptile Protocol Server")]
     public class MaptileServerHandler : IPlugin
     {
-        static readonly ILog m_Log = LogManager.GetLogger("ROBUST MAPTILE HANDLER");
+        private static readonly ILog m_Log = LogManager.GetLogger("ROBUST MAPTILE HANDLER");
 
-        readonly string m_MaptileServiceName;
-        MaptileServiceInterface m_MaptileService;
-        readonly Regex m_GetRegex = new Regex(@"/^map-([0-9]+)-([0-9]+)-([0-9]+)-.+\\.jpg$/");
+        private readonly string m_MaptileServiceName;
+        private MaptileServiceInterface m_MaptileService;
+        private readonly Regex m_GetRegex = new Regex(@"/^map-([0-9]+)-([0-9]+)-([0-9]+)-.+\\.jpg$/");
 
         public MaptileServerHandler(IConfig ownSection)
         {
@@ -66,7 +66,7 @@ namespace SilverSim.BackendHandlers.Robust.Maptile
             }
         }
 
-        void MaptileHandler(HttpRequest req)
+        private void MaptileHandler(HttpRequest req)
         {
             if (req.ContainsHeader("X-SecondLife-Shard"))
             {
@@ -90,7 +90,7 @@ namespace SilverSim.BackendHandlers.Robust.Maptile
             }
         }
 
-        void GetMaptileHandler(HttpRequest req)
+        private void GetMaptileHandler(HttpRequest req)
         {
             Match m = m_GetRegex.Match(req.RawUrl);
             if(m == null)
@@ -110,7 +110,7 @@ namespace SilverSim.BackendHandlers.Robust.Maptile
                 return;
             }
 
-            GridVector location = new GridVector(x * 256, y * 256);
+            var location = new GridVector(x * 256, y * 256);
             MaptileData data;
             if(m_MaptileService.TryGetValue(UUID.Zero, location, zoomLevel, out data))
             {
@@ -129,7 +129,7 @@ namespace SilverSim.BackendHandlers.Robust.Maptile
             }
         }
 
-        void PostMaptileHandler(HttpRequest req)
+        private void PostMaptileHandler(HttpRequest req)
         {
             Dictionary<string, object> data;
             try
@@ -162,7 +162,6 @@ namespace SilverSim.BackendHandlers.Robust.Maptile
                 return;
             }
 
-
             if (data.ContainsKey("SCOPEID") &&
                 !UUID.TryParse(data["SCOPEID"].ToString(), out scopeid))
             {
@@ -170,12 +169,14 @@ namespace SilverSim.BackendHandlers.Robust.Maptile
                 return;
             }
 
-            MaptileData nd = new MaptileData();
-            nd.Location = new GridVector(x, y);
-            nd.ContentType = type;
-            nd.Data = imgdata;
-            nd.ScopeID = scopeid;
-            nd.ZoomLevel = 1;
+            var nd = new MaptileData()
+            {
+                Location = new GridVector(x, y),
+                ContentType = type,
+                Data = imgdata,
+                ScopeID = scopeid,
+                ZoomLevel = 1
+            };
             bool success;
             string message = string.Empty;
             try
@@ -210,14 +211,7 @@ namespace SilverSim.BackendHandlers.Robust.Maptile
     [PluginName("MaptileHandler")]
     public class MaptileServerHandlerFactory : IPluginFactory
     {
-        public MaptileServerHandlerFactory()
-        {
-
-        }
-
-        public IPlugin Initialize(ConfigurationLoader loader, IConfig ownSection)
-        {
-            return new MaptileServerHandler(ownSection);
-        }
+        public IPlugin Initialize(ConfigurationLoader loader, IConfig ownSection) =>
+            new MaptileServerHandler(ownSection);
     }
 }

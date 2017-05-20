@@ -39,7 +39,7 @@ namespace SilverSim.BackendConnectors.Robust.GridUser
     public sealed class RobustGridUserConnector : GridUserServiceInterface, IPlugin
     {
         public int TimeoutMs { get; set; }
-        readonly string m_GridUserURI;
+        private readonly string m_GridUserURI;
 
         #region Constructor
         public RobustGridUserConnector(string uri)
@@ -62,15 +62,17 @@ namespace SilverSim.BackendConnectors.Robust.GridUser
 
         private GridUserInfo FromResult(Map map)
         {
-            GridUserInfo info = new GridUserInfo();
-            info.User = new UUI(map["UserID"].ToString());
-            info.HomeRegionID = map["HomeRegionID"].ToString();
-            info.HomePosition = Vector3.Parse(map["HomePosition"].ToString());
-            info.HomeLookAt = Vector3.Parse(map["HomeLookAt"].ToString());
-            info.LastRegionID = map["LastRegionID"].ToString();
-            info.LastPosition = Vector3.Parse(map["LastPosition"].ToString());
-            info.LastLookAt = Vector3.Parse(map["LastLookAt"].ToString());
-            info.IsOnline = map["Online"].AsBoolean;
+            var info = new GridUserInfo()
+            {
+                User = new UUI(map["UserID"].ToString()),
+                HomeRegionID = map["HomeRegionID"].ToString(),
+                HomePosition = Vector3.Parse(map["HomePosition"].ToString()),
+                HomeLookAt = Vector3.Parse(map["HomeLookAt"].ToString()),
+                LastRegionID = map["LastRegionID"].ToString(),
+                LastPosition = Vector3.Parse(map["LastPosition"].ToString()),
+                LastLookAt = Vector3.Parse(map["LastLookAt"].ToString()),
+                IsOnline = map["Online"].AsBoolean
+            };
             DateTime login;
             DateTime logout;
             DateTime.TryParse(map["Login"].ToString(), out login);
@@ -80,11 +82,13 @@ namespace SilverSim.BackendConnectors.Robust.GridUser
             return info;
         }
 
-        bool TryGetUserInfo(string userID, out GridUserInfo gridUserInfo)
+        private bool TryGetUserInfo(string userID, out GridUserInfo gridUserInfo)
         {
-            Dictionary<string, string> post = new Dictionary<string, string>();
-            post["UserID"] = userID;
-            post["METHOD"] = "getgriduserinfo";
+            var post = new Dictionary<string, string>
+            {
+                ["UserID"] = userID,
+                ["METHOD"] = "getgriduserinfo"
+            };
             Map map;
             using (Stream s = HttpClient.DoStreamPostRequest(m_GridUserURI, null, post, false, TimeoutMs))
             {
@@ -95,8 +99,8 @@ namespace SilverSim.BackendConnectors.Robust.GridUser
                 gridUserInfo = default(GridUserInfo);
                 return false;
             }
-            Map resultmap = map["result"] as Map;
-            if (null == resultmap)
+            var resultmap = map["result"] as Map;
+            if (resultmap == null)
             {
                 gridUserInfo = default(GridUserInfo);
                 return false;
@@ -105,10 +109,8 @@ namespace SilverSim.BackendConnectors.Robust.GridUser
             return true;
         }
 
-        public override bool TryGetValue(UUID userID, out GridUserInfo userInfo)
-        {
-            return TryGetUserInfo((string)userID, out userInfo);
-        }
+        public override bool TryGetValue(UUID userID, out GridUserInfo userInfo) =>
+            TryGetUserInfo((string)userID, out userInfo);
 
         public override GridUserInfo this[UUID userID]
         {
@@ -123,10 +125,8 @@ namespace SilverSim.BackendConnectors.Robust.GridUser
             }
         }
 
-        public override bool TryGetValue(UUI userID, out GridUserInfo userInfo)
-        {
-            return TryGetUserInfo((string)userID, out userInfo);
-        }
+        public override bool TryGetValue(UUI userID, out GridUserInfo userInfo) =>
+            TryGetUserInfo((string)userID, out userInfo);
 
         public override GridUserInfo this[UUI userID]
         {
@@ -160,10 +160,12 @@ namespace SilverSim.BackendConnectors.Robust.GridUser
 
         public override void LoggedIn(UUI userID)
         {
-            Dictionary<string, string> post = new Dictionary<string, string>();
-            post["UserID"] = (string)userID;
-            post["METHOD"] = "loggedin";
-            using(Stream s = HttpClient.DoStreamPostRequest(m_GridUserURI, null, post, false, TimeoutMs))
+            var post = new Dictionary<string, string>
+            {
+                ["UserID"] = (string)userID,
+                ["METHOD"] = "loggedin"
+            };
+            using (Stream s = HttpClient.DoStreamPostRequest(m_GridUserURI, null, post, false, TimeoutMs))
             {
                 CheckResult(OpenSimResponse.Deserialize(s));
             }
@@ -171,12 +173,14 @@ namespace SilverSim.BackendConnectors.Robust.GridUser
 
         public override void LoggedOut(UUI userID, UUID lastRegionID, Vector3 lastPosition, Vector3 lastLookAt)
         {
-            Dictionary<string, string> post = new Dictionary<string, string>();
-            post["UserID"] = (string)userID;
-            post["RegionID"] = lastRegionID.ToString();
-            post["Position"] = lastPosition.ToString();
-            post["LookAt"] = lastLookAt.ToString();
-            post["METHOD"] = "loggedout";
+            var post = new Dictionary<string, string>
+            {
+                ["UserID"] = (string)userID,
+                ["RegionID"] = lastRegionID.ToString(),
+                ["Position"] = lastPosition.ToString(),
+                ["LookAt"] = lastLookAt.ToString(),
+                ["METHOD"] = "loggedout"
+            };
             using (Stream s = HttpClient.DoStreamPostRequest(m_GridUserURI, null, post, false, TimeoutMs))
             {
                 CheckResult(OpenSimResponse.Deserialize(s));
@@ -185,12 +189,14 @@ namespace SilverSim.BackendConnectors.Robust.GridUser
 
         public override void SetHome(UUI userID, UUID homeRegionID, Vector3 homePosition, Vector3 homeLookAt)
         {
-            Dictionary<string, string> post = new Dictionary<string, string>();
-            post["UserID"] = (string)userID;
-            post["RegionID"] = homeRegionID.ToString();
-            post["Position"] = homePosition.ToString();
-            post["LookAt"] = homeLookAt.ToString();
-            post["METHOD"] = "sethome";
+            var post = new Dictionary<string, string>
+            {
+                ["UserID"] = (string)userID,
+                ["RegionID"] = homeRegionID.ToString(),
+                ["Position"] = homePosition.ToString(),
+                ["LookAt"] = homeLookAt.ToString(),
+                ["METHOD"] = "sethome"
+            };
             using (Stream s = HttpClient.DoStreamPostRequest(m_GridUserURI, null, post, false, TimeoutMs))
             {
                 CheckResult(OpenSimResponse.Deserialize(s));
@@ -199,12 +205,14 @@ namespace SilverSim.BackendConnectors.Robust.GridUser
 
         public override void SetPosition(UUI userID, UUID lastRegionID, Vector3 lastPosition, Vector3 lastLookAt)
         {
-            Dictionary<string, string> post = new Dictionary<string, string>();
-            post["UserID"] = (string)userID;
-            post["RegionID"] = lastRegionID.ToString();
-            post["Position"] = lastPosition.ToString();
-            post["LookAt"] = lastLookAt.ToString();
-            post["METHOD"] = "setposition";
+            var post = new Dictionary<string, string>
+            {
+                ["UserID"] = (string)userID,
+                ["RegionID"] = lastRegionID.ToString(),
+                ["Position"] = lastPosition.ToString(),
+                ["LookAt"] = lastLookAt.ToString(),
+                ["METHOD"] = "setposition"
+            };
             using (Stream s = HttpClient.DoStreamPostRequest(m_GridUserURI, null, post, false, TimeoutMs))
             {
                 CheckResult(OpenSimResponse.Deserialize(s));
@@ -218,10 +226,6 @@ namespace SilverSim.BackendConnectors.Robust.GridUser
     public sealed class RobustGridUserConnectorFactory : IPluginFactory
     {
         private static readonly ILog m_Log = LogManager.GetLogger("ROBUST GRIDUSER CONNECTOR");
-        public RobustGridUserConnectorFactory()
-        {
-
-        }
 
         public IPlugin Initialize(ConfigurationLoader loader, IConfig ownSection)
         {

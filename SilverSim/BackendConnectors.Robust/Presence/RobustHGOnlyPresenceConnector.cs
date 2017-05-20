@@ -37,7 +37,7 @@ namespace SilverSim.BackendConnectors.Robust.Presence
     public class RobustHGOnlyPresenceConnector : PresenceServiceInterface, IPlugin
     {
         public int TimeoutMs { get; set; }
-        readonly string m_HomeURI;
+        private readonly string m_HomeURI;
 
         #region Constructor
         public RobustHGOnlyPresenceConnector(string homeuri)
@@ -62,13 +62,14 @@ namespace SilverSim.BackendConnectors.Robust.Presence
             throw new NotSupportedException("Remove");
         }
 
-        void HGLogout(UUID sessionID, UUID userId)
+        private void HGLogout(UUID sessionID, UUID userId)
         {
-            Map p = new Map();
-            p.Add("userID", userId);
-            p.Add("sessionID", sessionID);
-
-            XmlRpc.XmlRpcRequest req = new XmlRpc.XmlRpcRequest("logout_agent");
+            var p = new Map
+            {
+                ["userID"] = userId,
+                ["sessionID"] = sessionID
+            };
+            var req = new XmlRpc.XmlRpcRequest("logout_agent");
             req.Params.Add(p);
             XmlRpc.XmlRpcResponse res;
             try
@@ -81,7 +82,7 @@ namespace SilverSim.BackendConnectors.Robust.Presence
             }
             if (res.ReturnValue is Map)
             {
-                Map d = (Map)res.ReturnValue;
+                var d = (Map)res.ReturnValue;
                 if (bool.Parse(d["result"].ToString()))
                 {
                     return;
@@ -90,23 +91,15 @@ namespace SilverSim.BackendConnectors.Robust.Presence
             throw new PresenceUpdateFailedException();
         }
 
-        public override List<PresenceInfo> this[UUID userID]
-        {
-            get
-            {
-                return new List<PresenceInfo>();
-            }
-        }
+        public override List<PresenceInfo> this[UUID userID] => new List<PresenceInfo>();
 
         public override PresenceInfo this[UUID sessionID, UUID userID]
         {
-            get
-            {
-                throw new NotSupportedException();
-            }
+            get { throw new NotSupportedException(); }
+
             set
             {
-                if(value == null)
+                if (value == null)
                 {
                     HGLogout(sessionID, userID);
                 }

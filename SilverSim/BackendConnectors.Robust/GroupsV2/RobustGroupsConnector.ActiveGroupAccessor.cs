@@ -35,8 +35,8 @@ namespace SilverSim.BackendConnectors.Robust.GroupsV2
         public sealed class ActiveGroupAccessor : IGroupSelectInterface
         {
             public int TimeoutMs = 20000;
-            readonly string m_Uri;
-            readonly Func<UUI, string> m_GetGroupsAgentID;
+            private readonly string m_Uri;
+            private readonly Func<UUI, string> m_GetGroupsAgentID;
 
             public ActiveGroupAccessor(string uri, Func<UUI, string> getGroupsAgentID)
             {
@@ -46,11 +46,12 @@ namespace SilverSim.BackendConnectors.Robust.GroupsV2
 
             public bool TryGetValue(UUI requestingAgent, UUI principal, out UGI ugi)
             {
-                Dictionary<string, string> post = new Dictionary<string, string>();
-                post["AgentID"] = m_GetGroupsAgentID(principal);
-                post["RequestingAgentID"] = m_GetGroupsAgentID(requestingAgent);
-                post["METHOD"] = "GETMEMBERSHIP";
-
+                var post = new Dictionary<string, string>
+                {
+                    ["AgentID"] = m_GetGroupsAgentID(principal),
+                    ["RequestingAgentID"] = m_GetGroupsAgentID(requestingAgent),
+                    ["METHOD"] = "GETMEMBERSHIP"
+                };
                 Map m;
                 using (Stream s = HttpClient.DoStreamPostRequest(m_Uri, null, post, false, TimeoutMs))
                 {
@@ -84,13 +85,14 @@ namespace SilverSim.BackendConnectors.Robust.GroupsV2
                 }
                 set
                 {
-                    Dictionary<string, string> post = new Dictionary<string, string>();
-                    post["AgentID"] = m_GetGroupsAgentID(principal);
-                    post["GroupID"] = (string)value.ID;
-                    post["RequestingAgentID"] = m_GetGroupsAgentID(requestingAgent);
-                    post["OP"] = "GROUP";
-                    post["METHOD"] = "SETACTIVE";
-
+                    var post = new Dictionary<string, string>
+                    {
+                        ["AgentID"] = m_GetGroupsAgentID(principal),
+                        ["GroupID"] = (string)value.ID,
+                        ["RequestingAgentID"] = m_GetGroupsAgentID(requestingAgent),
+                        ["OP"] = "GROUP",
+                        ["METHOD"] = "SETACTIVE"
+                    };
                     Map m;
                     using(Stream s = HttpClient.DoStreamPostRequest(m_Uri, null, post, false, TimeoutMs))
                     {
@@ -109,11 +111,12 @@ namespace SilverSim.BackendConnectors.Robust.GroupsV2
 
             public bool TryGetValue(UUI requestingAgent, UGI group, UUI principal, out UUID id)
             {
-                Dictionary<string, string> post = new Dictionary<string, string>();
-                post["AgentID"] = m_GetGroupsAgentID(principal);
-                post["RequestingAgentID"] = m_GetGroupsAgentID(requestingAgent);
-                post["METHOD"] = "GETMEMBERSHIP";
-
+                var post = new Dictionary<string, string>
+                {
+                    ["AgentID"] = m_GetGroupsAgentID(principal),
+                    ["RequestingAgentID"] = m_GetGroupsAgentID(requestingAgent),
+                    ["METHOD"] = "GETMEMBERSHIP"
+                };
                 Map m;
                 using (Stream s = HttpClient.DoStreamPostRequest(m_Uri, null, post, false, TimeoutMs))
                 {
@@ -147,14 +150,15 @@ namespace SilverSim.BackendConnectors.Robust.GroupsV2
                 }
                 set
                 {
-                    Dictionary<string, string> post = new Dictionary<string, string>();
-                    post["AgentID"] = m_GetGroupsAgentID(principal);
-                    post["GroupID"] = (string)group.ID;
-                    post["RoleID"] = (string)value;
-                    post["RequestingAgentID"] = m_GetGroupsAgentID(requestingAgent);
-                    post["OP"] = "ROLE";
-                    post["METHOD"] = "SETACTIVE";
-
+                    var post = new Dictionary<string, string>
+                    {
+                        ["AgentID"] = m_GetGroupsAgentID(principal),
+                        ["GroupID"] = (string)group.ID,
+                        ["RoleID"] = (string)value,
+                        ["RequestingAgentID"] = m_GetGroupsAgentID(requestingAgent),
+                        ["OP"] = "ROLE",
+                        ["METHOD"] = "SETACTIVE"
+                    };
                     Map m;
                     using(Stream s = HttpClient.DoStreamPostRequest(m_Uri, null, post, false, TimeoutMs))
                     {

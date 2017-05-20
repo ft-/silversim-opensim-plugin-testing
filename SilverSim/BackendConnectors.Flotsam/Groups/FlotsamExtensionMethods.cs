@@ -28,142 +28,109 @@ namespace SilverSim.BackendConnectors.Flotsam.Groups
 {
     public static class FlotsamExtensionMethods
     {
-        public static GroupInfo ToGroupInfo(this Map m, AvatarNameServiceInterface avatarNameService)
+        public static GroupInfo ToGroupInfo(this Map m, AvatarNameServiceInterface avatarNameService) => new GroupInfo()
         {
-            GroupInfo gi = new GroupInfo();
-            gi.ID.ID = m["GroupID"].AsUUID;
-            gi.ID.GroupName = m["Name"].ToString();
-            gi.Charter = m["Charter"].ToString();
-            gi.InsigniaID = m["InsigniaID"].AsUUID;
-            gi.Founder.ID = m["FounderID"].AsUUID;
-            gi.MembershipFee = m["MembershipFee"].AsInt;
-            gi.IsOpenEnrollment = Convert.ToBoolean(m["OpenEnrollment"].ToString());
-            gi.IsShownInList = Convert.ToBoolean(m["ShowInList"].ToString());
-            gi.IsAllowPublish = Convert.ToBoolean(m["AllowPublish"].ToString());
-            gi.IsMaturePublish = Convert.ToBoolean(m["MaturePublish"].ToString());
-            gi.OwnerRoleID = m["OwnerRoleID"].AsUUID;
-            gi.Founder = avatarNameService.ResolveName(gi.Founder);
-            return gi;
-        }
+            ID = new UGI { ID = m["GroupID"].AsUUID, GroupName = m["Name"].ToString() },
+            Charter = m["Charter"].ToString(),
+            InsigniaID = m["InsigniaID"].AsUUID,
+            Founder = avatarNameService.ResolveName(new UUI(m["FounderID"].AsUUID)),
+            MembershipFee = m["MembershipFee"].AsInt,
+            IsOpenEnrollment = Convert.ToBoolean(m["OpenEnrollment"].ToString()),
+            IsShownInList = Convert.ToBoolean(m["ShowInList"].ToString()),
+            IsAllowPublish = Convert.ToBoolean(m["AllowPublish"].ToString()),
+            IsMaturePublish = Convert.ToBoolean(m["MaturePublish"].ToString()),
+            OwnerRoleID = m["OwnerRoleID"].AsUUID
+        };
 
-        public static DirGroupInfo ToDirGroupInfo(this Map m)
+        public static DirGroupInfo ToDirGroupInfo(this Map m) => new DirGroupInfo()
         {
-            DirGroupInfo gi = new DirGroupInfo();
-            gi.MemberCount = m["Members"].AsInt;
-            gi.ID.GroupName = m["Name"].ToString();
-            gi.ID.ID = m["GroupID"].AsUUID;
-            return gi;
-        }
+            MemberCount = m["Members"].AsInt,
+            ID = new UGI { GroupName = m["Name"].ToString(), ID = m["GroupID"].AsUUID }
+        };
 
-        public static GroupMember ToGroupMember(this Map m, UGI group, AvatarNameServiceInterface avatarNameService)
+        public static GroupMember ToGroupMember(this Map m, UGI group, AvatarNameServiceInterface avatarNameService) => new GroupMember()
         {
-            GroupMember gmem = new GroupMember();
-            gmem.IsListInProfile = Convert.ToBoolean(m["ListInProfile"].ToString());
-            gmem.Contribution = m["Contribution"].AsInt;
-            gmem.IsAcceptNotices = Convert.ToBoolean(m["AcceptNotices"].ToString());
-            gmem.SelectedRoleID = m["SelectedRoleID"].AsUUID;
-            gmem.Principal.ID = m["AgentID"].AsUUID;
-            gmem.Group = group;
-            gmem.Principal = avatarNameService.ResolveName(gmem.Principal);
-            return gmem;
-        }
+            IsListInProfile = Convert.ToBoolean(m["ListInProfile"].ToString()),
+            Contribution = m["Contribution"].AsInt,
+            IsAcceptNotices = Convert.ToBoolean(m["AcceptNotices"].ToString()),
+            SelectedRoleID = m["SelectedRoleID"].AsUUID,
+            Principal = avatarNameService.ResolveName(new UUI(m["AgentID"].AsUUID)),
+            Group = group
+        };
 
-        public static GroupMember ToGroupMember(this Map m, AvatarNameServiceInterface avatarNameService)
+        public static GroupMember ToGroupMember(this Map m, AvatarNameServiceInterface avatarNameService) => new GroupMember()
         {
-            GroupMember gmem = new GroupMember();
-            gmem.IsListInProfile = Convert.ToBoolean(m["ListInProfile"].ToString());
-            gmem.Contribution = m["Contribution"].AsInt;
-            gmem.IsAcceptNotices = Convert.ToBoolean(m["AcceptNotices"].ToString());
-            gmem.SelectedRoleID = m["SelectedRoleID"].AsUUID;
-            gmem.Principal.ID = m["AgentID"].AsUUID;
-            gmem.Principal = avatarNameService.ResolveName(gmem.Principal);
-            gmem.Group.ID = m["GroupID"].AsUUID;
-            gmem.Group.GroupName = m["GroupName"].ToString();
-            return gmem;
-        }
+            IsListInProfile = Convert.ToBoolean(m["ListInProfile"].ToString()),
+            Contribution = m["Contribution"].AsInt,
+            IsAcceptNotices = Convert.ToBoolean(m["AcceptNotices"].ToString()),
+            SelectedRoleID = m["SelectedRoleID"].AsUUID,
+            Principal = avatarNameService.ResolveName(new UUI(m["AgentID"].AsUUID)),
+            Group = new UGI { ID = m["GroupID"].AsUUID, GroupName = m["GroupName"].ToString() }
+        };
 
-        public static GroupMembership ToGroupMembership(this Map m, AvatarNameServiceInterface avatarNameService)
+        public static GroupMembership ToGroupMembership(this Map m, AvatarNameServiceInterface avatarNameService) => new GroupMembership()
         {
-            GroupMembership gmem = new GroupMembership();
-            gmem.IsListInProfile = Convert.ToBoolean(m["ListInProfile"].ToString());
-            gmem.Contribution = m["Contribution"].AsInt;
-            gmem.IsAcceptNotices = Convert.ToBoolean(m["AcceptNotices"].ToString());
-            gmem.GroupTitle = m["Title"].ToString();
-            gmem.GroupPowers = (GroupPowers)ulong.Parse(m["GroupPowers"].ToString());
-            gmem.Principal.ID = m["AgentID"].AsUUID;
-            gmem.Principal = avatarNameService.ResolveName(gmem.Principal);
-            gmem.Group.ID = m["GroupID"].AsUUID;
-            gmem.Group.GroupName = m["GroupName"].ToString();
-            gmem.IsAllowPublish = Convert.ToBoolean(m["AllowPublish"].ToString());
-            gmem.Charter = m["Charter"].ToString();
-            gmem.ActiveRoleID = m["SelectedRoleID"].ToString();
-            gmem.Founder.ID = m["FounderID"].ToString();
-            gmem.Founder = avatarNameService.ResolveName(gmem.Founder);
-            gmem.AccessToken = string.Empty;
-            gmem.IsMaturePublish = Convert.ToBoolean(m["MaturePublish"].ToString());
-            gmem.IsOpenEnrollment = Convert.ToBoolean(m["OpenEnrollment"].ToString());
-            gmem.MembershipFee = int.Parse(m["MembershipFee"].ToString());
-            gmem.IsShownInList = Convert.ToBoolean(m["OPenEnrollment"].ToString());
+            IsListInProfile = Convert.ToBoolean(m["ListInProfile"].ToString()),
+            Contribution = m["Contribution"].AsInt,
+            IsAcceptNotices = Convert.ToBoolean(m["AcceptNotices"].ToString()),
+            GroupTitle = m["Title"].ToString(),
+            GroupPowers = (GroupPowers)ulong.Parse(m["GroupPowers"].ToString()),
+            Principal = avatarNameService.ResolveName(new UUI(m["AgentID"].AsUUID)),
+            Group = new UGI { ID = m["GroupID"].AsUUID, GroupName = m["GroupName"].ToString() },
+            IsAllowPublish = Convert.ToBoolean(m["AllowPublish"].ToString()),
+            Charter = m["Charter"].ToString(),
+            ActiveRoleID = m["SelectedRoleID"].ToString(),
+            Founder = avatarNameService.ResolveName(new UUI(m["FounderID"].ToString())),
+            AccessToken = string.Empty,
+            IsMaturePublish = Convert.ToBoolean(m["MaturePublish"].ToString()),
+            IsOpenEnrollment = Convert.ToBoolean(m["OpenEnrollment"].ToString()),
+            MembershipFee = int.Parse(m["MembershipFee"].ToString()),
+            IsShownInList = Convert.ToBoolean(m["OPenEnrollment"].ToString())
+        };
 
-            return gmem;
-        }
-
-        public static GroupRolemember ToGroupRolemember(this Map m, UGI group, AvatarNameServiceInterface avatarNameService)
+        public static GroupRolemember ToGroupRolemember(this Map m, UGI group, AvatarNameServiceInterface avatarNameService) => new GroupRolemember()
         {
-            GroupRolemember gmem = new GroupRolemember();
-            gmem.RoleID = m["RoleID"].AsUUID;
-            gmem.Principal.ID = m["AgentID"].AsUUID;
-            gmem.Group = group;
-            gmem.Principal = avatarNameService.ResolveName(gmem.Principal);
-            return gmem;
-        }
+            RoleID = m["RoleID"].AsUUID,
+            Principal = avatarNameService.ResolveName(new UUI(m["AgentID"].AsUUID)),
+            Group = group
+        };
 
-        public static GroupRolemembership ToGroupRolemembership(this Map m, UGI group, AvatarNameServiceInterface avatarNameService)
+        public static GroupRolemembership ToGroupRolemembership(this Map m, UGI group, AvatarNameServiceInterface avatarNameService) => new GroupRolemembership()
         {
-            GroupRolemembership gmem = new GroupRolemembership();
-            gmem.RoleID = m["RoleID"].AsUUID;
-            gmem.Principal.ID = m["AgentID"].AsUUID;
-            gmem.GroupTitle = m["Title"].ToString();
-            gmem.Group = group;
-            gmem.Principal = avatarNameService.ResolveName(gmem.Principal);
-            return gmem;
-        }
+            RoleID = m["RoleID"].AsUUID,
+            GroupTitle = m["Title"].ToString(),
+            Group = group,
+            Principal = avatarNameService.ResolveName(new UUI(m["AgentID"].AsUUID))
+        };
 
-        public static GroupRolemembership ToGroupRolemembership(this Map m, AvatarNameServiceInterface avatarNameService)
+        public static GroupRolemembership ToGroupRolemembership(this Map m, AvatarNameServiceInterface avatarNameService) => new GroupRolemembership()
         {
-            GroupRolemembership gmem = new GroupRolemembership();
-            gmem.RoleID = m["RoleID"].AsUUID;
-            gmem.Principal.ID = m["AgentID"].AsUUID;
-            gmem.GroupTitle = m["Title"].ToString();
-            gmem.Group.ID = m["GroupID"].AsUUID;
-            gmem.Principal = avatarNameService.ResolveName(gmem.Principal);
-            return gmem;
-        }
+            RoleID = m["RoleID"].AsUUID,
+            GroupTitle = m["Title"].ToString(),
+            Group = new UGI(m["GroupID"].AsUUID),
+            Principal = avatarNameService.ResolveName(new UUI(m["AgentID"].AsUUID))
+        };
 
-        public static GroupRole ToGroupRole(this Map m, UGI group)
+        public static GroupRole ToGroupRole(this Map m, UGI group) => new GroupRole()
         {
-            GroupRole role = new GroupRole();
-            role.Group = group;
-            role.ID = m["RoleID"].AsUUID;
-            role.Members = m["Members"].AsUInt;
-            role.Name = m["Name"].ToString();
-            role.Description = m["Description"].ToString();
-            role.Title = m["Title"].ToString();
-            role.Powers = (GroupPowers)m["Powers"].AsULong;
-            return role;
-        }
+            Group = group,
+            ID = m["RoleID"].AsUUID,
+            Members = m["Members"].AsUInt,
+            Name = m["Name"].ToString(),
+            Description = m["Description"].ToString(),
+            Title = m["Title"].ToString(),
+            Powers = (GroupPowers)m["Powers"].AsULong
+        };
 
-        public static GroupNotice ToGroupNotice(this Map m)
+        public static GroupNotice ToGroupNotice(this Map m) => new GroupNotice()
         {
-            GroupNotice notice = new GroupNotice();
-            notice.Group.ID = m["GroupID"].AsUUID;
-            notice.ID = m["NoticeID"].AsUUID;
-            notice.Timestamp = Date.UnixTimeToDateTime(m["Timestamp"].AsULong);
-            notice.FromName = m["FromName"].ToString();
-            notice.Subject = m["Subject"].ToString();
-            notice.Message = m["Message"].ToString();
+            Group = new UGI(m["GroupID"].AsUUID),
+            ID = m["NoticeID"].AsUUID,
+            Timestamp = Date.UnixTimeToDateTime(m["Timestamp"].AsULong),
+            FromName = m["FromName"].ToString(),
+            Subject = m["Subject"].ToString(),
+            Message = m["Message"].ToString()
+        };
 #warning TODO: Implement BinaryBucket conversion
-            return notice;
-        }
     }
 }

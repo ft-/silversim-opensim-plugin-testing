@@ -46,21 +46,10 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
     [Description("Friends Status Receive Handler")]
     public class SimFriendsHandler : IPlugin, IPluginShutdown
     {
-        BaseHttpServer m_HttpServer;
-        SceneList m_Scenes;
+        private BaseHttpServer m_HttpServer;
+        private SceneList m_Scenes;
 
-        public SimFriendsHandler()
-        {
-
-        }
-
-        public ShutdownOrder ShutdownOrder
-        {
-            get
-            {
-                return ShutdownOrder.Any;
-            }
-        }
+        public ShutdownOrder ShutdownOrder => ShutdownOrder.Any;
 
         public void Shutdown()
         {
@@ -75,7 +64,7 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
             m_HttpServer.UriHandlers.Add("/friends", FriendsHandler);
         }
 
-        void FriendsHandler(HttpRequest httpreq)
+        private void FriendsHandler(HttpRequest httpreq)
         {
             Dictionary<string, object> req;
             try
@@ -87,7 +76,6 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
                 httpreq.ErrorResponse(HttpStatusCode.BadRequest);
                 return;
             }
-
 
             bool result = false;
 
@@ -146,7 +134,7 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
             }
         }
 
-        bool HandleFriendStatus(HttpRequest httpreq, Dictionary<string, object> req)
+        private bool HandleFriendStatus(HttpRequest httpreq, Dictionary<string, object> req)
         {
             if (!req.ContainsKey("FromID") || !req.ContainsKey("ToID") || !req.ContainsKey("Online"))
             {
@@ -187,7 +175,7 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
                     if (!fStat.IsOnline)
                     {
                         fStat.IsOnline = true;
-                        OnlineNotification m = new OnlineNotification();
+                        var m = new OnlineNotification();
                         m.AgentIDs.Add(fromID);
                         agent.SendMessageAlways(m, agentScene.ID);
                     }
@@ -197,7 +185,7 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
                     if (fStat.IsOnline)
                     {
                         fStat.IsOnline = false;
-                        OfflineNotification m = new OfflineNotification();
+                        var m = new OfflineNotification();
                         m.AgentIDs.Add(fromID);
                         agent.SendMessageAlways(m, agentScene.ID);
                     }
@@ -207,7 +195,7 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
             return true;
         }
 
-        bool HandleGrantRights(HttpRequest httpreq, Dictionary<string, object> req)
+        private bool HandleGrantRights(HttpRequest httpreq, Dictionary<string, object> req)
         {
             if (!req.ContainsKey("FromID") || !req.ContainsKey("ToID") || !req.ContainsKey("Rights"))
             {
@@ -250,13 +238,16 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
             if(agent.KnownFriends.TryGetValue(fromID, out fi) && fi.Friend.EqualsGrid(gim.FromAgent))
             {
                 fi.UserGivenFlags = (FriendRightFlags)newRights;
-                ChangeUserRights m = new ChangeUserRights();
-                m.AgentID = agent.Owner.ID;
-                m.SessionID = agent.Session.SessionID;
-
-                ChangeUserRights.RightsEntry r = new ChangeUserRights.RightsEntry();
-                r.AgentRelated = gim.FromAgent.ID;
-                r.RelatedRights = (FriendRightFlags)newRights;
+                var m = new ChangeUserRights()
+                {
+                    AgentID = agent.Owner.ID,
+                    SessionID = agent.Session.SessionID
+                };
+                var r = new ChangeUserRights.RightsEntry()
+                {
+                    AgentRelated = gim.FromAgent.ID,
+                    RelatedRights = (FriendRightFlags)newRights
+                };
                 m.Rights.Add(r);
 
                 agent.SendMessageAlways(m, agentScene.ID);
@@ -265,7 +256,7 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
             return true;
         }
 
-        bool HandleFriendshipTerminated(HttpRequest httpreq, Dictionary<string, object> req)
+        private bool HandleFriendshipTerminated(HttpRequest httpreq, Dictionary<string, object> req)
         {
             if(!req.ContainsKey("FromID") || !req.ContainsKey("ToID"))
             {
@@ -292,11 +283,12 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
                 return false;
             }
 
-            TerminateFriendship m = new TerminateFriendship();
-            m.AgentID = agent.Owner.ID;
-            m.SessionID = agent.Session.SessionID;
-            m.OtherID = fromID;
-
+            var m = new TerminateFriendship()
+            {
+                AgentID = agent.Owner.ID,
+                SessionID = agent.Session.SessionID,
+                OtherID = fromID
+            };
             agent.SendMessageAlways(m, agentScene.ID);
 
             agent.KnownFriends.Remove(fromID);
@@ -304,7 +296,7 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
             return true;
         }
 
-        bool HandleFriendshipDenied(HttpRequest httpreq, Dictionary<string, object> req)
+        private bool HandleFriendshipDenied(HttpRequest httpreq, Dictionary<string, object> req)
         {
             UUID fromID = UUID.Zero;
             UUID toID = UUID.Zero;
@@ -331,7 +323,7 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
                 return false;
             }
 
-            GridInstantMessage gim = new GridInstantMessage();
+            var gim = new GridInstantMessage();
             if (!agentScene.AvatarNameService.TryGetValue(fromID, out gim.FromAgent))
             {
                 return false;
@@ -346,7 +338,7 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
             return agent.IMSend(gim);
         }
 
-        bool HandleFriendshipApproved(HttpRequest httpreq, Dictionary<string, object> req)
+        private bool HandleFriendshipApproved(HttpRequest httpreq, Dictionary<string, object> req)
         {
             UUID fromID = UUID.Zero;
             UUID toID = UUID.Zero;
@@ -365,7 +357,7 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
                 return false;
             }
 
-            GridInstantMessage gim = new GridInstantMessage();
+            var gim = new GridInstantMessage();
             if (!agentScene.AvatarNameService.TryGetValue(fromID, out gim.FromAgent))
             {
                 return false;
@@ -381,55 +373,53 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
             InventoryServiceInterface inventoryService = agent.InventoryService;
             if(inventoryService.Folder.TryGetValue(gim.ToAgent.ID, AssetType.CallingCard, out folder))
             {
-                InventoryItem item = new InventoryItem();
+                var item = new InventoryItem()
+                {
+                    AssetID = UUID.Zero,
+                    AssetType = AssetType.CallingCard,
+                    ID = UUID.Random,
+                    Creator = gim.FromAgent,
+                    Owner = gim.ToAgent,
+                    Group = UGI.Unknown,
+                    IsGroupOwned = false,
+                    ParentFolderID = folder.ID,
 
-                item.AssetID = UUID.Zero;
-                item.AssetType = AssetType.CallingCard;
+                    CreationDate = Date.Now,
+                    InventoryType = InventoryType.CallingCard,
+                    Flags = 0,
+
+                    Name = gim.ToAgent.FullName,
+                    Description = ""
+                };
+                item.SaleInfo.Price = 10;
+                item.SaleInfo.Type = InventoryItem.SaleInfoData.SaleType.NoSale;
+
                 item.Permissions.Base = InventoryPermissionsMask.Copy | InventoryPermissionsMask.Modify;
-
                 item.Permissions.EveryOne = InventoryPermissionsMask.None;
                 item.Permissions.Current = item.Permissions.Base;
                 item.Permissions.NextOwner = InventoryPermissionsMask.Copy | InventoryPermissionsMask.Modify;
 
-                item.ID = UUID.Random;
-                item.Creator = gim.FromAgent;
-                item.Owner = gim.ToAgent;
-                item.Group = UGI.Unknown;
-                item.IsGroupOwned = false;
-                item.ParentFolderID = folder.ID;
-
-                item.CreationDate = Date.Now;
-                item.InventoryType = InventoryType.CallingCard;
-                item.Flags = 0;
-
-                item.Name = gim.ToAgent.FullName;
-                item.Description = "";
-
-                item.SaleInfo.Price = 10;
-                item.SaleInfo.Type = InventoryItem.SaleInfoData.SaleType.NoSale;
-
                 inventoryService.Item.Add(item);
 
-                UpdateCreateInventoryItem m = new UpdateCreateInventoryItem();
-                m.AgentID = toID;
-                m.SimApproved = true;
-                m.TransactionID = UUID.Zero;
+                var m = new UpdateCreateInventoryItem(toID, true, UUID.Zero, item, 0);
                 m.AddItem(item, 0);
                 agent.SendMessageAlways(m, agentScene.ID);
             }
 
-            if(null != agent.FriendsService)
+            if(agent.FriendsService != null)
             {
                 FriendInfo fi;
                 if(agent.FriendsService.TryGetValue(gim.ToAgent, gim.FromAgent, out fi))
                 {
-                    FriendStatus fStat = new FriendStatus(fi);
-                    fStat.IsOnline = true;
+                    var fStat = new FriendStatus(fi)
+                    {
+                        IsOnline = true
+                    };
                     agent.KnownFriends[fromID] = fStat;
 
-                    if(fStat.UserGivenFlags.HasFlag(FriendRightFlags.SeeOnline))
+                    if((fStat.UserGivenFlags & FriendRightFlags.SeeOnline) != 0)
                     {
-                        OnlineNotification notification = new OnlineNotification();
+                        var notification = new OnlineNotification();
                         notification.AgentIDs.Add(fromID);
                         agent.SendMessageAlways(notification, agentScene.ID);
                     }
@@ -439,7 +429,7 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
             return agent.IMSend(gim);
         }
 
-        bool HandleFriendshipOffered(HttpRequest httpreq, Dictionary<string, object> req)
+        private bool HandleFriendshipOffered(HttpRequest httpreq, Dictionary<string, object> req)
         {
             UUID fromID;
             UUID toID;
@@ -467,7 +457,7 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
                 return false;
             }
 
-            GridInstantMessage gim = new GridInstantMessage();
+            var gim = new GridInstantMessage();
             if (!agentScene.AvatarNameService.TryGetValue(fromID, out gim.FromAgent))
             {
                 return false;
@@ -483,7 +473,7 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
             return agent.IMSend(gim);
         }
 
-        bool TryRootAgent(UUID agentID, out IAgent agent, out SceneInterface agentScene)
+        private bool TryRootAgent(UUID agentID, out IAgent agent, out SceneInterface agentScene)
         {
             agent = null;
             agentScene = null;
@@ -503,15 +493,8 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
     [PluginName("SimFriendsHandler")]
     public class SimFriendsHandlerFactory : IPluginFactory
     {
-        public SimFriendsHandlerFactory()
-        {
-
-        }
-
-        public IPlugin Initialize(ConfigurationLoader loader, IConfig ownSection)
-        {
-            return new SimFriendsHandler();
-        }
+        public IPlugin Initialize(ConfigurationLoader loader, IConfig ownSection) =>
+            new SimFriendsHandler();
     }
     #endregion
 }

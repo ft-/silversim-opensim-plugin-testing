@@ -30,10 +30,9 @@ namespace SilverSim.BackendConnectors.OpenSim
     [Description("OpenSim Profile Connector Factory")]
     public class OpenSimProfilePlugin : ServicePluginHelo, IProfileServicePlugin, IPlugin
     {
-        readonly string m_ProfileName;
         public OpenSimProfilePlugin(string profileName)
         {
-            m_ProfileName = profileName;
+            Name = profileName;
         }
 
         public void Startup(ConfigurationLoader loader)
@@ -41,27 +40,15 @@ namespace SilverSim.BackendConnectors.OpenSim
             /* no action needed */
         }
 
-        public ProfileServiceInterface Instantiate(string url)
-        {
-            return new Profile.ProfileConnector(url);
-        }
+        public ProfileServiceInterface Instantiate(string url) => new Profile.ProfileConnector(url);
 
-        public override string Name
-        {
-            get
-            {
-                return m_ProfileName;
-            }
-        }
+        public override string Name { get; }
     }
 
     [PluginName("RobustProfilePlugin")]
     public class RobustProfilePluginFactory : IPluginFactory
     {
-        public IPlugin Initialize(ConfigurationLoader loader, IConfig ownSection)
-        {
-            return new OpenSimProfilePlugin("opensim-robust");
-        }
+        public IPlugin Initialize(ConfigurationLoader loader, IConfig ownSection) =>
+            new OpenSimProfilePlugin("opensim-robust");
     }
-
 }

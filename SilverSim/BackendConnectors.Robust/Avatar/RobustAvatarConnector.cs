@@ -48,14 +48,22 @@ namespace SilverSim.BackendConnectors.Robust.Avatar
         {
             public AvatarInaccessibleException()
             {
-
             }
-            public AvatarInaccessibleException(string msg) : base(msg) {}
-            public AvatarInaccessibleException(string msg, Exception innerException) : base(msg, innerException) { }
-            protected AvatarInaccessibleException(SerializationInfo info, StreamingContext context) : base(info, context) { }
+
+            public AvatarInaccessibleException(string msg) : base(msg)
+            {
+            }
+
+            public AvatarInaccessibleException(string msg, Exception innerException) : base(msg, innerException)
+            {
+            }
+
+            protected AvatarInaccessibleException(SerializationInfo info, StreamingContext context) : base(info, context)
+            {
+            }
         }
 
-        readonly string m_AvatarURI;
+        private readonly string m_AvatarURI;
         public int TimeoutMs { get; set; }
 
         #region Constructor
@@ -79,11 +87,13 @@ namespace SilverSim.BackendConnectors.Robust.Avatar
         {
             get
             {
-                Dictionary<string, string> post = new Dictionary<string, string>();
-                post["UserID"] = (string)avatarID;
-                post["METHOD"] = "getavatar";
-                post["VERSIONMIN"] = "0";
-                post["VERSIONMAX"] = "1";
+                var post = new Dictionary<string, string>
+                {
+                    ["UserID"] = (string)avatarID,
+                    ["METHOD"] = "getavatar",
+                    ["VERSIONMIN"] = "0",
+                    ["VERSIONMAX"] = "1"
+                };
                 Map map;
                 using(Stream s = HttpClient.DoStreamPostRequest(m_AvatarURI, null, post, false, TimeoutMs))
                 {
@@ -108,11 +118,12 @@ namespace SilverSim.BackendConnectors.Robust.Avatar
             }
             set
             {
-                Dictionary<string, string> post = new Dictionary<string, string>();
-                post["UserID"] = (string)avatarID;
-                post["VERSIONMIN"] = "0";
-                post["VERSIONMAX"] = "1";
-
+                var post = new Dictionary<string, string>
+                {
+                    ["UserID"] = (string)avatarID,
+                    ["VERSIONMIN"] = "0",
+                    ["VERSIONMAX"] = "1"
+                };
                 if (value != null)
                 {
                     post["METHOD"] = "setavatar";
@@ -216,13 +227,15 @@ namespace SilverSim.BackendConnectors.Robust.Avatar
             }
             set
             {
-                Dictionary<string, string> post = new Dictionary<string, string>();
-                post["UserID"] = (string)avatarID;
-                post["METHOD"] = "setitems";
-                post["Names[]"] = itemKey;
-                post["Values[]"] = value;
-                post["VERSIONMIN"] = "0";
-                post["VERSIONMAX"] = "1";
+                var post = new Dictionary<string, string>
+                {
+                    ["UserID"] = (string)avatarID,
+                    ["METHOD"] = "setitems",
+                    ["Names[]"] = itemKey,
+                    ["Values[]"] = value,
+                    ["VERSIONMIN"] = "0",
+                    ["VERSIONMAX"] = "1"
+                };
                 Map map;
                 using(Stream s = HttpClient.DoStreamPostRequest(m_AvatarURI, null, post, false, TimeoutMs))
                 {
@@ -241,9 +254,11 @@ namespace SilverSim.BackendConnectors.Robust.Avatar
 
         public override void Remove(UUID avatarID, IList<string> nameList)
         {
-            Dictionary<string, string> post = new Dictionary<string, string>();
-            post["UserID"] = (string)avatarID;
-            post["METHOD"] = "removeitems";
+            var post = new Dictionary<string, string>
+            {
+                ["UserID"] = (string)avatarID,
+                ["METHOD"] = "removeitems"
+            };
             uint index = 0;
             foreach (string name in nameList)
             {
@@ -268,12 +283,14 @@ namespace SilverSim.BackendConnectors.Robust.Avatar
 
         public override void Remove(UUID avatarID, string name)
         {
-            Dictionary<string, string> post = new Dictionary<string, string>();
-            post["UserID"] = (string)avatarID;
-            post["METHOD"] = "removeitems";
-            post["Names[]"] = name.Replace(' ', '_');
-            post["VERSIONMIN"] = "0";
-            post["VERSIONMAX"] = "1";
+            var post = new Dictionary<string, string>
+            {
+                ["UserID"] = (string)avatarID,
+                ["METHOD"] = "removeitems",
+                ["Names[]"] = name.Replace(' ', '_'),
+                ["VERSIONMIN"] = "0",
+                ["VERSIONMAX"] = "1"
+            };
             Map map;
             using(Stream s = HttpClient.DoStreamPostRequest(m_AvatarURI, null, post, false, TimeoutMs))
             {
@@ -296,10 +313,6 @@ namespace SilverSim.BackendConnectors.Robust.Avatar
     public sealed class RobustAvatarConnectorFactory : IPluginFactory
     {
         private static readonly ILog m_Log = LogManager.GetLogger("ROBUST AVATAR CONNECTOR");
-        public RobustAvatarConnectorFactory()
-        {
-
-        }
 
         public IPlugin Initialize(ConfigurationLoader loader, IConfig ownSection)
         {

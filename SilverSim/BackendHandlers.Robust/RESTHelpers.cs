@@ -33,25 +33,21 @@ namespace SilverSim.BackendHandlers.Robust
     {
         public FailureResultException()
         {
-
         }
 
         public FailureResultException(string message)
             : base(message)
         {
-
         }
 
         public FailureResultException(string message, Exception innerException)
             : base(message, innerException)
         {
-
         }
 
         protected FailureResultException(SerializationInfo info, StreamingContext context)
             : base(info, context)
         {
-
         }
     }
 

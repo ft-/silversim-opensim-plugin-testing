@@ -45,25 +45,21 @@ namespace SilverSim.OpenSimArchiver.RegionArchiver
         {
             public OARLoadingErrorException()
             {
-
             }
 
             public OARLoadingErrorException(string message)
                 : base(message)
             {
-
             }
 
             public OARLoadingErrorException(string message, Exception innerException)
                 : base(message, innerException)
             {
-
             }
 
             protected OARLoadingErrorException(SerializationInfo info, StreamingContext context)
                 : base(info, context)
             {
-
             }
         }
 
@@ -72,25 +68,21 @@ namespace SilverSim.OpenSimArchiver.RegionArchiver
         {
             public OARLoadingTriedWithoutSelectedRegionException()
             {
-
             }
 
             public OARLoadingTriedWithoutSelectedRegionException(string message)
                 : base(message)
             {
-
             }
 
             public OARLoadingTriedWithoutSelectedRegionException(string message, Exception innerException)
                 : base(message, innerException)
             {
-
             }
 
             protected OARLoadingTriedWithoutSelectedRegionException(SerializationInfo info, StreamingContext context)
                 : base(info, context)
             {
-
             }
         }
 
@@ -99,25 +91,21 @@ namespace SilverSim.OpenSimArchiver.RegionArchiver
         {
             public MultiRegionOARLoadingTriedOnRegionException()
             {
-
             }
 
             public MultiRegionOARLoadingTriedOnRegionException(string message)
                 : base(message)
             {
-
             }
 
             public MultiRegionOARLoadingTriedOnRegionException(string message, Exception innerException)
                 : base(message, innerException)
             {
-
             }
 
             protected MultiRegionOARLoadingTriedOnRegionException(SerializationInfo info, StreamingContext context)
                 : base(info, context)
             {
-
             }
         }
 
@@ -126,25 +114,21 @@ namespace SilverSim.OpenSimArchiver.RegionArchiver
         {
             public OARFormatException()
             {
-
             }
 
             public OARFormatException(string message)
                 : base(message)
             {
-
             }
 
             public OARFormatException(string message, Exception innerException)
                 : base(message, innerException)
             {
-
             }
 
             protected OARFormatException(SerializationInfo info, StreamingContext context)
                 : base(info, context)
             {
-
             }
         }
 
@@ -158,7 +142,7 @@ namespace SilverSim.OpenSimArchiver.RegionArchiver
             PersistUuids = 0x00000004,
         }
 
-        static void AddObjects(
+        private static void AddObjects(
             SceneInterface scene,
             List<ObjectGroup> sogs,
             LoadOptions options)
@@ -205,7 +189,7 @@ namespace SilverSim.OpenSimArchiver.RegionArchiver
             sogs.Clear();
         }
 
-        enum CurrentOarLoadState
+        private enum CurrentOarLoadState
         {
             Unknown,
             Assets,
@@ -216,7 +200,7 @@ namespace SilverSim.OpenSimArchiver.RegionArchiver
             Region
         }
 
-        static void ShowOarLoadState(ref CurrentOarLoadState currentState, CurrentOarLoadState newState, TTY io)
+        private static void ShowOarLoadState(ref CurrentOarLoadState currentState, CurrentOarLoadState newState, TTY io)
         {
             if(currentState != newState)
             {
@@ -257,23 +241,23 @@ namespace SilverSim.OpenSimArchiver.RegionArchiver
             Stream inputFile,
             TTY io = null)
         {
-            CurrentOarLoadState currentLoadState = CurrentOarLoadState.Unknown;
+            var currentLoadState = CurrentOarLoadState.Unknown;
 
-            using (GZipStream gzipStream = new GZipStream(inputFile, CompressionMode.Decompress))
+            using (var gzipStream = new GZipStream(inputFile, CompressionMode.Decompress))
             {
-                using (TarArchiveReader reader = new TarArchiveReader(gzipStream))
+                using (var reader = new TarArchiveReader(gzipStream))
                 {
-                    GridVector baseLoc = new GridVector(0, 0);
+                    var baseLoc = new GridVector(0, 0);
                     if (scene != null)
                     {
                         baseLoc = scene.GridPosition;
                     }
 
-                    GridVector regionSize = new GridVector(256, 256);
-                    Dictionary<string, ArchiveXmlLoader.RegionInfo> regionMapping = new Dictionary<string, ArchiveXmlLoader.RegionInfo>();
-                    List<ArchiveXmlLoader.RegionInfo> regionInfos = new List<ArchiveXmlLoader.RegionInfo>();
+                    var regionSize = new GridVector(256, 256);
+                    var regionMapping = new Dictionary<string, ArchiveXmlLoader.RegionInfo>();
+                    var regionInfos = new List<ArchiveXmlLoader.RegionInfo>();
                     bool parcelsCleared = false;
-                    List<ObjectGroup> load_sogs = new List<ObjectGroup>();
+                    var load_sogs = new List<ObjectGroup>();
 
                     for (; ; )
                     {
@@ -396,9 +380,9 @@ namespace SilverSim.OpenSimArchiver.RegionArchiver
                                             scene.ClearParcels();
                                             parcelsCleared = true;
                                         }
-                                        List<ParcelAccessEntry> whiteList = new List<ParcelAccessEntry>();
-                                        List<ParcelAccessEntry> blackList = new List<ParcelAccessEntry>();
-                                        ParcelInfo pinfo = ParcelLoader.LoadParcel(new ObjectXmlStreamFilter(reader), regionSize, whiteList, blackList);
+                                        var whiteList = new List<ParcelAccessEntry>();
+                                        var blackList = new List<ParcelAccessEntry>();
+                                        ParcelInfo pinfo = ParcelLoader.GetParcelInfo(new ObjectXmlStreamFilter(reader), regionSize, whiteList, blackList);
                                         if (pinfo.Owner.ID == UUID.Zero)
                                         {
                                             pinfo.Owner = scene.Owner;

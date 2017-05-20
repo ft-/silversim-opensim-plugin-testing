@@ -40,15 +40,15 @@ namespace SilverSim.BackendConnectors.Robust.IM
     [Description("Robust HG IM Connector")]
     public class RobustHGIM : IPlugin, IPluginShutdown
     {
-        readonly RwLockedDictionary<string, KeyValuePair<int, IM.RobustIMConnector>> m_IMUrlCache = new RwLockedDictionary<string, KeyValuePair<int, IM.RobustIMConnector>>();
+        private readonly RwLockedDictionary<string, KeyValuePair<int, IM.RobustIMConnector>> m_IMUrlCache = new RwLockedDictionary<string, KeyValuePair<int, IM.RobustIMConnector>>();
 
         public int TimeoutMs { get; set; }
-        readonly List<AvatarNameServiceInterface> m_AvatarNameServices = new List<AvatarNameServiceInterface>();
-        readonly List<string> m_AvatarNameServiceNames;
-        PresenceServiceInterface m_PresenceService;
-        readonly string m_PresenceServiceName;
-        readonly Timer m_Timer;
-        IMRouter m_IMRouter;
+        private readonly List<AvatarNameServiceInterface> m_AvatarNameServices = new List<AvatarNameServiceInterface>();
+        private readonly List<string> m_AvatarNameServiceNames;
+        private PresenceServiceInterface m_PresenceService;
+        private readonly string m_PresenceServiceName;
+        private readonly Timer m_Timer;
+        private IMRouter m_IMRouter;
 
         public RobustHGIM(List<string> avatarNameServiceNames, string presenceServiceName)
         {
@@ -60,10 +60,10 @@ namespace SilverSim.BackendConnectors.Robust.IM
             m_Timer.Start();
         }
 
-        void CleanupTimer(object sender, ElapsedEventArgs e)
+        private void CleanupTimer(object sender, ElapsedEventArgs e)
         {
-            List<string> removeList = new List<string>();
-            foreach(KeyValuePair<string, KeyValuePair<int, IM.RobustIMConnector>> kvp in m_IMUrlCache)
+            var removeList = new List<string>();
+            foreach(KeyValuePair<string, KeyValuePair<int, RobustIMConnector>> kvp in m_IMUrlCache)
             {
                 if(Environment.TickCount - kvp.Value.Key > 60000)
                 {
@@ -132,8 +132,8 @@ namespace SilverSim.BackendConnectors.Robust.IM
                 {
                     return false;
                 }
-                imservice = new IM.RobustIMConnector(imurl);
-                m_IMUrlCache[resolved.HomeURI.ToString()] = new KeyValuePair<int, IM.RobustIMConnector>(Environment.TickCount, imservice);
+                imservice = new RobustIMConnector(imurl);
+                m_IMUrlCache[resolved.HomeURI.ToString()] = new KeyValuePair<int, RobustIMConnector>(Environment.TickCount, imservice);
             }
             else
             {
@@ -150,7 +150,7 @@ namespace SilverSim.BackendConnectors.Robust.IM
                 return false;
             }
         }
-    
+
         public void Startup(ConfigurationLoader loader)
         {
             m_IMRouter = loader.IMRouter;
@@ -162,17 +162,11 @@ namespace SilverSim.BackendConnectors.Robust.IM
             m_IMRouter.GridIM.Add(Send);
         }
 
-        public ShutdownOrder ShutdownOrder
-        {
-            get 
-            {
-                return ShutdownOrder.LogoutRegion;
-            }
-        }
+        public ShutdownOrder ShutdownOrder => ShutdownOrder.LogoutRegion;
 
         public void Shutdown()
         {
-            if (null != m_IMRouter)
+            if (m_IMRouter != null)
             {
                 m_IMRouter.GridIM.Remove(Send);
             }
@@ -185,14 +179,9 @@ namespace SilverSim.BackendConnectors.Robust.IM
     [PluginName("RobustHGIM")]
     public class RobustHGIMFactory : IPluginFactory
     {
-        public RobustHGIMFactory()
-        {
-
-        }
-    
         public IPlugin Initialize(ConfigurationLoader loader, IConfig ownConfig)
         {
-            List<string> avatarNameServiceNames = new List<string>();
+            var avatarNameServiceNames = new List<string>();
             string avatarNameServices = ownConfig.GetString("AvatarNameServices", string.Empty);
             string presenceServiceName = ownConfig.GetString("PresenceService", string.Empty);
             foreach(string p in avatarNameServices.Split(','))

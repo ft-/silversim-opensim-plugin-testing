@@ -37,7 +37,7 @@ namespace SilverSim.BackendConnectors.Robust.Maptile
     [Description("Robust Maptile Connector")]
     public class RobustMaptileConnector : MaptileServiceInterface, IPlugin
     {
-        readonly string m_Url;
+        private readonly string m_Url;
 
         public int TimeoutMs { get; set; }
 
@@ -51,15 +51,11 @@ namespace SilverSim.BackendConnectors.Robust.Maptile
             }
         }
 
-        public override List<MaptileInfo> GetUpdateTimes(UUID scopeid, GridVector minloc, GridVector maxloc, int zoomlevel)
-        {
-            return new List<MaptileInfo>();
-        }
+        public override List<MaptileInfo> GetUpdateTimes(UUID scopeid, GridVector minloc, GridVector maxloc, int zoomlevel) =>
+            new List<MaptileInfo>();
 
-        public override bool Remove(UUID scopeid, GridVector location, int zoomlevel)
-        {
-            return false;
-        }
+        public override bool Remove(UUID scopeid, GridVector location, int zoomlevel) =>
+            false;
 
         public void Startup(ConfigurationLoader loader)
         {
@@ -73,12 +69,14 @@ namespace SilverSim.BackendConnectors.Robust.Maptile
                 return;
             }
 
-            Dictionary<string, string> postVals = new Dictionary<string, string>();
-            postVals.Add("X", data.Location.X.ToString());
-            postVals.Add("Y", data.Location.Y.ToString());
-            postVals.Add("DATA", Convert.ToBase64String(data.Data));
-            postVals.Add("TYPE", data.ContentType);
-            postVals.Add("SCOPEID", data.ScopeID.ToString());
+            var postVals = new Dictionary<string, string>
+            {
+                ["X"] = data.Location.X.ToString(),
+                ["Y"] = data.Location.Y.ToString(),
+                ["DATA"] = Convert.ToBase64String(data.Data),
+                ["TYPE"] = data.ContentType,
+                ["SCOPEID"] = data.ScopeID.ToString()
+            };
             HttpClient.DoPostRequest(m_Url + "map", null, postVals, false, TimeoutMs);
         }
 
@@ -89,13 +87,15 @@ namespace SilverSim.BackendConnectors.Robust.Maptile
             {
                 using (Stream s = HttpClient.DoStreamGetRequest(requrl, null, TimeoutMs))
                 {
-                    data = new MaptileData();
-                    data.Location = location;
-                    data.ZoomLevel = zoomlevel;
-                    data.ScopeID = scopeid;
-                    data.LastUpdate = Date.Now;
-                    data.Data = s.ReadToStreamEnd();
-                    data.ContentType = "image/jpeg";
+                    data = new MaptileData()
+                    {
+                        Location = location,
+                        ZoomLevel = zoomlevel,
+                        ScopeID = scopeid,
+                        LastUpdate = Date.Now,
+                        Data = s.ReadToStreamEnd(),
+                        ContentType = "image/jpeg"
+                    };
                     return true;
                 }
             }
@@ -117,14 +117,7 @@ namespace SilverSim.BackendConnectors.Robust.Maptile
     [PluginName("Maptile")]
     public class RobustMaptileConnectorFactory : IPluginFactory
     {
-        public RobustMaptileConnectorFactory()
-        {
-
-        }
-
-        public IPlugin Initialize(ConfigurationLoader loader, IConfig ownSection)
-        {
-            return new RobustMaptileConnector(ownSection.GetString("URI"));
-        }
+        public IPlugin Initialize(ConfigurationLoader loader, IConfig ownSection) =>
+            new RobustMaptileConnector(ownSection.GetString("URI"));
     }
 }

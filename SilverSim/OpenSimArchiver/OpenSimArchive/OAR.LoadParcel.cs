@@ -30,11 +30,11 @@ namespace SilverSim.OpenSimArchiver.RegionArchiver
 {
     public static partial class OAR
     {
-        static class ParcelLoader
+        private static class ParcelLoader
         {
-            static void LoadParcelAccessListEntry(XmlTextReader reader, List<ParcelAccessEntry> whiteList, List<ParcelAccessEntry> blackList)
+            private static void LoadParcelAccessListEntry(XmlTextReader reader, List<ParcelAccessEntry> whiteList, List<ParcelAccessEntry> blackList)
             {
-                ParcelAccessEntry pae = new ParcelAccessEntry();
+                var pae = new ParcelAccessEntry();
                 OarAccessFlags flags = 0;
 
                 for (;;)
@@ -95,7 +95,7 @@ namespace SilverSim.OpenSimArchiver.RegionArchiver
                 }
             }
 
-            static void LoadParcelAccessList(XmlTextReader reader, List<ParcelAccessEntry> whiteList, List<ParcelAccessEntry> blackList)
+            private static void LoadParcelAccessList(XmlTextReader reader, List<ParcelAccessEntry> whiteList, List<ParcelAccessEntry> blackList)
             {
                 if(reader.IsEmptyElement)
                 {
@@ -143,7 +143,7 @@ namespace SilverSim.OpenSimArchiver.RegionArchiver
                 }
             }
 
-            static void LoadParcelInner(XmlTextReader reader, ParcelInfo pinfo, List<ParcelAccessEntry> whiteList, List<ParcelAccessEntry> blackList)
+            private static void LoadParcelInner(XmlTextReader reader, ParcelInfo pinfo, List<ParcelAccessEntry> whiteList, List<ParcelAccessEntry> blackList)
             {
                 for(;;)
                 {
@@ -317,9 +317,9 @@ namespace SilverSim.OpenSimArchiver.RegionArchiver
                 }
             }
 
-            static ParcelInfo LoadParcel(XmlTextReader reader, GridVector regionSize, List<ParcelAccessEntry> whiteList, List<ParcelAccessEntry> blackList)
+            private static ParcelInfo LoadParcel(XmlTextReader reader, GridVector regionSize, List<ParcelAccessEntry> whiteList, List<ParcelAccessEntry> blackList)
             {
-                ParcelInfo pinfo = new ParcelInfo((int)regionSize.X / 4, (int)regionSize.Y / 4);
+                var pinfo = new ParcelInfo((int)regionSize.X / 4, (int)regionSize.Y / 4);
                 for(;;)
                 {
                     if(!reader.Read())
@@ -343,9 +343,9 @@ namespace SilverSim.OpenSimArchiver.RegionArchiver
                 }
             }
 
-            public static ParcelInfo LoadParcel(Stream s, GridVector regionSize, List<ParcelAccessEntry> whiteList, List<ParcelAccessEntry> blackList)
+            public static ParcelInfo GetParcelInfo(Stream s, GridVector regionSize, List<ParcelAccessEntry> whiteList, List<ParcelAccessEntry> blackList)
             {
-                using(XmlTextReader reader = new XmlTextReader(s))
+                using(var reader = new XmlTextReader(s))
                 {
                     return LoadParcel(reader, regionSize, whiteList, blackList);
                 }

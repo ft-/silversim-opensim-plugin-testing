@@ -35,15 +35,17 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
     [SuppressMessage("Gendarme.Rules.Exceptions", "DoNotThrowInUnexpectedLocationRule")]
     public partial class RobustInventoryConnector : IInventoryFolderContentServiceInterface
     {
-        bool m_IsMultipeServiceSupported = true;
+        private bool m_IsMultipeServiceSupported = true;
 
         #region Private duplicate (keeps InventoryFolderConnector from having a circular reference)
         InventoryFolder GetFolder(UUID principalID, UUID key)
         {
-            Dictionary<string, string> post = new Dictionary<string, string>();
-            post["PRINCIPAL"] = (string)principalID;
-            post["ID"] = (string)key;
-            post["METHOD"] = "GETFOLDER";
+            var post = new Dictionary<string, string>
+            {
+                ["PRINCIPAL"] = (string)principalID,
+                ["ID"] = (string)key,
+                ["METHOD"] = "GETFOLDER"
+            };
             Map map;
             using(Stream s = HttpClient.DoStreamPostRequest(m_InventoryURI, null, post, false, TimeoutMs))
             {
@@ -54,8 +56,8 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
                 throw new InventoryInaccessibleException();
             }
 
-            Map foldermap = map["folder"] as Map;
-            if (null == foldermap)
+            var foldermap = map["folder"] as Map;
+            if (foldermap == null)
             {
                 throw new InventoryInaccessibleException();
             }
@@ -80,10 +82,12 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
 
         bool IInventoryFolderContentServiceInterface.ContainsKey(UUID principalID, UUID folderID)
         {
-            Dictionary<string, string> post = new Dictionary<string, string>();
-            post["PRINCIPAL"] = (string)principalID;
-            post["ID"] = (string)folderID;
-            post["METHOD"] = "GETFOLDER";
+            var post = new Dictionary<string, string>
+            {
+                ["PRINCIPAL"] = (string)principalID,
+                ["ID"] = (string)folderID,
+                ["METHOD"] = "GETFOLDER"
+            };
             Map map;
             using (Stream s = HttpClient.DoStreamPostRequest(m_InventoryURI, null, post, false, TimeoutMs))
             {
@@ -94,29 +98,33 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
                 return false;
             }
 
-            Map foldermap = map["folder"] as Map;
-            return (null != foldermap);
+            var foldermap = map["folder"] as Map;
+            return foldermap != null;
         }
 
         InventoryFolderContent IInventoryFolderContentServiceInterface.this[UUID principalID, UUID folderID]
         {
             get 
             {
-                InventoryFolderContent folderContent = new InventoryFolderContent();
-                Dictionary<string, string> post = new Dictionary<string, string>();
-                post["PRINCIPAL"] = (string)principalID;
-                post["FOLDER"] = (string)folderID;
-                post["METHOD"] = "GETFOLDERCONTENT";
+                var post = new Dictionary<string, string>
+                {
+                    ["PRINCIPAL"] = (string)principalID,
+                    ["FOLDER"] = (string)folderID,
+                    ["METHOD"] = "GETFOLDERCONTENT"
+                };
                 Map map;
                 using(Stream s = HttpClient.DoStreamPostRequest(m_InventoryURI, null, post, false, TimeoutMs))
                 {
                     map = OpenSimResponse.Deserialize(s);
                 }
 
-                folderContent.Owner.ID = principalID;
-                folderContent.FolderID = folderID;
-                folderContent.Version = 0;
-                if(map.ContainsKey("VERSION"))
+                var folderContent = new InventoryFolderContent()
+                {
+                    Owner = new UUI(principalID),
+                    FolderID = folderID,
+                    Version = 0
+                };
+                if (map.ContainsKey("VERSION"))
                 {
                     folderContent.Version = map["VERSION"].AsInt;
                 }
@@ -128,12 +136,12 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
 
                 if (map.ContainsKey("FOLDERS"))
                 {
-                    Map foldersmap = map["FOLDERS"] as Map;
+                    var foldersmap = map["FOLDERS"] as Map;
                     if(null != foldersmap)
                     {
                         foreach (KeyValuePair<string, IValue> ifolder in foldersmap)
                         {
-                            Map folderdata = ifolder.Value as Map;
+                            var folderdata = ifolder.Value as Map;
                             if (null != folderdata)
                             {
                                 folderContent.Folders.Add(RobustInventoryConnector.FolderFromMap(folderdata));
@@ -143,12 +151,12 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
                 }
                 if(map.ContainsKey("ITEMS"))
                 {
-                    Map itemsmap = map["ITEMS"] as Map;
+                    var itemsmap = map["ITEMS"] as Map;
                     if (null != itemsmap)
                     {
                         foreach (KeyValuePair<string, IValue> i in itemsmap)
                         {
-                            Map itemdata = i.Value as Map;
+                            var itemdata = i.Value as Map;
                             if (null != itemdata)
                             {
                                 folderContent.Items.Add(RobustInventoryConnector.ItemFromMap(itemdata, m_GroupsService));
@@ -164,7 +172,7 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
         [SuppressMessage("Gendarme.Rules.Exceptions", "DoNotSwallowErrorsCatchingNonSpecificExceptionsRule")]
         List<InventoryFolderContent> GetContentInSingleRequests(UUID principalID, UUID[] folderIDs)
         {
-            List<InventoryFolderContent> res = new List<InventoryFolderContent>();
+            var res = new List<InventoryFolderContent>();
             foreach (UUID folder in folderIDs)
             {
                 try
@@ -196,11 +204,13 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
                     return GetContentInSingleRequests(principalID, folderIDs);
                 }
 
-                Dictionary<string, string> post = new Dictionary<string, string>();
-                post["PRINCIPAL"] = (string)principalID;
-                post["FOLDERS"] = string.Join(",", folderIDs);
-                post["COUNT"] = folderIDs.Length.ToString(); /* <- some redundancy here for whatever unknown reason, it could have been derived from FOLDERS anyways */
-                post["METHOD"] = "GETMULTIPLEFOLDERSCONTENT";
+                var post = new Dictionary<string, string>
+                {
+                    ["PRINCIPAL"] = (string)principalID,
+                    ["FOLDERS"] = string.Join(",", folderIDs),
+                    ["COUNT"] = folderIDs.Length.ToString(), /* <- some redundancy here for whatever unknown reason, it could have been derived from FOLDERS anyways */
+                    ["METHOD"] = "GETMULTIPLEFOLDERSCONTENT"
+                };
                 Map map;
                 try
                 {
@@ -227,26 +237,27 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
                     }
                 }
 
-                List<InventoryFolderContent> contents = new List<InventoryFolderContent>();
+                var contents = new List<InventoryFolderContent>();
 
                 foreach(KeyValuePair<string, IValue> kvp in map)
                 {
-                    Map fc = kvp.Value as Map;
+                    var fc = kvp.Value as Map;
                     if(kvp.Key.StartsWith("F_") && null != fc)
                     {
-                        InventoryFolderContent folderContent = new InventoryFolderContent();
-                        folderContent.Owner.ID = fc["OWNER"].AsUUID;
-                        folderContent.FolderID = fc["FID"].AsUUID;
-                        folderContent.Version = fc["VERSION"].AsInt;
-
+                        var folderContent = new InventoryFolderContent()
+                        {
+                            Owner = new UUI(fc["OWNER"].AsUUID),
+                            FolderID = fc["FID"].AsUUID,
+                            Version = fc["VERSION"].AsInt
+                        };
                         if (map.ContainsKey("FOLDERS"))
                         {
-                            Map foldersmap = map["FOLDERS"] as Map;
+                            var foldersmap = map["FOLDERS"] as Map;
                             if(null != foldersmap)
                             {
                                 foreach (KeyValuePair<string, IValue> ifolder in foldersmap)
                                 {
-                                    Map folderdata = ifolder.Value as Map;
+                                    var folderdata = ifolder.Value as Map;
                                     if (null != folderdata)
                                     {
                                         folderContent.Folders.Add(RobustInventoryConnector.FolderFromMap(folderdata));
@@ -257,12 +268,12 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
 
                         if (map.ContainsKey("ITEMS"))
                         {
-                            Map itemsmap = map["ITEMS"] as Map;
-                            if(null != itemsmap)
+                            var itemsmap = map["ITEMS"] as Map;
+                            if(itemsmap != null)
                             {
                                 foreach (KeyValuePair<string, IValue> i in itemsmap)
                                 {
-                                    Map itemdata = i.Value as Map;
+                                    var itemdata = i.Value as Map;
                                     if (null != itemdata)
                                     {
                                         folderContent.Items.Add(RobustInventoryConnector.ItemFromMap(itemdata, m_GroupsService));

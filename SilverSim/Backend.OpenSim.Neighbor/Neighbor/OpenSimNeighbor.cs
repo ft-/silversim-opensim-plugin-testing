@@ -41,25 +41,21 @@ namespace SilverSim.Backend.OpenSim.Neighbor.Neighbor
     [Description("OpenSim Neighbor Connector")]
     public class OpenSimNeighbor : NeighborServiceInterface, IPlugin, IPluginShutdown, IPluginSubFactory
     {
-        readonly RwLockedDictionary<UUID, NeighborList> m_NeighborLists = new RwLockedDictionary<UUID, NeighborList>();
-        readonly object m_NeighborListAddLock = new object();
-        static OpenSimNeighborHandler m_NeighborHandler;
-        static object m_NeighborHandlerInitLock = new object();
-        bool m_ShutdownRequestThread;
-        readonly System.Timers.Timer m_Timer = new System.Timers.Timer(3600000);
+        private readonly RwLockedDictionary<UUID, NeighborList> m_NeighborLists = new RwLockedDictionary<UUID, NeighborList>();
+        private readonly object m_NeighborListAddLock = new object();
+        private static OpenSimNeighborHandler m_NeighborHandler;
+        private static readonly object m_NeighborHandlerInitLock = new object();
+        private bool m_ShutdownRequestThread;
+        private readonly System.Timers.Timer m_Timer = new System.Timers.Timer(3600000);
 
-        readonly BlockingQueue<UUID> m_NeighborNotifyRequestQueue = new BlockingQueue<UUID>();
-        SceneList m_Scenes;
+        private readonly BlockingQueue<UUID> m_NeighborNotifyRequestQueue = new BlockingQueue<UUID>();
+        private SceneList m_Scenes;
 
-        public OpenSimNeighbor()
-        {
-        }
-
-        static void InitNeighborHandler(ConfigurationLoader loader, OpenSimNeighbor neigh)
+        private static void InitNeighborHandler(ConfigurationLoader loader, OpenSimNeighbor neigh)
         {
             lock (m_NeighborHandlerInitLock)
             {
-                if (null == m_NeighborHandler)
+                if (m_NeighborHandler == null)
                 {
                     m_NeighborHandler = new OpenSimNeighborHandler(neigh);
                     loader.AddPlugin("OpenSimNeighborHandler", m_NeighborHandler);
@@ -87,7 +83,7 @@ namespace SilverSim.Backend.OpenSim.Neighbor.Neighbor
             m_Timer.Elapsed -= UpdateTimer;
         }
 
-        void UpdateTimer(object sender, ElapsedEventArgs e)
+        private void UpdateTimer(object sender, ElapsedEventArgs e)
         {
             foreach(UUID regionID in m_NeighborLists.Keys)
             {
@@ -95,7 +91,7 @@ namespace SilverSim.Backend.OpenSim.Neighbor.Neighbor
             }
         }
 
-        void RequestThread()
+        private void RequestThread()
         {
             Thread.CurrentThread.Name = "OpenSim Neighbor Notify Thread";
             while (!m_ShutdownRequestThread)
@@ -118,7 +114,7 @@ namespace SilverSim.Backend.OpenSim.Neighbor.Neighbor
 
                 GridServiceInterface gridService = scene.GridService;
                 RegionInfo regionInfo = scene.GetRegionInfo();
-                if (null == gridService)
+                if (gridService == null)
                 {
                     continue;
                 }
@@ -151,13 +147,7 @@ namespace SilverSim.Backend.OpenSim.Neighbor.Neighbor
             }
         }
 
-        public ShutdownOrder ShutdownOrder
-        {
-            get 
-            {
-                return ShutdownOrder.LogoutRegion;
-            }
-        }
+        public ShutdownOrder ShutdownOrder => ShutdownOrder.LogoutRegion;
 
         public override void NotifyNeighborStatus(RegionInfo fromRegion)
         {
@@ -226,13 +216,7 @@ namespace SilverSim.Backend.OpenSim.Neighbor.Neighbor
     [PluginName("OpenSimNeighbor")]
     public class OpenSimNeighborFactory : IPluginFactory
     {
-        public OpenSimNeighborFactory()
-        {
-
-        }
-        public IPlugin Initialize(ConfigurationLoader loader, IConfig ownSection)
-        {
-            return new OpenSimNeighbor();
-        }
+        public IPlugin Initialize(ConfigurationLoader loader, IConfig ownSection) =>
+            new OpenSimNeighbor();
     }
 }

@@ -36,19 +36,13 @@ namespace SilverSim.BackendHandlers.Robust.Groups
     [Description("Robust Groups Protocol Server")]
     public sealed class RobustGroupsServerHandler : BaseGroupsServerHandler
     {
-        static readonly ILog m_Log = LogManager.GetLogger("ROBUST GROUPS HANDLER");
+        private static readonly ILog m_Log = LogManager.GetLogger("ROBUST GROUPS HANDLER");
         public RobustGroupsServerHandler(IConfig ownSection)
             : base(ownSection)
         {
         }
 
-        protected override string UrlPath
-        {
-            get
-            {
-                return "/groups";
-            }
-        }
+        protected override string UrlPath => "/groups";
 
         public override void Startup(ConfigurationLoader loader)
         {
@@ -69,7 +63,7 @@ namespace SilverSim.BackendHandlers.Robust.Groups
             MethodHandlers.Add("FINDGROUPS", HandleFindGroups);
         }
 
-        void WriteGroupMembershipData(XmlTextWriter writer, string tagname, GroupInfo groupInfo, GroupMember groupmember, GroupRole groupRole)
+        private void WriteGroupMembershipData(XmlTextWriter writer, string tagname, GroupInfo groupInfo, GroupMember groupmember, GroupRole groupRole)
         {
             writer.WriteStartElement(tagname);
             writer.WriteAttributeString("type", "List");
@@ -94,7 +88,7 @@ namespace SilverSim.BackendHandlers.Robust.Groups
             writer.WriteEndElement();
         }
 
-        void HandleFindGroups(HttpRequest req, Dictionary<string, object> reqdata)
+        private void HandleFindGroups(HttpRequest req, Dictionary<string, object> reqdata)
         {
             UUI requestingAgent;
             try
@@ -114,7 +108,7 @@ namespace SilverSim.BackendHandlers.Robust.Groups
             {
                 query = reqdata["Query"].ToString();
             }
-            groups = m_GroupsService.Groups.GetGroupsByName(requestingAgent, query);
+            groups = GroupsService.Groups.GetGroupsByName(requestingAgent, query);
 
             if(groups.Count != 0)
             {
@@ -153,7 +147,7 @@ namespace SilverSim.BackendHandlers.Robust.Groups
             }
         }
 
-        void HandleAddAgentToGroup(HttpRequest req, Dictionary<string, object> reqdata)
+        private void HandleAddAgentToGroup(HttpRequest req, Dictionary<string, object> reqdata)
         {
             UUI requestingAgentID;
             UUI agentID;
@@ -184,8 +178,8 @@ namespace SilverSim.BackendHandlers.Robust.Groups
 
             GroupInfo groupInfo;
             GroupRole groupRole;
-            if(!m_GroupsService.Groups.TryGetValue(requestingAgentID, new UGI(groupID), out groupInfo) ||
-                !m_GroupsService.Roles.TryGetValue(requestingAgentID, new UGI(groupID), roleID, out groupRole))
+            if(!GroupsService.Groups.TryGetValue(requestingAgentID, new UGI(groupID), out groupInfo) ||
+                !GroupsService.Roles.TryGetValue(requestingAgentID, new UGI(groupID), roleID, out groupRole))
             {
                 SendNullResult(req, "Group and/or role not found");
                 return;
@@ -193,7 +187,7 @@ namespace SilverSim.BackendHandlers.Robust.Groups
             GroupMember groupmember;
             try
             {
-                groupmember = m_GroupsService.AddAgentToGroup(requestingAgentID, new UGI(groupID), roleID, agentID, accessToken);
+                groupmember = GroupsService.AddAgentToGroup(requestingAgentID, new UGI(groupID), roleID, agentID, accessToken);
             }
             catch
             {
@@ -211,7 +205,7 @@ namespace SilverSim.BackendHandlers.Robust.Groups
             }
         }
 
-        void HandleGetMembership(HttpRequest req, Dictionary<string, object> reqdata)
+        private void HandleGetMembership(HttpRequest req, Dictionary<string, object> reqdata)
         {
             UUI requestingAgentID;
             UUI agentID;
@@ -226,13 +220,12 @@ namespace SilverSim.BackendHandlers.Robust.Groups
                 return;
             }
 
-
             if(reqdata.ContainsKey("ALL"))
             {
                 List<GroupMembership> memberships;
                 try
                 {
-                    memberships = m_GroupsService.Memberships[requestingAgentID, agentID];
+                    memberships = GroupsService.Memberships[requestingAgentID, agentID];
                 }
                 catch
                 {
@@ -277,7 +270,7 @@ namespace SilverSim.BackendHandlers.Robust.Groups
                 }
                 else
                 {
-                    if(!m_GroupsService.ActiveGroup.TryGetValue(requestingAgentID, agentID, out group) || group.ID == UUID.Zero)
+                    if(!GroupsService.ActiveGroup.TryGetValue(requestingAgentID, agentID, out group) || group.ID == UUID.Zero)
                     {
                         SendNullResult(req, "No active group");
                         return;
@@ -285,7 +278,7 @@ namespace SilverSim.BackendHandlers.Robust.Groups
                 }
 
                 GroupMembership memship;
-                if(m_GroupsService.Memberships.TryGetValue(requestingAgentID, group, agentID, out memship))
+                if(GroupsService.Memberships.TryGetValue(requestingAgentID, group, agentID, out memship))
                 {
                     using (HttpResponse res = req.BeginResponse("text/xml"))
                     {
@@ -304,12 +297,12 @@ namespace SilverSim.BackendHandlers.Robust.Groups
             }
         }
 
-        void HandleUpdateMembership(HttpRequest req, Dictionary<string, object> reqdata)
+        private void HandleUpdateMembership(HttpRequest req, Dictionary<string, object> reqdata)
         {
             UUI requestingAgent;
             UUI agent;
             UUID groupID;
-            
+
             try
             {
                 requestingAgent = new UUI(reqdata["RequestingAgentID"].ToString());
@@ -323,7 +316,7 @@ namespace SilverSim.BackendHandlers.Robust.Groups
             }
 
             GroupMember member;
-            if(!m_GroupsService.Members.TryGetValue(requestingAgent, new UGI(groupID), agent, out member))
+            if(!GroupsService.Members.TryGetValue(requestingAgent, new UGI(groupID), agent, out member))
             {
                 SendBooleanResponse(req, false);
                 return;
@@ -342,7 +335,7 @@ namespace SilverSim.BackendHandlers.Robust.Groups
 
             try
             {
-                m_GroupsService.Members.Update(requestingAgent, member.Group, member.Principal, member.IsAcceptNotices, member.IsListInProfile);
+                GroupsService.Members.Update(requestingAgent, member.Group, member.Principal, member.IsAcceptNotices, member.IsListInProfile);
             }
             catch
             {
@@ -352,7 +345,7 @@ namespace SilverSim.BackendHandlers.Robust.Groups
             SendBooleanResponse(req, true);
         }
 
-        void HandleRemoveAgentFromGroup(HttpRequest req, Dictionary<string, object> reqdata)
+        private void HandleRemoveAgentFromGroup(HttpRequest req, Dictionary<string, object> reqdata)
         {
             UUI requestingAgentID;
             UUI agentID;
@@ -371,7 +364,7 @@ namespace SilverSim.BackendHandlers.Robust.Groups
 
             try
             {
-                m_GroupsService.Members.Delete(requestingAgentID, new UGI(groupID), agentID);
+                GroupsService.Members.Delete(requestingAgentID, new UGI(groupID), agentID);
             }
             catch
             {
@@ -382,7 +375,7 @@ namespace SilverSim.BackendHandlers.Robust.Groups
         }
 
         #region SETACTIVE
-        void HandleSetActive(HttpRequest req, Dictionary<string, object> reqdata)
+        private void HandleSetActive(HttpRequest req, Dictionary<string, object> reqdata)
         {
             string op;
             try
@@ -411,7 +404,7 @@ namespace SilverSim.BackendHandlers.Robust.Groups
             }
         }
 
-        void HandleSetActiveGroup(HttpRequest req, Dictionary<string, object> reqdata)
+        private void HandleSetActiveGroup(HttpRequest req, Dictionary<string, object> reqdata)
         {
             UUI requestingAgentID;
             UUI agentID;
@@ -430,7 +423,7 @@ namespace SilverSim.BackendHandlers.Robust.Groups
 
             if(UUID.Zero == groupID)
             {
-                m_GroupsService.ActiveGroup[requestingAgentID, agentID] = new UGI(groupID);
+                GroupsService.ActiveGroup[requestingAgentID, agentID] = new UGI(groupID);
                 SendNullResult(req, "No active group");
             }
             else
@@ -440,9 +433,9 @@ namespace SilverSim.BackendHandlers.Robust.Groups
                 GroupRole role;
                 try
                 {
-                    groupInfo = m_GroupsService.Groups[requestingAgentID, new UGI(groupID)];
-                    member = m_GroupsService.Members[requestingAgentID, groupInfo.ID, agentID];
-                    role = m_GroupsService.Roles[requestingAgentID, groupInfo.ID, member.SelectedRoleID];
+                    groupInfo = GroupsService.Groups[requestingAgentID, new UGI(groupID)];
+                    member = GroupsService.Members[requestingAgentID, groupInfo.ID, agentID];
+                    role = GroupsService.Roles[requestingAgentID, groupInfo.ID, member.SelectedRoleID];
                 }
                 catch
                 {
@@ -450,7 +443,7 @@ namespace SilverSim.BackendHandlers.Robust.Groups
                     return;
                 }
 
-                m_GroupsService.ActiveGroup[requestingAgentID, agentID] = groupInfo.ID;
+                GroupsService.ActiveGroup[requestingAgentID, agentID] = groupInfo.ID;
                 using (HttpResponse res = req.BeginResponse("text/xml"))
                 {
                     using (XmlTextWriter writer = res.GetOutputStream().UTF8XmlTextWriter())
@@ -463,7 +456,7 @@ namespace SilverSim.BackendHandlers.Robust.Groups
             }
         }
 
-        void HandleSetActiveRole(HttpRequest req, Dictionary<string, object> reqdata)
+        private void HandleSetActiveRole(HttpRequest req, Dictionary<string, object> reqdata)
         {
             UUI requestingAgentID;
             UUI agentID;
@@ -484,9 +477,9 @@ namespace SilverSim.BackendHandlers.Robust.Groups
 
             try
             {
-                if (m_GroupsService.Rolemembers.ContainsKey(requestingAgentID, new UGI(groupID), roleID, agentID))
+                if (GroupsService.Rolemembers.ContainsKey(requestingAgentID, new UGI(groupID), roleID, agentID))
                 {
-                    m_GroupsService.ActiveGroup[requestingAgentID, new UGI(groupID), agentID] = roleID;
+                    GroupsService.ActiveGroup[requestingAgentID, new UGI(groupID), agentID] = roleID;
                 }
             }
             catch
@@ -499,7 +492,7 @@ namespace SilverSim.BackendHandlers.Robust.Groups
         #endregion
 
         #region INVITE
-        void HandleInvite(HttpRequest req, Dictionary<string, object> reqdata)
+        private void HandleInvite(HttpRequest req, Dictionary<string, object> reqdata)
         {
             string op;
             try
@@ -532,10 +525,10 @@ namespace SilverSim.BackendHandlers.Robust.Groups
             }
         }
 
-        void HandleInviteAdd(HttpRequest req, Dictionary<string, object> reqdata)
+        private void HandleInviteAdd(HttpRequest req, Dictionary<string, object> reqdata)
         {
             UUI requestingAgentID;
-            GroupInvite invite = new GroupInvite();
+            var invite = new GroupInvite();
             try
             {
                 requestingAgentID = new UUI(reqdata["RequestingAgentID"].ToString());
@@ -552,7 +545,7 @@ namespace SilverSim.BackendHandlers.Robust.Groups
 
             try
             {
-                m_GroupsService.Invites.Add(requestingAgentID, invite);
+                GroupsService.Invites.Add(requestingAgentID, invite);
             }
             catch
             {
@@ -562,7 +555,7 @@ namespace SilverSim.BackendHandlers.Robust.Groups
             SendBooleanResponse(req, true);
         }
 
-        void HandleInviteGet(HttpRequest req, Dictionary<string, object> reqdata)
+        private void HandleInviteGet(HttpRequest req, Dictionary<string, object> reqdata)
         {
             UUI requestingAgentID;
             UUID inviteID;
@@ -579,7 +572,7 @@ namespace SilverSim.BackendHandlers.Robust.Groups
             }
 
             GroupInvite invite;
-            if(m_GroupsService.Invites.TryGetValue(requestingAgentID, inviteID, out invite))
+            if(GroupsService.Invites.TryGetValue(requestingAgentID, inviteID, out invite))
             {
                 using (HttpResponse res = req.BeginResponse("text/xml"))
                 {
@@ -597,7 +590,7 @@ namespace SilverSim.BackendHandlers.Robust.Groups
             }
         }
 
-        void HandleInviteDelete(HttpRequest req, Dictionary<string, object> reqdata)
+        private void HandleInviteDelete(HttpRequest req, Dictionary<string, object> reqdata)
         {
             UUI requestingAgentID;
             UUID inviteID;
@@ -615,7 +608,7 @@ namespace SilverSim.BackendHandlers.Robust.Groups
 
             try
             {
-                m_GroupsService.Invites.Delete(requestingAgentID, inviteID);
+                GroupsService.Invites.Delete(requestingAgentID, inviteID);
             }
             catch
             {
@@ -627,7 +620,7 @@ namespace SilverSim.BackendHandlers.Robust.Groups
         #endregion
 
         #region AGENTROLE
-        void HandleAgentRole(HttpRequest req, Dictionary<string, object> reqdata)
+        private void HandleAgentRole(HttpRequest req, Dictionary<string, object> reqdata)
         {
             string op;
             try
@@ -656,10 +649,10 @@ namespace SilverSim.BackendHandlers.Robust.Groups
             }
         }
 
-        void HandleAgentRoleAdd(HttpRequest req, Dictionary<string, object> reqdata)
+        private void HandleAgentRoleAdd(HttpRequest req, Dictionary<string, object> reqdata)
         {
             UUI requestingAgent;
-            GroupRolemember rolemember = new GroupRolemember();
+            var rolemember = new GroupRolemember();
 
             try
             {
@@ -674,11 +667,11 @@ namespace SilverSim.BackendHandlers.Robust.Groups
                 return;
             }
 
-            if(m_GroupsService.Members.ContainsKey(requestingAgent, rolemember.Group, rolemember.Principal))
+            if(GroupsService.Members.ContainsKey(requestingAgent, rolemember.Group, rolemember.Principal))
             {
                 try
                 {
-                    m_GroupsService.Rolemembers.Add(requestingAgent, rolemember);
+                    GroupsService.Rolemembers.Add(requestingAgent, rolemember);
                 }
                 catch
                 {
@@ -690,7 +683,7 @@ namespace SilverSim.BackendHandlers.Robust.Groups
             SendBooleanResponse(req, false);
         }
 
-        void HandleAgentRoleDelete(HttpRequest req, Dictionary<string, object> reqdata)
+        private void HandleAgentRoleDelete(HttpRequest req, Dictionary<string, object> reqdata)
         {
             UUI requestingAgent;
             UUID groupID;
@@ -716,7 +709,7 @@ namespace SilverSim.BackendHandlers.Robust.Groups
 
             try
             {
-                m_GroupsService.Rolemembers.Delete(requestingAgent, new UGI(groupID), roleID, agent);
+                GroupsService.Rolemembers.Delete(requestingAgent, new UGI(groupID), roleID, agent);
             }
             catch
             {
@@ -728,7 +721,7 @@ namespace SilverSim.BackendHandlers.Robust.Groups
         #endregion
 
         #region PUTROLE
-        void HandlePutRole(HttpRequest req, Dictionary<string, object> reqdata)
+        private void HandlePutRole(HttpRequest req, Dictionary<string, object> reqdata)
         {
             string op;
             try
@@ -757,9 +750,9 @@ namespace SilverSim.BackendHandlers.Robust.Groups
             }
         }
 
-        void HandlePutRoleAdd(HttpRequest req, Dictionary<string, object> reqdata)
+        private void HandlePutRoleAdd(HttpRequest req, Dictionary<string, object> reqdata)
         {
-            GroupRole role = new GroupRole();
+            var role = new GroupRole();
             UUI requestingAgentID;
             try
             {
@@ -779,7 +772,7 @@ namespace SilverSim.BackendHandlers.Robust.Groups
 
             try
             {
-                m_GroupsService.Roles.Add(requestingAgentID, role);
+                GroupsService.Roles.Add(requestingAgentID, role);
             }
             catch
             {
@@ -789,9 +782,9 @@ namespace SilverSim.BackendHandlers.Robust.Groups
             SendBooleanResponse(req, true);
         }
 
-        void HandlePutRoleUpdate(HttpRequest req, Dictionary<string, object> reqdata)
+        private void HandlePutRoleUpdate(HttpRequest req, Dictionary<string, object> reqdata)
         {
-            GroupRole role = new GroupRole();
+            var role = new GroupRole();
             UUI requestingAgentID;
 
             try
@@ -806,7 +799,7 @@ namespace SilverSim.BackendHandlers.Robust.Groups
                 return;
             }
 
-            if (!m_GroupsService.Roles.TryGetValue(requestingAgentID, role.Group, role.ID, out role))
+            if (!GroupsService.Roles.TryGetValue(requestingAgentID, role.Group, role.ID, out role))
             {
                 SendBooleanResponse(req, false, "Role not found");
                 return;
@@ -827,7 +820,7 @@ namespace SilverSim.BackendHandlers.Robust.Groups
 
             try
             {
-                m_GroupsService.Roles.Update(requestingAgentID, role);
+                GroupsService.Roles.Update(requestingAgentID, role);
             }
             catch
             {
@@ -838,7 +831,7 @@ namespace SilverSim.BackendHandlers.Robust.Groups
         }
         #endregion
 
-        void HandleGetAgentRoles(HttpRequest req, Dictionary<string, object> reqdata)
+        private void HandleGetAgentRoles(HttpRequest req, Dictionary<string, object> reqdata)
         {
             UUI requestingAgent;
             UUID groupID;
@@ -856,9 +849,9 @@ namespace SilverSim.BackendHandlers.Robust.Groups
             }
 
             GroupMember member;
-            if(m_GroupsService.Members.TryGetValue(requestingAgent, new UGI(groupID), agentID, out member))
+            if(GroupsService.Members.TryGetValue(requestingAgent, new UGI(groupID), agentID, out member))
             {
-                List<GroupRole> roles = m_GroupsService.Roles[requestingAgent, member.Group, member.Principal];
+                List<GroupRole> roles = GroupsService.Roles[requestingAgent, member.Group, member.Principal];
                 if(roles.Count != 0)
                 {
                     using (HttpResponse res = req.BeginResponse("text/xml"))
@@ -885,7 +878,7 @@ namespace SilverSim.BackendHandlers.Robust.Groups
             }
         }
 
-        void HandleRemoveRole(HttpRequest req, Dictionary<string, object> reqdata)
+        private void HandleRemoveRole(HttpRequest req, Dictionary<string, object> reqdata)
         {
             UUI requestingAgent;
             UUID groupID;
@@ -905,7 +898,7 @@ namespace SilverSim.BackendHandlers.Robust.Groups
 
             try
             {
-                m_GroupsService.Roles.Delete(requestingAgent, new UGI(groupID), roleID);
+                GroupsService.Roles.Delete(requestingAgent, new UGI(groupID), roleID);
             }
             catch
             {
@@ -916,7 +909,7 @@ namespace SilverSim.BackendHandlers.Robust.Groups
         }
 
         #region PUTGROUP
-        void HandlePutGroup(HttpRequest req, Dictionary<string, object> reqdata)
+        private void HandlePutGroup(HttpRequest req, Dictionary<string, object> reqdata)
         {
             string op;
             try
@@ -945,9 +938,9 @@ namespace SilverSim.BackendHandlers.Robust.Groups
             }
         }
 
-        void HandlePutGroupAdd(HttpRequest req, Dictionary<string, object> reqdata)
+        private void HandlePutGroupAdd(HttpRequest req, Dictionary<string, object> reqdata)
         {
-            GroupInfo gInfo = new GroupInfo();
+            var gInfo = new GroupInfo();
             gInfo.ID.ID = UUID.Random;
             UUI requestingAgentID;
             try
@@ -995,7 +988,7 @@ namespace SilverSim.BackendHandlers.Robust.Groups
 
             try
             {
-                gInfo = m_GroupsService.CreateGroup(requestingAgentID, gInfo, GroupPowers.DefaultEveryonePowers, GroupPowers.OwnerPowers);
+                gInfo = GroupsService.CreateGroup(requestingAgentID, gInfo, GroupPowers.DefaultEveryonePowers, GroupPowers.OwnerPowers);
             }
             catch
             {
@@ -1013,7 +1006,7 @@ namespace SilverSim.BackendHandlers.Robust.Groups
             }
         }
 
-        void HandlePutGroupUpdate(HttpRequest req, Dictionary<string, object> reqdata)
+        private void HandlePutGroupUpdate(HttpRequest req, Dictionary<string, object> reqdata)
         {
             UUI requestingAgentID;
             UUID groupID;
@@ -1029,7 +1022,7 @@ namespace SilverSim.BackendHandlers.Robust.Groups
             }
 
             GroupInfo groupInfo;
-            if(!m_GroupsService.Groups.TryGetValue(requestingAgentID, new UGI(groupID), out groupInfo))
+            if(!GroupsService.Groups.TryGetValue(requestingAgentID, new UGI(groupID), out groupInfo))
             {
                 SendNullResult(req, string.Empty);
                 return;
@@ -1074,7 +1067,7 @@ namespace SilverSim.BackendHandlers.Robust.Groups
 
             try
             {
-                groupInfo = m_GroupsService.Groups.Update(requestingAgentID, groupInfo);
+                groupInfo = GroupsService.Groups.Update(requestingAgentID, groupInfo);
             }
             catch
             {
@@ -1094,7 +1087,7 @@ namespace SilverSim.BackendHandlers.Robust.Groups
         }
         #endregion
 
-        void HandleGetNotices(HttpRequest req, Dictionary<string, object> reqdata)
+        private void HandleGetNotices(HttpRequest req, Dictionary<string, object> reqdata)
         {
             UUI requestingAgentID;
             try
@@ -1121,7 +1114,7 @@ namespace SilverSim.BackendHandlers.Robust.Groups
                 }
 
                 GroupNotice notice;
-                if (m_GroupsService.Notices.TryGetValue(requestingAgentID, noticeID, out notice))
+                if (GroupsService.Notices.TryGetValue(requestingAgentID, noticeID, out notice))
                 {
                     using (HttpResponse res = req.BeginResponse("text/xml"))
                     {
@@ -1151,7 +1144,7 @@ namespace SilverSim.BackendHandlers.Robust.Groups
                     return;
                 }
 
-                List<GroupNotice> notices = m_GroupsService.Notices.GetNotices(requestingAgentID, new UGI(groupID));
+                List<GroupNotice> notices = GroupsService.Notices.GetNotices(requestingAgentID, new UGI(groupID));
                 if (notices.Count != 0)
                 {
                     using (HttpResponse res = req.BeginResponse("text/xml"))
@@ -1184,15 +1177,8 @@ namespace SilverSim.BackendHandlers.Robust.Groups
     [PluginName("GroupsHandler")]
     public sealed class RobustGroupsServerHandlerFactory : IPluginFactory
     {
-        public RobustGroupsServerHandlerFactory()
-        {
-
-        }
-
-        public IPlugin Initialize(ConfigurationLoader loader, IConfig ownSection)
-        {
-            return new RobustGroupsServerHandler(ownSection);
-        }
+        public IPlugin Initialize(ConfigurationLoader loader, IConfig ownSection) =>
+            new RobustGroupsServerHandler(ownSection);
     }
     #endregion
 }

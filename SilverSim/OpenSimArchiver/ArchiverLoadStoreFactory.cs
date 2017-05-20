@@ -27,51 +27,27 @@ namespace SilverSim.OpenSimArchiver
     [PluginName("InventoryArchiveSupport")]
     public class InventoryArchiverLoadStoreFactory : IPluginFactory
     {
-        public InventoryArchiverLoadStoreFactory()
-        {
-
-        }
-        public IPlugin Initialize(ConfigurationLoader loader, IConfig ownSection)
-        {
-            return new InventoryArchiverLoadStore(ownSection);
-        }
+        public IPlugin Initialize(ConfigurationLoader loader, IConfig ownSection) =>
+            new InventoryArchiverLoadStore(ownSection);
     }
 
     [PluginName("NpcInventoryArchiveSupport")]
     public class NpcInventoryArchiverLoadStoreFactory : IPluginFactory
     {
-        public NpcInventoryArchiverLoadStoreFactory()
-        {
-
-        }
-        public IPlugin Initialize(ConfigurationLoader loader, IConfig ownSection)
-        {
-            return new NpcInventoryArchiverLoadStore(ownSection);
-        }
+        public IPlugin Initialize(ConfigurationLoader loader, IConfig ownSection) =>
+            new NpcInventoryArchiverLoadStore(ownSection);
     }
 
     [PluginName("RegionArchiveSupport")]
     public class OpenSimArchiverLoadStoreFactory : IPluginFactory
     {
-        public OpenSimArchiverLoadStoreFactory()
-        {
-
-        }
-        public IPlugin Initialize(ConfigurationLoader loader, IConfig ownSection)
-        {
-            return new OpenSimArchiverLoadStore();
-        }
+        public IPlugin Initialize(ConfigurationLoader loader, IConfig ownSection) =>
+            new OpenSimArchiverLoadStore();
     }
     [PluginName("OSAssetsArchiveSupport")]
     public class OSAssetsLoadFactory : IPluginFactory
     {
-        public OSAssetsLoadFactory()
-        {
-
-        }
-        public IPlugin Initialize(ConfigurationLoader loader, IConfig ownSection)
-        {
-            return new OSAssetsLoad();
-        }
+        public IPlugin Initialize(ConfigurationLoader loader, IConfig ownSection) =>
+            new OSAssetsLoad();
     }
 }

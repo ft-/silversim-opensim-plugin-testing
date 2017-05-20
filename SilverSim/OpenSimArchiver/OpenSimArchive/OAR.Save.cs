@@ -50,8 +50,9 @@ namespace SilverSim.OpenSimArchiver.RegionArchiver
         }
 
         [Flags]
-        enum OarAccessFlags : uint
+        private enum OarAccessFlags : uint
         {
+            None = 0,
             Access = 1,
             Ban = 2,
         }
@@ -62,12 +63,12 @@ namespace SilverSim.OpenSimArchiver.RegionArchiver
             Stream outputFile,
             TTY console_io = null)
         {
-            using (GZipStream gzip = new GZipStream(outputFile, CompressionMode.Compress))
+            using (var gzip = new GZipStream(outputFile, CompressionMode.Compress))
             {
-                TarArchiveWriter writer = new TarArchiveWriter(gzip);
+                var writer = new TarArchiveWriter(gzip);
 
                 bool saveAssets = (options & SaveOptions.NoAssets) == 0;
-                XmlSerializationOptions xmloptions = XmlSerializationOptions.None;
+                var xmloptions = XmlSerializationOptions.None;
                 if ((options & SaveOptions.Publish) == 0)
                 {
                     xmloptions |= XmlSerializationOptions.WriteOwnerInfo;
@@ -80,7 +81,7 @@ namespace SilverSim.OpenSimArchiver.RegionArchiver
 
                 writer.WriteFile("archive.xml", WriteArchiveXml08(scene, saveAssets));
 
-                Dictionary<string, AssetData> objectAssets = new Dictionary<string, AssetData>();
+                var objectAssets = new Dictionary<string, AssetData>();
 
                 if (console_io != null)
                 {
@@ -105,7 +106,7 @@ namespace SilverSim.OpenSimArchiver.RegionArchiver
                         console_io.Write("Saving asset data...");
                     }
                     /* we only parse sim details when saving assets */
-                    List<UUID> assetIDs = new List<UUID>();
+                    var assetIDs = new List<UUID>();
                     AssetData data;
 
                     foreach (AssetData objdata in objectAssets.Values)
@@ -170,7 +171,7 @@ namespace SilverSim.OpenSimArchiver.RegionArchiver
                 {
                     console_io.Write("Saving region settings...");
                 }
-                using (MemoryStream ms = new MemoryStream())
+                using (var ms = new MemoryStream())
                 {
                     using (XmlTextWriter xmlwriter = ms.UTF8XmlTextWriter())
                     {
@@ -197,8 +198,8 @@ namespace SilverSim.OpenSimArchiver.RegionArchiver
                                     case RegionAccess.Mature:
                                         xmlwriter.WriteNamedValue("MaturityRating", 1);
                                         break;
-                                    default:
                                     case RegionAccess.Adult:
+                                    default:
                                         xmlwriter.WriteNamedValue("MaturityRating", 2);
                                         break;
                                 }
@@ -277,7 +278,7 @@ namespace SilverSim.OpenSimArchiver.RegionArchiver
 
                 foreach (ParcelInfo pinfo in scene.Parcels)
                 {
-                    using (MemoryStream ms = new MemoryStream())
+                    using (var ms = new MemoryStream())
                     {
                         using (XmlTextWriter xmlwriter = ms.UTF8XmlTextWriter())
                         {
@@ -392,9 +393,9 @@ namespace SilverSim.OpenSimArchiver.RegionArchiver
             }
         }
 
-        static byte[] WriteArchiveXml08(SceneInterface scene, bool assetsIncluded)
+        private static byte[] WriteArchiveXml08(SceneInterface scene, bool assetsIncluded)
         {
-            using(MemoryStream ms = new MemoryStream())
+            using(var ms = new MemoryStream())
             {
                 using(XmlTextWriter writer = ms.UTF8XmlTextWriter())
                 {
@@ -414,7 +415,7 @@ namespace SilverSim.OpenSimArchiver.RegionArchiver
                         writer.WriteStartElement("region_info");
                         {
                             writer.WriteNamedValue("is_megaregion", false);
-                            writer.WriteNamedValue("size_in_meters", 
+                            writer.WriteNamedValue("size_in_meters",
                                 string.Format("{0},{1}", scene.SizeX, scene.SizeY));
                         }
                         writer.WriteEndElement();
@@ -427,9 +428,9 @@ namespace SilverSim.OpenSimArchiver.RegionArchiver
             }
         }
 
-        static byte[] GenTerrainFile(List<LayerPatch> terrain)
+        private static byte[] GenTerrainFile(List<LayerPatch> terrain)
         {
-            using (MemoryStream output = new MemoryStream())
+            using (var output = new MemoryStream())
             {
                 float[] outdata = new float[terrain.Count * LayerCompressor.LAYER_PATCH_NUM_XY_ENTRIES * LayerCompressor.LAYER_PATCH_NUM_XY_ENTRIES];
                 uint minX = terrain[0].X;
@@ -460,7 +461,7 @@ namespace SilverSim.OpenSimArchiver.RegionArchiver
                     }
                 }
 
-                using (BinaryWriter bs = new BinaryWriter(output))
+                using (var bs = new BinaryWriter(output))
                 {
                     foreach (float f in outdata)
                     {
@@ -472,9 +473,7 @@ namespace SilverSim.OpenSimArchiver.RegionArchiver
             }
         }
 
-        public static uint XYToYNormal(this LayerPatch p, uint lineWidth, uint minY)
-        {
-            return (p.Y - minY) * lineWidth + p.X;
-        }
+        public static uint XYToYNormal(this LayerPatch p, uint lineWidth, uint minY) =>
+            (p.Y - minY) * lineWidth + p.X;
     }
 }

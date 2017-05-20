@@ -37,27 +37,30 @@ namespace SilverSim.BackendConnectors.Flotsam.Groups
 
         bool IGroupInvitesInterface.TryGetValue(UUI requestingAgent, UUID groupInviteID, out GroupInvite inv)
         {
-            Map m = new Map();
-            m.Add("InviteID", groupInviteID);
+            var m = new Map
+            {
+                ["InviteID"] = groupInviteID
+            };
             m = FlotsamXmlRpcGetCall(requestingAgent, "groups.getAgentToGroupInvite", m) as Map;
-            if (null == m)
+            if (m == null)
             {
                 inv = default(GroupInvite);
                 return false;
             }
 
-            inv = new GroupInvite();
-            inv.ID = groupInviteID;
-            inv.Principal.ID = m["AgentID"].AsUUID;
-            inv.Group.ID = m["GroupID"].AsUUID;
-            inv.RoleID = m["RoleID"].AsUUID;
-            inv.Principal = m_AvatarNameService.ResolveName(inv.Principal);
+            inv = new GroupInvite()
+            {
+                ID = groupInviteID,
+                Group = new UGI(m["GroupID"].AsUUID),
+                RoleID = m["RoleID"].AsUUID,
+                Principal = m_AvatarNameService.ResolveName(new UUI(m["AgentID"].AsUUID))
+            };
             return true;
         }
 
         GroupInvite IGroupInvitesInterface.this[UUI requestingAgent, UUID groupInviteID]
         {
-            get 
+            get
             {
                 GroupInvite inv;
                 if (!Invites.TryGetValue(requestingAgent, groupInviteID, out inv))
@@ -68,13 +71,7 @@ namespace SilverSim.BackendConnectors.Flotsam.Groups
             }
         }
 
-        bool IGroupInvitesInterface.DoesSupportListGetters
-        {
-            get
-            {
-                return false;
-            }
-        }
+        bool IGroupInvitesInterface.DoesSupportListGetters => false;
 
         List<GroupInvite> IGroupInvitesInterface.this[UUI requestingAgent, UGI group, UUID roleID, UUI principal]
         {
@@ -93,18 +90,22 @@ namespace SilverSim.BackendConnectors.Flotsam.Groups
 
         void IGroupInvitesInterface.Add(UUI requestingAgent, GroupInvite invite)
         {
-            Map m = new Map();
-            m.Add("InviteID", invite.ID);
-            m.Add("GroupID", invite.Group.ID);
-            m.Add("RoleID", invite.RoleID);
-            m.Add("AgentID", invite.Principal.ID);
+            var m = new Map
+            {
+                ["InviteID"] = invite.ID,
+                ["GroupID"] = invite.Group.ID,
+                ["RoleID"] = invite.RoleID,
+                ["AgentID"] = invite.Principal.ID
+            };
             FlotsamXmlRpcCall(requestingAgent, "groups.addAgentToGroupInvite", m);
         }
 
         void IGroupInvitesInterface.Delete(UUI requestingAgent, UUID inviteID)
         {
-            Map m = new Map();
-            m.Add("InviteID", inviteID);
+            var m = new Map
+            {
+                ["InviteID"] = inviteID
+            };
             FlotsamXmlRpcCall(requestingAgent, "groups.removeAgentToGroupInvite", m);
         }
     }

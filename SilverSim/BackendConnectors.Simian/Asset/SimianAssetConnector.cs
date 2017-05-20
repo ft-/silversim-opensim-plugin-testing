@@ -44,19 +44,30 @@ namespace SilverSim.BackendConnectors.Simian.Asset
         [Serializable]
         public class SimianAssetProtocolErrorException : Exception
         {
-            public SimianAssetProtocolErrorException() { }
-            public SimianAssetProtocolErrorException(string msg) : base(msg) {}
-            public SimianAssetProtocolErrorException(string msg, Exception innerException) : base(msg, innerException) { }
-            protected SimianAssetProtocolErrorException(SerializationInfo info, StreamingContext context) : base(info, context) { }
+            public SimianAssetProtocolErrorException()
+            {
+            }
+
+            public SimianAssetProtocolErrorException(string msg) : base(msg)
+            {
+            }
+
+            public SimianAssetProtocolErrorException(string msg, Exception innerException) : base(msg, innerException)
+            {
+            }
+
+            protected SimianAssetProtocolErrorException(SerializationInfo info, StreamingContext context) : base(info, context)
+            {
+            }
         }
 
         public int TimeoutMs { get; set; }
-        readonly string m_AssetURI;
-        readonly DefaultAssetReferencesService m_ReferencesService;
-        readonly bool m_EnableCompression;
-        readonly bool m_EnableLocalStorage;
-        readonly bool m_EnableTempStorage;
-        readonly string m_AssetCapability = "00000000-0000-0000-0000-000000000000";
+        private readonly string m_AssetURI;
+        private readonly DefaultAssetReferencesService m_ReferencesService;
+        private readonly bool m_EnableCompression;
+        private readonly bool m_EnableLocalStorage;
+        private readonly bool m_EnableTempStorage;
+        private readonly string m_AssetCapability = "00000000-0000-0000-0000-000000000000";
 
         #region Constructor
         public SimianAssetConnector(string uri, string capability, bool enableCompression = false, bool enableLocalStorage = false, bool enableTempStorage = false)
@@ -87,9 +98,11 @@ namespace SilverSim.BackendConnectors.Simian.Asset
             /* using the metadata variant is always faster no need for transfering data */
             try
             {
-                Dictionary<string, string> para = new Dictionary<string, string>();
-                para["RequestMethod"] = "xGetAssetMetadata";
-                para["ID"] = (string)key;
+                var para = new Dictionary<string, string>
+                {
+                    ["RequestMethod"] = "xGetAssetMetadata",
+                    ["ID"] = (string)key
+                };
                 Map m = SimianGrid.PostToService(m_AssetURI, m_AssetCapability, para, TimeoutMs);
                 return m["Success"].AsBoolean;
             }
@@ -101,7 +114,7 @@ namespace SilverSim.BackendConnectors.Simian.Asset
 
         public override Dictionary<UUID, bool> Exists(List<UUID> assets)
         {
-            Dictionary<UUID, bool> res = new Dictionary<UUID,bool>();
+            var res = new Dictionary<UUID,bool>();
 
             foreach(UUID assetid in assets)
             {
@@ -115,9 +128,11 @@ namespace SilverSim.BackendConnectors.Simian.Asset
         #region Accessors
         public override bool TryGetValue(UUID key, out AssetData assetData)
         {
-            Dictionary<string, string> para = new Dictionary<string, string>();
-            para["RequestMethod"] = "xGetAsset";
-            para["ID"] = (string)key;
+            var para = new Dictionary<string, string>
+            {
+                ["RequestMethod"] = "xGetAsset",
+                ["ID"] = (string)key
+            };
             Map m = SimianGrid.PostToService(m_AssetURI, m_AssetCapability, para, TimeoutMs);
             if(!m.ContainsKey("Success"))
             {
@@ -129,14 +144,16 @@ namespace SilverSim.BackendConnectors.Simian.Asset
                 assetData = default(AssetData);
                 return false;
             }
-            assetData = new AssetData();
-            assetData.ID = key;
-            assetData.Name = m.ContainsKey("Name") ? m["Name"].ToString() : string.Empty;
-            assetData.ContentType = m["ContentType"].ToString();
+            assetData = new AssetData()
+            {
+                ID = key,
+                Name = m.ContainsKey("Name") ? m["Name"].ToString() : string.Empty,
+                ContentType = m["ContentType"].ToString(),
+                Local = false,
+                Data = Convert.FromBase64String(m["EncodedData"].ToString()),
+                Temporary = m["Temporary"].AsBoolean
+            };
             assetData.Creator.FullName = m["CreatorID"].ToString();
-            assetData.Local = false;
-            assetData.Data = Convert.FromBase64String(m["EncodedData"].ToString());
-            assetData.Temporary = m["Temporary"].AsBoolean;
             return true;
         }
 
@@ -155,32 +172,30 @@ namespace SilverSim.BackendConnectors.Simian.Asset
         #endregion
 
         #region Metadata interface
-        public override IAssetMetadataServiceInterface Metadata
-        {
-            get
-            {
-                return this;
-            }
-        }
+        public override IAssetMetadataServiceInterface Metadata => this;
 
         bool IAssetMetadataServiceInterface.TryGetValue(UUID key, out AssetMetadata metadata)
         {
-            Dictionary<string, string> para = new Dictionary<string, string>();
-            para["RequestMethod"] = "xGetAssetMetadata";
-            para["ID"] = (string)key;
+            var para = new Dictionary<string, string>
+            {
+                ["RequestMethod"] = "xGetAssetMetadata",
+                ["ID"] = (string)key
+            };
             Map m = SimianGrid.PostToService(m_AssetURI, m_AssetCapability, para, TimeoutMs);
             if (!m["Success"].AsBoolean)
             {
                 metadata = default(AssetMetadata);
                 return false;
             }
-            metadata = new AssetMetadata();
-            metadata.ID = key;
-            metadata.Name = string.Empty;
-            metadata.ContentType = m["ContentType"].ToString();
+            metadata = new AssetMetadata()
+            {
+                ID = key,
+                Name = string.Empty,
+                ContentType = m["ContentType"].ToString(),
+                Local = false,
+                Temporary = m["Temporary"].AsBoolean
+            };
             metadata.Creator.FullName = m["CreatorID"].ToString();
-            metadata.Local = false;
-            metadata.Temporary = m["Temporary"].AsBoolean;
 
             string lastModifiedStr = m["Last-Modified"].ToString();
             if (!string.IsNullOrEmpty(lastModifiedStr))
@@ -209,23 +224,11 @@ namespace SilverSim.BackendConnectors.Simian.Asset
         #endregion
 
         #region References interface
-        public override AssetReferencesServiceInterface References
-        {
-            get
-            {
-                return m_ReferencesService;
-            }
-        }
+        public override AssetReferencesServiceInterface References => m_ReferencesService;
         #endregion
 
         #region Data interface
-        public override IAssetDataServiceInterface Data
-        {
-            get
-            {
-                return this;
-            }
-        }
+        public override IAssetDataServiceInterface Data => this;
 
         bool IAssetDataServiceInterface.TryGetValue(UUID key, out Stream s)
         {
@@ -239,7 +242,6 @@ namespace SilverSim.BackendConnectors.Simian.Asset
                 s = null;
                 return false;
             }
-
         }
 
         [SuppressMessage("Gendarme.Rules.Correctness", "EnsureLocalDisposalRule")]
@@ -270,15 +272,16 @@ namespace SilverSim.BackendConnectors.Simian.Asset
                 return;
             }
 
-            Dictionary<string, string> para = new Dictionary<string, string>();
-            para["RequestMethod"] = "xAddAsset";
-            para["ContentType"] = asset.ContentType;
-            para["EncodedData"] = Convert.ToBase64String(asset.Data);
-            para["AssetID"] = (string)asset.ID;
-            para["CreatorID"] = asset.Creator.FullName;
-            para["Temporary"] = asset.Temporary ? "1" : "0";
-            para["Name"] = asset.Name;
-
+            var para = new Dictionary<string, string>
+            {
+                ["RequestMethod"] = "xAddAsset",
+                ["ContentType"] = asset.ContentType,
+                ["EncodedData"] = Convert.ToBase64String(asset.Data),
+                ["AssetID"] = (string)asset.ID,
+                ["CreatorID"] = asset.Creator.FullName,
+                ["Temporary"] = asset.Temporary ? "1" : "0",
+                ["Name"] = asset.Name
+            };
             Map m = SimianGrid.PostToService(m_AssetURI, m_AssetCapability, para, m_EnableCompression, TimeoutMs);
             if (!m["Success"].AsBoolean)
             {
@@ -290,10 +293,11 @@ namespace SilverSim.BackendConnectors.Simian.Asset
         #region Delete asset method
         public override void Delete(UUID id)
         {
-            Dictionary<string, string> para = new Dictionary<string, string>();
-            para["RequestMethod"] = "xRemoveAsset";
-            para["AssetID"] = (string)id;
-
+            var para = new Dictionary<string, string>
+            {
+                ["RequestMethod"] = "xRemoveAsset",
+                ["AssetID"] = (string)id
+            };
             Map m = SimianGrid.PostToService(m_AssetURI, m_AssetCapability, para, TimeoutMs);
             if (!m["Success"].AsBoolean)
             {
@@ -309,10 +313,6 @@ namespace SilverSim.BackendConnectors.Simian.Asset
     public class SimianAssetConnectorFactory : IPluginFactory
     {
         private static readonly ILog m_Log = LogManager.GetLogger("SIMIAN ASSET CONNECTOR");
-        public SimianAssetConnectorFactory()
-        {
-
-        }
 
         public IPlugin Initialize(ConfigurationLoader loader, IConfig ownSection)
         {

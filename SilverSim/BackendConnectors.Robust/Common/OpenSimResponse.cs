@@ -39,22 +39,25 @@ namespace SilverSim.BackendConnectors.Robust.Common
             {
                 Path = path;
             }
-            public InvalidOpenSimResponseSerializationException() {}
-            public InvalidOpenSimResponseSerializationException(string msg, Exception innerException) : base(msg, innerException) { }
-            protected InvalidOpenSimResponseSerializationException(SerializationInfo info, StreamingContext context) : base(info, context) { }
 
-            public override string Message
+            public InvalidOpenSimResponseSerializationException()
             {
-                get
-                {
-                    return "Invalid OpenSim response at " + Path;
-                }
             }
+
+            public InvalidOpenSimResponseSerializationException(string msg, Exception innerException) : base(msg, innerException)
+            {
+            }
+
+            protected InvalidOpenSimResponseSerializationException(SerializationInfo info, StreamingContext context) : base(info, context)
+            {
+            }
+
+            public override string Message => "Invalid OpenSim response at " + Path;
         }
 
         private static AString ParseValue(XmlTextReader reader)
         {
-            AString astring = new AString();
+            var astring = new AString();
             string tagname = reader.Name;
             while(true)
             {
@@ -87,7 +90,7 @@ namespace SilverSim.BackendConnectors.Robust.Common
         private static Map ParseMap(XmlTextReader reader)
         {
             string tagname = reader.Name;
-            Map map = new Map();
+            var map = new Map();
             while(true)
             {
                 if (!reader.Read())
@@ -151,7 +154,7 @@ namespace SilverSim.BackendConnectors.Robust.Common
 
         public static Map Deserialize(Stream input)
         {
-            using(XmlTextReader reader = new XmlTextReader(input))
+            using(var reader = new XmlTextReader(input))
             {
                 while(true)
                 {

@@ -33,21 +33,20 @@ namespace SilverSim.BackendConnectors.Robust.GroupsV2
         public static DirGroupInfo ToDirGroupInfo(this IValue iv)
         {
             Map m = (Map)iv;
-            DirGroupInfo group = new DirGroupInfo();
-            group.ID.ID = m["GroupID"].AsUUID;
-            group.ID.GroupName = m["Name"].ToString();
-            group.MemberCount = m["NMembers"].AsInt;
-            group.SearchOrder = (float)(double)m["SearchOrder"].AsReal;
-
-            return group;
+            return new DirGroupInfo()
+            {
+                ID = new UGI { ID = m["GroupID"].AsUUID, GroupName = m["Name"].ToString() },
+                MemberCount = m["NMembers"].AsInt,
+                SearchOrder = (float)(double)m["SearchOrder"].AsReal
+            };
         }
         #endregion
 
         #region Group
         public static GroupInfo ToGroup(this IValue iv)
         {
-            Map m = (Map)iv;
-            GroupInfo group = new GroupInfo();
+            var m = (Map)iv;
+            var group = new GroupInfo();
             if(m.ContainsKey("AllowPublish"))
             {
                 group.IsAllowPublish = bool.Parse(m["AllowPublish"].ToString());
@@ -129,35 +128,31 @@ namespace SilverSim.BackendConnectors.Robust.GroupsV2
             return group;
         }
 
-        public static Dictionary<string, string> ToPost(this GroupInfo group)
+        public static Dictionary<string, string> ToPost(this GroupInfo group) => new Dictionary<string, string>
         {
-            Dictionary<string, string> post = new Dictionary<string, string>();
-
-            post["AllowPublish"] = group.IsAllowPublish.ToString();
-            post["Charter"] = group.Charter;
-            post["FounderID"] = (string)group.Founder.ID;
-            post["FounderUUI"] = group.Founder.ToString();
-            post["GroupID"] = (string)group.ID.ID;
-            post["Name"] = group.ID.GroupName;
-            post["InsigniaID"] = (string)group.InsigniaID;
-            post["MaturePublish"] = group.IsMaturePublish.ToString();
-            post["MembershipFee"] = group.MembershipFee.ToString();
-            post["OpenEnrollment"] = group.IsOpenEnrollment.ToString();
-            post["OwnerRoleID"] = group.OwnerRoleID.ToString();
-            post["ServiceLocation"] = group.ID.HomeURI != null ? group.ID.HomeURI.ToString() : string.Empty;
-            post["ShownInList"] = group.IsShownInList.ToString();
-            post["MemberCount"] = group.MemberCount.ToString();
-            post["RoleCount"] = group.RoleCount.ToString();
-
-            return post;
-        }
+            ["AllowPublish"] = group.IsAllowPublish.ToString(),
+            ["Charter"] = group.Charter,
+            ["FounderID"] = (string)group.Founder.ID,
+            ["FounderUUI"] = group.Founder.ToString(),
+            ["GroupID"] = (string)group.ID.ID,
+            ["Name"] = group.ID.GroupName,
+            ["InsigniaID"] = (string)group.InsigniaID,
+            ["MaturePublish"] = group.IsMaturePublish.ToString(),
+            ["MembershipFee"] = group.MembershipFee.ToString(),
+            ["OpenEnrollment"] = group.IsOpenEnrollment.ToString(),
+            ["OwnerRoleID"] = group.OwnerRoleID.ToString(),
+            ["ServiceLocation"] = group.ID.HomeURI != null ? group.ID.HomeURI.ToString() : string.Empty,
+            ["ShownInList"] = group.IsShownInList.ToString(),
+            ["MemberCount"] = group.MemberCount.ToString(),
+            ["RoleCount"] = group.RoleCount.ToString()
+        };
         #endregion
 
         #region Group Member
         public static GroupMember ToGroupMemberFromMembership(this IValue iv)
         {
-            Map m = (Map)iv;
-            GroupMember member = new GroupMember();
+            var m = (Map)iv;
+            var member = new GroupMember();
 
             if(m.ContainsKey("AccessToken"))
             {
@@ -197,8 +192,8 @@ namespace SilverSim.BackendConnectors.Robust.GroupsV2
 
         public static GroupMembership ToGroupMembership(this IValue iv)
         {
-            Map m = (Map)iv;
-            GroupMembership member = new GroupMembership();
+            var m = (Map)iv;
+            var member = new GroupMembership();
 
             if (m.ContainsKey("GroupID"))
             {
@@ -274,8 +269,8 @@ namespace SilverSim.BackendConnectors.Robust.GroupsV2
 
         public static GroupMember ToGroupMember(this IValue iv, UGI group)
         {
-            Map m = (Map)iv;
-            GroupMember member = new GroupMember();
+            var m = (Map)iv;
+            var member = new GroupMember();
             member.Group = group;
 
             if(m.ContainsKey("AcceptNotices"))
@@ -310,8 +305,8 @@ namespace SilverSim.BackendConnectors.Robust.GroupsV2
         #region GroupRole
         public static GroupRole ToGroupRole(this IValue iv)
         {
-            Map m = (Map)iv;
-            GroupRole role = new GroupRole();
+            var m = (Map)iv;
+            var role = new GroupRole();
             if(m.ContainsKey("Description"))
             {
                 role.Description = m["Description"].ToString();
@@ -340,50 +335,48 @@ namespace SilverSim.BackendConnectors.Robust.GroupsV2
             return role;
         }
 
-        public static Dictionary<string, string> ToPost(this GroupRole role)
+        public static Dictionary<string, string> ToPost(this GroupRole role) => new Dictionary<string, string>
         {
-            Dictionary<string, string> m = new Dictionary<string, string>();
-            m.Add("GroupID", (string)role.Group.ID);
-            m.Add("RoleID", (string)role.ID);
-            m.Add("Name", role.Name);
-            m.Add("Description", role.Description);
-            m.Add("Title", role.Title);
-            m.Add("Powers", ((ulong)role.Powers).ToString());
-            return m;
-        }
+            { "GroupID", (string)role.Group.ID },
+            { "RoleID", (string)role.ID },
+            { "Name", role.Name },
+            { "Description", role.Description },
+            { "Title", role.Title },
+            { "Powers", ((ulong)role.Powers).ToString() }
+        };
         #endregion
 
         #region Group Rolemember
         public static GroupRolemember ToGroupRolemember(this IValue iv)
         {
-            Map m = (Map)iv;
-            GroupRolemember member = new GroupRolemember();
-            member.RoleID = m["RoleID"].AsUUID;
-            member.Principal = new UUI(m["MemberID"].ToString());
-            return member;
+            var m = (Map)iv;
+            return new GroupRolemember()
+            {
+                RoleID = m["RoleID"].AsUUID,
+                Principal = new UUI(m["MemberID"].ToString())
+            };
         }
 
-        public static Dictionary<string, string> ToPost(this GroupRolemember m, Func<UUI, string> getGroupsAgentID)
+        public static Dictionary<string, string> ToPost(this GroupRolemember m, Func<UUI, string> getGroupsAgentID) => new Dictionary<string, string>
         {
-            Dictionary<string, string> post = new Dictionary<string,string>();
-            post["RoleID"] = (string)m.RoleID;
-            post["MemberID"] = getGroupsAgentID(m.Principal);
-
-            return post;
-        }
+            ["RoleID"] = (string)m.RoleID,
+            ["MemberID"] = getGroupsAgentID(m.Principal)
+        };
         #endregion
 
         #region Group Notice
         public static GroupNotice ToGroupNotice(this IValue iv)
         {
-            Map m = (Map)iv;
+            var m = (Map)iv;
 
-            GroupNotice notice = new GroupNotice();
-            notice.ID = m["NoticeID"].AsUUID;
-            notice.Timestamp = Date.UnixTimeToDateTime(m["Timestamp"].AsULong);
-            notice.FromName = m["FromName"].ToString();
-            notice.Subject = m["Subject"].ToString();
-            notice.HasAttachment = bool.Parse(m["HasAttachment"].ToString());
+            var notice = new GroupNotice()
+            {
+                ID = m["NoticeID"].AsUUID,
+                Timestamp = Date.UnixTimeToDateTime(m["Timestamp"].AsULong),
+                FromName = m["FromName"].ToString(),
+                Subject = m["Subject"].ToString(),
+                HasAttachment = bool.Parse(m["HasAttachment"].ToString())
+            };
             if (notice.HasAttachment)
             {
                 notice.AttachmentItemID = m["AttachmentItemID"].AsUUID;
@@ -400,12 +393,14 @@ namespace SilverSim.BackendConnectors.Robust.GroupsV2
 
         public static Dictionary<string, string> ToPost(this GroupNotice notice, Func<UUI, string> getGroupsAgentID)
         {
-            Dictionary<string, string> post = new Dictionary<string, string>();
-            post["NoticeID"] = (string)notice.ID;
-            post["Timestamp"] = notice.Timestamp.AsULong.ToString();
-            post["FromName"] = notice.FromName;
-            post["Subject"] = notice.Subject;
-            post["HasAttachment"] = notice.HasAttachment.ToString();
+            var post = new Dictionary<string, string>
+            {
+                ["NoticeID"] = (string)notice.ID,
+                ["Timestamp"] = notice.Timestamp.AsULong.ToString(),
+                ["FromName"] = notice.FromName,
+                ["Subject"] = notice.Subject,
+                ["HasAttachment"] = notice.HasAttachment.ToString()
+            };
             if (notice.HasAttachment)
             {
                 post["AttachmentItemID"] = (string)notice.AttachmentItemID;

@@ -42,11 +42,11 @@ namespace SilverSim.BackendHandlers.Robust.Grid
     [ServerParam("GridName", ParameterType = typeof(Uri), Type = ServerParamType.GlobalOnly, DefaultValue = "")]
     public sealed class RobustGridServerHandler : IPlugin, IServerParamListener
     {
-        readonly string m_GridServiceName;
-        GridServiceInterface m_GridService;
-        readonly Dictionary<string, object> m_ExtraFeatures = new Dictionary<string, object>();
+        private readonly string m_GridServiceName;
+        private GridServiceInterface m_GridService;
+        private readonly Dictionary<string, object> m_ExtraFeatures = new Dictionary<string, object>();
 
-        static readonly ILog m_Log = LogManager.GetLogger("ROBUST GRID HANDLER");
+        private static readonly ILog m_Log = LogManager.GetLogger("ROBUST GRID HANDLER");
         public RobustGridServerHandler(string gridServiceName)
         {
             m_GridServiceName = gridServiceName;
@@ -78,7 +78,7 @@ namespace SilverSim.BackendHandlers.Robust.Grid
             m_ExtraFeatures["gridname"] = value;
         }
 
-        void SuccessResult(HttpRequest req, RegionInfo rInfo)
+        private void SuccessResult(HttpRequest req, RegionInfo rInfo)
         {
             using (HttpResponse res = req.BeginResponse("text/xml"))
             {
@@ -97,7 +97,7 @@ namespace SilverSim.BackendHandlers.Robust.Grid
             }
         }
 
-        void SuccessResult(HttpRequest req, List<RegionInfo> regions)
+        private void SuccessResult(HttpRequest req, List<RegionInfo> regions)
         {
             using (HttpResponse res = req.BeginResponse("text/xml"))
             {
@@ -123,7 +123,7 @@ namespace SilverSim.BackendHandlers.Robust.Grid
             }
         }
 
-        void ListFailureResult(HttpRequest req)
+        private void ListFailureResult(HttpRequest req)
         {
             using (HttpResponse res = req.BeginResponse("text/xml"))
             {
@@ -141,7 +141,7 @@ namespace SilverSim.BackendHandlers.Robust.Grid
             }
         }
 
-        void FailureResult(HttpRequest req, string message)
+        private void FailureResult(HttpRequest req, string message)
         {
             using (HttpResponse res = req.BeginResponse("text/xml"))
             {
@@ -162,7 +162,7 @@ namespace SilverSim.BackendHandlers.Robust.Grid
             }
         }
 
-        void SuccessResult(HttpRequest req)
+        private void SuccessResult(HttpRequest req)
         {
             using (HttpResponse res = req.BeginResponse("text/xml"))
             {
@@ -180,7 +180,7 @@ namespace SilverSim.BackendHandlers.Robust.Grid
             }
         }
 
-        void GridAccessHandler(HttpRequest req)
+        private void GridAccessHandler(HttpRequest req)
         {
             if (req.ContainsHeader("X-SecondLife-Shard"))
             {
@@ -278,7 +278,7 @@ namespace SilverSim.BackendHandlers.Robust.Grid
             }
         }
 
-        void RegisterRegion(HttpRequest req, Dictionary<string, object> reqdata)
+        private void RegisterRegion(HttpRequest req, Dictionary<string, object> reqdata)
         {
             if (!reqdata.ContainsKey("uuid") ||
                 !reqdata.ContainsKey("regionName"))
@@ -287,7 +287,7 @@ namespace SilverSim.BackendHandlers.Robust.Grid
                 return;
             }
 
-            RegionInfo rInfo = new RegionInfo();
+            var rInfo = new RegionInfo();
 
             if (!UUID.TryParse(reqdata["uuid"].ToString(), out rInfo.ID))
             {
@@ -302,14 +302,14 @@ namespace SilverSim.BackendHandlers.Robust.Grid
 
             rInfo.Name = reqdata["regionName"].ToString();
 
-            if (reqdata.ContainsKey("SCOPEID") && 
+            if (reqdata.ContainsKey("SCOPEID") &&
                 !UUID.TryParse(reqdata["SCOPEID"].ToString(), out rInfo.ScopeID))
             {
                 FailureResult(req, "Invalid parameter SCOPEID");
                 return;
             }
 
-            if (reqdata.ContainsKey("owner_uuid") && 
+            if (reqdata.ContainsKey("owner_uuid") &&
                 !UUID.TryParse(reqdata["owner_uuid"].ToString(), out rInfo.Owner.ID))
             {
                 FailureResult(req, "Invalid parameter owner_uuid");
@@ -395,7 +395,7 @@ namespace SilverSim.BackendHandlers.Robust.Grid
                 return;
             }
 
-            uint access_val = (uint)RegionAccess.Adult;
+            var access_val = (uint)RegionAccess.Adult;
             if(reqdata.ContainsKey("access") &&
                 !uint.TryParse(reqdata["access"].ToString(), out access_val))
             {
@@ -421,7 +421,7 @@ namespace SilverSim.BackendHandlers.Robust.Grid
                 uint.TryParse(reqdata["flags"].ToString(), out flags_val)) ?
                 (RegionFlags)flags_val :
                 RegionFlags.RegionOnline;
-            
+
             try
             {
                 m_GridService.RegisterRegion(rInfo);
@@ -442,7 +442,7 @@ namespace SilverSim.BackendHandlers.Robust.Grid
             }
         }
 
-        void DeregisterRegion(HttpRequest req, Dictionary<string, object> reqdata)
+        private void DeregisterRegion(HttpRequest req, Dictionary<string, object> reqdata)
         {
             UUID regionid;
             if(!reqdata.ContainsKey("REGIONID") ||
@@ -470,7 +470,7 @@ namespace SilverSim.BackendHandlers.Robust.Grid
             SuccessResult(req);
         }
 
-        void SerializeRegionData(XmlTextWriter w, RegionInfo rInfo)
+        private void SerializeRegionData(XmlTextWriter w, RegionInfo rInfo)
         {
             w.WriteNamedValue("uuid", rInfo.ID);
             w.WriteNamedValue("locX", rInfo.Location.X);
@@ -491,7 +491,7 @@ namespace SilverSim.BackendHandlers.Robust.Grid
             w.WriteNamedValue("owner_data", rInfo.Owner.CreatorData);
         }
 
-        void SerializeRegion(XmlTextWriter w, RegionInfo rInfo)
+        private void SerializeRegion(XmlTextWriter w, RegionInfo rInfo)
         {
             w.WriteStartElement("region");
             w.WriteAttributeString("type", "List");
@@ -499,7 +499,7 @@ namespace SilverSim.BackendHandlers.Robust.Grid
             w.WriteEndElement();
         }
 
-        void SerializeRegionList(XmlTextWriter w, List<RegionInfo> list)
+        private void SerializeRegionList(XmlTextWriter w, List<RegionInfo> list)
         {
             int cnt = 1;
             foreach(RegionInfo rInfo in list)
@@ -511,7 +511,7 @@ namespace SilverSim.BackendHandlers.Robust.Grid
             }
         }
 
-        void GetNeighbours(HttpRequest req, Dictionary<string, object> reqdata)
+        private void GetNeighbours(HttpRequest req, Dictionary<string, object> reqdata)
         {
             UUID regionid;
             if (!reqdata.ContainsKey("REGIONID") ||
@@ -540,7 +540,7 @@ namespace SilverSim.BackendHandlers.Robust.Grid
             SuccessResult(req, regions);
         }
 
-        void GetRegionById(HttpRequest req, Dictionary<string, object> reqdata)
+        private void GetRegionById(HttpRequest req, Dictionary<string, object> reqdata)
         {
             UUID regionid;
             if (!reqdata.ContainsKey("REGIONID") ||
@@ -569,7 +569,7 @@ namespace SilverSim.BackendHandlers.Robust.Grid
             SuccessResult(req, rInfo);
         }
 
-        void GetRegionByPosition(HttpRequest req, Dictionary<string, object> reqdata)
+        private void GetRegionByPosition(HttpRequest req, Dictionary<string, object> reqdata)
         {
             uint x;
             uint y;
@@ -605,7 +605,7 @@ namespace SilverSim.BackendHandlers.Robust.Grid
             SuccessResult(req, rInfo);
         }
 
-        void GetRegionByName(HttpRequest req, Dictionary<string, object> reqdata)
+        private void GetRegionByName(HttpRequest req, Dictionary<string, object> reqdata)
         {
             string name;
             if (!reqdata.ContainsKey("NAME"))
@@ -634,7 +634,7 @@ namespace SilverSim.BackendHandlers.Robust.Grid
             SuccessResult(req, rInfo);
         }
 
-        void GetRegionsByName(HttpRequest req, Dictionary<string, object> reqdata)
+        private void GetRegionsByName(HttpRequest req, Dictionary<string, object> reqdata)
         {
             string name;
             if (!reqdata.ContainsKey("NAME"))
@@ -664,10 +664,10 @@ namespace SilverSim.BackendHandlers.Robust.Grid
             SuccessResult(req, regions);
         }
 
-        void GetRegionRange(HttpRequest req, Dictionary<string, object> reqdata)
+        private void GetRegionRange(HttpRequest req, Dictionary<string, object> reqdata)
         {
-            GridVector min = new GridVector();
-            GridVector max = new GridVector();
+            var min = new GridVector();
+            var max = new GridVector();
 
             if (!reqdata.ContainsKey("XMIN") ||
                 uint.TryParse(reqdata["XMIN"].ToString(), out min.X) ||
@@ -702,7 +702,7 @@ namespace SilverSim.BackendHandlers.Robust.Grid
             SuccessResult(req, regions);
         }
 
-        void GetDefaultRegions(HttpRequest req, Dictionary<string, object> reqdata)
+        private void GetDefaultRegions(HttpRequest req, Dictionary<string, object> reqdata)
         {
             UUID scopeid;
             if (!reqdata.ContainsKey("SCOPEID") ||
@@ -724,7 +724,7 @@ namespace SilverSim.BackendHandlers.Robust.Grid
             SuccessResult(req, regions);
         }
 
-        void GetDefaultHypergridRegions(HttpRequest req, Dictionary<string, object> reqdata)
+        private void GetDefaultHypergridRegions(HttpRequest req, Dictionary<string, object> reqdata)
         {
             UUID scopeid;
             if (!reqdata.ContainsKey("SCOPEID") ||
@@ -746,7 +746,7 @@ namespace SilverSim.BackendHandlers.Robust.Grid
             SuccessResult(req, regions);
         }
 
-        void GetFallbackRegions(HttpRequest req, Dictionary<string, object> reqdata)
+        private void GetFallbackRegions(HttpRequest req, Dictionary<string, object> reqdata)
         {
             UUID scopeid;
             if (!reqdata.ContainsKey("SCOPEID") ||
@@ -768,7 +768,7 @@ namespace SilverSim.BackendHandlers.Robust.Grid
             SuccessResult(req, regions);
         }
 
-        void GetHyperlinks(HttpRequest req, Dictionary<string, object> reqdata)
+        private void GetHyperlinks(HttpRequest req, Dictionary<string, object> reqdata)
         {
             UUID scopeid;
             if (!reqdata.ContainsKey("SCOPEID") ||
@@ -790,7 +790,7 @@ namespace SilverSim.BackendHandlers.Robust.Grid
             SuccessResult(req, regions);
         }
 
-        void GetRegionFlags(HttpRequest req, Dictionary<string, object> reqdata)
+        private void GetRegionFlags(HttpRequest req, Dictionary<string, object> reqdata)
         {
             UUID regionid;
             if (!reqdata.ContainsKey("REGIONID") ||
@@ -831,7 +831,7 @@ namespace SilverSim.BackendHandlers.Robust.Grid
             }
         }
 
-        void GetGridExtraFeatures(HttpRequest req, Dictionary<string, object> reqdata)
+        private void GetGridExtraFeatures(HttpRequest req, Dictionary<string, object> reqdata)
         {
             using (HttpResponse res = req.BeginResponse("text/xml"))
             {
@@ -851,7 +851,7 @@ namespace SilverSim.BackendHandlers.Robust.Grid
                                 KeyValuePair<string, object> kvp = enumerator.Current;
                                 w.WriteStartElement(kvp.Key);
                                 object obj = kvp.Value;
-                                Dictionary<string, object> dict = obj as Dictionary<string, object>;
+                                var dict = obj as Dictionary<string, object>;
                                 if(dict != null)
                                 {
                                     w.WriteAttributeString("type", "List");
@@ -880,15 +880,8 @@ namespace SilverSim.BackendHandlers.Robust.Grid
     [PluginName("GridHandler")]
     public sealed class RobustGridHandlerFactory : IPluginFactory
     {
-        public RobustGridHandlerFactory()
-        {
-
-        }
-
-        public IPlugin Initialize(ConfigurationLoader loader, IConfig ownSection)
-        {
-            return new RobustGridServerHandler(ownSection.GetString("GridService", "GridService"));
-        }
+        public IPlugin Initialize(ConfigurationLoader loader, IConfig ownSection) =>
+            new RobustGridServerHandler(ownSection.GetString("GridService", "GridService"));
     }
     #endregion
 }

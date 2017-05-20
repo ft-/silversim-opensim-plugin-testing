@@ -38,7 +38,7 @@ namespace SilverSim.BackendConnectors.Robust.Account
     [Description("Robust UserAccount Connector")]
     public sealed class RobustAccountConnector : UserAccountServiceInterface, IPlugin
     {
-        readonly string m_UserAccountURI;
+        private readonly string m_UserAccountURI;
         public int TimeoutMs { get; set; }
 
         #region Constructor
@@ -61,15 +61,17 @@ namespace SilverSim.BackendConnectors.Robust.Account
 
         public override bool TryGetValue(UUID scopeID, UUID accountID, out UserAccount account)
         {
-            Dictionary<string, string> post = new Dictionary<string, string>();
-            post["UserID"] = (string)accountID;
-            post["SCOPEID"] = (string)scopeID;
-            post["METHOD"] = "getaccount";
+            var post = new Dictionary<string, string>
+            {
+                ["UserID"] = (string)accountID,
+                ["SCOPEID"] = (string)scopeID,
+                ["METHOD"] = "getaccount"
+            };
             using (Stream s = HttpClient.DoStreamPostRequest(m_UserAccountURI, null, post, false, TimeoutMs))
             {
                 Map map = OpenSimResponse.Deserialize(s);
-                Map resultmap = map["result"] as Map;
-                if (null == resultmap)
+                var resultmap = map["result"] as Map;
+                if (resultmap == null)
                 {
                     account = default(UserAccount);
                     return false;
@@ -81,15 +83,17 @@ namespace SilverSim.BackendConnectors.Robust.Account
 
         public override bool ContainsKey(UUID scopeID, UUID accountID)
         {
-            Dictionary<string, string> post = new Dictionary<string, string>();
-            post["UserID"] = (string)accountID;
-            post["SCOPEID"] = (string)scopeID;
-            post["METHOD"] = "getaccount";
+            var post = new Dictionary<string, string>
+            {
+                ["UserID"] = (string)accountID,
+                ["SCOPEID"] = (string)scopeID,
+                ["METHOD"] = "getaccount"
+            };
             using (Stream s = HttpClient.DoStreamPostRequest(m_UserAccountURI, null, post, false, TimeoutMs))
             {
                 Map map = OpenSimResponse.Deserialize(s);
-                Map resultmap = map["result"] as Map;
-                return null != resultmap;
+                var resultmap = map["result"] as Map;
+                return resultmap != null;
             }
         }
 
@@ -108,10 +112,12 @@ namespace SilverSim.BackendConnectors.Robust.Account
 
         public override bool TryGetValue(UUID scopeID, string email, out UserAccount account)
         {
-            Dictionary<string, string> post = new Dictionary<string, string>();
-            post["Email"] = email;
-            post["SCOPEID"] = (string)scopeID;
-            post["METHOD"] = "getaccount";
+            var post = new Dictionary<string, string>
+            {
+                ["Email"] = email,
+                ["SCOPEID"] = (string)scopeID,
+                ["METHOD"] = "getaccount"
+            };
             using (Stream s = HttpClient.DoStreamPostRequest(m_UserAccountURI, null, post, false, TimeoutMs))
             {
                 Map map = OpenSimResponse.Deserialize(s);
@@ -120,9 +126,9 @@ namespace SilverSim.BackendConnectors.Robust.Account
                     account = default(UserAccount);
                     return false;
                 }
-                Map resultmap = map["result"] as Map;
-                if (null == resultmap)
-                { 
+                var resultmap = map["result"] as Map;
+                if (resultmap == null)
+                {
                     account = default(UserAccount);
                     return false;
                 }
@@ -133,10 +139,12 @@ namespace SilverSim.BackendConnectors.Robust.Account
 
         public override bool ContainsKey(UUID scopeID, string email)
         {
-            Dictionary<string, string> post = new Dictionary<string, string>();
-            post["Email"] = email;
-            post["SCOPEID"] = (string)scopeID;
-            post["METHOD"] = "getaccount";
+            var post = new Dictionary<string, string>
+            {
+                ["Email"] = email,
+                ["SCOPEID"] = (string)scopeID,
+                ["METHOD"] = "getaccount"
+            };
             using (Stream s = HttpClient.DoStreamPostRequest(m_UserAccountURI, null, post, false, TimeoutMs))
             {
                 Map map = OpenSimResponse.Deserialize(s);
@@ -145,7 +153,7 @@ namespace SilverSim.BackendConnectors.Robust.Account
                     return false;
                 }
                 Map resultmap = map["result"] as Map;
-                return null != resultmap;
+                return resultmap != null;
             }
         }
 
@@ -164,11 +172,13 @@ namespace SilverSim.BackendConnectors.Robust.Account
 
         public override bool TryGetValue(UUID scopeID, string firstName, string lastName, out UserAccount account)
         {
-            Dictionary<string, string> post = new Dictionary<string, string>();
-            post["FirstName"] = firstName;
-            post["LastName"] = lastName;
-            post["SCOPEID"] = (string)scopeID;
-            post["METHOD"] = "getaccount";
+            var post = new Dictionary<string, string>
+            {
+                ["FirstName"] = firstName,
+                ["LastName"] = lastName,
+                ["SCOPEID"] = (string)scopeID,
+                ["METHOD"] = "getaccount"
+            };
             using (Stream s = HttpClient.DoStreamPostRequest(m_UserAccountURI, null, post, false, TimeoutMs))
             {
                 Map map = OpenSimResponse.Deserialize(s);
@@ -177,8 +187,8 @@ namespace SilverSim.BackendConnectors.Robust.Account
                     account = default(UserAccount);
                     return false;
                 }
-                Map resultmap = map["result"] as Map;
-                if (null == resultmap)
+                var resultmap = map["result"] as Map;
+                if (resultmap == null)
                 {
                     account = default(UserAccount);
                     return false;
@@ -190,11 +200,13 @@ namespace SilverSim.BackendConnectors.Robust.Account
 
         public override bool ContainsKey(UUID scopeID, string firstName, string lastName)
         {
-            Dictionary<string, string> post = new Dictionary<string, string>();
-            post["FirstName"] = firstName;
-            post["LastName"] = lastName;
-            post["SCOPEID"] = (string)scopeID;
-            post["METHOD"] = "getaccount";
+            var post = new Dictionary<string, string>
+            {
+                ["FirstName"] = firstName,
+                ["LastName"] = lastName,
+                ["SCOPEID"] = (string)scopeID,
+                ["METHOD"] = "getaccount"
+            };
             using (Stream s = HttpClient.DoStreamPostRequest(m_UserAccountURI, null, post, false, TimeoutMs))
             {
                 Map map = OpenSimResponse.Deserialize(s);
@@ -202,8 +214,8 @@ namespace SilverSim.BackendConnectors.Robust.Account
                 {
                     return false;
                 }
-                Map resultmap = map["result"] as Map;
-                if (null == resultmap)
+                var resultmap = map["result"] as Map;
+                if (resultmap == null)
                 {
                     return false;
                 }
@@ -217,7 +229,7 @@ namespace SilverSim.BackendConnectors.Robust.Account
             {
                 UserAccount account;
                 if(!TryGetValue(scopeID, firstName, lastName, out account))
-                { 
+                {
                     throw new UserAccountNotFoundException();
                 }
                 return account;
@@ -226,18 +238,20 @@ namespace SilverSim.BackendConnectors.Robust.Account
 
         public override List<UserAccount> GetAccounts(UUID scopeID, string query)
         {
-            Dictionary<string, string> post = new Dictionary<string, string>();
-            post["query"] = query;
-            post["SCOPEID"] = (string)scopeID;
-            post["METHOD"] = "getaccounts";
+            var post = new Dictionary<string, string>
+            {
+                ["query"] = query,
+                ["SCOPEID"] = (string)scopeID,
+                ["METHOD"] = "getaccounts"
+            };
             Map map;
-            
+
             using(Stream s = HttpClient.DoStreamPostRequest(m_UserAccountURI, null, post, false, TimeoutMs))
             {
                 map = OpenSimResponse.Deserialize(s);
             }
-            Map resultmap = map["result"] as Map;
-            if (null == resultmap)
+            var resultmap = map["result"] as Map;
+            if (resultmap == null)
             {
                 throw new UserAccountNotFoundException();
             }
@@ -310,10 +324,6 @@ namespace SilverSim.BackendConnectors.Robust.Account
     public sealed class RobustAccountConnectorFactory : IPluginFactory
     {
         private static readonly ILog m_Log = LogManager.GetLogger("ROBUST ACCOUNT CONNECTOR");
-        public RobustAccountConnectorFactory()
-        {
-
-        }
 
         public IPlugin Initialize(ConfigurationLoader loader, IConfig ownSection)
         {

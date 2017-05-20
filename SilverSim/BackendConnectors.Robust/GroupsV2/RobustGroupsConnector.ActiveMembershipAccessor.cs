@@ -36,8 +36,8 @@ namespace SilverSim.BackendConnectors.Robust.GroupsV2
         public sealed class ActiveGroupMembershipAccesor : IActiveGroupMembershipInterface
         {
             public int TimeoutMs = 20000;
-            readonly string m_Uri;
-            readonly Func<UUI, string> m_GetGroupsAgentID;
+            private readonly string m_Uri;
+            private readonly Func<UUI, string> m_GetGroupsAgentID;
 
             public ActiveGroupMembershipAccesor(string uri, Func<UUI, string> getGroupsAgentID)
             {
@@ -47,11 +47,12 @@ namespace SilverSim.BackendConnectors.Robust.GroupsV2
 
             public bool TryGetValue(UUI requestingAgent, UUI principal, out GroupActiveMembership gam)
             {
-                Dictionary<string, string> post = new Dictionary<string, string>();
-                post["AgentID"] = m_GetGroupsAgentID(principal);
-                post["RequestingAgentID"] = m_GetGroupsAgentID(requestingAgent);
-                post["METHOD"] = "GETMEMBERSHIP";
-
+                var post = new Dictionary<string, string>
+                {
+                    ["AgentID"] = m_GetGroupsAgentID(principal),
+                    ["RequestingAgentID"] = m_GetGroupsAgentID(requestingAgent),
+                    ["METHOD"] = "GETMEMBERSHIP"
+                };
                 Map m;
                 using (Stream s = HttpClient.DoStreamPostRequest(m_Uri, null, post, false, TimeoutMs))
                 {
@@ -68,22 +69,24 @@ namespace SilverSim.BackendConnectors.Robust.GroupsV2
                     return false;
                 }
 
-                gam = new GroupActiveMembership();
-                Map res = (Map)m["RESULT"];
-                gam.User = principal;
-                gam.Group = new UGI(res["GroupID"].AsUUID);
-                gam.Group.GroupName = res["GroupName"].ToString();
-                gam.SelectedRoleID = res["ActiveRole"].AsUUID;
+                var res = (Map)m["RESULT"];
+                gam = new GroupActiveMembership()
+                {
+                    User = principal,
+                    Group = new UGI { ID = res["GroupID"].AsUUID, GroupName = res["GroupName"].ToString() },
+                    SelectedRoleID = res["ActiveRole"].AsUUID
+                };
                 return true;
             }
 
             public bool ContainsKey(UUI requestingAgent, UUI principal)
             {
-                Dictionary<string, string> post = new Dictionary<string, string>();
-                post["AgentID"] = m_GetGroupsAgentID(principal);
-                post["RequestingAgentID"] = m_GetGroupsAgentID(requestingAgent);
-                post["METHOD"] = "GETMEMBERSHIP";
-
+                var post = new Dictionary<string, string>
+                {
+                    ["AgentID"] = m_GetGroupsAgentID(principal),
+                    ["RequestingAgentID"] = m_GetGroupsAgentID(requestingAgent),
+                    ["METHOD"] = "GETMEMBERSHIP"
+                };
                 Map m;
                 using (Stream s = HttpClient.DoStreamPostRequest(m_Uri, null, post, false, TimeoutMs))
                 {
@@ -103,7 +106,7 @@ namespace SilverSim.BackendConnectors.Robust.GroupsV2
 
             public GroupActiveMembership this[UUI requestingAgent, UUI principal]
             {
-                get 
+                get
                 {
                     GroupActiveMembership gam;
                     if(!TryGetValue(requestingAgent, principal, out gam))

@@ -35,7 +35,7 @@ namespace SilverSim.BackendConnectors.Robust.IM
     {
         public int TimeoutMs { get; set; }
 
-        readonly string m_IMUri;
+        private readonly string m_IMUri;
 
         public RobustIMConnector(string uri)
         {
@@ -50,9 +50,9 @@ namespace SilverSim.BackendConnectors.Robust.IM
 
         public override void Send(GridInstantMessage im)
         {
-            XmlRpc.XmlRpcRequest req = new XmlRpc.XmlRpcRequest();
-            
-            Map p = new Map();
+            var req = new XmlRpc.XmlRpcRequest();
+
+            var p = new Map();
             if (im.IsFromGroup)
             {
                 p.Add("from_agent_id", im.FromGroup.ID);
@@ -69,11 +69,11 @@ namespace SilverSim.BackendConnectors.Robust.IM
             p.Add("from_agent_name", im.FromAgent.FullName);
             p.Add("from_group", im.IsFromGroup ? "TRUE" : "FALSE");
             p.Add("message", im.Message);
-            byte[] v = new byte[1];
+            var v = new byte[1];
             v[0] = (byte)(int)im.Dialog;
             p.Add("dialog", Convert.ToBase64String(v, Base64FormattingOptions.None));
             v = new byte[1];
-            v[0] = (im.IsOffline ? (byte)1 : (byte)0);
+            v[0] = im.IsOffline ? (byte)1 : (byte)0;
             p.Add("offline", Convert.ToBase64String(v, Base64FormattingOptions.None));
             p.Add("parent_estate_id", im.ParentEstateID.ToString());
             p.Add("position_x", im.Position.X.ToString());
@@ -95,7 +95,7 @@ namespace SilverSim.BackendConnectors.Robust.IM
             }
             if(res.ReturnValue is Map)
             {
-                Map d = (Map)res.ReturnValue;
+                var d = (Map)res.ReturnValue;
                 if(bool.Parse(d["success"].ToString()))
                 {
                     return;

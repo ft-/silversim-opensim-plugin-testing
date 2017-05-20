@@ -35,36 +35,20 @@ namespace SilverSim.BackendConnectors.Robust
     [Description("Robust Inventory Connector Factory")]
     public class RobustInventoryPlugin : ServicePluginHelo, IInventoryServicePlugin, IPlugin
     {
-        public RobustInventoryPlugin()
-        {
-
-        }
-
         public void Startup(ConfigurationLoader loader)
         {
             /* no action needed */
         }
 
-        public InventoryServiceInterface Instantiate(string url)
-        {
-            return new Inventory.RobustInventoryConnector(url);
-        }
+        public InventoryServiceInterface Instantiate(string url) => new Inventory.RobustInventoryConnector(url);
 
-        public override string Name
-        {
-            get
-            {
-                return "opensim-robust";
-            }
-        }
+        public override string Name => "opensim-robust";
     }
+
     [PluginName("InventoryPlugin")]
     public class RobustInventoryPluginFactory : IPluginFactory
     {
-        public IPlugin Initialize(ConfigurationLoader loader, IConfig ownSection)
-        {
-            return new RobustInventoryPlugin();
-        }
+        public IPlugin Initialize(ConfigurationLoader loader, IConfig ownSection) => new RobustInventoryPlugin();
     }
     #endregion
 
@@ -72,42 +56,20 @@ namespace SilverSim.BackendConnectors.Robust
     [Description("Robust Asset Connector Factory")]
     public class RobustAssetPlugin : ServicePluginHelo, IAssetServicePlugin, IPlugin
     {
-        public RobustAssetPlugin()
-        {
-
-        }
-
         public void Startup(ConfigurationLoader loader)
         {
             /* no action needed */
         }
 
-        public AssetServiceInterface Instantiate(string url)
-        {
-            return new Asset.RobustAssetConnector(url);
-        }
+        public AssetServiceInterface Instantiate(string url) => new Asset.RobustAssetConnector(url);
 
-        public override string Name
-        {
-            get
-            {
-                return "opensim-robust";
-            }
-        }
+        public override string Name => "opensim-robust";
     }
 
     [PluginName("AssetPlugin")]
     public class RobustAssetPluginFactory : IPluginFactory
     {
-        public RobustAssetPluginFactory()
-        {
-
-        }
-
-        public IPlugin Initialize(ConfigurationLoader loader, IConfig ownSection)
-        {
-            return new RobustAssetPlugin();
-        }
+        public IPlugin Initialize(ConfigurationLoader loader, IConfig ownSection) => new RobustAssetPlugin();
     }
     #endregion
 
@@ -115,23 +77,9 @@ namespace SilverSim.BackendConnectors.Robust
     [Description("Robust HGFriends Connector factory")]
     public class RobustHGFriendsPlugin : ServicePluginHelo, IFriendsServicePlugin, IPlugin
     {
-        public RobustHGFriendsPlugin()
-        {
+        public override string Name => "opensim-robust";
 
-        }
-
-        public override string Name
-        {
-            get
-            {
-                return "opensim-robust";
-            }
-        }
-
-        public FriendsServiceInterface Instantiate(string url)
-        {
-            return new Friends.RobustFriendsConnector(url, string.Empty);
-        }
+        public FriendsServiceInterface Instantiate(string url) => new Friends.RobustFriendsConnector(url, string.Empty);
 
         public void Startup(ConfigurationLoader loader)
         {
@@ -144,10 +92,9 @@ namespace SilverSim.BackendConnectors.Robust
     [Description("Robust UserAgent Connector Factory")]
     public class RobustUserAgentPlugin : ServicePluginHelo, IUserAgentServicePlugin, IPlugin
     {
-        readonly string m_Name;
         public RobustUserAgentPlugin(string name)
         {
-            m_Name = name;
+            Name = name;
         }
 
         public void Startup(ConfigurationLoader loader)
@@ -155,30 +102,14 @@ namespace SilverSim.BackendConnectors.Robust
             /* no action needed */
         }
 
-        public UserAgentServiceInterface Instantiate(string url)
-        {
-            return new UserAgent.RobustUserAgentConnector(url);
-        }
+        public UserAgentServiceInterface Instantiate(string url) => new UserAgent.RobustUserAgentConnector(url);
 
-        public override string Name
-        {
-            get
-            {
-                return m_Name;
-            }
-        }
+        public override string Name { get; }
     }
 
     [Description("Robust UserAgent Connector Factory Factory")]
     public class RobustUserAgentPluginSubFactory : IPlugin, IPluginSubFactory
     {
-        public RobustUserAgentPluginSubFactory()
-        {
-
-        }
-
-
-
         public void Startup(ConfigurationLoader loader)
         {
             /* no action needed */
@@ -190,18 +121,11 @@ namespace SilverSim.BackendConnectors.Robust
             loader.AddPlugin("SimianUserAgentConnector", new RobustUserAgentPlugin("opensim-simian"));
         }
     }
+
     [PluginName("UserAgentPlugin")]
     public class RobustUserAgentPluginFactory : IPluginFactory
     {
-        public RobustUserAgentPluginFactory()
-        {
-
-        }
-
-        public IPlugin Initialize(ConfigurationLoader loader, IConfig ownSection)
-        {
-            return new RobustUserAgentPluginSubFactory();
-        }
+        public IPlugin Initialize(ConfigurationLoader loader, IConfig ownSection) => new RobustUserAgentPluginSubFactory();
     }
     #endregion
 }

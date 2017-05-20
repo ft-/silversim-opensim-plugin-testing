@@ -26,9 +26,9 @@ namespace SilverSim.OpenSimArchiver.InventoryArchiver
 {
     public static partial class IAR
     {
-        static class ArchiveXmlLoader
+        private static class ArchiveXmlLoader
         {
-            static void LoadArchiveXml(
+            private static void LoadArchiveXml(
                 XmlTextReader reader)
             {
                 uint majorVersion = 0;
@@ -102,7 +102,7 @@ namespace SilverSim.OpenSimArchiver.InventoryArchiver
             public static void LoadArchiveXml(
                 Stream s)
             {
-                using (XmlTextReader reader = new XmlTextReader(s))
+                using (var reader = new XmlTextReader(s))
                 {
                     LoadArchiveXml(reader);
                 }

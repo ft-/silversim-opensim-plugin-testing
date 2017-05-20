@@ -32,13 +32,12 @@ namespace SilverSim.BackendConnectors.Simian.Inventory
 {
     public partial class SimianInventoryConnector : IInventoryFolderServiceInterface
     {
-        readonly string m_SimCapability;
+        private readonly string m_SimCapability;
 
         #region Accessors
         bool IInventoryFolderServiceInterface.TryGetValue(UUID principalID, UUID key, out InventoryFolder invfolder)
         {
-            List<InventoryFolder> folders = Folder.GetFolders(principalID, key);
-            foreach (InventoryFolder folder in folders)
+            foreach (InventoryFolder folder in Folder.GetFolders(principalID, key))
             {
                 if (folder.ID.Equals(key))
                 {
@@ -52,8 +51,7 @@ namespace SilverSim.BackendConnectors.Simian.Inventory
 
         bool IInventoryFolderServiceInterface.ContainsKey(UUID principalID, UUID key)
         {
-            List<InventoryFolder> folders = Folder.GetFolders(principalID, key);
-            foreach (InventoryFolder folder in folders)
+            foreach (InventoryFolder folder in Folder.GetFolders(principalID, key))
             {
                 if (folder.ID.Equals(key))
                 {
@@ -69,7 +67,7 @@ namespace SilverSim.BackendConnectors.Simian.Inventory
             get
             {
                 InventoryFolder folder;
-                if(!Folder.TryGetValue(principalID, key, out folder))
+                if (!Folder.TryGetValue(principalID, key, out folder))
                 {
                     throw new InventoryInaccessibleException();
                 }
@@ -90,15 +88,12 @@ namespace SilverSim.BackendConnectors.Simian.Inventory
 
         InventoryFolder IInventoryFolderServiceInterface.this[UUID key]
         {
-            get 
-            { 
-                throw new NotSupportedException();
-            }
+            get { throw new NotSupportedException(); }
         }
 
         bool IInventoryFolderServiceInterface.TryGetValue(UUID principalID, AssetType type, out InventoryFolder folder)
         {
-            Dictionary<string, string> post = new Dictionary<string, string>();
+            var post = new Dictionary<string, string>();
             if (type == AssetType.RootFolder)
             {
                 post["RequestMethod"] = "GetInventoryNode";
@@ -112,18 +107,18 @@ namespace SilverSim.BackendConnectors.Simian.Inventory
             {
                 post["RequestMethod"] = "GetFolderForType";
                 post["OwnerID"] = (string)principalID;
-                post["ContentType"] = SimianInventoryConnector.ContentTypeFromAssetType(type);
+                post["ContentType"] = ContentTypeFromAssetType(type);
             }
             Map res = SimianGrid.PostToService(m_InventoryURI, m_SimCapability, post, TimeoutMs);
             if (res["Success"].AsBoolean && res.ContainsKey("Items"))
             {
-                AnArray resarray = res["Items"] as AnArray;
-                if (null != resarray && resarray.Count != 0)
+                var resarray = res["Items"] as AnArray;
+                if (resarray != null && resarray.Count != 0)
                 {
-                    Map m = resarray[0] as Map;
+                    var m = resarray[0] as Map;
                     if (m != null)
                     {
-                        folder = SimianInventoryConnector.FolderFromMap(m);
+                        folder = FolderFromMap(m);
                         return true;
                     }
                 }
@@ -134,7 +129,7 @@ namespace SilverSim.BackendConnectors.Simian.Inventory
 
         bool IInventoryFolderServiceInterface.ContainsKey(UUID principalID, AssetType type)
         {
-            Dictionary<string, string> post = new Dictionary<string, string>();
+            var post = new Dictionary<string, string>();
             if (type == AssetType.RootFolder)
             {
                 post["RequestMethod"] = "GetInventoryNode";
@@ -153,10 +148,10 @@ namespace SilverSim.BackendConnectors.Simian.Inventory
             Map res = SimianGrid.PostToService(m_InventoryURI, m_SimCapability, post, TimeoutMs);
             if (res["Success"].AsBoolean && res.ContainsKey("Items"))
             {
-                AnArray resarray = res["Items"] as AnArray;
-                if (null != resarray && resarray.Count != 0)
+                var resarray = res["Items"] as AnArray;
+                if (resarray != null && resarray.Count != 0)
                 {
-                    Map m = resarray[0] as Map;
+                    var m = resarray[0] as Map;
                     if (m != null)
                     {
                         return true;
@@ -182,24 +177,25 @@ namespace SilverSim.BackendConnectors.Simian.Inventory
 
         List<InventoryFolder> IInventoryFolderServiceInterface.GetFolders(UUID principalID, UUID key)
         {
-            List<InventoryFolder> folders = new List<InventoryFolder>();
-            Dictionary<string, string> post = new Dictionary<string, string>();
-            post["RequestMethod"] = "GetInventoryNode";
-            post["ItemID"] = (string)key;
-            post["OwnerID"] = (string)principalID;
-            post["IncludeFolders"] = "1";
-            post["IncludeItems"] = "0";
-            post["ChildrenOnly"] = "1";
-
+            var folders = new List<InventoryFolder>();
+            var post = new Dictionary<string, string>
+            {
+                ["RequestMethod"] = "GetInventoryNode",
+                ["ItemID"] = (string)key,
+                ["OwnerID"] = (string)principalID,
+                ["IncludeFolders"] = "1",
+                ["IncludeItems"] = "0",
+                ["ChildrenOnly"] = "1"
+            };
             Map res = SimianGrid.PostToService(m_InventoryURI, m_SimCapability, post, TimeoutMs);
             if (res["Success"].AsBoolean && res.ContainsKey("Items"))
             {
-                AnArray resarray = res["Items"] as AnArray;
-                if(null != resarray)
+                var resarray = res["Items"] as AnArray;
+                if(resarray != null)
                 {
                     foreach (IValue iv in resarray)
                     {
-                        Map m = iv as Map;
+                        var m = iv as Map;
                         if (m != null && m["Type"].ToString() == "Folder")
                         {
                             folders.Add(SimianInventoryConnector.FolderFromMap(m));
@@ -213,25 +209,26 @@ namespace SilverSim.BackendConnectors.Simian.Inventory
 
         List<InventoryItem> IInventoryFolderServiceInterface.GetItems(UUID principalID, UUID key)
         {
-            List<InventoryItem> items = new List<InventoryItem>();
-            Dictionary<string, string> post = new Dictionary<string, string>();
-            post["RequestMethod"] = "GetInventoryNode";
-            post["ItemID"] = (string)key;
-            post["OwnerID"] = (string)principalID;
-            post["IncludeFolders"] = "0";
-            post["IncludeItems"] = "1";
-            post["ChildrenOnly"] = "1";
-
+            var items = new List<InventoryItem>();
+            var post = new Dictionary<string, string>
+            {
+                ["RequestMethod"] = "GetInventoryNode",
+                ["ItemID"] = (string)key,
+                ["OwnerID"] = (string)principalID,
+                ["IncludeFolders"] = "0",
+                ["IncludeItems"] = "1",
+                ["ChildrenOnly"] = "1"
+            };
             Map res = SimianGrid.PostToService(m_InventoryURI, m_SimCapability, post, TimeoutMs);
             if (res["Success"].AsBoolean && res.ContainsKey("Items"))
             {
-                AnArray resarray = res["Items"] as AnArray;
-                if(null != resarray)
+                var resarray = res["Items"] as AnArray;
+                if(resarray != null)
                 {
                     foreach (IValue iv in resarray)
                     {
                         Map m = iv as Map;
-                        if (null != m && m["Type"].ToString() == "Item")
+                        if (m != null && m["Type"].ToString() == "Item")
                         {
                             items.Add(SimianInventoryConnector.ItemFromMap(m, m_GroupsService));
                         }
@@ -248,14 +245,15 @@ namespace SilverSim.BackendConnectors.Simian.Inventory
 
         void IInventoryFolderServiceInterface.Add(InventoryFolder folder)
         {
-            Dictionary<string, string> post = new Dictionary<string, string>();
-            post["RequestMethod"] = "AddInventoryFolder";
-            post["FolderID"] = (string)folder.ID;
-            post["ParentID"] = (string)folder.ParentFolderID;
-            post["ContentType"] = ((int)folder.InventoryType).ToString();
-            post["Name"] = folder.Name;
-            post["OwnerID"] = (string)folder.Owner.ID;
-
+            var post = new Dictionary<string, string>
+            {
+                ["RequestMethod"] = "AddInventoryFolder",
+                ["FolderID"] = (string)folder.ID,
+                ["ParentID"] = (string)folder.ParentFolderID,
+                ["ContentType"] = ((int)folder.InventoryType).ToString(),
+                ["Name"] = folder.Name,
+                ["OwnerID"] = (string)folder.Owner.ID
+            };
             Map m = SimianGrid.PostToService(m_InventoryURI, m_SimCapability, post, TimeoutMs);
             if (!m["Success"].AsBoolean)
             {
@@ -272,7 +270,7 @@ namespace SilverSim.BackendConnectors.Simian.Inventory
         {
             InventoryFolder folder = Folder[principalID, folderID];
 #warning TODO: check whether Simian has a IncrementVersion check
-            folder.Version += 1;
+            ++folder.Version;
             Folder.Update(folder);
         }
 
@@ -285,11 +283,12 @@ namespace SilverSim.BackendConnectors.Simian.Inventory
 
         void IInventoryFolderServiceInterface.Delete(UUID principalID, UUID folderID)
         {
-            Dictionary<string, string> post = new Dictionary<string, string>();
-            post["RequestMethod"] = "RemoveInventoryNode";
-            post["OwnerID"] = (string)principalID;
-            post["ItemID"] = (string)folderID;
-
+            var post = new Dictionary<string, string>
+            {
+                ["RequestMethod"] = "RemoveInventoryNode",
+                ["OwnerID"] = (string)principalID,
+                ["ItemID"] = (string)folderID
+            };
             Map m = SimianGrid.PostToService(m_InventoryURI, m_SimCapability, post, TimeoutMs);
             if(!m["Success"].AsBoolean)
             {
@@ -304,11 +303,12 @@ namespace SilverSim.BackendConnectors.Simian.Inventory
 
         void IInventoryFolderServiceInterface.Purge(UUID principalID, UUID folderID)
         {
-            Dictionary<string, string> post = new Dictionary<string, string>();
-            post["RequestMethod"] = "PurgeInventoryFolder";
-            post["OwnerID"] = (string)principalID;
-            post["FolderID"] = (string)folderID;
-
+            var post = new Dictionary<string, string>
+            {
+                ["RequestMethod"] = "PurgeInventoryFolder",
+                ["OwnerID"] = (string)principalID,
+                ["FolderID"] = (string)folderID
+            };
             Map m = SimianGrid.PostToService(m_InventoryURI, m_SimCapability, post, TimeoutMs);
             if(!m["Success"].AsBoolean)
             {
@@ -320,7 +320,7 @@ namespace SilverSim.BackendConnectors.Simian.Inventory
         [SuppressMessage("Gendarme.Rules.Exceptions", "DoNotSwallowErrorsCatchingNonSpecificExceptionsRule")]
         List<UUID> IInventoryFolderServiceInterface.Delete(UUID principalID, List<UUID> folderIDs)
         {
-            List<UUID> deleted = new List<UUID>();
+            var deleted = new List<UUID>();
             foreach (UUID id in folderIDs)
             {
                 try
