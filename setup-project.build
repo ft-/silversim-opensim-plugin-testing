@@ -148,6 +148,7 @@ ${sonar.moduledeclarations}
 				<arg value="/p:Configuration=Debug" if="${property::exists('debug-build')}"/>
 				<arg value="/p:Configuration=DebugRel" if="${property::exists('debugrel-build')}"/>
 				<arg value="/p:Configuration=Release" if="${property::exists('release-build')}"/>
+				<arg value="/p:Platform=&quot;Any CPU&quot;"/>
 			</exec>
 		</if>
 		<if test="${platform::is-unix()}">
