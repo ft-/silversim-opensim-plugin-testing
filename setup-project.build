@@ -142,9 +142,12 @@ ${sonar.moduledeclarations}
 		<call target="setup"/>
 		<call target="nls"/>
 		<if test="${platform::is-windows()}">
-			<exec program="windows/createcompile.bat">
-			</exec>
-			<exec program="compile.bat" workingdir="." basedir=".">
+			<readregistry property="msbuildpath" key="SOFTWARE\Microsoft\MSBuild\ToolsVersions\14.0\MSBuildToolsPath" hive="LocalMachine"/>
+			<echo message="Found msbuild at ${msbuildpath}"/>
+			<exec program="msbuild.exe" basedir="${msbuildpath}" workingdir=".">
+				<arg value="/p:Configuration=Debug" if="${property::exists('debug-build')}"/>
+				<arg value="/p:Configuration=DebugRel" if="${property::exists('debugrel-build')}"/>
+				<arg value="/p:Configuration=Release" if="${property::exists('release-build')}"/>
 			</exec>
 		</if>
 		<if test="${platform::is-unix()}">
