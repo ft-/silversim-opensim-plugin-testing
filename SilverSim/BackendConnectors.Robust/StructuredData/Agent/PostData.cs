@@ -28,7 +28,6 @@ using SilverSim.Types.Grid;
 using SilverSim.Types.StructuredData.Json;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Runtime.Serialization;
 using System.Text;
@@ -67,8 +66,6 @@ namespace SilverSim.BackendConnectors.Robust.StructuredData.Agent
             }
         }
 
-        [SuppressMessage("Gendarme.Rules.Performance", "AvoidRepetitiveCallsToPropertiesRule")]
-        [SuppressMessage("Gendarme.Rules.Exceptions", "DoNotSwallowErrorsCatchingNonSpecificExceptionsRule")]
         public static PostData Deserialize(Stream input)
         {
             var agentparams = new PostData();

@@ -30,13 +30,11 @@ using SilverSim.Types.IM;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Diagnostics.CodeAnalysis;
 using System.Timers;
 
 namespace SilverSim.BackendConnectors.Robust.IM
 {
     #region Service Implementation
-    [SuppressMessage("Gendarme.Rules.Design", "TypesWithDisposableFieldsShouldBeDisposableRule")]
     [Description("Robust HG IM Connector")]
     public class RobustHGIM : IPlugin, IPluginShutdown
     {

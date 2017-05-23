@@ -32,13 +32,11 @@ using SilverSim.Types.Inventory;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Diagnostics.CodeAnalysis;
 using System.IO;
 
 namespace SilverSim.BackendConnectors.Robust.Inventory
 {
     #region Service Implementation
-    [SuppressMessage("Gendarme.Rules.Exceptions", "DoNotThrowInUnexpectedLocationRule")]
     [Description("Robust Inventory Connector")]
     public sealed partial class RobustInventoryConnector : InventoryServiceInterface, IPlugin
     {

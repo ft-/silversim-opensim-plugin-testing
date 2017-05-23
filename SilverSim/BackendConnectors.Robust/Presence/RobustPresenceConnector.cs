@@ -30,13 +30,11 @@ using SilverSim.Types.Presence;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Diagnostics.CodeAnalysis;
 using System.IO;
 
 namespace SilverSim.BackendConnectors.Robust.Presence
 {
     #region Service Implementation
-    [SuppressMessage("Gendarme.Rules.Exceptions", "DoNotThrowInUnexpectedLocationRule")]
     [Description("Robust Presence Connector")]
     public class RobustPresenceConnector : PresenceServiceInterface, IPlugin
     {

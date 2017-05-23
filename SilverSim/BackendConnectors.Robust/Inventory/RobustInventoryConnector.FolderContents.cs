@@ -25,14 +25,12 @@ using SilverSim.ServiceInterfaces.Inventory;
 using SilverSim.Types;
 using SilverSim.Types.Inventory;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Net;
 using System.Web;
 
 namespace SilverSim.BackendConnectors.Robust.Inventory
 {
-    [SuppressMessage("Gendarme.Rules.Exceptions", "DoNotThrowInUnexpectedLocationRule")]
     public partial class RobustInventoryConnector : IInventoryFolderContentServiceInterface
     {
         private bool m_IsMultipeServiceSupported = true;
@@ -168,8 +166,6 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
             }
         }
 
-        [SuppressMessage("Gendarme.Rules.Design", "AvoidMultidimensionalIndexerRule")]
-        [SuppressMessage("Gendarme.Rules.Exceptions", "DoNotSwallowErrorsCatchingNonSpecificExceptionsRule")]
         List<InventoryFolderContent> GetContentInSingleRequests(UUID principalID, UUID[] folderIDs)
         {
             var res = new List<InventoryFolderContent>();

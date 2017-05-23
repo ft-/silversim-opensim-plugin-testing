@@ -30,7 +30,6 @@ using SilverSim.Types.Parcel;
 using SilverSim.Viewer.Messages.LayerData;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.IO;
 using System.IO.Compression;
@@ -41,7 +40,6 @@ namespace SilverSim.OpenSimArchiver.RegionArchiver
     public static partial class OAR
     {
         [Flags]
-        [SuppressMessage("Gendarme.Rules.Design", "FlagsShouldNotDefineAZeroValueRule")]
         public enum SaveOptions
         {
             None = 0,

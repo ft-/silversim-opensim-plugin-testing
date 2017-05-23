@@ -30,14 +30,11 @@ using SilverSim.Types;
 using SilverSim.Types.Grid;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 using System.Timers;
 
 namespace SilverSim.Backend.OpenSim.Neighbor.Neighbor
 {
-    [SuppressMessage("Gendarme.Rules.Design", "TypesWithDisposableFieldsShouldBeDisposableRule")]
-    [SuppressMessage("Gendarme.Rules.Concurrency", "WriteStaticFieldFromInstanceMethodRule")]
     [Description("OpenSim Neighbor Connector")]
     public class OpenSimNeighbor : NeighborServiceInterface, IPlugin, IPluginShutdown, IPluginSubFactory
     {

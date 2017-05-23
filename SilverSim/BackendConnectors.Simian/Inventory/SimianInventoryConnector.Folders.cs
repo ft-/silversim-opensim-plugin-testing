@@ -26,7 +26,6 @@ using SilverSim.Types.Asset;
 using SilverSim.Types.Inventory;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 
 namespace SilverSim.BackendConnectors.Simian.Inventory
 {
@@ -61,7 +60,6 @@ namespace SilverSim.BackendConnectors.Simian.Inventory
             return false;
         }
 
-        [SuppressMessage("Gendarme.Rules.Exceptions", "DoNotThrowInUnexpectedLocationRule")]
         InventoryFolder IInventoryFolderServiceInterface.this[UUID principalID, UUID key]
         {
             get
@@ -161,7 +159,6 @@ namespace SilverSim.BackendConnectors.Simian.Inventory
             return false;
         }
 
-        [SuppressMessage("Gendarme.Rules.Exceptions", "DoNotThrowInUnexpectedLocationRule")]
         InventoryFolder IInventoryFolderServiceInterface.this[UUID principalID, AssetType type]
         {
             get
@@ -317,7 +314,6 @@ namespace SilverSim.BackendConnectors.Simian.Inventory
         }
         #endregion
 
-        [SuppressMessage("Gendarme.Rules.Exceptions", "DoNotSwallowErrorsCatchingNonSpecificExceptionsRule")]
         List<UUID> IInventoryFolderServiceInterface.Delete(UUID principalID, List<UUID> folderIDs)
         {
             var deleted = new List<UUID>();

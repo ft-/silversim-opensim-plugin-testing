@@ -20,15 +20,13 @@
 // exception statement from your version.
 
 using SilverSim.BackendConnectors.Simian.Common;
-using SilverSim.ServiceInterfaces.Groups;
 using SilverSim.ServiceInterfaces.Inventory;
-using SilverSim.Types.StructuredData.Json;
 using SilverSim.Types;
 using SilverSim.Types.Asset;
 using SilverSim.Types.Inventory;
+using SilverSim.Types.StructuredData.Json;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 
 namespace SilverSim.BackendConnectors.Simian.Inventory
 {
@@ -127,7 +125,6 @@ namespace SilverSim.BackendConnectors.Simian.Inventory
             }
         }
 
-        [SuppressMessage("Gendarme.Rules.Exceptions", "DoNotSwallowErrorsCatchingNonSpecificExceptionsRule")]
         List<InventoryItem> IInventoryItemServiceInterface.this[UUID principalID, List<UUID> keys]
         {
             get
@@ -294,7 +291,6 @@ namespace SilverSim.BackendConnectors.Simian.Inventory
             }
         }
 
-        [SuppressMessage("Gendarme.Rules.Exceptions", "DoNotSwallowErrorsCatchingNonSpecificExceptionsRule")]
         List<UUID> IInventoryItemServiceInterface.Delete(UUID principalID, List<UUID> itemids)
         {
             var deleted = new List<UUID>();

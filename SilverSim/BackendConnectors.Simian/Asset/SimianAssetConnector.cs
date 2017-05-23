@@ -30,10 +30,8 @@ using SilverSim.Types.Asset;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Runtime.Serialization;
-using System.Text;
 
 namespace SilverSim.BackendConnectors.Simian.Asset
 {
@@ -244,7 +242,6 @@ namespace SilverSim.BackendConnectors.Simian.Asset
             }
         }
 
-        [SuppressMessage("Gendarme.Rules.Correctness", "EnsureLocalDisposalRule")]
         Stream IAssetDataServiceInterface.this[UUID key]
         {
             get

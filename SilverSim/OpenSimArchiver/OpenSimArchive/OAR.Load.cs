@@ -31,7 +31,6 @@ using SilverSim.Types.Asset.Format;
 using SilverSim.Types.Parcel;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.IO.Compression;
 using System.Runtime.Serialization;
@@ -133,7 +132,6 @@ namespace SilverSim.OpenSimArchiver.RegionArchiver
         }
 
         [Flags]
-        [SuppressMessage("Gendarme.Rules.Design", "FlagsShouldNotDefineAZeroValueRule")]
         public enum LoadOptions
         {
             None = 0,

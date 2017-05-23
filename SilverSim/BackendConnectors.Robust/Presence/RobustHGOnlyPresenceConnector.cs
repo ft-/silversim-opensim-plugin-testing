@@ -28,11 +28,9 @@ using SilverSim.Types.StructuredData.XmlRpc;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Diagnostics.CodeAnalysis;
 
 namespace SilverSim.BackendConnectors.Robust.Presence
 {
-    [SuppressMessage("Gendarme.Rules.Exceptions", "DoNotThrowInUnexpectedLocationRule")]
     [Description("Robust HGOnly Presence Connector")]
     public class RobustHGOnlyPresenceConnector : PresenceServiceInterface, IPlugin
     {

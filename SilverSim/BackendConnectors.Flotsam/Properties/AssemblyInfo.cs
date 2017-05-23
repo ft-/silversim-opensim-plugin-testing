@@ -19,36 +19,8 @@
 // obligated to do so. If you do not wish to do so, delete this
 // exception statement from your version.
 
-using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 
 [assembly: AssemblyTitle("SilverSim.BackendConnectors.Flotsam")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: SuppressMessage("Gendarme.Rules.Correctness", "CheckParametersNullityInVisibleMethodsRule")]
-[assembly: SuppressMessage("Gendarme.Rules.Design.Generic", "DoNotExposeNestedGenericSignaturesRule")]
-[assembly: SuppressMessage("Gendarme.Rules.Naming", "AvoidDeepNamespaceHierarchyRule")]
-[assembly: SuppressMessage("Gendarme.Rules.Naming", "AvoidNonAlphanumericIdentifierRule")]
-[assembly: SuppressMessage("Gendarme.Rules.Naming", "AvoidRedundancyInTypeNameRule")]
-[assembly: SuppressMessage("Gendarme.Rules.Design", "AvoidRefAndOutParametersRule")]
-[assembly: SuppressMessage("Gendarme.Rules.Maintainability", "AvoidUnnecessarySpecializationRule")]
-[assembly: SuppressMessage("Gendarme.Rules.Performance", "AvoidUnusedParametersRule")]
-[assembly: SuppressMessage("Gendarme.Rules.Design", "AvoidVisibleFieldsRule")]
-[assembly: SuppressMessage("Gendarme.Rules.Design", "AvoidVisibleNestedTypesRule")]
-[assembly: SuppressMessage("Gendarme.Rules.Design.Generic", "DoNotExposeGenericListsRule")]
-[assembly: SuppressMessage("Gendarme.Rules.Naming", "UseSingularNameInEnumsUnlessAreFlagsRule")]
-[assembly: SuppressMessage("Gendarme.Rules.Naming", "UsePreferredTermsRule")]
-[assembly: SuppressMessage("Gendarme.Rules.Exceptions", "UseObjectDisposedExceptionRule")]
-[assembly: SuppressMessage("Gendarme.Rules.Design", "PreferIntegerOrStringForIndexersRule")]
-[assembly: SuppressMessage("Gendarme.Rules.Design", "ProvideAlternativeNamesForOperatorOverloadsRule")]
-[assembly: SuppressMessage("Gendarme.Rules.Design", "PreferUriOverStringRule")]
-[assembly: SuppressMessage("Gendarme.Rules.Performance", "AvoidRepetitiveCallsToPropertiesRule")]
-[assembly: SuppressMessage("Gendarme.Rules.Design", "AvoidMultidimensionalIndexerRule")]
-[assembly: SuppressMessage("Gendarme.Rules.Exceptions", "DoNotSwallowErrorsCatchingNonSpecificExceptionsRule")]
-[assembly: SuppressMessage("Gendarme.Rules.Design", "AvoidPropertiesWithoutGetAccessorRule")]
-[assembly: SuppressMessage("Gendarme.Rules.Design", "AvoidPropertiesWithoutGetAccessorRule")]
-
-/* this assembly only */
-[assembly: SuppressMessage("Gendarme.Rules.Exceptions", "DoNotThrowInUnexpectedLocationRule")]
-[assembly: SuppressMessage("Gendarme.Rules.BadPractice", "PreferTryParseRule")]
-

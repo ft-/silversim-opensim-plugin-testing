@@ -24,17 +24,15 @@ using SilverSim.Main.Common;
 using SilverSim.Main.Common.HttpServer;
 using SilverSim.Scene.Management.Scene;
 using SilverSim.Scene.Types.Scene;
-using SilverSim.Types.StructuredData.Json;
 using SilverSim.Types;
 using SilverSim.Types.Grid;
+using SilverSim.Types.StructuredData.Json;
+using System.ComponentModel;
 using System.IO;
 using System.Net;
-using System.Diagnostics.CodeAnalysis;
-using System.ComponentModel;
 
 namespace SilverSim.Backend.OpenSim.Neighbor.Neighbor
 {
-    [SuppressMessage("Gendarme.Rules.Design", "TypesWithDisposableFieldsShouldBeDisposableRule")]
     [Description("OpenSim Neighbor Protocol Handler")]
     public class OpenSimNeighborHandler : IPlugin
     {
@@ -64,7 +62,6 @@ namespace SilverSim.Backend.OpenSim.Neighbor.Neighbor
             }
         }
 
-        [SuppressMessage("Gendarme.Rules.BadPractice", "PreferTryParseRule")]
         private void GetRegionParams(string uri, out UUID regionID)
         {
             /* /region/<UUID> */

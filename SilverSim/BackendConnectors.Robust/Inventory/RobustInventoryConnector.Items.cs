@@ -25,14 +25,12 @@ using SilverSim.ServiceInterfaces.Inventory;
 using SilverSim.Types;
 using SilverSim.Types.Inventory;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Net;
 using System.Web;
 
 namespace SilverSim.BackendConnectors.Robust.Inventory
 {
-    [SuppressMessage("Gendarme.Rules.Exceptions", "DoNotThrowInUnexpectedLocationRule")]
     public partial class RobustInventoryConnector : IInventoryItemServiceInterface
     {
         private bool m_isMultipleSupported = true;
@@ -184,7 +182,6 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
             }
         }
 
-        [SuppressMessage("Gendarme.Rules.Exceptions", "DoNotSwallowErrorsCatchingNonSpecificExceptionsRule")]
         private List<InventoryItem> GetItemsBySingleRequests(UUID principalID, List<UUID> itemids)
         {
             var res = new List<InventoryItem>();
@@ -376,7 +373,6 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
             }
         }
 
-        [SuppressMessage("Gendarme.Rules.Exceptions", "DoNotSwallowErrorsCatchingNonSpecificExceptionsRule")]
         List<UUID> IInventoryItemServiceInterface.Delete(UUID principalID, List<UUID> itemids)
         {
             var deleted = new List<UUID>();
