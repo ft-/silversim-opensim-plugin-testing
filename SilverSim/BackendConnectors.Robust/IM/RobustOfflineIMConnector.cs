@@ -37,10 +37,30 @@ namespace SilverSim.BackendConnectors.Robust.IM
 {
     #region Service Implementation
     [Description("Robust OfflineIM Connector")]
+    [PluginName("OfflineIM")]
     public class RobustOfflineIMConnector : OfflineIMServiceInterface, IPlugin
     {
+        private static readonly ILog m_Log = LogManager.GetLogger("ROBUST OFFLINE IM CONNECTOR");
+
         public int TimeoutMs { get; set; }
         private readonly string m_OfflineIMURI;
+        public RobustOfflineIMConnector(IConfig ownSection)
+        {
+            if (!ownSection.Contains("URI"))
+            {
+                m_Log.FatalFormat("Missing 'URI' in section {0}", ownSection.Name);
+                throw new ConfigurationLoader.ConfigurationErrorException();
+            }
+            string uri = ownSection.GetString("URI");
+            TimeoutMs = 20000;
+            if (!uri.EndsWith("/"))
+            {
+                uri += "/";
+            }
+            uri += "offlineim";
+            m_OfflineIMURI = uri;
+        }
+
         public RobustOfflineIMConnector(string uri)
         {
             TimeoutMs = 20000;
@@ -144,24 +164,6 @@ namespace SilverSim.BackendConnectors.Robust.IM
         public override void DeleteOfflineIM(ulong offlineImID)
         {
             /* no action required */
-        }
-    }
-    #endregion
-
-    #region Factory
-    [PluginName("OfflineIM")]
-    public class RobustOfflineIMConnectorFactory : IPluginFactory
-    {
-        private static readonly ILog m_Log = LogManager.GetLogger("ROBUST OFFLINE IM CONNECTOR");
-
-        public IPlugin Initialize(ConfigurationLoader loader, IConfig ownSection)
-        {
-            if (!ownSection.Contains("URI"))
-            {
-                m_Log.FatalFormat("Missing 'URI' in section {0}", ownSection.Name);
-                throw new ConfigurationLoader.ConfigurationErrorException();
-            }
-            return new RobustOfflineIMConnector(ownSection.GetString("URI"));
         }
     }
     #endregion

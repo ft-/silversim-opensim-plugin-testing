@@ -34,14 +34,35 @@ using System.IO;
 
 namespace SilverSim.BackendConnectors.Robust.GridUser
 {
-    #region Service Implementation
     [Description("Robust GridUser Connector")]
+    [PluginName("GridUser")]
     public sealed class RobustGridUserConnector : GridUserServiceInterface, IPlugin
     {
+        private static readonly ILog m_Log = LogManager.GetLogger("ROBUST GRIDUSER CONNECTOR");
+
         public int TimeoutMs { get; set; }
         private readonly string m_GridUserURI;
 
         #region Constructor
+        public RobustGridUserConnector(IConfig ownSection)
+        {
+            if (!ownSection.Contains("URI"))
+            {
+                m_Log.FatalFormat("Missing 'URI' in section {0}", ownSection.Name);
+                throw new ConfigurationLoader.ConfigurationErrorException();
+            }
+            string uri = ownSection.GetString("URI");
+
+            TimeoutMs = 20000;
+            if (!uri.EndsWith("/"))
+            {
+                uri += "/";
+            }
+            uri += "griduser";
+
+            m_GridUserURI = uri;
+        }
+
         public RobustGridUserConnector(string uri)
         {
             TimeoutMs = 20000;
@@ -219,23 +240,4 @@ namespace SilverSim.BackendConnectors.Robust.GridUser
             }
         }
     }
-    #endregion
-
-    #region Factory
-    [PluginName("GridUser")]
-    public sealed class RobustGridUserConnectorFactory : IPluginFactory
-    {
-        private static readonly ILog m_Log = LogManager.GetLogger("ROBUST GRIDUSER CONNECTOR");
-
-        public IPlugin Initialize(ConfigurationLoader loader, IConfig ownSection)
-        {
-            if (!ownSection.Contains("URI"))
-            {
-                m_Log.FatalFormat("Missing 'URI' in section {0}", ownSection.Name);
-                throw new ConfigurationLoader.ConfigurationErrorException();
-            }
-            return new RobustGridUserConnector(ownSection.GetString("URI"));
-        }
-    }
-    #endregion
 }

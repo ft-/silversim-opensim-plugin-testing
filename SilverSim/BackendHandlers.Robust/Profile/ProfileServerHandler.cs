@@ -31,13 +31,11 @@ using SilverSim.Types.StructuredData.XmlRpc;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace SilverSim.BackendHandlers.Robust.Profile
 {
     [Description("Robust CoreProfile/OpenSimProfile Protocol Server")]
+    [PluginName("ProfileHandler")]
     public class ProfileServerHandler : IPlugin, IServiceURLsGetInterface
     {
         private ProfileServiceInterface m_ProfileService;
@@ -1187,12 +1185,5 @@ namespace SilverSim.BackendHandlers.Robust.Profile
         {
             dict["ProfileServerURI"] = m_HttpServer.ServerURI;
         }
-    }
-
-    [PluginName("ProfileHandler")]
-    public class ProfileServerHandlerFactory : IPluginFactory
-    {
-        public IPlugin Initialize(ConfigurationLoader loader, IConfig ownSection) =>
-            new ProfileServerHandler(ownSection);
     }
 }

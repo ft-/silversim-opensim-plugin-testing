@@ -40,6 +40,7 @@ using System.ComponentModel;
 namespace SilverSim.BackendHandlers.Robust.UserAccounts
 {
     [Description("Robust UserAgent Protocol Server")]
+    [PluginName("UserAgentHandler")]
     public class UserAgentServerHandler : IPlugin
     {
         GridServiceInterface m_GridService;
@@ -401,20 +402,6 @@ namespace SilverSim.BackendHandlers.Robust.UserAccounts
                 respdata.Add("lookAt", userInfo.HomeLookAt.ToString());
             }
             return new XmlRpc.XmlRpcResponse { ReturnValue = respdata };
-        }
-    }
-
-    [PluginName("UserAgentHandler")]
-    public class UserAgentServerHandlerFactory : IPluginFactory
-    {
-        public UserAgentServerHandlerFactory()
-        {
-
-        }
-
-        public IPlugin Initialize(ConfigurationLoader loader, IConfig ownSection)
-        {
-            return new UserAgentServerHandler(ownSection);
         }
     }
 }

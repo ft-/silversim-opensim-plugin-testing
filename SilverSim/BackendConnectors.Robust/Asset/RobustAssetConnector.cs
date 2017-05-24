@@ -40,8 +40,8 @@ using System.Xml;
 
 namespace SilverSim.BackendConnectors.Robust.Asset
 {
-    #region Service Implementation
     [Description("Robust Asset Connector")]
+    [PluginName("Assets")]
     public class RobustAssetConnector : AssetServiceInterface, IPlugin, IAssetMetadataServiceInterface, IAssetDataServiceInterface
     {
         [Serializable]
@@ -63,6 +63,8 @@ namespace SilverSim.BackendConnectors.Robust.Asset
             {
             }
         }
+
+        private static readonly ILog m_Log = LogManager.GetLogger("ROBUST ASSET CONNECTOR");
 
         private const int MAX_ASSET_BASE64_CONVERSION_SIZE = 9 * 1024; /* must be an integral multiple of 3 */
         public int TimeoutMs { get; set; }
@@ -86,6 +88,28 @@ namespace SilverSim.BackendConnectors.Robust.Asset
             m_EnableCompression = enableCompression;
             m_EnableLocalStorage = enableLocalStorage;
             m_EnableTempStorage = enableTempStorage;
+        }
+
+        public RobustAssetConnector(IConfig ownSection)
+        {
+            if (!ownSection.Contains("URI"))
+            {
+                m_Log.FatalFormat("Missing 'URI' in section {0}", ownSection.Name);
+                throw new ConfigurationLoader.ConfigurationErrorException();
+            }
+            string uri = ownSection.GetString("URI");
+
+            TimeoutMs = 20000;
+            if (!uri.EndsWith("/"))
+            {
+                uri += "/";
+            }
+
+            m_AssetURI = uri;
+            m_ReferencesService = new DefaultAssetReferencesService(this);
+            m_EnableCompression = ownSection.GetBoolean("EnableCompressedStoreRequest", false);
+            m_EnableLocalStorage = ownSection.GetBoolean("EnableLocalAssetStorage", false);
+            m_EnableTempStorage = ownSection.GetBoolean("EnableTempAssetStorage", false);
         }
 
         public void Startup(ConfigurationLoader loader)
@@ -487,27 +511,4 @@ namespace SilverSim.BackendConnectors.Robust.Asset
         }
         #endregion
     }
-    #endregion
-
-    #region Factory
-    [PluginName("Assets")]
-    public class RobustAssetConnectorFactory : IPluginFactory
-    {
-        private static readonly ILog m_Log = LogManager.GetLogger("ROBUST ASSET CONNECTOR");
-
-        public IPlugin Initialize(ConfigurationLoader loader, IConfig ownSection)
-        {
-            if (!ownSection.Contains("URI"))
-            {
-                m_Log.FatalFormat("Missing 'URI' in section {0}", ownSection.Name);
-                throw new ConfigurationLoader.ConfigurationErrorException();
-            }
-            return new RobustAssetConnector(
-                ownSection.GetString("URI"),
-                ownSection.GetBoolean("EnableCompressedStoreRequest", false),
-                ownSection.GetBoolean("EnableLocalAssetStorage", false),
-                ownSection.GetBoolean("EnableTempAssetStorage", false));
-        }
-    }
-    #endregion
 }

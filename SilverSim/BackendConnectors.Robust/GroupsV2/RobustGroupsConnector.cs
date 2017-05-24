@@ -19,6 +19,8 @@
 // obligated to do so. If you do not wish to do so, delete this
 // exception statement from your version.
 
+using log4net;
+using Nini.Config;
 using SilverSim.BackendConnectors.Robust.Common;
 using SilverSim.Http.Client;
 using SilverSim.Main.Common;
@@ -34,8 +36,11 @@ using System.IO;
 namespace SilverSim.BackendConnectors.Robust.GroupsV2
 {
     [Description("Robust Groups Connector")]
+    [PluginName("Groups")]
     public partial class RobustGroupsConnector : GroupsServiceInterface, IPlugin
     {
+        private static readonly ILog m_Log = LogManager.GetLogger("ROBUST GROUPS CONNECTOR");
+
         private readonly GroupsAccessor m_Groups;
         private readonly GroupRolesAccessor m_GroupRoles;
         private readonly MembersAccessor m_Members;
@@ -85,14 +90,21 @@ namespace SilverSim.BackendConnectors.Robust.GroupsV2
             }
         }
 
-        public RobustGroupsConnector(string uri, string userAccountServiceName)
+        public RobustGroupsConnector(IConfig ownSection)
         {
-            if(!uri.EndsWith("/"))
+            if (!ownSection.Contains("URI"))
+            {
+                m_Log.FatalFormat("Missing 'URI' in section {0}", ownSection.Name);
+                throw new ConfigurationLoader.ConfigurationErrorException();
+            }
+            string uri = ownSection.GetString("URI");
+            m_UserAccountServiceName = ownSection.GetString("UserAccountService", string.Empty);
+
+            if (!uri.EndsWith("/"))
             {
                 uri += "/";
             }
             uri += "groups";
-            m_UserAccountServiceName = userAccountServiceName;
             m_Groups = new GroupsAccessor(uri, GetGroupsAgentID);
             m_GroupRoles = new GroupRolesAccessor(uri, GetGroupsAgentID);
             m_Members = new MembersAccessor(uri, GetGroupsAgentID);

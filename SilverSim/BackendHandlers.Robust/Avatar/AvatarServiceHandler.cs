@@ -59,8 +59,8 @@ namespace SilverSim.BackendHandlers.Robust.Avatar
         }
     }
 
-    #region Service Implementation
     [Description("Robust Avatar Protocol Server")]
+    [PluginName("AvatarHandler")]
     public class RobustAvatarServerHandler : IPlugin
     {
         protected static readonly ILog m_Log = LogManager.GetLogger("ROBUST AVATAR HANDLER");
@@ -68,9 +68,9 @@ namespace SilverSim.BackendHandlers.Robust.Avatar
         private AvatarServiceInterface m_AvatarService;
         private readonly string m_AvatarServiceName;
 
-        public RobustAvatarServerHandler(string avatarServiceName)
+        public RobustAvatarServerHandler(IConfig ownSection)
         {
-            m_AvatarServiceName = avatarServiceName;
+            m_AvatarServiceName = ownSection.GetString("AvatarService", "AvatarService");
         }
 
         public void Startup(ConfigurationLoader loader)
@@ -271,14 +271,4 @@ namespace SilverSim.BackendHandlers.Robust.Avatar
             SuccessResult(req);
         }
     }
-    #endregion
-
-    #region Factory
-    [PluginName("AvatarHandler")]
-    public class RobustAvatarHandlerFactory : IPluginFactory
-    {
-        public IPlugin Initialize(ConfigurationLoader loader, IConfig ownSection) =>
-            new RobustAvatarServerHandler(ownSection.GetString("AvatarService", "AvatarService"));
-    }
-    #endregion
 }

@@ -34,6 +34,7 @@ using System.IO;
 namespace SilverSim.OpenSimArchiver
 {
     [Description("OS Assets Load Plugin")]
+    [PluginName("OSAssetsArchiveSupport")]
     public sealed class OSAssetsLoad : IPlugin
     {
         private SceneList m_Scenes;

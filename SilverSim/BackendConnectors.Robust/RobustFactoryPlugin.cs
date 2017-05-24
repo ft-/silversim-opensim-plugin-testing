@@ -33,6 +33,7 @@ namespace SilverSim.BackendConnectors.Robust
 {
     #region Inventory Plugin
     [Description("Robust Inventory Connector Factory")]
+    [PluginName("InventoryPlugin")]
     public class RobustInventoryPlugin : ServicePluginHelo, IInventoryServicePlugin, IPlugin
     {
         public void Startup(ConfigurationLoader loader)
@@ -44,16 +45,11 @@ namespace SilverSim.BackendConnectors.Robust
 
         public override string Name => "opensim-robust";
     }
-
-    [PluginName("InventoryPlugin")]
-    public class RobustInventoryPluginFactory : IPluginFactory
-    {
-        public IPlugin Initialize(ConfigurationLoader loader, IConfig ownSection) => new RobustInventoryPlugin();
-    }
     #endregion
 
     #region Asset plugin
     [Description("Robust Asset Connector Factory")]
+    [PluginName("AssetPlugin")]
     public class RobustAssetPlugin : ServicePluginHelo, IAssetServicePlugin, IPlugin
     {
         public void Startup(ConfigurationLoader loader)
@@ -64,12 +60,6 @@ namespace SilverSim.BackendConnectors.Robust
         public AssetServiceInterface Instantiate(string url) => new Asset.RobustAssetConnector(url);
 
         public override string Name => "opensim-robust";
-    }
-
-    [PluginName("AssetPlugin")]
-    public class RobustAssetPluginFactory : IPluginFactory
-    {
-        public IPlugin Initialize(ConfigurationLoader loader, IConfig ownSection) => new RobustAssetPlugin();
     }
     #endregion
 
@@ -108,6 +98,7 @@ namespace SilverSim.BackendConnectors.Robust
     }
 
     [Description("Robust UserAgent Connector Factory Factory")]
+    [PluginName("UserAgentPlugin")]
     public class RobustUserAgentPluginSubFactory : IPlugin, IPluginSubFactory
     {
         public void Startup(ConfigurationLoader loader)
@@ -120,12 +111,6 @@ namespace SilverSim.BackendConnectors.Robust
             loader.AddPlugin("RobustUserAgentConnector", new RobustUserAgentPlugin("opensim-robust"));
             loader.AddPlugin("SimianUserAgentConnector", new RobustUserAgentPlugin("opensim-simian"));
         }
-    }
-
-    [PluginName("UserAgentPlugin")]
-    public class RobustUserAgentPluginFactory : IPluginFactory
-    {
-        public IPlugin Initialize(ConfigurationLoader loader, IConfig ownSection) => new RobustUserAgentPluginSubFactory();
     }
     #endregion
 }

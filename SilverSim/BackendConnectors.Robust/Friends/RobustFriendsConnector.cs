@@ -34,11 +34,31 @@ using System.IO;
 namespace SilverSim.BackendConnectors.Robust.Friends
 {
     [Description("Robust Friends Connector")]
+    [PluginName("Friends")]
     public sealed class RobustFriendsConnector : FriendsServiceInterface, IPlugin
     {
+        private static readonly ILog m_Log = LogManager.GetLogger("ROBUST FRIENDS CONNECTOR");
+
         private readonly string m_Uri;
         private string m_HomeUri;
         public int TimeoutMs = 20000;
+
+        public RobustFriendsConnector(IConfig ownSection)
+        {
+            if (!ownSection.Contains("URI"))
+            {
+                m_Log.FatalFormat("Missing 'URI' in section {0}", ownSection.Name);
+                throw new ConfigurationLoader.ConfigurationErrorException();
+            }
+
+            m_Uri = ownSection.GetString("URI");
+            if (!m_Uri.EndsWith("/"))
+            {
+                m_Uri += "/";
+            }
+            m_Uri += "friends";
+            m_HomeUri = string.Empty;
+        }
 
         public RobustFriendsConnector(string uri, string homeuri)
         {
@@ -216,23 +236,4 @@ namespace SilverSim.BackendConnectors.Robust.Friends
             StoreEntry(fi.Friend, fi.User, fi.Secret, 0);
         }
     }
-
-    #region Factory
-    [PluginName("Friends")]
-    public class RobustFriendsConnectorFactory : IPluginFactory
-    {
-        private static readonly ILog m_Log = LogManager.GetLogger("ROBUST FRIENDS CONNECTOR");
-
-        public IPlugin Initialize(ConfigurationLoader loader, IConfig ownSection)
-        {
-            if (!ownSection.Contains("URI"))
-            {
-                m_Log.FatalFormat("Missing 'URI' in section {0}", ownSection.Name);
-                throw new ConfigurationLoader.ConfigurationErrorException();
-            }
-            return new RobustFriendsConnector(ownSection.GetString("URI"), string.Empty);
-        }
-    }
-    #endregion
-
 }

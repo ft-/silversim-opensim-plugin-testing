@@ -44,6 +44,7 @@ using System.Xml;
 namespace SilverSim.BackendHandlers.Robust.Simulation
 {
     [Description("Friends Status Receive Handler")]
+    [PluginName("SimFriendsHandler")]
     public class SimFriendsHandler : IPlugin, IPluginShutdown
     {
         private BaseHttpServer m_HttpServer;
@@ -488,13 +489,4 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
             return false;
         }
     }
-
-    #region Service Factory
-    [PluginName("SimFriendsHandler")]
-    public class SimFriendsHandlerFactory : IPluginFactory
-    {
-        public IPlugin Initialize(ConfigurationLoader loader, IConfig ownSection) =>
-            new SimFriendsHandler();
-    }
-    #endregion
 }

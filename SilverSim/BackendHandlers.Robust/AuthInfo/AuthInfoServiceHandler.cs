@@ -33,8 +33,8 @@ using System.Xml;
 
 namespace SilverSim.BackendHandlers.Robust.AuthInfo
 {
-    #region Service implementation
     [Description("Robust AuthInfo Protocol Server")]
+    [PluginName("AuthInfoHandler")]
     public class AuthInfoServiceHandler : IPlugin, IHttpAclListAccess
     {
         private readonly string m_AuthInfoServiceName;
@@ -357,13 +357,4 @@ namespace SilverSim.BackendHandlers.Robust.AuthInfo
             SuccessResponse(req);
         }
     }
-    #endregion
-
-    #region Service factory
-    [PluginName("AuthInfoHandler")]
-    public class AuthInfoServiceHandlerFactory : IPluginFactory
-    {
-        public IPlugin Initialize(ConfigurationLoader loader, IConfig ownSection) => new AuthInfoServiceHandler(ownSection);
-    }
-    #endregion
 }

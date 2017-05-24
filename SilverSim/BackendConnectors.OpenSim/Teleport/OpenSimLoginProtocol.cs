@@ -65,6 +65,7 @@ using System.Text.RegularExpressions;
 namespace SilverSim.BackendConnectors.OpenSim.Teleport
 {
     [Description("OpenSim Login Protocol Connector")]
+    [PluginName("LoginProtocol")]
     public class OpenSimLoginProtocol : ILoginConnectorServiceInterface, IPlugin, IServerParamListener
     {
         protected static readonly ILog m_Log = LogManager.GetLogger("OPENSIM LOGIN PROTOCOL");
@@ -616,12 +617,5 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
 
             capsPath = OpenSimTeleportProtocol.NewCapsURL(destinationInfo.ServerURI, agentPostData.Circuit.CapsPath);
         }
-    }
-
-    [PluginName("LoginProtocol")]
-    public class OpenSimLoginProtocolFactory : IPluginFactory
-    {
-        public IPlugin Initialize(ConfigurationLoader loader, IConfig ownSection) =>
-            new OpenSimLoginProtocol(ownSection);
     }
 }

@@ -34,6 +34,7 @@ using System.IO;
 namespace SilverSim.OpenSimArchiver
 {
     [Description("OAR Plugin")]
+    [PluginName("RegionArchiveSupport")]
     public sealed class OpenSimArchiverLoadStore : IPlugin
     {
         private static readonly ILog m_Log = LogManager.GetLogger("OAR ARCHIVER");

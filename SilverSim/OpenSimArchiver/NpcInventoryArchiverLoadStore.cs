@@ -37,6 +37,7 @@ using System.IO;
 namespace SilverSim.OpenSimArchiver
 {
     [Description("IAR Plugin")]
+    [PluginName("NpcInventoryArchiveSupport")]
     public class NpcInventoryArchiverLoadStore : IPlugin
     {
         private static readonly ILog m_Log = LogManager.GetLogger("NPC-IAR ARCHIVER");

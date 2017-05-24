@@ -56,13 +56,22 @@ namespace SilverSim.BackendConnectors.Robust.AuthInfo
     }
 
     [Description("Robust AuthInfo Connector")]
+    [PluginName("AuthInfo")]
     public class RobustAuthInfoConnector : AuthInfoServiceInterface, IPlugin
     {
+        private static readonly ILog m_Log = LogManager.GetLogger("ROBUST AUTHINFO CONNECTOR");
         private readonly string m_Uri;
         public int TimeoutMs { get; set; }
 
-        public RobustAuthInfoConnector(string uri)
+        public RobustAuthInfoConnector(IConfig ownSection)
         {
+            if (!ownSection.Contains("URI"))
+            {
+                m_Log.FatalFormat("Missing 'URI' in section {0}", ownSection.Name);
+                throw new ConfigurationLoader.ConfigurationErrorException();
+            }
+            string uri = ownSection.GetString("URI");
+
             TimeoutMs = 20000;
             m_Uri = uri;
             if(!m_Uri.EndsWith("/"))
@@ -157,23 +166,4 @@ namespace SilverSim.BackendConnectors.Robust.AuthInfo
             return map["Token"].AsUUID;
         }
     }
-
-    #region Factory
-    [PluginName("AuthInfo")]
-    public class RobustAuthInfoConnectorFactory : IPluginFactory
-    {
-        private static readonly ILog m_Log = LogManager.GetLogger("ROBUST AUTHINFO CONNECTOR");
-
-        public IPlugin Initialize(ConfigurationLoader loader, IConfig ownSection)
-        {
-            if (!ownSection.Contains("URI"))
-            {
-                m_Log.FatalFormat("Missing 'URI' in section {0}", ownSection.Name);
-                throw new ConfigurationLoader.ConfigurationErrorException();
-            }
-            return new RobustAuthInfoConnector(
-                ownSection.GetString("URI"));
-        }
-    }
-    #endregion
 }

@@ -34,8 +34,8 @@ using System.Xml;
 
 namespace SilverSim.BackendHandlers.Robust.Presence
 {
-    #region Service Implementation
     [Description("Robust Presence Protocol Server")]
+    [PluginName("PresenceHandler")]
     public sealed class RobustPresenceServerHandler : IPlugin
     {
         private PresenceServiceInterface m_PresenceService;
@@ -349,14 +349,4 @@ namespace SilverSim.BackendHandlers.Robust.Presence
             }
         }
     }
-    #endregion
-
-    #region Factory
-    [PluginName("PresenceHandler")]
-    public sealed class RobustPresenceServerHandlerFactory : IPluginFactory
-    {
-        public IPlugin Initialize(ConfigurationLoader loader, IConfig ownSection) =>
-            new RobustPresenceServerHandler(ownSection);
-    }
-    #endregion
 }

@@ -34,17 +34,26 @@ using System.IO;
 
 namespace SilverSim.BackendConnectors.Robust.Account
 {
-    #region Service Implementation
     [Description("Robust UserAccount Connector")]
+    [PluginName("UserAccounts")]
     public sealed class RobustAccountConnector : UserAccountServiceInterface, IPlugin
     {
+        private static readonly ILog m_Log = LogManager.GetLogger("ROBUST ACCOUNT CONNECTOR");
+
         private readonly string m_UserAccountURI;
         public int TimeoutMs { get; set; }
 
         #region Constructor
-        public RobustAccountConnector(string uri)
+        public RobustAccountConnector(IConfig ownSection)
         {
-            if(!uri.EndsWith("/"))
+            if (!ownSection.Contains("URI"))
+            {
+                m_Log.FatalFormat("Missing 'URI' in section {0}", ownSection.Name);
+                throw new ConfigurationLoader.ConfigurationErrorException();
+            }
+            string uri = ownSection.GetString("URI");
+
+            if (!uri.EndsWith("/"))
             {
                 uri += "/";
             }
@@ -317,23 +326,4 @@ namespace SilverSim.BackendConnectors.Robust.Account
             /* intentionally left empty */
         }
     }
-    #endregion
-
-    #region Factory
-    [PluginName("UserAccounts")]
-    public sealed class RobustAccountConnectorFactory : IPluginFactory
-    {
-        private static readonly ILog m_Log = LogManager.GetLogger("ROBUST ACCOUNT CONNECTOR");
-
-        public IPlugin Initialize(ConfigurationLoader loader, IConfig ownSection)
-        {
-            if (!ownSection.Contains("URI"))
-            {
-                m_Log.FatalFormat("Missing 'URI' in section {0}", ownSection.Name);
-                throw new ConfigurationLoader.ConfigurationErrorException();
-            }
-            return new RobustAccountConnector(ownSection.GetString("URI"));
-        }
-    }
-    #endregion
 }

@@ -28,9 +28,9 @@ using SilverSim.ServiceInterfaces.Inventory;
 using SilverSim.Types;
 using SilverSim.Types.Asset;
 using SilverSim.Types.Inventory;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System;
 
 namespace SilverSim.BackendConnectors.Simian.Inventory
 {
@@ -38,6 +38,8 @@ namespace SilverSim.BackendConnectors.Simian.Inventory
     [Description("Simian Inventory Connector")]
     public sealed partial class SimianInventoryConnector : InventoryServiceInterface, IPlugin
     {
+        private static readonly ILog m_Log = LogManager.GetLogger("SIMIAN INVENTORY CONNECTOR");
+
         private readonly string m_InventoryURI;
         private readonly DefaultInventoryFolderContentService m_ContentService;
         private readonly GroupsServiceInterface m_GroupsService;
@@ -49,6 +51,25 @@ namespace SilverSim.BackendConnectors.Simian.Inventory
         }
 
         #region Constructor
+        public SimianInventoryConnector(IConfig ownSection)
+        {
+            if (!ownSection.Contains("URI"))
+            {
+                m_Log.FatalFormat("Missing 'URI' in section {0}", ownSection.Name);
+                throw new ConfigurationLoader.ConfigurationErrorException();
+            }
+            string uri = ownSection.GetString("URI");
+            m_InventoryCapability = ownSection.GetString("SimCapability", (string)UUID.Zero);
+
+            TimeoutMs = 20000;
+            if (!uri.EndsWith("/") && !uri.EndsWith("="))
+            {
+                uri += "/";
+            }
+            m_InventoryURI = uri;
+            m_ContentService = new DefaultInventoryFolderContentService(this);
+        }
+
         public SimianInventoryConnector(string uri, string simCapability)
         {
             TimeoutMs = 20000;
@@ -404,23 +425,4 @@ namespace SilverSim.BackendConnectors.Simian.Inventory
         #endregion
     }
     #endregion
-
-    #region Factory
-    [PluginName("Inventory")]
-    public sealed class SimianInventoryConnectorFactory : IPluginFactory
-    {
-        private static readonly ILog m_Log = LogManager.GetLogger("SIMIAN INVENTORY CONNECTOR");
-
-        public IPlugin Initialize(ConfigurationLoader loader, IConfig ownSection)
-        {
-            if (!ownSection.Contains("URI"))
-            {
-                m_Log.FatalFormat("Missing 'URI' in section {0}", ownSection.Name);
-                throw new ConfigurationLoader.ConfigurationErrorException();
-            }
-            return new SimianInventoryConnector(ownSection.GetString("URI"), ownSection.GetString("SimCapability", (string)UUID.Zero));
-        }
-    }
-    #endregion
-
 }

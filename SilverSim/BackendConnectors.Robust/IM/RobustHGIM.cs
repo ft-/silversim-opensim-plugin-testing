@@ -34,8 +34,8 @@ using System.Timers;
 
 namespace SilverSim.BackendConnectors.Robust.IM
 {
-    #region Service Implementation
     [Description("Robust HG IM Connector")]
+    [PluginName("RobustHGIM")]
     public class RobustHGIM : IPlugin, IPluginShutdown
     {
         private readonly RwLockedDictionary<string, KeyValuePair<int, IM.RobustIMConnector>> m_IMUrlCache = new RwLockedDictionary<string, KeyValuePair<int, IM.RobustIMConnector>>();
@@ -48,8 +48,16 @@ namespace SilverSim.BackendConnectors.Robust.IM
         private readonly Timer m_Timer;
         private IMRouter m_IMRouter;
 
-        public RobustHGIM(List<string> avatarNameServiceNames, string presenceServiceName)
+        public RobustHGIM(IConfig ownConfig)
         {
+            var avatarNameServiceNames = new List<string>();
+            string avatarNameServices = ownConfig.GetString("AvatarNameServices", string.Empty);
+            string presenceServiceName = ownConfig.GetString("PresenceService", string.Empty);
+            foreach (string p in avatarNameServices.Split(','))
+            {
+                avatarNameServiceNames.Add(p.Trim());
+            }
+
             TimeoutMs = 20000;
             m_AvatarNameServiceNames = avatarNameServiceNames;
             m_PresenceServiceName = presenceServiceName;
@@ -171,24 +179,4 @@ namespace SilverSim.BackendConnectors.Robust.IM
             m_Timer.Stop();
         }
     }
-    #endregion
-
-    #region Service Factory
-    [PluginName("RobustHGIM")]
-    public class RobustHGIMFactory : IPluginFactory
-    {
-        public IPlugin Initialize(ConfigurationLoader loader, IConfig ownConfig)
-        {
-            var avatarNameServiceNames = new List<string>();
-            string avatarNameServices = ownConfig.GetString("AvatarNameServices", string.Empty);
-            string presenceServiceName = ownConfig.GetString("PresenceService", string.Empty);
-            foreach(string p in avatarNameServices.Split(','))
-            {
-                avatarNameServiceNames.Add(p.Trim());
-            }
-
-            return new RobustHGIM(avatarNameServiceNames, presenceServiceName);
-        }
-    }
-    #endregion
 }

@@ -40,6 +40,7 @@ namespace SilverSim.BackendHandlers.Robust.Grid
     #region Service Implementation
     [Description("Robust Grid Protocol Server")]
     [ServerParam("GridName", ParameterType = typeof(Uri), Type = ServerParamType.GlobalOnly, DefaultValue = "")]
+    [PluginName("GridHandler")]
     public sealed class RobustGridServerHandler : IPlugin, IServerParamListener
     {
         private readonly string m_GridServiceName;
@@ -47,9 +48,9 @@ namespace SilverSim.BackendHandlers.Robust.Grid
         private readonly Dictionary<string, object> m_ExtraFeatures = new Dictionary<string, object>();
 
         private static readonly ILog m_Log = LogManager.GetLogger("ROBUST GRID HANDLER");
-        public RobustGridServerHandler(string gridServiceName)
+        public RobustGridServerHandler(IConfig ownSection)
         {
-            m_GridServiceName = gridServiceName;
+            m_GridServiceName = ownSection.GetString("GridService", "GridService");
             m_ExtraFeatures["ExportSupported"] = "true";
             m_ExtraFeatures["gridname"] = string.Empty;
         }
@@ -873,15 +874,6 @@ namespace SilverSim.BackendHandlers.Robust.Grid
                 }
             }
         }
-    }
-    #endregion
-
-    #region Factory
-    [PluginName("GridHandler")]
-    public sealed class RobustGridHandlerFactory : IPluginFactory
-    {
-        public IPlugin Initialize(ConfigurationLoader loader, IConfig ownSection) =>
-            new RobustGridServerHandler(ownSection.GetString("GridService", "GridService"));
     }
     #endregion
 }

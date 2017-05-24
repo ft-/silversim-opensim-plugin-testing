@@ -35,8 +35,8 @@ using System.Xml;
 
 namespace SilverSim.BackendHandlers.Robust.Friends
 {
-    #region Service Implementation
     [Description("Robust Friends Protocol Server")]
+    [PluginName("FriendsHandler")]
     public sealed class RobustFriendsServerHandler : IPlugin
     {
         private BaseHttpServer m_HttpServer;
@@ -326,14 +326,4 @@ namespace SilverSim.BackendHandlers.Robust.Friends
 
         private static readonly char[] Semicolon = new char[1] { ';' };
     }
-    #endregion
-
-    #region Factory
-    [PluginName("FriendsHandler")]
-    public sealed class RobustFriendsHandlerFactory : IPluginFactory
-    {
-        public IPlugin Initialize(ConfigurationLoader loader, IConfig ownSection) =>
-            new RobustFriendsServerHandler(ownSection);
-    }
-    #endregion
 }

@@ -37,8 +37,8 @@ using System.Xml;
 
 namespace SilverSim.BackendConnectors.Robust.Avatar
 {
-    #region Service implementation
     [Description("Robust Avatar Connector")]
+    [PluginName("Avatar")]
     public sealed class RobustAvatarConnector : AvatarServiceInterface, IPlugin
     {
         [Serializable]
@@ -61,12 +61,20 @@ namespace SilverSim.BackendConnectors.Robust.Avatar
             }
         }
 
+        private static readonly ILog m_Log = LogManager.GetLogger("ROBUST AVATAR CONNECTOR");
+
         private readonly string m_AvatarURI;
         public int TimeoutMs { get; set; }
 
         #region Constructor
-        public RobustAvatarConnector(string uri)
+        public RobustAvatarConnector(IConfig ownSection)
         {
+            if (!ownSection.Contains("URI"))
+            {
+                m_Log.FatalFormat("Missing 'URI' in section {0}", ownSection.Name);
+                throw new ConfigurationLoader.ConfigurationErrorException();
+            }
+            string uri = ownSection.GetString("URI");
             TimeoutMs = 20000;
             if(!uri.EndsWith("/"))
             {
@@ -304,23 +312,4 @@ namespace SilverSim.BackendConnectors.Robust.Avatar
             }
         }
     }
-    #endregion
-
-    #region Factory
-    [PluginName("Avatar")]
-    public sealed class RobustAvatarConnectorFactory : IPluginFactory
-    {
-        private static readonly ILog m_Log = LogManager.GetLogger("ROBUST AVATAR CONNECTOR");
-
-        public IPlugin Initialize(ConfigurationLoader loader, IConfig ownSection)
-        {
-            if (!ownSection.Contains("URI"))
-            {
-                m_Log.FatalFormat("Missing 'URI' in section {0}", ownSection.Name);
-                throw new ConfigurationLoader.ConfigurationErrorException();
-            }
-            return new RobustAvatarConnector(ownSection.GetString("URI"));
-        }
-    }
-    #endregion
 }

@@ -34,16 +34,24 @@ using System.IO;
 
 namespace SilverSim.BackendConnectors.Robust.Grid
 {
-    #region Service Implementation
     [Description("Robust Grid Connector")]
+    [PluginName("Grid")]
     public class RobustGridConnector : GridServiceInterface, IPlugin
     {
+        private static readonly ILog m_Log = LogManager.GetLogger("ROBUST GRID CONNECTOR");
         private readonly string m_GridURI;
         public int TimeoutMs { get; set; }
 
         #region Constructor
-        public RobustGridConnector(string uri)
+        public RobustGridConnector(IConfig ownSection)
         {
+            if (!ownSection.Contains("URI"))
+            {
+                m_Log.FatalFormat("Missing 'URI' in section {0}", ownSection.Name);
+                throw new ConfigurationLoader.ConfigurationErrorException();
+            }
+            string uri = ownSection.GetString("URI");
+
             TimeoutMs = 20000;
             if(!uri.EndsWith("/"))
             {
@@ -582,24 +590,4 @@ namespace SilverSim.BackendConnectors.Robust.Grid
         }
         #endregion
     }
-    #endregion
-
-    #region Factory
-    [PluginName("Grid")]
-    public class RobustGridConnectorFactory : IPluginFactory
-    {
-        private static readonly ILog m_Log = LogManager.GetLogger("ROBUST GRID CONNECTOR");
-
-        public IPlugin Initialize(ConfigurationLoader loader, IConfig ownSection)
-        {
-            if (!ownSection.Contains("URI"))
-            {
-                m_Log.FatalFormat("Missing 'URI' in section {0}", ownSection.Name);
-                throw new ConfigurationLoader.ConfigurationErrorException();
-            }
-            return new RobustGridConnector(ownSection.GetString("URI"));
-        }
-    }
-    #endregion
-
 }

@@ -35,7 +35,6 @@ using System.Xml;
 
 namespace SilverSim.BackendHandlers.Robust.UserAccounts
 {
-    #region Service Implementation
     internal static class ExtensionMethods
     {
         public static void WriteUserAccount(this XmlTextWriter writer, string tagname, UserAccount ua)
@@ -69,6 +68,7 @@ namespace SilverSim.BackendHandlers.Robust.UserAccounts
     }
 
     [Description("Robust UserAccount Protocol Server")]
+    [PluginName("UserAccountHandler")]
     public sealed class RobustUserAccountServerHandler : IPlugin
     {
         private static readonly ILog m_Log = LogManager.GetLogger("ROBUST USERACCOUNT HANDLER");
@@ -79,6 +79,11 @@ namespace SilverSim.BackendHandlers.Robust.UserAccounts
         public RobustUserAccountServerHandler(string userAccountServiceName)
         {
             m_UserAccountServiceName = userAccountServiceName;
+        }
+
+        public RobustUserAccountServerHandler(IConfig ownSection)
+        {
+            m_UserAccountServiceName = ownSection.GetString("UserAccountService", "UserAccountService");
         }
 
         public void Startup(ConfigurationLoader loader)
@@ -263,14 +268,4 @@ namespace SilverSim.BackendHandlers.Robust.UserAccounts
             }
         }
     }
-    #endregion
-
-    #region Factory
-    [PluginName("UserAccountHandler")]
-    public sealed class RobustUserAccountServerHandlerFactory : IPluginFactory
-    {
-        public IPlugin Initialize(ConfigurationLoader loader, IConfig ownSection) =>
-            new RobustUserAccountServerHandler(ownSection.GetString("UserAccountService", "UserAccountService"));
-    }
-    #endregion
 }

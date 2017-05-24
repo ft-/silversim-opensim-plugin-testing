@@ -40,6 +40,7 @@ namespace SilverSim.BackendHandlers.Robust.Grid
     [Description("Hypergrid Gatekeeper Server")]
     [ServerParam("AllowTeleportsToAnyRegion", Description = "Controls whether teleports anywhere is allowed", ParameterType = typeof(bool), Type = ServerParamType.GlobalOnly, DefaultValue = true)]
     [ServerParamStartsWith("HGRegionRedirect_")]
+    [PluginName("GatekeeperHandler")]
     public class GatekeeperHandler : IPlugin, IServerParamListener, IServerParamAnyListener
     {
         private readonly string m_GridServiceName;
@@ -205,12 +206,5 @@ namespace SilverSim.BackendHandlers.Robust.Grid
                 }
             }
         }
-    }
-
-    [PluginName("GatekeeperHandler")]
-    public class GatekeeperHandlerFactory : IPluginFactory
-    {
-        public IPlugin Initialize(ConfigurationLoader loader, IConfig ownSection) =>
-            new GatekeeperHandler(ownSection);
     }
 }

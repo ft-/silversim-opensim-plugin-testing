@@ -39,6 +39,7 @@ using System.IO;
 namespace SilverSim.OpenSimArchiver
 {
     [Description("IAR Plugin")]
+    [PluginName("InventoryArchiveSupport")]
     public sealed class InventoryArchiverLoadStore : IPlugin
     {
         private static readonly ILog m_Log = LogManager.GetLogger("IAR ARCHIVER");

@@ -38,6 +38,7 @@ using System.Xml;
 namespace SilverSim.BackendHandlers.Robust.Friends
 {
     [Description("Robust Friends Protocol Server")]
+    [PluginName("HGFriendsHandler")]
     public class HGFriendsServerHandler : IPlugin, IServiceURLsGetInterface
     {
         private FriendsServiceInterface m_FriendsService;
@@ -288,12 +289,5 @@ namespace SilverSim.BackendHandlers.Robust.Friends
                 }
             }
         }
-    }
-
-    [PluginName("HGFriendsHandler")]
-    public class HGFriendsServerHandlerFactory : IPluginFactory
-    {
-        public IPlugin Initialize(ConfigurationLoader loader, IConfig ownSection) =>
-            new HGFriendsServerHandler(ownSection);
     }
 }

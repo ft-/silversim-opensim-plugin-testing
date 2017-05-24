@@ -38,6 +38,7 @@ using System.Xml;
 namespace SilverSim.BackendHandlers.Robust.Maptile
 {
     [Description("Robust Maptile Protocol Server")]
+    [PluginName("MaptileHandler")]
     public class MaptileServerHandler : IPlugin
     {
         private static readonly ILog m_Log = LogManager.GetLogger("ROBUST MAPTILE HANDLER");
@@ -206,12 +207,5 @@ namespace SilverSim.BackendHandlers.Robust.Maptile
                 }
             }
         }
-    }
-
-    [PluginName("MaptileHandler")]
-    public class MaptileServerHandlerFactory : IPluginFactory
-    {
-        public IPlugin Initialize(ConfigurationLoader loader, IConfig ownSection) =>
-            new MaptileServerHandler(ownSection);
     }
 }

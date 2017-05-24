@@ -36,6 +36,7 @@ using System.Timers;
 namespace SilverSim.Backend.OpenSim.Neighbor.Neighbor
 {
     [Description("OpenSim Neighbor Connector")]
+    [PluginName("OpenSimNeighbor")]
     public class OpenSimNeighbor : NeighborServiceInterface, IPlugin, IPluginShutdown, IPluginSubFactory
     {
         private readonly RwLockedDictionary<UUID, NeighborList> m_NeighborLists = new RwLockedDictionary<UUID, NeighborList>();
@@ -208,12 +209,5 @@ namespace SilverSim.Backend.OpenSim.Neighbor.Neighbor
             m_NeighborLists[toRegionID].Add(fromRegion);
             scene.NotifyNeighborOnline(fromRegion);
         }
-    }
-
-    [PluginName("OpenSimNeighbor")]
-    public class OpenSimNeighborFactory : IPluginFactory
-    {
-        public IPlugin Initialize(ConfigurationLoader loader, IConfig ownSection) =>
-            new OpenSimNeighbor();
     }
 }

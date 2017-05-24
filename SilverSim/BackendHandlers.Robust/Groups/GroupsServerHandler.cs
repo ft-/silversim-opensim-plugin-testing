@@ -32,8 +32,8 @@ using System.Xml;
 
 namespace SilverSim.BackendHandlers.Robust.Groups
 {
-    #region Service Implementation
     [Description("Robust Groups Protocol Server")]
+    [PluginName("GroupsHandler")]
     public sealed class RobustGroupsServerHandler : BaseGroupsServerHandler
     {
         private static readonly ILog m_Log = LogManager.GetLogger("ROBUST GROUPS HANDLER");
@@ -1171,14 +1171,4 @@ namespace SilverSim.BackendHandlers.Robust.Groups
             }
         }
     }
-    #endregion
-
-    #region Factory
-    [PluginName("GroupsHandler")]
-    public sealed class RobustGroupsServerHandlerFactory : IPluginFactory
-    {
-        public IPlugin Initialize(ConfigurationLoader loader, IConfig ownSection) =>
-            new RobustGroupsServerHandler(ownSection);
-    }
-    #endregion
 }

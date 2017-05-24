@@ -68,8 +68,8 @@ using System.Net;
 
 namespace SilverSim.BackendHandlers.Robust.Simulation
 {
-    #region Service Implementation
     [Description("OpenSim PostAgent Handler")]
+    [PluginName("RobustAgentHandler")]
     [ServerParam("OpenSimProtocolCompatibility", ParameterType = typeof(bool), DefaultValue = true)]
     public class PostAgentHandler : IPlugin, IPluginShutdown, IServerParamListener
     {
@@ -1664,14 +1664,4 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
             }
         }
     }
-    #endregion
-
-    #region Service Factory
-    [PluginName("RobustAgentHandler")]
-    public class PostAgentHandlerFactory : IPluginFactory
-    {
-        public IPlugin Initialize(ConfigurationLoader loader, IConfig ownSection) =>
-            new PostAgentHandler(ownSection);
-    }
-    #endregion
 }

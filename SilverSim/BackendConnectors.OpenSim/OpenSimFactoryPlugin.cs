@@ -28,13 +28,9 @@ using System.ComponentModel;
 namespace SilverSim.BackendConnectors.OpenSim
 {
     [Description("OpenSim Profile Connector Factory")]
+    [PluginName("RobustProfilePlugin")]
     public class OpenSimProfilePlugin : ServicePluginHelo, IProfileServicePlugin, IPlugin
     {
-        public OpenSimProfilePlugin(string profileName)
-        {
-            Name = profileName;
-        }
-
         public void Startup(ConfigurationLoader loader)
         {
             /* no action needed */
@@ -42,13 +38,6 @@ namespace SilverSim.BackendConnectors.OpenSim
 
         public ProfileServiceInterface Instantiate(string url) => new Profile.ProfileConnector(url);
 
-        public override string Name { get; }
-    }
-
-    [PluginName("RobustProfilePlugin")]
-    public class RobustProfilePluginFactory : IPluginFactory
-    {
-        public IPlugin Initialize(ConfigurationLoader loader, IConfig ownSection) =>
-            new OpenSimProfilePlugin("opensim-robust");
+        public override string Name => "opensim-robust";
     }
 }

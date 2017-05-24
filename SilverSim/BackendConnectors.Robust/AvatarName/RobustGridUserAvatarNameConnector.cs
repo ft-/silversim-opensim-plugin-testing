@@ -32,14 +32,34 @@ using System.IO;
 
 namespace SilverSim.BackendConnectors.Robust.AvatarName
 {
-    #region Service Implementation
     [Description("Robust GridUser AvatarName Connector")]
+    [PluginName("GridUserAvatarNames")]
     public sealed class RobustGridUserAvatarNameConnector : AvatarNameServiceInterface, IPlugin
     {
+        private static readonly ILog m_Log = LogManager.GetLogger("ROBUST GRIDUSER AVATAR NAME CONNECTOR");
+
         public int TimeoutMs { get; set; }
         readonly string m_GridUserURI;
 
         #region Constructor
+        public RobustGridUserAvatarNameConnector(IConfig ownSection)
+        {
+            if (!ownSection.Contains("URI"))
+            {
+                m_Log.FatalFormat("Missing 'URI' in section {0}", ownSection.Name);
+                throw new ConfigurationLoader.ConfigurationErrorException();
+            }
+            string uri = ownSection.GetString("URI");
+            TimeoutMs = 20000;
+            if (!uri.EndsWith("/"))
+            {
+                uri += "/";
+            }
+            uri += "griduser";
+
+            m_GridUserURI = uri;
+        }
+
         public RobustGridUserAvatarNameConnector(string uri)
         {
             TimeoutMs = 20000;
@@ -132,27 +152,4 @@ namespace SilverSim.BackendConnectors.Robust.AvatarName
             return false;
         }
     }
-    #endregion
-
-    #region Factory
-    [PluginName("GridUserAvatarNames")]
-    public sealed class RobustGridUserAvatarNameConnectorFactory : IPluginFactory
-    {
-        private static readonly ILog m_Log = LogManager.GetLogger("ROBUST GRIDUSER AVATAR NAME CONNECTOR");
-        public RobustGridUserAvatarNameConnectorFactory()
-        {
-
-        }
-
-        public IPlugin Initialize(ConfigurationLoader loader, IConfig ownSection)
-        {
-            if (!ownSection.Contains("URI"))
-            {
-                m_Log.FatalFormat("Missing 'URI' in section {0}", ownSection.Name);
-                throw new ConfigurationLoader.ConfigurationErrorException();
-            }
-            return new RobustGridUserAvatarNameConnector(ownSection.GetString("URI"));
-        }
-    }
-    #endregion
 }

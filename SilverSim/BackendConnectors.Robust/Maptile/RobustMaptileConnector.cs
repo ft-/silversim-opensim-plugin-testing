@@ -35,11 +35,23 @@ using System.Web;
 namespace SilverSim.BackendConnectors.Robust.Maptile
 {
     [Description("Robust Maptile Connector")]
+    [PluginName("Maptile")]
     public class RobustMaptileConnector : MaptileServiceInterface, IPlugin
     {
         private readonly string m_Url;
 
         public int TimeoutMs { get; set; }
+
+        public RobustMaptileConnector(IConfig ownSection)
+        {
+            TimeoutMs = 20000;
+            string url = ownSection.GetString("URI");
+            if (!url.EndsWith("/"))
+            {
+                url += "/";
+            }
+            m_Url = url;
+        }
 
         public RobustMaptileConnector(string url)
         {
@@ -112,12 +124,5 @@ namespace SilverSim.BackendConnectors.Robust.Maptile
                 }
             }
         }
-    }
-
-    [PluginName("Maptile")]
-    public class RobustMaptileConnectorFactory : IPluginFactory
-    {
-        public IPlugin Initialize(ConfigurationLoader loader, IConfig ownSection) =>
-            new RobustMaptileConnector(ownSection.GetString("URI"));
     }
 }

@@ -32,10 +32,11 @@ using System.Web;
 
 namespace SilverSim.BackendConnectors.Robust.GridInfo
 {
-    #region Service Implementation
     [Description("Robust GridInfo Connector")]
+    [PluginName("GridInfo")]
     public class RobustGridInfoConnector : GridInfoServiceInterface, IPlugin
     {
+        private static readonly ILog m_Log = LogManager.GetLogger("ROBUST GRIDINFO CONNECTOR");
         private readonly string m_GridURI;
         public int TimeoutMs { get; set; }
         private readonly object m_UpdateLock = new object();
@@ -44,8 +45,15 @@ namespace SilverSim.BackendConnectors.Robust.GridInfo
         private Date m_LastUpdate = new Date();
 
         #region Constructor
-        public RobustGridInfoConnector(string uri)
+        public RobustGridInfoConnector(IConfig ownSection)
         {
+            if (!ownSection.Contains("URI"))
+            {
+                m_Log.FatalFormat("Missing 'URI' in section {0}", ownSection.Name);
+                throw new ConfigurationLoader.ConfigurationErrorException();
+            }
+            string uri = ownSection.GetString("URI");
+
             TimeoutMs = 20000;
             if (!uri.EndsWith("/"))
             {
@@ -178,23 +186,4 @@ namespace SilverSim.BackendConnectors.Robust.GridInfo
             }
         }
     }
-    #endregion
-
-    #region Factory
-    [PluginName("GridInfo")]
-    public class RobustGridInfoConnectorFactory : IPluginFactory
-    {
-        private static readonly ILog m_Log = LogManager.GetLogger("ROBUST GRIDINFO CONNECTOR");
-
-        public IPlugin Initialize(ConfigurationLoader loader, IConfig ownSection)
-        {
-            if (!ownSection.Contains("URI"))
-            {
-                m_Log.FatalFormat("Missing 'URI' in section {0}", ownSection.Name);
-                throw new ConfigurationLoader.ConfigurationErrorException();
-            }
-            return new RobustGridInfoConnector(ownSection.GetString("URI"));
-        }
-    }
-    #endregion
 }

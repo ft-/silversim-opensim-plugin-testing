@@ -38,8 +38,8 @@ using System.Xml;
 
 namespace SilverSim.BackendHandlers.Robust.Asset
 {
-    #region Service Implementation
     [Description("Robust Asset Protocol Server")]
+    [PluginName("AssetHandler")]
     public class RobustAssetServerHandler : IPlugin, IServiceURLsGetInterface
     {
         protected static readonly ILog m_Log = LogManager.GetLogger("ROBUST ASSET HANDLER");
@@ -52,12 +52,12 @@ namespace SilverSim.BackendHandlers.Robust.Asset
         private readonly bool m_EnableGet;
         private readonly bool m_EnableLimitedGet;
 
-        public RobustAssetServerHandler(string persistentAssetServiceName, string temporaryAssetServiceName, bool enableGet, bool enableLimitedGet)
+        public RobustAssetServerHandler(IConfig ownSection)
         {
-            m_PersistentAssetServiceName = persistentAssetServiceName;
-            m_TemporaryAssetServiceName = temporaryAssetServiceName;
-            m_EnableGet = enableGet;
-            m_EnableLimitedGet = enableLimitedGet;
+            m_PersistentAssetServiceName = ownSection.GetString("PersistentAssetService", "AssetService");
+            m_TemporaryAssetServiceName = ownSection.GetString("TemporaryAssetService", string.Empty);
+            m_EnableGet = ownSection.GetBoolean("IsGetEnabled", true);
+            m_EnableLimitedGet = ownSection.GetBoolean("IsLimitedGetEnabled", false);
         }
 
         public void Startup(ConfigurationLoader loader)
@@ -678,17 +678,4 @@ namespace SilverSim.BackendHandlers.Robust.Asset
             }
         }
     }
-    #endregion
-
-    #region Factory
-    [PluginName("AssetHandler")]
-    public class RobustAssetHandlerFactory : IPluginFactory
-    {
-        public IPlugin Initialize(ConfigurationLoader loader, IConfig ownSection) =>
-            new RobustAssetServerHandler(ownSection.GetString("PersistentAssetService", "AssetService"),
-                ownSection.GetString("TemporaryAssetService", string.Empty),
-                ownSection.GetBoolean("IsGetEnabled", true),
-                ownSection.GetBoolean("IsLimitedGetEnabled", false));
-    }
-    #endregion
 }

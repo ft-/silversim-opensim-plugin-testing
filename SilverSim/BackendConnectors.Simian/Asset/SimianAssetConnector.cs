@@ -35,8 +35,8 @@ using System.Runtime.Serialization;
 
 namespace SilverSim.BackendConnectors.Simian.Asset
 {
-    #region Service Implementation
     [Description("Simian Asset Connector")]
+    [PluginName("Assets")]
     public sealed class SimianAssetConnector : AssetServiceInterface, IPlugin, IAssetMetadataServiceInterface, IAssetDataServiceInterface
     {
         [Serializable]
@@ -59,6 +59,8 @@ namespace SilverSim.BackendConnectors.Simian.Asset
             }
         }
 
+        private static readonly ILog m_Log = LogManager.GetLogger("SIMIAN ASSET CONNECTOR");
+
         public int TimeoutMs { get; set; }
         private readonly string m_AssetURI;
         private readonly DefaultAssetReferencesService m_ReferencesService;
@@ -68,6 +70,29 @@ namespace SilverSim.BackendConnectors.Simian.Asset
         private readonly string m_AssetCapability = "00000000-0000-0000-0000-000000000000";
 
         #region Constructor
+        public SimianAssetConnector(IConfig ownSection)
+        {
+            if (!ownSection.Contains("URI"))
+            {
+                m_Log.FatalFormat("Missing 'URI' in section {0}", ownSection.Name);
+                throw new ConfigurationLoader.ConfigurationErrorException();
+            }
+            string uri = ownSection.GetString("URI");
+            m_AssetCapability = ownSection.GetString("SimCapability", "00000000-0000-0000-0000-000000000000");
+            m_EnableCompression = ownSection.GetBoolean("EnableCompressedStoreRequest", false);
+            m_EnableLocalStorage = ownSection.GetBoolean("EnableLocalAssetStorage", false);
+            m_EnableTempStorage = ownSection.GetBoolean("EnableTempAssetStorage", false);
+
+            TimeoutMs = 20000;
+            if (!uri.EndsWith("/") && !uri.EndsWith("="))
+            {
+                uri += "/";
+            }
+
+            m_AssetURI = uri;
+            m_ReferencesService = new DefaultAssetReferencesService(this);
+        }
+
         public SimianAssetConnector(string uri, string capability, bool enableCompression = false, bool enableLocalStorage = false, bool enableTempStorage = false)
         {
             TimeoutMs = 20000;
@@ -303,28 +328,4 @@ namespace SilverSim.BackendConnectors.Simian.Asset
         }
         #endregion
     }
-    #endregion
-
-    #region Factory
-    [PluginName("Assets")]
-    public class SimianAssetConnectorFactory : IPluginFactory
-    {
-        private static readonly ILog m_Log = LogManager.GetLogger("SIMIAN ASSET CONNECTOR");
-
-        public IPlugin Initialize(ConfigurationLoader loader, IConfig ownSection)
-        {
-            if (!ownSection.Contains("URI"))
-            {
-                m_Log.FatalFormat("Missing 'URI' in section {0}", ownSection.Name);
-                throw new ConfigurationLoader.ConfigurationErrorException();
-            }
-            return new SimianAssetConnector(
-                ownSection.GetString("URI"),
-                ownSection.GetString("SimCapability", "00000000-0000-0000-0000-000000000000"),
-                ownSection.GetBoolean("EnableCompressedStoreRequest", false),
-                ownSection.GetBoolean("EnableLocalAssetStorage", false),
-                ownSection.GetBoolean("EnableTempAssetStorage", false));
-        }
-    }
-    #endregion
 }

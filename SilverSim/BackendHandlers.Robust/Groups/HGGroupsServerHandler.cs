@@ -35,6 +35,7 @@ using System.Net;
 namespace SilverSim.BackendHandlers.Robust.Groups
 {
     [Description("Robust HG-Groups Protocol Server")]
+    [PluginName("HGGroupsHandler")]
     public class RobustHGGroupsServerHandler : BaseGroupsServerHandler, IServiceURLsGetInterface
     {
         private static readonly ILog m_Log = LogManager.GetLogger("ROBUST HGGROUPS HANDLER");
@@ -234,13 +235,4 @@ namespace SilverSim.BackendHandlers.Robust.Groups
             base.HandleGetGroupMembers(req, reqdata);
         }
     }
-
-    #region Factory
-    [PluginName("HGGroupsHandler")]
-    public sealed class RobustHGGroupsServerHandlerFactory : IPluginFactory
-    {
-        public IPlugin Initialize(ConfigurationLoader loader, IConfig ownSection) =>
-            new RobustHGGroupsServerHandler(ownSection);
-    }
-    #endregion
 }

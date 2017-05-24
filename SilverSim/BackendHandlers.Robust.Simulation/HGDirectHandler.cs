@@ -32,10 +32,10 @@ using SilverSim.Threading;
 
 namespace SilverSim.BackendHandlers.Robust.Simulation
 {
-    #region Service Implementation
     [Description("OpenSim PostAgent Direct HG Handler")]
     [ServerParam("DirectHGEnabled", ParameterType = typeof(bool), DefaultValue = false)]
     [ServerParam("DefaultHGRegion", ParameterType = typeof(string), DefaultValue = "", Type = ServerParamType.GlobalOnly)]
+    [PluginName("RobustDirectHGHandler")]
     public class PostAgentHGDirectHandler : PostAgentHandler
     {
         private HttpXmlRpcHandler m_XmlRpcServer;
@@ -189,15 +189,4 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
             m_DefaultHGRegion = value;
         }
     }
-    #endregion
-
-    #region Service Factory
-    [PluginName("RobustDirectHGHandler")]
-    public class PostAgentDirectHGHandlerFactory : IPluginFactory
-    {
-        public IPlugin Initialize(ConfigurationLoader loader, IConfig ownSection) =>
-            new PostAgentHGDirectHandler(ownSection);
-    }
-    #endregion
-
 }

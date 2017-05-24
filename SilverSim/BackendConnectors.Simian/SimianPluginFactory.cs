@@ -30,6 +30,7 @@ using System.ComponentModel;
 namespace SilverSim.BackendConnectors.Simian
 {
     [Description("Simian Inventory Connector Factory")]
+    [PluginName("InventoryPlugin")]
     public sealed class SimianInventoryPlugin : ServicePluginHelo, IInventoryServicePlugin, IPlugin
     {
         public void Startup(ConfigurationLoader loader)
@@ -42,13 +43,8 @@ namespace SilverSim.BackendConnectors.Simian
         public override string Name => "opensim-simian";
     }
 
-    [PluginName("InventoryPlugin")]
-    public sealed class SimianInventoryPluginFactory : IPluginFactory
-    {
-        public IPlugin Initialize(ConfigurationLoader loader, IConfig ownSection) => new SimianInventoryPlugin();
-    }
-
     [Description("Simian Asset Connector Factory")]
+    [PluginName("AssetPlugin")]
     public sealed class SimianAssetPlugin : ServicePluginHelo, IAssetServicePlugin, IPlugin
     {
         public void Startup(ConfigurationLoader loader)
@@ -59,11 +55,5 @@ namespace SilverSim.BackendConnectors.Simian
         public AssetServiceInterface Instantiate(string url) => new Asset.SimianAssetConnector(url, (string)UUID.Zero);
 
         public override string Name => "opensim-simian";
-    }
-
-    [PluginName("AssetPlugin")]
-    public sealed class SimianAssetPluginFactory : IPluginFactory
-    {
-        public IPlugin Initialize(ConfigurationLoader loader, IConfig ownSection) => new SimianAssetPlugin();
     }
 }

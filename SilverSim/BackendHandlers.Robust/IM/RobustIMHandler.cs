@@ -75,15 +75,16 @@ namespace SilverSim.BackendConnectors.Robust.IM
     }
 
     [Description("OpenSim InstantMessage Server")]
+    [PluginName("IMHandler")]
     public sealed class RobustIMHandler : IPlugin, IServiceURLsGetInterface
     {
         private readonly bool m_DisallowOfflineIM;
         private IMServiceInterface m_IMService;
         private BaseHttpServer m_HttpServer;
 
-        public RobustIMHandler(bool disallowOfflineIM)
+        public RobustIMHandler(IConfig ownSection)
         {
-            m_DisallowOfflineIM = disallowOfflineIM;
+            m_DisallowOfflineIM = ownSection.GetBoolean("DisallowOfflineIM", true);
         }
 
         public void Startup(ConfigurationLoader loader)
@@ -164,15 +165,6 @@ namespace SilverSim.BackendConnectors.Robust.IM
 
             return res;
         }
-    }
-    #endregion
-
-    #region Factory
-    [PluginName("IMHandler")]
-    public sealed class RobustIMHandlerFactory : IPluginFactory
-    {
-        public IPlugin Initialize(ConfigurationLoader loader, IConfig ownSection) =>
-            new RobustIMHandler(ownSection.GetBoolean("DisallowOfflineIM", true));
     }
     #endregion
 }

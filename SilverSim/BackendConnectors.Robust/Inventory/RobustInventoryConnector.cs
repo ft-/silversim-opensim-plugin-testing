@@ -38,12 +38,32 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
 {
     #region Service Implementation
     [Description("Robust Inventory Connector")]
+    [PluginName("Inventory")]
     public sealed partial class RobustInventoryConnector : InventoryServiceInterface, IPlugin
     {
+        private static readonly ILog m_Log = LogManager.GetLogger("ROBUST INVENTORY CONNECTOR");
+
         private readonly string m_InventoryURI;
         private readonly GroupsServiceInterface m_GroupsService;
 
         #region Constructor
+        public RobustInventoryConnector(IConfig ownSection)
+        {
+            if (!ownSection.Contains("URI"))
+            {
+                m_Log.FatalFormat("Missing 'URI' in section {0}", ownSection.Name);
+                throw new ConfigurationLoader.ConfigurationErrorException();
+            }
+            TimeoutMs = 20000;
+            string uri = ownSection.GetString("URI");
+            if (!uri.EndsWith("/"))
+            {
+                uri += "/";
+            }
+            uri += "xinventory";
+            m_InventoryURI = uri;
+        }
+
         public RobustInventoryConnector(string uri)
         {
             TimeoutMs = 20000;
@@ -199,23 +219,4 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
         #endregion
     }
     #endregion
-
-    #region Factory
-    [PluginName("Inventory")]
-    public class RobustInventoryConnectorFactory : IPluginFactory
-    {
-        private static readonly ILog m_Log = LogManager.GetLogger("ROBUST INVENTORY CONNECTOR");
-
-        public IPlugin Initialize(ConfigurationLoader loader, IConfig ownSection)
-        {
-            if (!ownSection.Contains("URI"))
-            {
-                m_Log.FatalFormat("Missing 'URI' in section {0}", ownSection.Name);
-                throw new ConfigurationLoader.ConfigurationErrorException();
-            }
-            return new RobustInventoryConnector(ownSection.GetString("URI"));
-        }
-    }
-    #endregion
-
 }

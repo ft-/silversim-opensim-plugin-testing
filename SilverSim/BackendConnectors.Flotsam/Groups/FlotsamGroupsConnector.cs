@@ -19,6 +19,8 @@
 // obligated to do so. If you do not wish to do so, delete this
 // exception statement from your version.
 
+using log4net;
+using Nini.Config;
 using SilverSim.Main.Common;
 using SilverSim.Main.Common.Rpc;
 using SilverSim.ServiceInterfaces.AvatarName;
@@ -70,8 +72,11 @@ using System.IO;
 namespace SilverSim.BackendConnectors.Flotsam.Groups
 {
     [Description("XmlRpc Groups Connector")]
+    [PluginName("XmlRpcGroups")]
     public partial class FlotsamGroupsConnector : GroupsServiceInterface, IPlugin
     {
+        private static readonly ILog m_Log = LogManager.GetLogger("FLOTSAM GROUPS CONNECTOR");
+
         private AvatarNameServiceInterface m_AvatarNameService;
         private readonly string m_AvatarNameServiceNames;
         private readonly string m_ReadKey = string.Empty;
@@ -80,11 +85,17 @@ namespace SilverSim.BackendConnectors.Flotsam.Groups
 
         public int TimeoutMs { get; set; }
 
-        public FlotsamGroupsConnector(string uri, string avatarNameServiceNames)
+        public FlotsamGroupsConnector(IConfig ownSection)
         {
-            m_Uri = uri;
+            if (!ownSection.Contains("URI"))
+            {
+                m_Log.FatalFormat("Missing 'URI' in section {0}", ownSection.Name);
+                throw new ConfigurationLoader.ConfigurationErrorException();
+            }
+            m_Uri = ownSection.GetString("URI");
+
             TimeoutMs = 20000;
-            m_AvatarNameServiceNames = avatarNameServiceNames.Trim();
+            m_AvatarNameServiceNames = ownSection.GetString("AvatarNameServices", "AvatarNameStorage").Trim();
         }
 
         public void Startup(ConfigurationLoader loader)

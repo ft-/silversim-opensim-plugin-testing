@@ -34,10 +34,12 @@ using System.IO;
 
 namespace SilverSim.BackendConnectors.Robust.Presence
 {
-    #region Service Implementation
     [Description("Robust Presence Connector")]
+    [PluginName("Presence")]
     public class RobustPresenceConnector : PresenceServiceInterface, IPlugin
     {
+        private static readonly ILog m_Log = LogManager.GetLogger("ROBUST PRESENCE CONNECTOR");
+
         public int TimeoutMs { get; set; }
         private readonly string m_PresenceUri;
 
@@ -51,6 +53,18 @@ namespace SilverSim.BackendConnectors.Robust.Presence
             }
             uri += "presence";
             m_PresenceUri = uri;
+        }
+
+        public RobustPresenceConnector(IConfig ownSection)
+        {
+            if (!ownSection.Contains("URI"))
+            {
+                m_Log.FatalFormat("Missing 'URI' in section {0}", ownSection.Name);
+
+                throw new ConfigurationLoader.ConfigurationErrorException();
+            }
+
+            m_PresenceUri = ownSection.GetString("URI");
         }
 
         public void Startup(ConfigurationLoader loader)
@@ -270,25 +284,4 @@ namespace SilverSim.BackendConnectors.Robust.Presence
             throw new NotSupportedException("Remove");
         }
     }
-    #endregion
-
-    #region Factory
-    [PluginName("Presence")]
-    public class RobustPresenceConnectorFactory : IPluginFactory
-    {
-        private static readonly ILog m_Log = LogManager.GetLogger("ROBUST PRESENCE CONNECTOR");
-
-        public IPlugin Initialize(ConfigurationLoader loader, IConfig ownSection)
-        {
-            if (!ownSection.Contains("URI"))
-            {
-                m_Log.FatalFormat("Missing 'URI' in section {0}", ownSection.Name);
-
-                throw new ConfigurationLoader.ConfigurationErrorException();
-            }
-
-            return new RobustPresenceConnector(ownSection.GetString("URI"), string.Empty);
-        }
-    }
-    #endregion
 }

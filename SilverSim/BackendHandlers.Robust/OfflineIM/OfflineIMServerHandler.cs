@@ -35,8 +35,8 @@ using System.Xml;
 
 namespace SilverSim.BackendHandlers.Robust.OfflineIM
 {
-    #region Service Implementation
     [Description("Robust OfflineIM Protocol Server")]
+    [PluginName("OfflineIMHandler")]
     public sealed class RobustOfflineIMServerHandler : IPlugin
     {
         private readonly string m_OfflineIMServiceName;
@@ -45,10 +45,10 @@ namespace SilverSim.BackendHandlers.Robust.OfflineIM
         private readonly string m_UserAccountServiceName;
         private UserAccountServiceInterface m_UserAccountService;
 
-        public RobustOfflineIMServerHandler(string offlineIMServiceName, string userAccountServiceName)
+        public RobustOfflineIMServerHandler(IConfig ownSection)
         {
-            m_OfflineIMServiceName = offlineIMServiceName;
-            m_UserAccountServiceName = userAccountServiceName;
+            m_OfflineIMServiceName = ownSection.GetString("OfflineIMService", "OfflineIMService");
+            m_UserAccountServiceName = ownSection.GetString("UserAccountService", "UserAccountService");
         }
 
         public void Startup(ConfigurationLoader loader)
@@ -308,16 +308,4 @@ namespace SilverSim.BackendHandlers.Robust.OfflineIM
             }
         }
     }
-    #endregion
-
-    #region Factory
-    [PluginName("OfflineIMHandler")]
-    public sealed class RobustOfflineIMServerHandlerFactory : IPluginFactory
-    {
-        public IPlugin Initialize(ConfigurationLoader loader, IConfig ownSection) =>
-            new RobustOfflineIMServerHandler(
-                ownSection.GetString("OfflineIMService", "OfflineIMService"),
-                ownSection.GetString("UserAccountService", "UserAccountService"));
-    }
-    #endregion
 }

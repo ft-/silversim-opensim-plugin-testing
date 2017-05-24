@@ -38,8 +38,8 @@ using System.Xml;
 
 namespace SilverSim.BackendHandlers.Robust.GridUser
 {
-    #region Service Implementation
     [Description("Robust GridUser Protocol Server")]
+    [PluginName("GridUserHandler")]
     public sealed class RobustGridUserServerHandler : IPlugin
     {
         private static readonly ILog m_Log = LogManager.GetLogger("ROBUST GRIDUSER HANDLER");
@@ -51,11 +51,11 @@ namespace SilverSim.BackendHandlers.Robust.GridUser
         private readonly string m_UserAccountServiceName;
         private readonly string m_AvatarNameStorageName;
 
-        public RobustGridUserServerHandler(string gridUserService, string userAccountService, string avatarNameService)
+        public RobustGridUserServerHandler(IConfig ownSection)
         {
-            m_GridUserServiceName = gridUserService;
-            m_UserAccountServiceName = userAccountService;
-            m_AvatarNameStorageName = avatarNameService;
+            m_GridUserServiceName = ownSection.GetString("GridUserService", "GridUserService");
+            m_UserAccountServiceName = ownSection.GetString("UserAccountService", "UserAccountService");
+            m_AvatarNameStorageName = ownSection.GetString("AvatarNameStorage", "AvatarNameStorage");
         }
 
         public void Startup(ConfigurationLoader loader)
@@ -422,16 +422,4 @@ namespace SilverSim.BackendHandlers.Robust.GridUser
         }
         #endregion
     }
-    #endregion
-
-    #region Factory
-    [PluginName("GridUserHandler")]
-    public class RobustGridUserHandlerFactory : IPluginFactory
-    {
-        public IPlugin Initialize(ConfigurationLoader loader, IConfig ownSection) =>
-            new RobustGridUserServerHandler(ownSection.GetString("GridUserService", "GridUserService"),
-                ownSection.GetString("UserAccountService", "UserAccountService"),
-                ownSection.GetString("AvatarNameStorage", "AvatarNameStorage"));
-    }
-    #endregion
 }

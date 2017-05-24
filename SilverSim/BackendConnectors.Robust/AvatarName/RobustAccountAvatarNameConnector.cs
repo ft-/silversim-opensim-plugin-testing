@@ -33,16 +33,37 @@ using System.IO;
 
 namespace SilverSim.BackendConnectors.Robust.AvatarName
 {
-    #region Service Implementation
     [Description("Robust UserAccount AvatarName Connector")]
+    [PluginName("UserAccountAvatarNames")]
     public sealed class RobustAccountAvatarNameConnector : AvatarNameServiceInterface, IPlugin
     {
+        private static readonly ILog m_Log = LogManager.GetLogger("ROBUST ACCOUNT AVATAR NAME CONNECTOR");
+
         private readonly string m_UserAccountURI;
         private string m_HomeURI;
         private readonly UUID m_ScopeID;
         public int TimeoutMs { get; set; }
 
         #region Constructor
+        public RobustAccountAvatarNameConnector(IConfig ownSection)
+        {
+            if (!ownSection.Contains("URI"))
+            {
+                m_Log.FatalFormat("Missing 'URI' in section {0}", ownSection.Name);
+                throw new ConfigurationLoader.ConfigurationErrorException();
+            }
+            string uri = ownSection.GetString("URI");
+            m_ScopeID = ownSection.GetString("ScopeID", (string)UUID.Zero);
+            if (!uri.EndsWith("/"))
+            {
+                uri += "/";
+            }
+            uri += "accounts";
+            m_UserAccountURI = uri;
+            TimeoutMs = 20000;
+            m_HomeURI = string.Empty;
+        }
+
         public RobustAccountAvatarNameConnector(string uri, string homeURI, UUID scopeID)
         {
             m_ScopeID = scopeID;
@@ -211,23 +232,4 @@ namespace SilverSim.BackendConnectors.Robust.AvatarName
 
         public override bool Remove(UUID key) => false;
     }
-    #endregion
-
-    #region Factory
-    [PluginName("UserAccountAvatarNames")]
-    public sealed class RobustAccountAvatarNameConnectorFactory : IPluginFactory
-    {
-        private static readonly ILog m_Log = LogManager.GetLogger("ROBUST ACCOUNT AVATAR NAME CONNECTOR");
-
-        public IPlugin Initialize(ConfigurationLoader loader, IConfig ownSection)
-        {
-            if (!ownSection.Contains("URI"))
-            {
-                m_Log.FatalFormat("Missing 'URI' in section {0}", ownSection.Name);
-                throw new ConfigurationLoader.ConfigurationErrorException();
-            }
-            return new RobustAccountAvatarNameConnector(ownSection.GetString("URI"), string.Empty, ownSection.GetString("ScopeID", (string)UUID.Zero));
-        }
-    }
-    #endregion
 }

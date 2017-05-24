@@ -173,6 +173,7 @@ namespace SilverSim.BackendHandlers.Robust.Inventory
 
     #region Service Implementation
     [Description("Robust Inventory Protocol Server")]
+    [PluginName("InventoryHandler")]
     public class RobustInventoryServerHandler : IPlugin, IServiceURLsGetInterface
     {
         protected static readonly ILog m_Log = LogManager.GetLogger("ROBUST INVENTORY HANDLER");
@@ -182,10 +183,10 @@ namespace SilverSim.BackendHandlers.Robust.Inventory
         private readonly bool m_AdvertiseInventoryServerURI;
         private readonly Dictionary<string, Action<HttpRequest, Dictionary<string, object>>> m_Handlers = new Dictionary<string, Action<HttpRequest, Dictionary<string, object>>>();
 
-        public RobustInventoryServerHandler(string inventoryServiceName, bool advertiseInventoryServerURI)
+        public RobustInventoryServerHandler(IConfig ownSection)
         {
-            m_AdvertiseInventoryServerURI = advertiseInventoryServerURI;
-            m_InventoryServiceName = inventoryServiceName;
+            m_AdvertiseInventoryServerURI = ownSection.GetBoolean("AdvertiseServerURI", true);
+            m_InventoryServiceName = ownSection.GetString("InventoryService", "InventoryService");
             m_Handlers["CREATEUSERINVENTORY"] = CreateUserInventory;
             m_Handlers["GETINVENTORYSKELETON"] = GetInventorySkeleton;
             m_Handlers["GETROOTFOLDER"] = GetRootFolder;
@@ -830,17 +831,6 @@ namespace SilverSim.BackendHandlers.Robust.Inventory
                 }
             }
         }
-    }
-    #endregion
-
-    #region Factory
-    [PluginName("InventoryHandler")]
-    public sealed class RobustInventoryServerHandlerFactory : IPluginFactory
-    {
-        public IPlugin Initialize(ConfigurationLoader loader, IConfig ownSection) =>
-            new RobustInventoryServerHandler(
-                ownSection.GetString("InventoryService", "InventoryService"),
-                ownSection.GetBoolean("AdvertiseServerURI", true));
     }
     #endregion
 }
