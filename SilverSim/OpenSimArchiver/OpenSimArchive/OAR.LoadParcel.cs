@@ -232,7 +232,7 @@ namespace SilverSim.OpenSimArchiver.RegionArchiver
                                 case "MediaURL":
                                     {
                                         string url = reader.ReadElementValueAsString();
-                                        if(!string.IsNullOrEmpty(url))
+                                        if(url?.Length != 0)
                                         {
                                             pinfo.MediaURI = new URI(url);
                                         }
@@ -242,7 +242,7 @@ namespace SilverSim.OpenSimArchiver.RegionArchiver
                                 case "MusicURL":
                                     {
                                         string url = reader.ReadElementValueAsString();
-                                        if(!string.IsNullOrEmpty(url))
+                                        if(url?.Length != 0)
                                         {
                                             pinfo.MusicURI = new URI(url);
                                         }

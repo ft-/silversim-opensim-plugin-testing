@@ -135,14 +135,14 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
             {
                 m_LocalAssetService = loader.GetService<AssetServiceInterface>(m_LocalAssetServiceName);
                 m_LocalInventoryService = loader.GetService<InventoryServiceInterface>(m_LocalInventoryServiceName);
-                if (!string.IsNullOrEmpty(m_LocalProfileServiceName))
+                if (m_LocalProfileServiceName?.Length != 0)
                 {
                     m_LocalProfileService = loader.GetService<ProfileServiceInterface>(m_LocalProfileServiceName);
                 }
                 m_LocalFriendsService = loader.GetService<FriendsServiceInterface>(m_LocalFriendsServiceName);
                 m_LocalPresenceService = loader.GetService<PresenceServiceInterface>(m_LocalPresenceServiceName);
                 m_LocalOfflineIMService = loader.GetService<OfflineIMServiceInterface>(m_LocalOfflineIMServiceName);
-                if(!string.IsNullOrEmpty(m_LocalGroupsServiceName))
+                if(m_LocalGroupsServiceName?.Length != 0)
                 {
                     m_LocalGroupsService = loader.GetService<GroupsServiceInterface>(m_LocalGroupsServiceName);
                 }
@@ -251,7 +251,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
                 catch (Exception e)
                 {
                     m_Log.Debug(string.Format("Failed to login {0} {1} to fallback destination {2} ({3})", account.Principal.FirstName, account.Principal.LastName, destinationInfo.Name, destinationInfo.ID), e);
-                    if (string.IsNullOrEmpty(lastMessage))
+                    if (lastMessage?.Length == 0)
                     {
                         lastMessage = e.Message;
                     }

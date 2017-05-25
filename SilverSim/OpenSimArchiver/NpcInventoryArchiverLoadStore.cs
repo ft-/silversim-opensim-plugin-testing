@@ -66,9 +66,10 @@ namespace SilverSim.OpenSimArchiver
             m_NpcAssetService = loader.GetService<AssetServiceInterface>(m_NpcAssetServiceName);
             foreach (string avatarNameService in m_AvatarNameServiceNames.Split(','))
             {
-                if (!string.IsNullOrEmpty(avatarNameService))
+                string name = avatarNameService.Trim();
+                if (name.Length != 0)
                 {
-                    m_AvatarNameServices.Add(loader.GetService<AvatarNameServiceInterface>(avatarNameService));
+                    m_AvatarNameServices.Add(loader.GetService<AvatarNameServiceInterface>(name));
                 }
             }
             loader.CommandRegistry.AddLoadCommand("npc-iar", LoadIarCommand);
@@ -129,7 +130,7 @@ namespace SilverSim.OpenSimArchiver
                 }
             }
 
-            if (string.IsNullOrEmpty(filename))
+            if (filename?.Length == 0)
             {
                 io.Write("missing parameters");
                 return;
@@ -215,7 +216,7 @@ namespace SilverSim.OpenSimArchiver
                 }
             }
 
-            if (string.IsNullOrEmpty(filename))
+            if (filename?.Length == 0)
             {
                 io.Write("No filename or url specified.\n");
                 return;

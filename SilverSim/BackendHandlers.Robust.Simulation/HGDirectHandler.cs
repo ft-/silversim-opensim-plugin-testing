@@ -84,13 +84,13 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
             {
                 region_name = string.Empty;
             }
-            Map resdata = new Map();
-            if (string.IsNullOrEmpty(region_name))
+            var resdata = new Map();
+            if (region_name?.Length == 0)
             {
                 region_name = m_DefaultHGRegion;
             }
 
-            if(!string.IsNullOrEmpty(region_name))
+            if(region_name?.Length != 0)
             {
                 try
                 {

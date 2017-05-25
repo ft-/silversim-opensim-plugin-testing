@@ -975,7 +975,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
                         catch (Exception e)
                         {
                             string msg = e.Message;
-                            if (string.IsNullOrEmpty(msg))
+                            if (msg?.Length == 0)
                             {
                                 msg = "Teleport failed due to communication failure.";
                             }
@@ -992,7 +992,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
                         catch (Exception e)
                         {
                             string msg = e.Message;
-                            if (string.IsNullOrEmpty(msg))
+                            if (msg?.Length == 0)
                             {
                                 msg = "Teleport failed due to communication failure.";
                             }
@@ -1421,7 +1421,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
                 }
             }
             */
-            if (!string.IsNullOrEmpty(callbackUri))
+            if (callbackUri?.Length != 0)
             {
                 req.Add("callback_uri", callbackUri);
             }

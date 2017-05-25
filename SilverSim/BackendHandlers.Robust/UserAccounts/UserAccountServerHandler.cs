@@ -58,7 +58,7 @@ namespace SilverSim.BackendHandlers.Robust.UserAccounts
                 {
                     str.Append(kvp.Key);
                     str.Append("*");
-                    str.Append(string.IsNullOrEmpty(kvp.Value) ? string.Empty : kvp.Value);
+                    str.Append(kvp.Value?.Length == 0 ? string.Empty : kvp.Value);
                     str.Append(";");
                 }
                 writer.WriteNamedValue("ServiceURLs", str.ToString());
