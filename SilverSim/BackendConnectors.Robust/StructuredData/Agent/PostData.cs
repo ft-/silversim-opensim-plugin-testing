@@ -177,7 +177,7 @@ namespace SilverSim.BackendConnectors.Robust.StructuredData.Agent
             }
 
             if (agentparams.Account.ServiceURLs.ContainsKey("GatekeeperURI") &&
-                (agentparams.Account.ServiceURLs["GatekeeperURI"]?.Length == 0 || agentparams.Account.ServiceURLs["GatekeeperURI"] == "/"))
+                (string.IsNullOrEmpty(agentparams.Account.ServiceURLs["GatekeeperURI"]) || agentparams.Account.ServiceURLs["GatekeeperURI"] == "/"))
             {
                 agentparams.Account.ServiceURLs["GatekeeperURI"] = agentparams.Account.ServiceURLs["HomeURI"];
             }

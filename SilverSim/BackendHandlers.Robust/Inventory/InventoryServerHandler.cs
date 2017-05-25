@@ -126,7 +126,7 @@ namespace SilverSim.BackendHandlers.Robust.Inventory
 
         public static void WriteFolderContent(this XmlTextWriter writer, string name, InventoryFolderContent content, bool serializeOwner = false)
         {
-            if(name?.Length != 0)
+            if(!string.IsNullOrEmpty(name))
             {
                 writer.WriteStartElement(name);
                 writer.WriteAttributeString("type", "List");
@@ -163,7 +163,7 @@ namespace SilverSim.BackendHandlers.Robust.Inventory
                 writer.WriteEndElement();
             }
 
-            if(name?.Length != 0)
+            if(!string.IsNullOrEmpty(name))
             {
                 writer.WriteEndElement();
             }

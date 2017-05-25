@@ -67,7 +67,7 @@ namespace SilverSim.BackendHandlers.Robust.Asset
             m_HttpServer.StartsWithUriHandlers.Add("/assets", AssetHandler);
             m_HttpServer.UriHandlers.Add("/get_assets_exist", GetAssetsExistHandler);
             m_PersistentAssetService = loader.GetService<AssetServiceInterface>(m_PersistentAssetServiceName);
-            if (m_TemporaryAssetServiceName?.Length != 0)
+            if (!string.IsNullOrEmpty(m_TemporaryAssetServiceName))
             {
                 m_TemporaryAssetService = loader.GetService<AssetServiceInterface>(m_TemporaryAssetServiceName);
             }

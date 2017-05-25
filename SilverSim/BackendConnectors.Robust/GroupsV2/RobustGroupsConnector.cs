@@ -118,7 +118,7 @@ namespace SilverSim.BackendConnectors.Robust.GroupsV2
 
         public void Startup(ConfigurationLoader loader)
         {
-            if(m_UserAccountServiceName?.Length != 0)
+            if(!string.IsNullOrEmpty(m_UserAccountServiceName))
             {
                 m_UserAccountService = loader.GetService<UserAccountServiceInterface>(m_UserAccountServiceName);
             }

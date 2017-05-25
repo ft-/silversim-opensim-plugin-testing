@@ -175,7 +175,7 @@ namespace SilverSim.OpenSimArchiver
                 }
             }
 
-            if (filename?.Length == 0)
+            if (string.IsNullOrEmpty(filename))
             {
                 io.Write("No filename or url specified.\n");
                 return;

@@ -74,10 +74,9 @@ namespace SilverSim.OpenSimArchiver
             m_UserAccountService = loader.GetService<UserAccountServiceInterface>(m_UserAccountServiceName);
             foreach(string avatarNameService in m_AvatarNameServiceNames.Split(','))
             {
-                string service = avatarNameService.Trim();
-                if (service.Length != 0)
+                if (!string.IsNullOrEmpty(avatarNameService))
                 {
-                    m_AvatarNameServices.Add(loader.GetService<AvatarNameServiceInterface>(service));
+                    m_AvatarNameServices.Add(loader.GetService<AvatarNameServiceInterface>(avatarNameService));
                 }
             }
         }
@@ -132,7 +131,7 @@ namespace SilverSim.OpenSimArchiver
                 }
             }
 
-            if(filename?.Length == 0)
+            if(string.IsNullOrEmpty(filename))
             {
                 io.Write("missing parameters");
                 return;
@@ -215,7 +214,7 @@ namespace SilverSim.OpenSimArchiver
                 }
             }
 
-            if (filename?.Length == 0)
+            if (string.IsNullOrEmpty(filename))
             {
                 io.Write("No filename or url specified.\n");
                 return;

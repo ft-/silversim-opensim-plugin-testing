@@ -134,7 +134,7 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
         public void OpenSimProtocolCompatibilityUpdated(UUID regionId, string value)
         {
             bool boolval;
-            if(value?.Length == 0)
+            if(string.IsNullOrEmpty(value))
             {
                 m_OpenSimProtocolCompatibilityParams.Remove(regionId);
             }
@@ -255,7 +255,7 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
                     map.OfflineIMServerURI = section.GetString("OfflineIMServerURI", string.Empty);
                     map.FriendsServerURI = section.GetString("FriendsServerURI", string.Empty);
                     map.HomeURI = section.GetString("HomeURI");
-                    if (map.HomeURI?.Length == 0)
+                    if (string.IsNullOrEmpty(map.HomeURI))
                     {
                         map.HomeURI = m_HttpServer.ServerURI;
                         if (!map.HomeURI.EndsWith("/"))
@@ -537,30 +537,30 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
             {
                 assetServerURI = gridparams.AssetServerURI;
                 inventoryServerURI = gridparams.InventoryServerURI;
-                if (gridparams.GatekeeperURI?.Length != 0)
+                if (!string.IsNullOrEmpty(gridparams.GatekeeperURI))
                 {
                     gatekeeperURI = gridparams.GatekeeperURI;
                 }
-                if (gridparams.GridUserServerURI?.Length != 0)
+                if (!string.IsNullOrEmpty(gridparams.GridUserServerURI))
                 {
                     gridUserService = new RobustGridUserConnector(gridparams.GridUserServerURI);
                 }
-                if (gridparams.PresenceServerURI?.Length != 0)
+                if (!string.IsNullOrEmpty(gridparams.PresenceServerURI))
                 {
                     presenceService = new RobustPresenceConnector(gridparams.PresenceServerURI, agentPost.Account.Principal.HomeURI.ToString());
                 }
-                if (gridparams.OfflineIMServerURI?.Length != 0)
+                if (!string.IsNullOrEmpty(gridparams.OfflineIMServerURI))
                 {
                     offlineIMService = new RobustOfflineIMConnector(gridparams.OfflineIMServerURI);
                 }
-                if(gridparams.FriendsServerURI?.Length != 0)
+                if(!string.IsNullOrEmpty(gridparams.FriendsServerURI))
                 {
                     friendsService = new RobustFriendsConnector(gridparams.FriendsServerURI, gridparams.HomeURI);
                 }
             }
             else
             {
-                presenceService = m_DefaultPresenceServerURI?.Length == 0 ?
+                presenceService = string.IsNullOrEmpty(m_DefaultPresenceServerURI) ?
                     (PresenceServiceInterface)new RobustHGOnlyPresenceConnector(agentPost.Account.Principal.HomeURI.ToString()) :
                     new RobustHGPresenceConnector(m_DefaultPresenceServerURI, agentPost.Account.Principal.HomeURI.ToString());
             }
@@ -571,7 +571,7 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
                 profileServiceURI = string.Empty;
             }
 
-            if (profileServiceURI?.Length != 0)
+            if (!string.IsNullOrEmpty(profileServiceURI))
             {
                 string profileType = HeloRequester(profileServiceURI);
                 if (m_ProfileServicePlugins.ContainsKey(profileType))
@@ -580,7 +580,7 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
                 }
             }
 
-            if (agentPost.Session.ServiceSessionID?.Length != 0 || !GetOpenSimProtocolCompatibility(agentPost.Destination.ID))
+            if (!string.IsNullOrEmpty(agentPost.Session.ServiceSessionID) || !GetOpenSimProtocolCompatibility(agentPost.Destination.ID))
             {
                 try
                 {
@@ -685,11 +685,11 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
             string inventoryType = HeloRequester(inventoryServerURI);
             string assetType = HeloRequester(assetServerURI);
 
-            assetService = (assetType?.Length == 0 || assetType == "opensim-robust") ?
+            assetService = (string.IsNullOrEmpty(assetType) || assetType == "opensim-robust") ?
                 new RobustAssetConnector(assetServerURI) :
                 m_AssetServicePlugins[assetType].Instantiate(assetServerURI);
 
-            inventoryService = (inventoryType?.Length == 0 || inventoryType == "opensim-robust") ?
+            inventoryService = (string.IsNullOrEmpty(inventoryType) || inventoryType == "opensim-robust") ?
                 new RobustInventoryConnector(inventoryServerURI, groupsService) :
                 m_InventoryServicePlugins[assetType].Instantiate(inventoryServerURI);
 
@@ -1586,7 +1586,7 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
             {
                 ID = agentID
             };
-            if (agent_home_uri?.Length != 0)
+            if (!string.IsNullOrEmpty(agent_home_uri))
             {
                 agentUUI.HomeURI = new Uri(agent_home_uri);
             }

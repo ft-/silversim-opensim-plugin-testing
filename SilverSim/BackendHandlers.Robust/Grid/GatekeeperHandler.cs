@@ -145,7 +145,7 @@ namespace SilverSim.BackendHandlers.Robust.Grid
                     if (ri != null)
                     {
                         resdata["result"] = new AString("true");
-                        if(message?.Length != 0)
+                        if(!string.IsNullOrEmpty(message))
                         {
                             resdata.Add("message", message);
                         }
@@ -185,7 +185,7 @@ namespace SilverSim.BackendHandlers.Robust.Grid
             if(parametername.StartsWith("HGRegionRedirect_") && UUID.Zero != regionID)
             {
                 UUID redirectid;
-                if(value?.Length == 0)
+                if(string.IsNullOrEmpty(value))
                 {
                     m_RegionRedirects.Remove(regionID);
                 }
@@ -196,7 +196,7 @@ namespace SilverSim.BackendHandlers.Robust.Grid
             }
             if (parametername.StartsWith("HGRegionRedirectMessage_") && UUID.Zero != regionID)
             {
-                if (value?.Length == 0)
+                if (string.IsNullOrEmpty(value))
                 {
                     m_RegionRedirectMessages.Remove(regionID);
                 }

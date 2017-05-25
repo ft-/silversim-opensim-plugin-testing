@@ -221,7 +221,7 @@ namespace SilverSim.BackendConnectors.Simian.Asset
             metadata.Creator.FullName = m["CreatorID"].ToString();
 
             string lastModifiedStr = m["Last-Modified"].ToString();
-            if (lastModifiedStr?.Length != 0)
+            if (!string.IsNullOrEmpty(lastModifiedStr))
             {
                 DateTime lastModified;
                 if (DateTime.TryParse(lastModifiedStr, out lastModified))
