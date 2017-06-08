@@ -90,6 +90,8 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
         protected SceneList Scenes { get; private set; }
         protected CommandRegistry Commands { get; private set; }
 
+        protected List<AuthorizationServiceInterface> AuthorizationServices => m_AuthorizationServices;
+
         private sealed class GridParameterMap : ICloneable
         {
             public string HomeURI;
