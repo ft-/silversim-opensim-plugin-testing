@@ -177,7 +177,7 @@ namespace SilverSim.BackendHandlers.Robust.Presence
 
             try
             {
-                m_PresenceService[pInfo.SessionID, pInfo.UserID.ID, PresenceServiceInterface.SetType.Login] = pInfo;
+                m_PresenceService.Login(pInfo);
             }
             catch
             {
@@ -199,7 +199,7 @@ namespace SilverSim.BackendHandlers.Robust.Presence
 
             try
             {
-                m_PresenceService[sessionID, UUID.Zero] = null;
+                m_PresenceService.Logout(sessionID, UUID.Zero);
                 m_TravelingDataService.Remove(sessionID);
             }
             catch
@@ -257,7 +257,7 @@ namespace SilverSim.BackendHandlers.Robust.Presence
             {
                 PresenceInfo pInfo = m_PresenceService[sessionID, UUID.Zero];
                 pInfo.RegionID = regionID;
-                m_PresenceService[sessionID, pInfo.UserID.ID, PresenceServiceInterface.SetType.Report] = pInfo;
+                m_PresenceService.Report(pInfo);
             }
             catch
             {

@@ -55,16 +55,21 @@ namespace SilverSim.BackendConnectors.Robust.Presence
             throw new NotSupportedException("GetPresencesInRegion");
         }
 
+        public override PresenceInfo this[UUID sessionID, UUID userID]
+        {
+            get { throw new NotSupportedException(); }
+        }
+
         public override void Remove(UUID scopeID, UUID accountID)
         {
             throw new NotSupportedException("Remove");
         }
 
-        private void HGLogout(UUID sessionID, UUID userId)
+        public override void Logout(UUID sessionID, UUID userID)
         {
             var p = new Map
             {
-                ["userID"] = userId,
+                ["userID"] = userID,
                 ["sessionID"] = sessionID
             };
             var req = new XmlRpc.XmlRpcRequest("logout_agent");
@@ -91,40 +96,14 @@ namespace SilverSim.BackendConnectors.Robust.Presence
 
         public override List<PresenceInfo> this[UUID userID] => new List<PresenceInfo>();
 
-        public override PresenceInfo this[UUID sessionID, UUID userID]
+        public override void Report(PresenceInfo pInfo)
         {
-            get { throw new NotSupportedException(); }
-
-            set
-            {
-                if (value == null)
-                {
-                    HGLogout(sessionID, userID);
-                }
-                else
-                {
-                    throw new ArgumentException("setting value != null is not allowed without reportType");
-                }
-            }
+            /* no action needed */
         }
 
-        public override PresenceInfo this[UUID sessionID, UUID userID, SetType reportType]
+        public override void Login(PresenceInfo pInfo)
         {
-            set
-            {
-                if (value == null)
-                {
-                    HGLogout(sessionID, userID);
-                }
-                else if(reportType == SetType.Login || reportType == SetType.Report)
-                {
-                    /* no action needed */
-                }
-                else
-                {
-                    throw new ArgumentException("Invalid reportType specified");
-                }
-            }
+            /* no action needed */
         }
 
         public override void LogoutRegion(UUID regionID)

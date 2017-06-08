@@ -62,8 +62,17 @@ namespace SilverSim.BackendConnectors.Robust.Presence
             throw new NotSupportedException("Remove");
         }
 
-        private void HGLogout(UUID sessionID, UUID userId)
+        public override void Logout(UUID sessionID, UUID userId)
         {
+            try
+            {
+                m_LocalConnector.Logout(sessionID, userId);
+            }
+            catch
+            {
+                /* no action needed */
+            }
+
             var p = new Map
             {
                 ["userID"] = userId,
@@ -96,57 +105,16 @@ namespace SilverSim.BackendConnectors.Robust.Presence
         public override PresenceInfo this[UUID sessionID, UUID userID]
         {
             get { return m_LocalConnector[sessionID, userID]; }
-
-            set
-            {
-                if (value == null)
-                {
-                    try
-                    {
-                        m_LocalConnector[sessionID, userID] = null;
-                    }
-                    catch
-                    {
-                        /* no action needed */
-                    }
-                    HGLogout(sessionID, userID);
-                }
-                else
-                {
-                    throw new ArgumentException("setting value != null is not allowed without reportType");
-                }
-            }
         }
 
-        public override PresenceInfo this[UUID sessionID, UUID userID, SetType reportType]
+        public override void Login(PresenceInfo pInfo)
         {
-            set
-            {
-                if (value == null)
-                {
-                    try
-                    {
-                        m_LocalConnector[sessionID, userID, reportType] = null;
-                    }
-                    catch
-                    {
-                        /* no action needed */
-                    }
-                    HGLogout(sessionID, userID);
-                }
-                else if(reportType == SetType.Login)
-                {
-                    /* no action needed */
-                }
-                else if(reportType == SetType.Report)
-                {
-                    m_LocalConnector[sessionID, userID, reportType] = value;
-                }
-                else
-                {
-                    throw new ArgumentException("Invalid reportType specified");
-                }
-            }
+            /* no action needed */
+        }
+
+        public override void Report(PresenceInfo pInfo)
+        {
+            m_LocalConnector.Report(pInfo);
         }
 
         public override void LogoutRegion(UUID regionID)
