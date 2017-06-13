@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<package>
+	<name>SilverSim.BackendHandlers.Robust.Grid</name>
+	<dependencies>
+		<dependency name="SilverSim.Meta.Core"/>
+		<dependency name="SilverSim.BackendConnectors.Robust"/>
+		<dependency name="SilverSim.BackendConnectors.Simian"/>
+	</dependencies>
+	<files>
+		<file name="bin/plugins/SilverSim.BackendHandlers.Robust.Grid.dll"/>
+	</files>
+</package>

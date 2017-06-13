@@ -109,6 +109,30 @@ namespace SilverSim.BackendConnectors.Robust.Presence
             }
         }
 
+        public override void Logout(UUID sessionID, UUID userID)
+        {
+            var post = new Dictionary<string, string>
+            {
+                ["VERSIONMIN"] = "0",
+                ["VERSIONMAX"] = "0",
+                ["SessionID"] = (string)sessionID,
+                ["METHOD"] = "logout"
+            };
+            Map map;
+            using (Stream s = HttpClient.DoStreamPostRequest(m_PresenceUri, null, post, false, TimeoutMs))
+            {
+                map = OpenSimResponse.Deserialize(s);
+            }
+            if (!map.ContainsKey("result"))
+            {
+                throw new PresenceUpdateFailedException();
+            }
+            if (map["result"].ToString() != "Success")
+            {
+                throw new PresenceUpdateFailedException();
+            }
+        }
+
         public override PresenceInfo this[UUID sessionID, UUID userID]
         {
             get
@@ -137,118 +161,56 @@ namespace SilverSim.BackendConnectors.Robust.Presence
                     SessionID = sessionID
                 };
             }
-            set
+        }
+
+        public override void Login(PresenceInfo pInfo)
+        {
+            var post = new Dictionary<string, string>
             {
-                if(value == null)
-                {
-                    var post = new Dictionary<string, string>
-                    {
-                        ["VERSIONMIN"] = "0",
-                        ["VERSIONMAX"] = "0",
-                        ["SessionID"] = (string)sessionID,
-                        ["METHOD"] = "logout"
-                    };
-                    Map map;
-                    using(Stream s = HttpClient.DoStreamPostRequest(m_PresenceUri, null, post, false, TimeoutMs))
-                    {
-                        map = OpenSimResponse.Deserialize(s);
-                    }
-                    if (!map.ContainsKey("result"))
-                    {
-                        throw new PresenceUpdateFailedException();
-                    }
-                    if (map["result"].ToString() != "Success")
-                    {
-                        throw new PresenceUpdateFailedException();
-                    }
-                }
-                else
-                {
-                    throw new ArgumentException("setting value != null is not allowed without reportType");
-                }
+                ["VERSIONMIN"] = "0",
+                ["VERSIONMAX"] = "0",
+                ["UserID"] = (string)pInfo.UserID,
+                ["SessionID"] = (string)pInfo.SessionID,
+                ["SecureSessionID"] = (string)pInfo.SecureSessionID,
+                ["METHOD"] = "login"
+            };
+            Map map;
+            using (Stream s = HttpClient.DoStreamPostRequest(m_PresenceUri, null, post, false, TimeoutMs))
+            {
+                map = OpenSimResponse.Deserialize(s);
+            }
+            if (!map.ContainsKey("result"))
+            {
+                throw new PresenceUpdateFailedException();
+            }
+            if (map["result"].ToString() != "Success")
+            {
+                throw new PresenceUpdateFailedException();
             }
         }
 
-        public override PresenceInfo this[UUID sessionID, UUID userID, SetType reportType]
+        public override void Report(PresenceInfo pInfo)
         {
-            set
+            var post = new Dictionary<string, string>
             {
-                if (value == null)
-                {
-                    var post = new Dictionary<string, string>
-                    {
-                        ["VERSIONMIN"] = "0",
-                        ["VERSIONMAX"] = "0",
-                        ["SessionID"] = (string)sessionID,
-                        ["METHOD"] = "logout"
-                    };
-                    Map map;
-                    using(Stream s = HttpClient.DoStreamPostRequest(m_PresenceUri, null, post, false, TimeoutMs))
-                    {
-                        map = OpenSimResponse.Deserialize(s);
-                    }
-                    if (!map.ContainsKey("result"))
-                    {
-                        throw new PresenceUpdateFailedException();
-                    }
-                    if (map["result"].ToString() != "Success")
-                    {
-                        throw new PresenceUpdateFailedException();
-                    }
-                }
-                else if(reportType == SetType.Login)
-                {
-                    var post = new Dictionary<string, string>
-                    {
-                        ["VERSIONMIN"] = "0",
-                        ["VERSIONMAX"] = "0",
-                        ["UserID"] = (string)value.UserID,
-                        ["SessionID"] = (string)value.SessionID,
-                        ["SecureSessionID"] = (string)value.SecureSessionID,
-                        ["METHOD"] = "login"
-                    };
-                    Map map;
-                    using(Stream s = HttpClient.DoStreamPostRequest(m_PresenceUri, null, post, false, TimeoutMs))
-                    {
-                        map = OpenSimResponse.Deserialize(s);
-                    }
-                    if (!map.ContainsKey("result"))
-                    {
-                        throw new PresenceUpdateFailedException();
-                    }
-                    if (map["result"].ToString() != "Success")
-                    {
-                        throw new PresenceUpdateFailedException();
-                    }
-                }
-                else if(reportType == SetType.Report)
-                {
-                    var post = new Dictionary<string, string>
-                    {
-                        ["VERSIONMIN"] = "0",
-                        ["VERSIONMAX"] = "0",
-                        ["METHOD"] = "report",
-                        ["SessionID"] = (string)value.SessionID,
-                        ["RegionID"] = (string)value.RegionID
-                    };
-                    Map map;
-                    using(Stream s = HttpClient.DoStreamPostRequest(m_PresenceUri, null, post, false, TimeoutMs))
-                    {
-                        map = OpenSimResponse.Deserialize(s);
-                    }
-                    if (!map.ContainsKey("result"))
-                    {
-                        throw new PresenceUpdateFailedException();
-                    }
-                    if (map["result"].ToString() != "Success")
-                    {
-                        throw new PresenceUpdateFailedException();
-                    }
-                }
-                else
-                {
-                    throw new ArgumentException("Invalid reportType specified");
-                }
+                ["VERSIONMIN"] = "0",
+                ["VERSIONMAX"] = "0",
+                ["METHOD"] = "report",
+                ["SessionID"] = (string)pInfo.SessionID,
+                ["RegionID"] = (string)pInfo.RegionID
+            };
+            Map map;
+            using (Stream s = HttpClient.DoStreamPostRequest(m_PresenceUri, null, post, false, TimeoutMs))
+            {
+                map = OpenSimResponse.Deserialize(s);
+            }
+            if (!map.ContainsKey("result"))
+            {
+                throw new PresenceUpdateFailedException();
+            }
+            if (map["result"].ToString() != "Success")
+            {
+                throw new PresenceUpdateFailedException();
             }
         }
 

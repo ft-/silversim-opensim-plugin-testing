@@ -90,6 +90,8 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
         protected SceneList Scenes { get; private set; }
         protected CommandRegistry Commands { get; private set; }
 
+        protected List<AuthorizationServiceInterface> AuthorizationServices => m_AuthorizationServices;
+
         private sealed class GridParameterMap : ICloneable
         {
             public string HomeURI;
@@ -809,13 +811,13 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
 
             try
             {
-                presenceService[agent.SessionID, agent.ID, PresenceServiceInterface.SetType.Report] = new PresenceInfo()
+                presenceService.Report(new PresenceInfo()
                 {
                     UserID = agent.Owner,
                     SessionID = agent.SessionID,
                     SecureSessionID = agentPost.Session.SecureSessionID,
                     RegionID = scene.ID
-                };
+                });
             }
             catch (Exception e)
             {

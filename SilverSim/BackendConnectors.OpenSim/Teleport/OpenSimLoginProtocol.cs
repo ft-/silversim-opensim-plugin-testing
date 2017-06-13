@@ -488,13 +488,13 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
 
             try
             {
-                m_LocalPresenceService[agent.SessionID, agent.ID, PresenceServiceInterface.SetType.Report] = new PresenceInfo()
+                m_LocalPresenceService.Report(new PresenceInfo()
                 {
                     UserID = agent.Owner,
                     SessionID = agent.SessionID,
                     SecureSessionID = sessionInfo.SecureSessionID,
                     RegionID = scene.ID
-                };
+                });
             }
             catch (Exception e)
             {
