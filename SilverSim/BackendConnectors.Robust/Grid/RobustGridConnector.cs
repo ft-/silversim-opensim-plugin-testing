@@ -36,7 +36,7 @@ namespace SilverSim.BackendConnectors.Robust.Grid
 {
     [Description("Robust Grid Connector")]
     [PluginName("Grid")]
-    public class RobustGridConnector : GridServiceInterface, IPlugin
+    public partial class RobustGridConnector : GridServiceInterface, IPlugin
     {
         private static readonly ILog m_Log = LogManager.GetLogger("ROBUST GRID CONNECTOR");
         private readonly string m_GridURI;
