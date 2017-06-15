@@ -21,190 +21,277 @@
 
 using Nini.Config;
 using SilverSim.Main.Common;
+using SilverSim.Main.Common.HttpServer;
 using SilverSim.ServiceInterfaces.Grid;
+using SilverSim.ServiceInterfaces.ServerParam;
+using SilverSim.Threading;
+using SilverSim.Types;
+using SilverSim.Types.Grid;
+using SilverSim.Types.StructuredData.XmlRpc;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using SilverSim.Types.StructuredData.XmlRpc;
-using SilverSim.Main.Common.HttpServer;
-using SilverSim.Types;
-using SilverSim.Types.Grid;
-using SilverSim.Threading;
-using SilverSim.ServiceInterfaces.ServerParam;
 
 namespace SilverSim.BackendHandlers.Robust.Grid
 {
     [Description("Hypergrid Gatekeeper Server")]
-    [ServerParam("AllowTeleportsToAnyRegion", Description = "Controls whether teleports anywhere is allowed", ParameterType = typeof(bool), Type = ServerParamType.GlobalOnly, DefaultValue = true)]
-    [ServerParamStartsWith("HGRegionRedirect_")]
     [PluginName("GatekeeperHandler")]
-    public class GatekeeperHandler : IPlugin, IServerParamListener, IServerParamAnyListener
+    [ServerParam("Gatekeeper.AllowDirectTeleportViaHg", DefaultValue = true, ParameterType = typeof(bool))]
+    [ServerParam("Gatekeeper.DenyMessageWhenHgTeleport", DefaultValue = "Teleporting to the default region.", ParameterType = typeof(string))]
+    [ServerParam("Gatekeeper.RedirectMessageWhenHgTeleport", ParameterType = typeof(string))]
+    [ServerParam("Gatekeeper.RedirectToOtherRegion", ParameterType = typeof(UUID))]
+    public class GatekeeperHandler : IPlugin, IServerParamListener
     {
+        private HttpXmlRpcHandler m_XmlRpcServer;
+
         private readonly string m_GridServiceName;
         private GridServiceInterface m_GridService;
-        private bool m_AllowTeleportsToAnyRegion = true;
-        private readonly RwLockedDictionary<UUID, UUID> m_RegionRedirects = new RwLockedDictionary<UUID, UUID>();
-        private readonly RwLockedDictionary<UUID, string> m_RegionRedirectMessages = new RwLockedDictionary<UUID, string>();
+        private readonly UUID m_ScopeID;
+        private RwLockedDictionary<UUID, bool> m_AllowDirectTeleportViaHgMap = new RwLockedDictionary<UUID, bool>();
+        private RwLockedDictionary<UUID, string> m_DenyMessages = new RwLockedDictionary<UUID, string>();
+        private RwLockedDictionary<UUID, string> m_RedirectMessages = new RwLockedDictionary<UUID, string>();
+        private RwLockedDictionary<UUID, UUID> m_RedirectToOtherRegion = new RwLockedDictionary<UUID, UUID>();
 
-        public GatekeeperHandler(IConfig ownSection)
+        [ServerParam("Gatekeeper.RedirectToOtherRegion")]
+        public void RedirectToOtherRegionUpdated(UUID regionID, string value)
         {
-            m_GridServiceName = ownSection.GetString("GridService", "GridService");
+            UUID id;
+            if (string.IsNullOrEmpty(value) || !UUID.TryParse(value, out id))
+            {
+                m_RedirectToOtherRegion.Remove(regionID);
+            }
+            else
+            {
+                m_RedirectToOtherRegion[regionID] = id;
+            }
+        }
+
+        private bool IsRedirectedToOtherRegion(UUID regionID, out UUID redirectID)
+        {
+            return (m_RedirectToOtherRegion.TryGetValue(regionID, out redirectID) || m_RedirectToOtherRegion.TryGetValue(UUID.Zero, out redirectID)) && redirectID != UUID.Zero;
+        }
+
+        [ServerParam("Gatekeeper.DenyMessageWhenHgTeleport")]
+        public void DenyMessageWhenHgTeleportUpdated(UUID regionID, string value)
+        {
+            if (string.IsNullOrEmpty(value))
+            {
+                m_DenyMessages.Remove(regionID);
+            }
+            else
+            {
+                m_DenyMessages[regionID] = value;
+            }
+        }
+
+        private string GetDenyMessage(UUID regionId)
+        {
+            string denymsg;
+            if (m_DenyMessages.TryGetValue(regionId, out denymsg))
+            {
+                return denymsg;
+            }
+            else if (m_DenyMessages.TryGetValue(UUID.Zero, out denymsg))
+            {
+                return denymsg;
+            }
+            else
+            {
+                return "Teleporting to the default region.";
+            }
+        }
+
+        [ServerParam("Gatekeeper.RedirectMessageWhenHgTeleport")]
+        public void RedirectMessageWhenHgTeleportUpdated(UUID regionID, string value)
+        {
+            if (string.IsNullOrEmpty(value))
+            {
+                m_RedirectMessages.Remove(regionID);
+            }
+            else
+            {
+                m_RedirectMessages[regionID] = value;
+            }
+        }
+
+        private string GetRedirectMessage(UUID regionId)
+        {
+            string redirectmsg;
+            if (m_RedirectMessages.TryGetValue(regionId, out redirectmsg))
+            {
+                return redirectmsg;
+            }
+            else if (m_RedirectMessages.TryGetValue(UUID.Zero, out redirectmsg))
+            {
+                return redirectmsg;
+            }
+            else
+            {
+                return string.Empty;
+            }
+        }
+
+        [ServerParam("Gatekeeper.AllowDirectTeleportViaHg")]
+        public void AllowDirectTeleportViaHgUpdated(UUID regionID, string value)
+        {
+            bool boolval;
+            if (string.IsNullOrEmpty(value))
+            {
+                m_AllowDirectTeleportViaHgMap.Remove(regionID);
+            }
+            else
+            {
+                m_AllowDirectTeleportViaHgMap[regionID] = bool.TryParse(value, out boolval) && boolval;
+            }
+        }
+
+        private bool IsDirectTeleportViaHgAllowed(UUID regionID)
+        {
+            bool bval;
+            return (m_AllowDirectTeleportViaHgMap.TryGetValue(regionID, out bval) ||
+                m_AllowDirectTeleportViaHgMap.TryGetValue(UUID.Zero, out bval)) && bval;
+        }
+
+        public GatekeeperHandler(IConfig ownConfig)
+        {
+            m_GridServiceName = ownConfig.GetString("GridService", "GridService");
+            m_ScopeID = ownConfig.GetString("ScopeID", UUID.Zero.ToString());
+        }
+
+        public void Shutdown()
+        {
+            m_XmlRpcServer.XmlRpcMethods.Remove("link_region");
+            m_XmlRpcServer.XmlRpcMethods.Remove("get_region");
+            m_XmlRpcServer = null;
         }
 
         public void Startup(ConfigurationLoader loader)
         {
             m_GridService = loader.GetService<GridServiceInterface>(m_GridServiceName);
-            HttpXmlRpcHandler xmlRpcServer = loader.XmlRpcServer;
-            xmlRpcServer.XmlRpcMethods.Add("link_region", LinkRegion);
-            xmlRpcServer.XmlRpcMethods.Add("get_region", GetRegion);
+            m_XmlRpcServer = loader.XmlRpcServer;
+            m_XmlRpcServer.XmlRpcMethods.Add("link_region", LinkRegion);
+            m_XmlRpcServer.XmlRpcMethods.Add("get_region", GetRegion);
         }
 
         private XmlRpc.XmlRpcResponse LinkRegion(XmlRpc.XmlRpcRequest req)
         {
-            Map reqdata;
-            IValue iv;
-            var resdata = new Map
+            string region_name = string.Empty;
+            try
             {
-                { "result", "False" }
+                region_name = (((Map)req.Params[0])["region_name"]).ToString();
+            }
+            catch
+            {
+                region_name = string.Empty;
+            }
+
+            Map resdata = new Map();
+            bool success = false;
+            if (string.IsNullOrEmpty(region_name))
+            {
+                List<RegionInfo> regions = m_GridService.GetDefaultHypergridRegions(m_ScopeID);
+                foreach (RegionInfo rInfo in regions)
+                {
+                    if ((rInfo.Flags & RegionFlags.RegionOnline) == 0)
+                    {
+                        continue;
+                    }
+
+                    resdata.Add("uuid", rInfo.ID);
+                    resdata.Add("handle", rInfo.Location.RegionHandle.ToString());
+                    resdata.Add("region_image", string.Empty);
+                    resdata.Add("external_name", rInfo.ServerURI + " " + rInfo.Name);
+                    success = true;
+                    break;
+                }
+            }
+            else
+            {
+                RegionInfo rInfo;
+                if (m_GridService.TryGetValue(m_ScopeID, region_name, out rInfo))
+                {
+                    resdata.Add("uuid", rInfo.ID);
+                    resdata.Add("handle", rInfo.Location.RegionHandle.ToString());
+                    resdata.Add("region_image", string.Empty);
+                    resdata.Add("external_name", rInfo.ServerURI + " " + rInfo.Name);
+                    success = true;
+                }
+            }
+
+            resdata.Add("result", success);
+
+            return new XmlRpc.XmlRpcResponse()
+            {
+                ReturnValue = resdata
             };
-            RegionInfo ri;
-            if(!(req.Params.Count == 1 && req.Params.TryGetValue(0, out reqdata) &&
-                reqdata.TryGetValue("region_name", out iv) &&
-                m_GridService.TryGetValue(UUID.Zero, iv.ToString(), out ri)))
-            {
-                List<RegionInfo> ris = m_GridService.GetDefaultHypergridRegions(UUID.Zero);
-                if(ris.Count != 0)
-                {
-                    ri = ris[0];
-                }
-                else
-                {
-                    ri = null;
-                }
-            }
-
-            if (ri != null)
-            {
-                resdata["result"] = new AString("True");
-                resdata.Add("uuid", ri.ID);
-                resdata.Add("handle", ri.Location.RegionHandle.ToString());
-                resdata.Add("size_x", ri.Size.X.ToString());
-                resdata.Add("size_y", ri.Size.Y.ToString());
-                //resdata.Add("region_image", );
-                resdata.Add("external_name", ri.ServerURI);
-            }
-
-            return new XmlRpc.XmlRpcResponse { ReturnValue = resdata };
         }
 
         private XmlRpc.XmlRpcResponse GetRegion(XmlRpc.XmlRpcRequest req)
         {
-            Map reqdata;
-            IValue iv;
-            UUID regionid;
-            RegionInfo ri;
-            var resdata = new Map
+            UUID region_uuid = (((Map)req.Params[0])["region_uuid"]).AsUUID;
+            var resdata = new Map();
+            try
             {
-                { "result", "false" }
-            };
-            if (req.Params.Count == 1 && req.Params.TryGetValue(0, out reqdata) &&
-                reqdata.TryGetValue("region_uuid", out iv) &&
-                UUID.TryParse(iv.ToString(), out regionid)
-                )
-            {
-                UUID redirectid;
-                string message = string.Empty;
-                if(m_RegionRedirects.TryGetValue(regionid, out redirectid) &&
-                    m_GridService.ContainsKey(redirectid))
+                RegionInfo rInfo;
+                if (m_GridService.TryGetValue(region_uuid, out rInfo) && (rInfo.Flags & RegionFlags.RegionOnline) != 0)
                 {
-                    regionid = redirectid;
-                    if(!m_RegionRedirectMessages.TryGetValue(regionid, out message))
+                    UUID redirect_id;
+                    if (!IsDirectTeleportViaHgAllowed(region_uuid))
                     {
-                        message = string.Empty;
-                    }
-                }
-                if (m_GridService.TryGetValue(UUID.Zero, regionid, out ri))
-                {
-                    if (!m_AllowTeleportsToAnyRegion && (ri.Flags & RegionFlags.DefaultHGRegion) == 0)
-                    {
-                        List<RegionInfo> ris = m_GridService.GetDefaultHypergridRegions(UUID.Zero);
-                        if (ris.Count != 0)
+                        resdata.Add("message", GetDenyMessage(region_uuid));
+                        rInfo = null;
+                        foreach (RegionInfo defInfo in m_GridService.GetDefaultHypergridRegions(m_ScopeID))
                         {
-                            ri = ris[0];
-                            resdata.Add("message", "Teleporting you to the default region");
-                        }
-                        else
-                        {
-                            ri = null;
+                            if ((defInfo.Flags & RegionFlags.RegionOnline) != 0)
+                            {
+                                continue;
+                            }
+                            rInfo = defInfo;
+                            break;
                         }
                     }
-
-                    if (ri != null)
+                    else if (IsRedirectedToOtherRegion(region_uuid, out redirect_id))
                     {
-                        resdata["result"] = new AString("true");
-                        if(!string.IsNullOrEmpty(message))
+                        string redirectmsg = GetRedirectMessage(region_uuid);
+                        if (!string.IsNullOrEmpty(redirectmsg))
                         {
-                            resdata.Add("message", message);
+                            resdata.Add("message", redirectmsg);
                         }
-                        resdata.Add("uuid", ri.ID.ToString());
-                        resdata.Add("x", ri.Location.X.ToString());
-                        resdata.Add("y", ri.Location.Y.ToString());
-                        resdata.Add("size_x", ri.Size.X.ToString());
-                        resdata.Add("size_y", ri.Size.Y.ToString());
-                        resdata.Add("region_name", ri.Name);
-                        resdata.Add("hostname", ri.ServerIP);
-                        resdata.Add("http_port", ri.ServerHttpPort.ToString());
-                        resdata.Add("internal_port", ri.ServerPort.ToString());
-                        resdata.Add("server_uri", ri.ServerURI);
+                        if (!m_GridService.TryGetValue(redirect_id, out rInfo))
+                        {
+                            rInfo = null;
+                        }
                     }
                 }
-            }
 
-            return new XmlRpc.XmlRpcResponse { ReturnValue = resdata };
-        }
-
-        [ServerParam("AllowTeleportsToAnyRegion")]
-        public void AllowTeleportsToAnyRegionUpdated(UUID regionID, string value)
-        {
-            if(regionID != UUID.Zero)
-            {
-                return;
-            }
-
-            bool b;
-            m_AllowTeleportsToAnyRegion = (value.Length == 0) || (bool.TryParse(value, out b) && b);
-        }
-
-        public IReadOnlyDictionary<string, ServerParamAttribute> ServerParams => new Dictionary<string, ServerParamAttribute>();
-
-        public void TriggerParameterUpdated(UUID regionID, string parametername, string value)
-        {
-            if(parametername.StartsWith("HGRegionRedirect_") && UUID.Zero != regionID)
-            {
-                UUID redirectid;
-                if(string.IsNullOrEmpty(value))
+                if (rInfo != null)
                 {
-                    m_RegionRedirects.Remove(regionID);
-                }
-                else if(UUID.TryParse(value, out redirectid))
-                {
-                    m_RegionRedirects[regionID] = redirectid;
-                }
-            }
-            if (parametername.StartsWith("HGRegionRedirectMessage_") && UUID.Zero != regionID)
-            {
-                if (string.IsNullOrEmpty(value))
-                {
-                    m_RegionRedirectMessages.Remove(regionID);
+                    resdata.Add("uuid", rInfo.ID);
+                    resdata.Add("handle", rInfo.Location.RegionHandle.ToString());
+                    resdata.Add("x", rInfo.Location.X);
+                    resdata.Add("y", rInfo.Location.Y);
+                    resdata.Add("region_name", rInfo.Name);
+                    Uri serverURI = new Uri(rInfo.ServerURI);
+                    resdata.Add("hostname", serverURI.Host);
+                    resdata.Add("http_port", rInfo.ServerHttpPort);
+                    resdata.Add("internal_port", rInfo.ServerPort);
+                    resdata.Add("server_uri", rInfo.ServerURI);
+                    resdata.Add("result", true);
                 }
                 else
                 {
-                    m_RegionRedirectMessages[regionID] = value;
+                    resdata["message"] = new AString("No destination region found.");
+                    resdata.Add("result", false);
                 }
             }
+            catch
+            {
+                resdata.Add("result", false);
+            }
+            return new XmlRpc.XmlRpcResponse()
+            {
+                ReturnValue = resdata
+            };
         }
     }
 }

@@ -24,12 +24,14 @@ using SilverSim.Main.Common;
 using SilverSim.Main.Common.HttpServer;
 using SilverSim.ServiceInterfaces.Account;
 using SilverSim.ServiceInterfaces.AuthInfo;
+using SilverSim.ServiceInterfaces.Friends;
 using SilverSim.ServiceInterfaces.Grid;
 using SilverSim.ServiceInterfaces.GridUser;
 using SilverSim.ServiceInterfaces.Presence;
 using SilverSim.ServiceInterfaces.Traveling;
 using SilverSim.Types;
 using SilverSim.Types.Account;
+using SilverSim.Types.Friends;
 using SilverSim.Types.Grid;
 using SilverSim.Types.GridUser;
 using SilverSim.Types.StructuredData.XmlRpc;
@@ -49,6 +51,7 @@ namespace SilverSim.BackendHandlers.Robust.UserAccounts
         PresenceServiceInterface m_PresenceService;
         TravelingDataServiceInterface m_TravelingDataService;
         AuthInfoServiceInterface m_AuthInfoService;
+        FriendsServiceInterface m_FriendsService;
 
         readonly string m_GridServiceName;
         readonly string m_GridUserServiceName;
@@ -56,6 +59,7 @@ namespace SilverSim.BackendHandlers.Robust.UserAccounts
         readonly string m_PresenceServiceName;
         readonly string m_TravelingDataServiceName;
         readonly string m_AuthInfoServiceName;
+        readonly string m_FriendsServiceName;
 
         readonly Dictionary<string, string> m_ServiceURLs = new Dictionary<string, string>();
         static readonly string[] m_RequiredURLs = new string[] { "AssetServerURI", "InventoryServerURI", "IMServerURI", "FriendsServerURI", "ProfileServerURI" };
@@ -68,6 +72,7 @@ namespace SilverSim.BackendHandlers.Robust.UserAccounts
             m_PresenceServiceName = ownConfig.GetString("PresenceService", "PresenceService");
             m_TravelingDataServiceName = ownConfig.GetString("TravelingDataService", "TravelingDataService");
             m_AuthInfoServiceName = ownConfig.GetString("AuthInfoService", "AuthInfoService");
+            m_FriendsServiceName = ownConfig.GetString("FriendsService", "FriendsService");
             foreach (string key in ownConfig.GetKeys())
             {
                 if(key.StartsWith("SRV_"))
@@ -326,6 +331,7 @@ namespace SilverSim.BackendHandlers.Robust.UserAccounts
             UserAccount account;
             UUI uui = null;
             GridUserInfo userInfo;
+            FriendInfo fInfo;
             if(m_UserAccountService.TryGetValue(UUID.Zero, toid, out account))
             {
                 uui = account.Principal;
@@ -333,6 +339,11 @@ namespace SilverSim.BackendHandlers.Robust.UserAccounts
             else if(m_GridUserService.TryGetValue(toid, out userInfo) && userInfo.User.HomeURI != null)
             {
                 uui = userInfo.User;
+            }
+            else if(m_FriendsService.TryGetValue(new UUI(fromid), new UUI(toid), out fInfo))
+            {
+                /* since we already checked that it is a local account, this must be a foreign one */
+                uui = fInfo.Friend;
             }
 
             Map respdata = new Map();

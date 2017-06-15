@@ -739,6 +739,9 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
             catch(Exception e)
             {
                 m_Log.InfoFormat("Failed to determine initial location for agent {0}: {1}: {2}", agentPost.Account.Principal.FullName, e.GetType().FullName, e.Message);
+#if DEBUG
+                m_Log.Debug("Exception", e);
+#endif
                 DoAgentResponse(req, e.Message, false);
                 return;
             }

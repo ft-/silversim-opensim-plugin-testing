@@ -419,6 +419,9 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
             catch (Exception e)
             {
                 m_Log.InfoFormat("Failed to determine initial location for agent {0}: {1}: {2}", account.Principal.FullName, e.GetType().FullName, e.Message);
+#if DEBUG
+                m_Log.Debug("Exception", e);
+#endif
                 throw new OpenSimTeleportProtocol.TeleportFailedException(e.Message);
             }
 
