@@ -105,7 +105,7 @@ namespace SilverSim.BackendHandlers.Robust.Profile
         private Map ClassifiedToMap(ProfileClassified classified) => new Map
         {
             { "CreatorId", classified.Creator.ToString() },
-            { "ParcelId", classified.ParcelID },
+            { "ParcelId", new UUID(classified.ParcelID.GetBytes(), 0) },
             { "SnapshotId", classified.SnapshotID },
             { "CreationDate", classified.CreationDate },
             { "ParentEstate", classified.ParentEstate },
@@ -127,7 +127,7 @@ namespace SilverSim.BackendHandlers.Robust.Profile
             { "Name", pick.Name },
             { "OriginalName", pick.OriginalName },
             { "Desc", pick.Description },
-            { "ParcelId", pick.ParcelID },
+            { "ParcelId", new UUID(pick.ParcelID.GetBytes(), 0) },
             { "SnapshotId", pick.SnapshotID },
             { "User", pick.Creator.ToString() },
             { "SimName", pick.SimName },
@@ -406,7 +406,7 @@ namespace SilverSim.BackendHandlers.Robust.Profile
             UUID id;
             if(reqdata.TryGetValue("ParcelId", out id))
             {
-                classified.ParcelID = id;
+                classified.ParcelID = new ParcelID(id.GetBytes(), 0);
             }
             if(reqdata.TryGetValue("ParentEstate", out integerval))
             {
@@ -553,7 +553,7 @@ namespace SilverSim.BackendHandlers.Robust.Profile
             UUID id;
             if(reqdata.TryGetValue("ParcelId", out id))
             {
-                pick.ParcelID = id;
+                pick.ParcelID = new ParcelID(id.GetBytes(), 0);
             }
 
             if(reqdata.TryGetValue("SnapshotId", out id))
@@ -1011,7 +1011,7 @@ namespace SilverSim.BackendHandlers.Robust.Profile
                 classified.Category = structParam["category"].AsInt;
                 classified.Name = structParam["name"].ToString();
                 classified.Description = structParam["description"].ToString();
-                classified.ParcelID = structParam["parcelUUID"].AsUUID;
+                classified.ParcelID = new ParcelID(structParam["parcelUUID"].AsUUID.GetBytes(), 0);
                 classified.ParentEstate = structParam["ParentEstate"].AsInt;
                 classified.SnapshotID = structParam["snapshotUUID"].AsUUID;
                 classified.SimName = structParam["sim_name"].ToString();
@@ -1071,7 +1071,7 @@ namespace SilverSim.BackendHandlers.Robust.Profile
                 resdata.Add("category", classified.Category);
                 resdata.Add("name", classified.Name);
                 resdata.Add("description", classified.Description);
-                resdata.Add("parceluuid", classified.ParcelID);
+                resdata.Add("parceluuid", new UUID(classified.ParcelID.GetBytes(), 0));
                 resdata.Add("parentestate", classified.ParentEstate);
                 resdata.Add("snapshotuuid", classified.SnapshotID);
                 resdata.Add("simname", classified.SimName);
@@ -1104,7 +1104,7 @@ namespace SilverSim.BackendHandlers.Robust.Profile
             {
                 resdata.Add("pickuuid", pick.PickID);
                 resdata.Add("creatoruuid", pick.Creator.ID);
-                resdata.Add("parceluuid", pick.ParcelID);
+                resdata.Add("parceluuid", new UUID(pick.ParcelID.GetBytes(), 0));
                 resdata.Add("snapshotuuid", pick.SnapshotID);
                 resdata.Add("posglobal", pick.GlobalPosition.ToString());
                 resdata.Add("toppick", pick.TopPick ? "True" : "False");
@@ -1160,7 +1160,7 @@ namespace SilverSim.BackendHandlers.Robust.Profile
                     Name = structParam["Name"].ToString(),
                     OriginalName = structParam["name"].ToString(),
                     Description = structParam["desc"].ToString(),
-                    ParcelID = structParam["parcel_uuid"].AsUUID,
+                    ParcelID = new ParcelID(structParam["parcel_uuid"].AsUUID.GetBytes(), 0),
                     SnapshotID = structParam["snapshot_uuid"].AsUUID,
                     SimName = structParam["sim_name"].ToString(),
                     GlobalPosition = Vector3.Parse(structParam["pos_global"].ToString()),

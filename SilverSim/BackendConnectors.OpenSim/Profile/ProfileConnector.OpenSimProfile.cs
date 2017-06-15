@@ -158,7 +158,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
                     Category = res["category"].AsInt,
                     Name = res["name"].ToString(),
                     Description = res["description"].ToString(),
-                    ParcelID = res["parceluuid"].AsUUID,
+                    ParcelID = new ParcelID(res["parceluuid"].AsUUID.GetBytes(), 0),
                     ParentEstate = res["parentestate"].AsInt,
                     SnapshotID = res["snapshotuuid"].AsUUID,
                     SimName = res["simname"].ToString(),
@@ -244,7 +244,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
                 PickID = res["pickuuid"].AsUUID,
                 Creator = new UUI(res["creatoruuid"].AsUUID),
                 TopPick = Convert.ToBoolean(res["toppick"].ToString()),
-                ParcelID = res["parceluuid"].AsUUID,
+                ParcelID = new ParcelID(res["parceluuid"].AsUUID.GetBytes(), 0),
                 Name = res["name"].ToString(),
                 Description = res["description"].ToString(),
                 SnapshotID = res["snapshotuuid"].AsUUID,
@@ -316,7 +316,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
                     { "sort_order", pick.SortOrder.ToString() },
                     { "enabled", pick.Enabled.ToString() },
                     { "sim_name", pick.SimName },
-                    { "parcel_uuid", pick.ParcelID },
+                    { "parcel_uuid", new UUID(pick.ParcelID.GetBytes(), 0) },
                     { "parcel_name", pick.ParcelName },
                     { "pos_global", pick.GlobalPosition }
                 };
