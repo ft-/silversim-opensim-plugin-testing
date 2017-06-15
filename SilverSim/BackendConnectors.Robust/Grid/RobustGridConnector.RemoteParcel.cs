@@ -22,6 +22,7 @@
 using SilverSim.Main.Common.Rpc;
 using SilverSim.ServiceInterfaces.Parcel;
 using SilverSim.Types;
+using SilverSim.Types.Grid;
 using SilverSim.Types.Parcel;
 using SilverSim.Types.StructuredData.XmlRpc;
 
@@ -79,6 +80,13 @@ namespace SilverSim.BackendConnectors.Robust.Grid
                 SnapshotID = p["SnapshotID"].AsUUID,
                 LandingPosition = p["UserLocation"].AsVector3
             };
+
+            IValue regAccess;
+
+            if (p.TryGetValue("RegionAccess", out regAccess))
+            {
+                parcelInfo.Access = (RegionAccess)regAccess.AsInt;
+            }
 
             p.TryGetValue("Dwell", out parcelInfo.Dwell);
 
