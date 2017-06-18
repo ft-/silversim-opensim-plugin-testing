@@ -342,7 +342,7 @@ namespace SilverSim.OpenSimArchiver.RegionArchiver
                                     List<ObjectGroup> sogs;
                                     try
                                     {
-                                        sogs = ObjectXML.FromXml(reader, scene.Owner);
+                                        sogs = ObjectXML.FromXml(reader, scene.Owner, XmlDeserializationOptions.ReadKeyframeMotion);
                                     }
                                     catch (Exception e)
                                     {
