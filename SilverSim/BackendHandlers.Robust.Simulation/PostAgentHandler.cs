@@ -1135,7 +1135,7 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
 
             if (appearancePack.ContainsKey("serial"))
             {
-                Appearance.Serial = appearancePack["serial"].AsUInt;
+                Appearance.Serial = appearancePack["serial"].AsInt;
             }
 
             /*

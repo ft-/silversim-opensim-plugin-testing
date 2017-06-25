@@ -200,7 +200,7 @@ namespace SilverSim.BackendConnectors.Robust.StructuredData.Agent
                 }
                 if (appearancePack.ContainsKey("serial"))
                 {
-                    agentparams.Appearance.Serial = (uint)appearancePack["serial"].AsInt;
+                    agentparams.Appearance.Serial = appearancePack["serial"].AsInt;
                 }
 
                 if(appearancePack.ContainsKey("visualparams"))
