@@ -206,7 +206,7 @@ namespace SilverSim.OpenSimArchiver.InventoryArchiver
                                 item.ParentFolderID = GetPath(principal, inventoryService, inventoryPath, header.FileName, options);
 
                                 UUID oldId = item.ID;
-                                item.ID = UUID.Random;
+                                item.SetNewID(UUID.Random);
                                 reassignedIds.Add(oldId, item.ID);
 
                                 if (item.AssetType == AssetType.Link || item.AssetType == AssetType.LinkFolder)
@@ -434,7 +434,7 @@ namespace SilverSim.OpenSimArchiver.InventoryArchiver
                                 break;
 
                             case "ID":
-                                item.ID = UUID.Parse(reader.ReadElementValueAsString());
+                                item.SetNewID(UUID.Parse(reader.ReadElementValueAsString()));
                                 break;
 
                             case "Owner":

@@ -166,9 +166,8 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
         };
         internal static InventoryItem ItemFromMap(Map map, GroupsServiceInterface groupsService)
         {
-            var item = new InventoryItem()
+            var item = new InventoryItem(map["ID"].AsUUID)
             {
-                ID = map["ID"].AsUUID,
                 AssetID = map["AssetID"].AsUUID,
                 AssetType = (AssetType)map["AssetType"].AsInt,
                 CreationDate = Date.UnixTimeToDateTime(map["CreationDate"].AsULong),

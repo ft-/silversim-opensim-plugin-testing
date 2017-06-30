@@ -43,13 +43,12 @@ namespace SilverSim.BackendHandlers.Robust.Inventory
     {
         public static InventoryItem ToItem(this Dictionary<string, object> dict)
         {
-            var item = new InventoryItem()
+            var item = new InventoryItem(dict.GetUUID("ID"))
             {
                 AssetID = dict.GetUUID("AssetID"),
                 AssetType = (AssetType)dict.GetInt("AssetType"),
                 Name = dict.GetString("Name"),
                 Owner = new UUI(dict.GetUUID("Owner")),
-                ID = dict.GetUUID("ID"),
                 InventoryType = (InventoryType)dict.GetInt("InvType"),
                 ParentFolderID = dict.GetUUID("Folder"),
                 Creator = new UUI { ID = dict.GetUUID("CreatorId"), CreatorData = dict.GetString("CreatorData") },

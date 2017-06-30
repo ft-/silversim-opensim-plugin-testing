@@ -377,7 +377,6 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
                 {
                     AssetID = UUID.Zero,
                     AssetType = AssetType.CallingCard,
-                    ID = UUID.Random,
                     Creator = gim.FromAgent,
                     Owner = gim.ToAgent,
                     Group = UGI.Unknown,

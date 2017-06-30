@@ -147,41 +147,6 @@ namespace SilverSim.OpenSimArchiver.RegionArchiver
         {
             foreach (ObjectGroup sog in sogs)
             {
-                if ((options & LoadOptions.PersistUuids) == LoadOptions.PersistUuids)
-                {
-                    foreach (ObjectPart part in sog.ValuesByKey1)
-                    {
-                        UUID oldID;
-                        ObjectPart check;
-                        if(scene.Primitives.TryGetValue(part.ID, out check))
-                        {
-                            oldID = part.ID;
-                            part.ID = UUID.Random;
-                            sog.ChangeKey(part.ID, oldID);
-                        }
-                        foreach (ObjectPartInventoryItem item in part.Inventory.ValuesByKey2)
-                        {
-                            oldID = item.ID;
-                            item.ID = UUID.Random;
-                            part.Inventory.ChangeKey(item.ID, oldID);
-                        }
-                    }
-                }
-                else
-                {
-                    foreach (ObjectPart part in sog.ValuesByKey1)
-                    {
-                        UUID oldID = part.ID;
-                        part.ID = UUID.Random;
-                        sog.ChangeKey(part.ID, oldID);
-                        foreach (ObjectPartInventoryItem item in part.Inventory.ValuesByKey2)
-                        {
-                            oldID = item.ID;
-                            item.ID = UUID.Random;
-                            part.Inventory.ChangeKey(item.ID, oldID);
-                        }
-                    }
-                }
                 scene.Add(sog);
             }
             sogs.Clear();
@@ -340,9 +305,14 @@ namespace SilverSim.OpenSimArchiver.RegionArchiver
                                     ShowOarLoadState(ref currentLoadState, CurrentOarLoadState.Objects, io);
                                     /* Load objects */
                                     List<ObjectGroup> sogs;
+                                    XmlDeserializationOptions xmloptions = XmlDeserializationOptions.ReadKeyframeMotion;
+                                    if((options & LoadOptions.PersistUuids) != 0)
+                                    {
+                                        xmloptions |= XmlDeserializationOptions.RestoreIDs;
+                                    }
                                     try
                                     {
-                                        sogs = ObjectXML.FromXml(reader, scene.Owner, XmlDeserializationOptions.ReadKeyframeMotion);
+                                        sogs = ObjectXML.FromXml(reader, scene.Owner, xmloptions);
                                     }
                                     catch (Exception e)
                                     {

@@ -350,14 +350,13 @@ namespace SilverSim.BackendConnectors.Simian.Inventory
 
         internal static InventoryItem ItemFromMap(Map map, GroupsServiceInterface groupsService)
         {
-            var item = new InventoryItem()
+            var item = new InventoryItem(map["ID"].AsUUID)
             {
                 AssetID = map["AssetID"].AsUUID,
                 AssetType = AssetTypeFromContentType(map["ContentType"].ToString()),
                 CreationDate = Date.UnixTimeToDateTime(map["CreationDate"].AsULong),
                 Description = map["Description"].AsString.ToString(),
                 ParentFolderID = map["ParentID"].AsUUID,
-                ID = map["ID"].AsUUID,
                 InventoryType = InventoryTypeFromContentType(map["ContentType"].ToString()),
                 Name = map["Name"].AsString.ToString(),
                 Owner = new UUI(map["OwnerID"].AsUUID)
