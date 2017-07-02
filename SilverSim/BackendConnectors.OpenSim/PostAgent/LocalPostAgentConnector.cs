@@ -383,6 +383,12 @@ namespace SilverSim.BackendConnectors.OpenSim.PostAgent
             string profileServiceURI = string.Empty;
 
             /* check if it is standalone */
+#if DEBUG
+            if (StandaloneServices != null)
+            {
+                m_Log.InfoFormat("Agent {0} has HomeURI {1} compare to standalone HomeURI {2}", authData.AccountInfo.Principal.FullName, authData.AccountInfo.Principal.HomeURI.ToString(), m_HomeURI);
+            }
+#endif
             if (authData.AccountInfo.Principal.HomeURI.ToString().StartsWith(m_HomeURI, true, CultureInfo.InvariantCulture) && StandaloneServices != null)
             {
                 m_Log.InfoFormat("Agent {0} is local to us", authData.AccountInfo.Principal.FullName);
