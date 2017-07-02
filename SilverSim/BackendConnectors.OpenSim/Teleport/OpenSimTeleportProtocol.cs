@@ -1233,6 +1233,10 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
             {
                 dInfo.ServerURI = response["server_uri"].ToString();
             }
+            else if(response.ContainsKey("hostname") && response.ContainsKey("http_port"))
+            {
+                dInfo.ServerURI = string.Format("http://{0}:{1}/", response["hostname"], dInfo.ServerHttpPort);
+            }
             return dInfo;
         }
 

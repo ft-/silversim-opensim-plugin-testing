@@ -268,13 +268,15 @@ namespace SilverSim.BackendHandlers.Robust.Grid
                 {
                     resdata.Add("uuid", rInfo.ID);
                     resdata.Add("handle", rInfo.Location.RegionHandle.ToString());
-                    resdata.Add("x", rInfo.Location.X);
-                    resdata.Add("y", rInfo.Location.Y);
+                    resdata.Add("x", rInfo.Location.X.ToString());
+                    resdata.Add("y", rInfo.Location.Y.ToString());
+                    resdata.Add("size_x", rInfo.Size.X.ToString());
+                    resdata.Add("size_y", rInfo.Size.Y.ToString());
                     resdata.Add("region_name", rInfo.Name);
                     Uri serverURI = new Uri(rInfo.ServerURI);
                     resdata.Add("hostname", serverURI.Host);
-                    resdata.Add("http_port", rInfo.ServerHttpPort);
-                    resdata.Add("internal_port", rInfo.ServerPort);
+                    resdata.Add("http_port", rInfo.ServerHttpPort.ToString());
+                    resdata.Add("internal_port", rInfo.ServerPort.ToString());
                     resdata.Add("server_uri", rInfo.ServerURI);
                     resdata.Add("result", true);
                 }

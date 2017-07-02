@@ -130,8 +130,10 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
                 {
                     resdata.Add("uuid", s.ID);
                     resdata.Add("handle", s.GridPosition.RegionHandle.ToString());
-                    resdata.Add("x", s.GridPosition.X);
-                    resdata.Add("y", s.GridPosition.Y);
+                    resdata.Add("x", s.GridPosition.X.ToString());
+                    resdata.Add("y", s.GridPosition.Y.ToString());
+                    resdata.Add("size_x", s.SizeX.ToString());
+                    resdata.Add("size_y", s.SizeY.ToString());
                     resdata.Add("region_name", s.Name);
                     Uri serverURI = new Uri(s.ServerURI);
                     resdata.Add("hostname", serverURI.Host);
