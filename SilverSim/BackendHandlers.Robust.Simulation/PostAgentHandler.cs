@@ -21,6 +21,7 @@
 
 using log4net;
 using Nini.Config;
+using SilverSim.BackendConnectors.OpenSim.PostAgent;
 using SilverSim.BackendConnectors.OpenSim.Teleport;
 using SilverSim.BackendConnectors.Robust.Asset;
 using SilverSim.BackendConnectors.Robust.Friends;
@@ -79,54 +80,12 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
 
         protected static readonly ILog m_Log = LogManager.GetLogger("ROBUST AGENT HANDLER");
         private BaseHttpServer m_HttpServer;
-        private Main.Common.Caps.CapsHttpRedirector m_CapsRedirector;
-        private readonly string m_DefaultGridUserServerURI = string.Empty;
-        private readonly string m_DefaultPresenceServerURI = string.Empty;
-        private readonly Dictionary<string, IAssetServicePlugin> m_AssetServicePlugins = new Dictionary<string, IAssetServicePlugin>();
-        private readonly Dictionary<string, IInventoryServicePlugin> m_InventoryServicePlugins = new Dictionary<string, IInventoryServicePlugin>();
-        private readonly Dictionary<string, IProfileServicePlugin> m_ProfileServicePlugins = new Dictionary<string, IProfileServicePlugin>();
-        private List<IProtocolExtender> m_PacketHandlerPlugins = new List<IProtocolExtender>();
         private List<AuthorizationServiceInterface> m_AuthorizationServices;
         protected SceneList Scenes { get; private set; }
-        protected CommandRegistry Commands { get; private set; }
+        protected PostAgentConnector PostAgentConnector { get; private set; }
+        private readonly string m_PostAgentConnectorName;
 
         protected List<AuthorizationServiceInterface> AuthorizationServices => m_AuthorizationServices;
-
-        private sealed class GridParameterMap : ICloneable
-        {
-            public string HomeURI;
-            public string AssetServerURI;
-            public string InventoryServerURI;
-            public string GridUserServerURI = string.Empty;
-            public string PresenceServerURI = string.Empty;
-            public string AvatarServerURI = string.Empty;
-            public string FriendsServerURI = string.Empty;
-            public string GatekeeperURI = string.Empty;
-            public string ProfileServerURI = string.Empty;
-            public string OfflineIMServerURI = string.Empty;
-            public readonly List<UUID> ValidForSims = new List<UUID>(); /* if empty, all sims are valid */
-
-            public object Clone()
-            {
-                var m = new GridParameterMap()
-                {
-                    HomeURI = HomeURI,
-                    GatekeeperURI = GatekeeperURI,
-                    AssetServerURI = AssetServerURI,
-                    InventoryServerURI = InventoryServerURI,
-                    GridUserServerURI = GridUserServerURI,
-                    PresenceServerURI = PresenceServerURI,
-                    AvatarServerURI = AvatarServerURI,
-                    FriendsServerURI = FriendsServerURI,
-                    ProfileServerURI = ProfileServerURI,
-                    OfflineIMServerURI = OfflineIMServerURI
-                };
-                m.ValidForSims.AddRange(ValidForSims);
-                return m;
-            }
-        }
-
-        private readonly RwLockedList<GridParameterMap> m_GridParameterMap = new RwLockedList<GridParameterMap>();
 
         private readonly string m_AgentBaseURL = "/agent/";
 
@@ -160,58 +119,17 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
 
         public PostAgentHandler(IConfig ownSection)
         {
-            m_DefaultGridUserServerURI = ownSection.GetString("DefaultGridUserServerURI", string.Empty);
-            m_DefaultPresenceServerURI = ownSection.GetString("DefaultPresenceServerURI", string.Empty);
+            m_PostAgentConnectorName = ownSection.GetString("PostAgentConnector", "PostAgentConnector");
         }
 
         protected PostAgentHandler(string agentBaseURL, IConfig ownSection)
         {
             m_AgentBaseURL = agentBaseURL;
         }
-
-        protected string HeloRequester(string uri)
-        {
-            if (!uri.EndsWith("="))
-            {
-                uri = uri.TrimEnd('/') + "/helo/";
-            }
-            else
-            {
-                /* simian special */
-                if(uri.Contains("?"))
-                {
-                    uri = uri.Substring(0, uri.IndexOf('?'));
-                }
-                uri = uri.TrimEnd('/') + "/helo/";
-            }
-
-            var headers = new Dictionary<string, string>();
-            try
-            {
-                using (Stream responseStream = HttpClient.DoStreamRequest("HEAD", uri, null, string.Empty, string.Empty, false, 20000, headers))
-                {
-                    using (var reader = new StreamReader(responseStream))
-                    {
-                        reader.ReadToEnd();
-                    }
-                }
-
-                if (!headers.ContainsKey("x-handlers-provided"))
-                {
-                    return "opensim-robust"; /* let us assume Robust API */
-                }
-                return headers["x-handlers-provided"];
-            }
-            catch
-            {
-                return "opensim-robust"; /* let us assume Robust API */
-            }
-        }
-
+        
         public virtual void Startup(ConfigurationLoader loader)
         {
             Scenes = loader.Scenes;
-            Commands = loader.CommandRegistry;
             m_Log.Info("Initializing agent post handler for " + m_AgentBaseURL);
             m_AuthorizationServices = loader.GetServicesByValue<AuthorizationServiceInterface>();
             m_HttpServer = loader.HttpServer;
@@ -224,129 +142,6 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
             {
                 /* intentionally left empty */
             }
-            foreach(IAssetServicePlugin plugin in loader.GetServicesByValue<IAssetServicePlugin>())
-            {
-                m_AssetServicePlugins.Add(plugin.Name, plugin);
-            }
-            foreach(IInventoryServicePlugin plugin in loader.GetServicesByValue<IInventoryServicePlugin>())
-            {
-                m_InventoryServicePlugins.Add(plugin.Name, plugin);
-            }
-            foreach (IProfileServicePlugin plugin in loader.GetServicesByValue<IProfileServicePlugin>())
-            {
-                m_ProfileServicePlugins.Add(plugin.Name, plugin);
-            }
-
-            m_PacketHandlerPlugins = loader.GetServicesByValue<IProtocolExtender>();
-
-            foreach(IConfig section in loader.Config.Configs)
-            {
-                if(section.Name.StartsWith("RobustGrid-"))
-                {
-                    if(!section.Contains("HomeURI") || !section.Contains("AssetServerURI") || !section.Contains("InventoryServerURI"))
-                    {
-                        m_Log.WarnFormat("Skipping section {0} for missing entries (HomeURI, AssetServerURI and InventoryServerURI are required)", section.Name);
-                        continue;
-                    }
-                    var map = new GridParameterMap();
-                    map.AssetServerURI = section.GetString("AssetServerURI", map.HomeURI);
-                    map.GridUserServerURI = section.GetString("GridUserServerURI", m_DefaultGridUserServerURI);
-                    map.PresenceServerURI = section.GetString("PresenceServerURI", string.Empty);
-                    map.AvatarServerURI = section.GetString("AvatarServerURI", string.Empty);
-                    map.InventoryServerURI = section.GetString("InventoryServerURI", map.HomeURI);
-                    map.OfflineIMServerURI = section.GetString("OfflineIMServerURI", string.Empty);
-                    map.FriendsServerURI = section.GetString("FriendsServerURI", string.Empty);
-                    map.HomeURI = section.GetString("HomeURI");
-                    if (string.IsNullOrEmpty(map.HomeURI))
-                    {
-                        map.HomeURI = m_HttpServer.ServerURI;
-                        if (!map.HomeURI.EndsWith("/"))
-                        {
-                            map.HomeURI += "/";
-                        }
-                    }
-
-                    if (!Uri.IsWellFormedUriString(map.HomeURI, UriKind.Absolute))
-                    {
-                        m_Log.WarnFormat("Skipping section {0} for invalid URI in HomeURI {1}", section.Name, map.HomeURI);
-                        continue;
-                    }
-                    else if (map.GridUserServerURI.Length != 0 && !Uri.IsWellFormedUriString(map.GridUserServerURI, UriKind.Absolute))
-                    {
-                        m_Log.WarnFormat("Skipping section {0} for invalid URI in GridUserServerURI {1}", section.Name, map.GridUserServerURI);
-                        continue;
-                    }
-                    else if (map.GatekeeperURI.Length != 0 && !Uri.IsWellFormedUriString(map.GatekeeperURI, UriKind.Absolute))
-                    {
-                        m_Log.WarnFormat("Skipping section {0} for invalid URI in GatekeeperURI {1}", section.Name, map.GatekeeperURI);
-                        continue;
-                    }
-                    else if (map.FriendsServerURI.Length != 0 && !Uri.IsWellFormedUriString(map.FriendsServerURI, UriKind.Absolute))
-                    {
-                        m_Log.WarnFormat("Skipping section {0} for invalid URI in FriendsServerURI {1}", section.Name, map.FriendsServerURI);
-                        continue;
-                    }
-                    else if (map.PresenceServerURI.Length != 0 && !Uri.IsWellFormedUriString(map.PresenceServerURI, UriKind.Absolute))
-                    {
-                        m_Log.WarnFormat("Skipping section {0} for invalid URI in PresenceServerURI {1}", section.Name, map.PresenceServerURI);
-                        continue;
-                    }
-                    else if (map.AvatarServerURI.Length != 0 && !Uri.IsWellFormedUriString(map.AvatarServerURI, UriKind.Absolute))
-                    {
-                        m_Log.WarnFormat("Skipping section {0} for invalid URI in AvatarServerURI {1}", section.Name, map.AvatarServerURI);
-                        continue;
-                    }
-                    else if(map.OfflineIMServerURI.Length != 0 && !Uri.IsWellFormedUriString(map.OfflineIMServerURI, UriKind.Absolute))
-                    {
-                        m_Log.WarnFormat("Skipping section {0} for invalid URI in OfflineIMServerURI {1}", section.Name, map.OfflineIMServerURI);
-                        continue;
-                    }
-                    else if (!Uri.IsWellFormedUriString(map.AssetServerURI, UriKind.Absolute))
-                    {
-                        m_Log.WarnFormat("Skipping section {0} for invalid URI in AssetServerURI {1}", section.Name, map.AssetServerURI);
-                        continue;
-                    }
-                    else if (!Uri.IsWellFormedUriString(map.InventoryServerURI, UriKind.Absolute))
-                    {
-                        m_Log.WarnFormat("Skipping section {0} for invalid URI in InventoryServerURI {1}", section.Name, map.InventoryServerURI);
-                        continue;
-                    }
-
-                    if(section.Contains("ValidFor"))
-                    {
-                        string[] sims = section.GetString("ValidFor", string.Empty).Split(new char[]{','}, StringSplitOptions.RemoveEmptyEntries);
-                        if(sims.Length != 0)
-                        {
-                            foreach(string sim in sims)
-                            {
-                                UUID id;
-                                if(!UUID.TryParse(sim.Trim(), out id))
-                                {
-                                    m_Log.ErrorFormat("Invalid UUID {0} encountered within ValidFor in section {1}", sim, section.Name);
-                                    continue;
-                                }
-                                map.ValidForSims.Add(id);
-                            }
-                            if(map.ValidForSims.Count == 0)
-                            {
-                                m_Log.WarnFormat("Grid Parameter Map section {0} will be valid for all sims", section.Name);
-                            }
-                        }
-                    }
-                    m_GridParameterMap.Add(map);
-                    foreach(string key in section.GetKeys())
-                    {
-                        if(key.StartsWith("Alias-"))
-                        {
-                            var map2 = (GridParameterMap)map.Clone();
-                            map2.HomeURI = section.GetString(key);
-                            m_GridParameterMap.Add(map2);
-                        }
-                    }
-                }
-            }
-
-            m_CapsRedirector = loader.CapsRedirector;
         }
 
         public ShutdownOrder ShutdownOrder => ShutdownOrder.Any;
@@ -384,24 +179,6 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
                     action = parts[3];
                 }
             }
-        }
-
-        private GridParameterMap FindGridParameterMap(string homeURI, SceneInterface scene)
-        {
-            foreach (GridParameterMap map in m_GridParameterMap)
-            {
-                /* some grids have weird ideas about how to map their URIs, so we need this checking for whether the grid name starts with it */
-                if (map.HomeURI.StartsWith(homeURI))
-                {
-                    if (map.ValidForSims.Count != 0 &&
-                        !map.ValidForSims.Contains(scene.ID))
-                    {
-                        continue;
-                    }
-                    return map;
-                }
-            }
-            return null;
         }
 
         public void DoAgentResponse(HttpRequest req, string reason, bool success)
@@ -522,65 +299,7 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
                 return;
             }
 
-            string assetServerURI = agentPost.Account.ServiceURLs["AssetServerURI"];
-            string inventoryServerURI = agentPost.Account.ServiceURLs["InventoryServerURI"];
-            string gatekeeperURI = scene.GatekeeperURI;
-
-            ProfileServiceInterface profileService = null;
-            UserAgentServiceInterface userAgentService;
-            PresenceServiceInterface presenceService = null;
-            GridUserServiceInterface gridUserService = null;
-            FriendsServiceInterface friendsService = null;
-            OfflineIMServiceInterface offlineIMService = null;
-            string profileServiceURI = string.Empty;
-
-            GridParameterMap gridparams = FindGridParameterMap(agentPost.Account.Principal.HomeURI.ToString(), scene);
-            if (gridparams != null)
-            {
-                assetServerURI = gridparams.AssetServerURI;
-                inventoryServerURI = gridparams.InventoryServerURI;
-                if (!string.IsNullOrEmpty(gridparams.GatekeeperURI))
-                {
-                    gatekeeperURI = gridparams.GatekeeperURI;
-                }
-                if (!string.IsNullOrEmpty(gridparams.GridUserServerURI))
-                {
-                    gridUserService = new RobustGridUserConnector(gridparams.GridUserServerURI);
-                }
-                if (!string.IsNullOrEmpty(gridparams.PresenceServerURI))
-                {
-                    presenceService = new RobustPresenceConnector(gridparams.PresenceServerURI, agentPost.Account.Principal.HomeURI.ToString());
-                }
-                if (!string.IsNullOrEmpty(gridparams.OfflineIMServerURI))
-                {
-                    offlineIMService = new RobustOfflineIMConnector(gridparams.OfflineIMServerURI);
-                }
-                if(!string.IsNullOrEmpty(gridparams.FriendsServerURI))
-                {
-                    friendsService = new RobustFriendsConnector(gridparams.FriendsServerURI, gridparams.HomeURI);
-                }
-            }
-            else
-            {
-                presenceService = string.IsNullOrEmpty(m_DefaultPresenceServerURI) ?
-                    (PresenceServiceInterface)new RobustHGOnlyPresenceConnector(agentPost.Account.Principal.HomeURI.ToString()) :
-                    new RobustHGPresenceConnector(m_DefaultPresenceServerURI, agentPost.Account.Principal.HomeURI.ToString());
-            }
-            userAgentService = new RobustUserAgentConnector(agentPost.Account.Principal.HomeURI.ToString());
-
-            if (!agentPost.Account.ServiceURLs.TryGetValue("ProfileServerURI", out profileServiceURI))
-            {
-                profileServiceURI = string.Empty;
-            }
-
-            if (!string.IsNullOrEmpty(profileServiceURI))
-            {
-                string profileType = HeloRequester(profileServiceURI);
-                if (m_ProfileServicePlugins.ContainsKey(profileType))
-                {
-                    profileService = m_ProfileServicePlugins[profileType].Instantiate(profileServiceURI);
-                }
-            }
+            UserAgentServiceInterface userAgentService = new RobustUserAgentConnector(agentPost.Account.Principal.HomeURI.ToString());
 
             if (!string.IsNullOrEmpty(agentPost.Session.ServiceSessionID) || !GetOpenSimProtocolCompatibility(agentPost.Destination.ID))
             {
@@ -588,12 +307,9 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
                 {
                     userAgentService.VerifyAgent(agentPost.Session.SessionID, agentPost.Session.ServiceSessionID);
                 }
-                catch
-#if DEBUG
-                (Exception e)
-#endif
+                catch(Exception e)
                 {
-                    m_Log.InfoFormat("Failed to verify agent {0} at Home Grid (Code 1)", agentPost.Account.Principal.FullName);
+                    m_Log.InfoFormat("Failed to verify agent {0} at Home Grid (Code 1): {1}", agentPost.Account.Principal.FullName, e.Message);
                     DoAgentResponse(req, "Failed to verify agent at Home Grid (Code 1)", false);
                     return;
                 }
@@ -607,12 +323,9 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
             {
                 userAgentService.VerifyClient(agentPost.Session.SessionID, agentPost.Client.ClientIP);
             }
-            catch
-#if DEBUG
-                (Exception e)
-#endif
+            catch(Exception e)
             {
-                m_Log.InfoFormat("Failed to verify client {0} at Home Grid (Code 2)", agentPost.Account.Principal.FullName);
+                m_Log.InfoFormat("Failed to verify client {0} at Home Grid (Code 2): {1}", agentPost.Account.Principal.FullName, e.Message);
                 DoAgentResponse(req, "Failed to verify client at Home Grid (Code 2)", false);
                 return;
             }
@@ -651,182 +364,13 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
 
             try
             {
-                IAgent sceneAgent = scene.Agents[agentPost.Account.Principal.ID];
-                if (sceneAgent.Owner.EqualsGrid(agentPost.Account.Principal))
-                {
-                    if (agentPost.Circuit.IsChild && !sceneAgent.IsInScene(scene))
-                    {
-                        /* already got an agent here */
-                        DoAgentResponse(req, "Failed to create agent due to duplicate agent id", false);
-                        m_Log.WarnFormat("Failed to create agent due to duplicate agent id. {0} != {1}", sceneAgent.Owner.ToString(), agentPost.Account.Principal.ToString());
-                        return;
-                    }
-                    else if (!agentPost.Circuit.IsChild && !sceneAgent.IsInScene(scene))
-                    {
-                        /* child becomes root */
-                        DoAgentResponse(req, "Teleport destination not yet implemented", false);
-                        return;
-                    }
-                }
-                else if (sceneAgent.Owner.ID == agentPost.Account.Principal.ID)
-                {
-                    /* we got an agent already and no grid match? */
-                    DoAgentResponse(req, "Failed to create agent due to duplicate agent id", false);
-                    m_Log.WarnFormat("Failed to create agent due to duplicate agent id. {0} != {1}", sceneAgent.Owner.ToString(), agentPost.Account.Principal.ToString());
-                    return;
-                }
-            }
-            catch
-            {
-                /* no action needed */
-            }
-
-            GroupsServiceInterface groupsService = null;
-            AssetServiceInterface assetService;
-            InventoryServiceInterface inventoryService;
-            string inventoryType = HeloRequester(inventoryServerURI);
-            string assetType = HeloRequester(assetServerURI);
-
-            assetService = (string.IsNullOrEmpty(assetType) || assetType == "opensim-robust") ?
-                new RobustAssetConnector(assetServerURI) :
-                m_AssetServicePlugins[assetType].Instantiate(assetServerURI);
-
-            inventoryService = (string.IsNullOrEmpty(inventoryType) || inventoryType == "opensim-robust") ?
-                new RobustInventoryConnector(inventoryServerURI, groupsService) :
-                m_InventoryServicePlugins[assetType].Instantiate(inventoryServerURI);
-
-            GridServiceInterface gridService = scene.GridService;
-
-            var serviceList = new AgentServiceList
-            {
-                assetService,
-                inventoryService,
-                groupsService,
-                profileService,
-                friendsService,
-                userAgentService,
-                presenceService,
-                gridUserService,
-                gridService,
-                offlineIMService,
-                new OpenSimTeleportProtocol(
-                Commands,
-                m_CapsRedirector,
-                m_PacketHandlerPlugins,
-                Scenes)
-            };
-            var agent = new ViewerAgent(
-                Scenes,
-                agentPost.Account.Principal.ID,
-                agentPost.Account.Principal.FirstName,
-                agentPost.Account.Principal.LastName,
-                agentPost.Account.Principal.HomeURI,
-                agentPost.Session.SessionID,
-                agentPost.Session.SecureSessionID,
-                agentPost.Session.ServiceSessionID,
-                agentPost.Client,
-                agentPost.Account,
-                serviceList)
-            {
-                ServiceURLs = agentPost.Account.ServiceURLs,
-
-                Appearance = agentPost.Appearance
-            };
-            try
-            {
-                scene.DetermineInitialAgentLocation(agent, agentPost.Destination.TeleportFlags, agentPost.Destination.Location, agentPost.Destination.LookAt);
-            }
-            catch(Exception e)
-            {
-                m_Log.InfoFormat("Failed to determine initial location for agent {0}: {1}: {2}", agentPost.Account.Principal.FullName, e.GetType().FullName, e.Message);
-#if DEBUG
-                m_Log.Debug("Exception", e);
-#endif
-                DoAgentResponse(req, e.Message, false);
-                return;
-            }
-
-            var udpServer = (UDPCircuitsManager)scene.UDPServer;
-
-            IPAddress ipAddr;
-            if (!IPAddress.TryParse(agentPost.Client.ClientIP, out ipAddr))
-            {
-                m_Log.InfoFormat("Invalid IP address for agent {0}", agentPost.Account.Principal.FullName);
-                DoAgentResponse(req, "Invalid IP address", false);
-                return;
-            }
-            var ep = new IPEndPoint(ipAddr, 0);
-            var circuit = new AgentCircuit(
-                Commands,
-                agent,
-                udpServer,
-                agentPost.Circuit.CircuitCode,
-                m_CapsRedirector,
-                agentPost.Circuit.CapsPath,
-                agent.ServiceURLs,
-                gatekeeperURI,
-                m_PacketHandlerPlugins,
-                ep)
-            {
-                LastTeleportFlags = agentPost.Destination.TeleportFlags,
-                Agent = agent,
-                AgentID = agentPost.Account.Principal.ID,
-                SessionID = agentPost.Session.SessionID
-            };
-            agent.Circuits.Add(circuit.Scene.ID, circuit);
-
-            try
-            {
-                scene.Add(agent);
-                try
-                {
-                    udpServer.AddCircuit(circuit);
-                }
-                catch
-                {
-                    scene.Remove(agent);
-                    throw;
-                }
+                PostAgentConnector.PostAgent(agentPost.Circuit, ad);
             }
             catch (Exception e)
             {
-                m_Log.Debug("Failed agent post", e);
-                agent.Circuits.Clear();
                 DoAgentResponse(req, e.Message, false);
                 return;
             }
-            if (!agentPost.Circuit.IsChild)
-            {
-                /* make agent a root agent */
-                agent.SceneID = scene.ID;
-                if (gridUserService != null)
-                {
-                    try
-                    {
-                        gridUserService.SetPosition(agent.Owner, scene.ID, agent.GlobalPosition, agent.LookAt);
-                    }
-                    catch (Exception e)
-                    {
-                        m_Log.Warn("Could not contact GridUserService", e);
-                    }
-                }
-            }
-
-            try
-            {
-                presenceService.Report(new PresenceInfo()
-                {
-                    UserID = agent.Owner,
-                    SessionID = agent.SessionID,
-                    SecureSessionID = agentPost.Session.SecureSessionID,
-                    RegionID = scene.ID
-                });
-            }
-            catch (Exception e)
-            {
-                m_Log.Warn("Could not contact PresenceService", e);
-            }
-            circuit.LogIncomingAgent(m_Log, agentPost.Circuit.IsChild);
             DoAgentResponse(req, "authorized", true);
         }
 

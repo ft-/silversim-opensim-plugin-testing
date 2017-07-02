@@ -52,6 +52,7 @@ namespace SilverSim.BackendHandlers.Robust.Grid
         {
             base.Startup(loader);
             m_UserAccountService = loader.GetService<UserAccountServiceInterface>(m_UserAccountServiceName);
+            m_TravelingDataService = loader.GetService<TravelingDataServiceInterface>(m_TravelingDataServiceName);
         }
 
         public override bool TryVerifyIdentity(HttpRequest req, PostData data)

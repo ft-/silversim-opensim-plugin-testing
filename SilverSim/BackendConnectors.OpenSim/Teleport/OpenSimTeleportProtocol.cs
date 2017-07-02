@@ -1521,6 +1521,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
                     }
                     catch (Exception e)
                     {
+                        m_Log.Error("Connect failed", e);
                         /* connect failed */
                         return false;
                     }

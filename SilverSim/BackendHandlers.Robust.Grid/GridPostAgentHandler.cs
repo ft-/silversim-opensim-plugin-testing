@@ -21,6 +21,7 @@
 
 using log4net;
 using Nini.Config;
+using SilverSim.BackendConnectors.OpenSim.PostAgent;
 using SilverSim.BackendConnectors.OpenSim.Teleport;
 using SilverSim.BackendConnectors.Robust.StructuredData.Agent;
 using SilverSim.Http.Client;
@@ -50,7 +51,9 @@ namespace SilverSim.BackendHandlers.Robust.Grid
         protected static readonly ILog m_Log = LogManager.GetLogger("ROBUST GRID AGENT HANDLER");
         private BaseHttpServer m_HttpServer;
         private List<AuthorizationServiceInterface> m_AuthorizationServices;
+        private PostAgentConnector m_PostAgentConnector;
         protected List<AuthorizationServiceInterface> AuthorizationServices => m_AuthorizationServices;
+        private readonly string m_PostAgentConnectorName;
 
         private readonly string m_AgentBaseURL = "/agent/";
 
@@ -62,6 +65,7 @@ namespace SilverSim.BackendHandlers.Robust.Grid
         {
             TimeoutMs = 20000;
             m_AgentBaseURL = agentBaseURL;
+            m_PostAgentConnectorName = ownSection.GetString("PostAgentConnector", "PostAgentConnector");
             m_GatekeeperURI = ownSection.GetString("GatekeeperURI", string.Empty);
             if (!m_GatekeeperURI.EndsWith("/"))
             {
@@ -111,6 +115,7 @@ namespace SilverSim.BackendHandlers.Robust.Grid
         public virtual void Startup(ConfigurationLoader loader)
         {
             m_Log.Info("Initializing agent post handler for " + m_AgentBaseURL);
+            m_PostAgentConnector = loader.GetService<PostAgentConnector>(m_PostAgentConnectorName);
             m_AuthorizationServices = loader.GetServicesByValue<AuthorizationServiceInterface>();
             m_HttpServer = loader.HttpServer;
             m_HttpServer.StartsWithUriHandlers.Add(m_AgentBaseURL, AgentPostHandler);
@@ -287,7 +292,7 @@ namespace SilverSim.BackendHandlers.Robust.Grid
 
             try
             {
-                PostAgent(agentPost.Circuit, ad);
+                m_PostAgentConnector.PostAgent(agentPost.Circuit, ad);
             }
             catch (Exception e)
             {
@@ -295,113 +300,6 @@ namespace SilverSim.BackendHandlers.Robust.Grid
                 return;
             }
             DoAgentResponse(req, "authorized", true);
-        }
-
-        private static string BuildAgentUri(RegionInfo destinationRegion, UUID agentID, string extra = "")
-        {
-            string agentURL = destinationRegion.ServerURI;
-
-            if (!agentURL.EndsWith("/"))
-            {
-                agentURL += "/";
-            }
-
-            return agentURL + "agent/" + agentID.ToString() + "/" + destinationRegion.ID.ToString() + "/" + extra;
-        }
-
-        private void PostAgent(
-            CircuitInfo circuitInfo,
-            AuthorizationServiceInterface.AuthorizationData authData)
-        {
-            var agentPostData = new PostData();
-
-            agentPostData.Account = authData.AccountInfo;
-
-            agentPostData.Appearance = authData.AppearanceInfo;
-
-            agentPostData.Circuit = circuitInfo;
-            agentPostData.Client = authData.ClientInfo;
-
-            agentPostData.Destination = authData.DestinationInfo;
-
-            agentPostData.Session = authData.SessionInfo;
-
-            string agentURL = BuildAgentUri(authData.DestinationInfo, authData.AccountInfo.Principal.ID);
-
-            byte[] uncompressed_postdata;
-            using (MemoryStream ms = new MemoryStream())
-            {
-                agentPostData.Serialize(ms, (int)WearableType.NumWearables);
-                uncompressed_postdata = ms.ToArray();
-            }
-
-            Map result;
-            byte[] compressed_postdata;
-            using (MemoryStream ms = new MemoryStream())
-            {
-                using (GZipStream gz = new GZipStream(ms, CompressionMode.Compress))
-                {
-                    gz.Write(uncompressed_postdata, 0, uncompressed_postdata.Length);
-                    compressed_postdata = ms.ToArray();
-                }
-            }
-            try
-            {
-                using (Stream o = HttpClient.DoStreamRequest("POST", agentURL, null, "application/json", compressed_postdata.Length, (Stream ws) =>
-                    ws.Write(compressed_postdata, 0, compressed_postdata.Length), true, TimeoutMs))
-                {
-                    result = (Map)Json.Deserialize(o);
-                }
-            }
-            catch
-            {
-                try
-                {
-                    using (Stream o = HttpClient.DoStreamRequest("POST", agentURL, null, "application/x-gzip", compressed_postdata.Length, (Stream ws) =>
-                        ws.Write(compressed_postdata, 0, compressed_postdata.Length), false, TimeoutMs))
-                    {
-                        result = (Map)Json.Deserialize(o);
-                    }
-                }
-                catch
-                {
-                    try
-                    {
-                        using (Stream o = HttpClient.DoStreamRequest("POST", agentURL, null, "application/json", uncompressed_postdata.Length, (Stream ws) =>
-                            ws.Write(uncompressed_postdata, 0, uncompressed_postdata.Length), false, TimeoutMs))
-                        {
-                            result = (Map)Json.Deserialize(o);
-                        }
-                    }
-                    catch (Exception e)
-                    {
-                        /* connect failed */
-                        throw new OpenSimTeleportProtocol.TeleportFailedException(e.Message);
-                    }
-                }
-            }
-
-            if (result.ContainsKey("success"))
-            {
-                if (!result["success"].AsBoolean)
-                {
-                    /* not authorized */
-                    throw new OpenSimTeleportProtocol.TeleportFailedException("Not authorized");
-                }
-            }
-            else if (result.ContainsKey("reason"))
-            {
-                if (result["reason"].ToString() != "authorized")
-                {
-                    /* not authorized */
-                    throw new OpenSimTeleportProtocol.TeleportFailedException(result["reason"].ToString());
-                }
-            }
-            else
-            {
-                /* not authorized */
-                throw new OpenSimTeleportProtocol.TeleportFailedException("Not authorized");
-            }
         }
 
         public abstract bool TryVerifyIdentity(HttpRequest req, PostData data);
