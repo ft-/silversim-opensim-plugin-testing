@@ -76,7 +76,7 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
     {
         /* CAUTION! Never ever make a protocol version configurable */
         private const int PROTOCOL_VERSION_MAJOR = 0;
-        private const int PROTOCOL_VERSION_MINOR = 0;
+        private const int PROTOCOL_VERSION_MINOR = 6;
 
         protected static readonly ILog m_Log = LogManager.GetLogger("ROBUST AGENT HANDLER");
         private BaseHttpServer m_HttpServer;
@@ -1204,7 +1204,7 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
                 response.Add("negotiated_inbound_version", string.Format("{0}.{1}", versionMajor, versionMinor));
             }
             response.Add("features", new Map());
-            using(HttpResponse res = req.BeginResponse(HttpStatusCode.OK, "OK"))
+            using(HttpResponse res = req.BeginResponse("application/json"))
             {
                 using(Stream s = res.GetOutputStream())
                 {

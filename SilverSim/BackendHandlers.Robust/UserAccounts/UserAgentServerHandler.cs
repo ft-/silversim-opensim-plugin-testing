@@ -168,12 +168,13 @@ namespace SilverSim.BackendHandlers.Robust.UserAccounts
             }
 
             UUID sessionId;
-            if (!reqdata.TryGetValue("sessionID", out sessionId))
+            IValue iv;
+            if (!reqdata.TryGetValue("sessionID", out iv) || !UUID.TryParse(iv.ToString(), out sessionId))
             {
                 throw new XmlRpc.XmlRpcFaultException(-32602, "invalid method parameters");
             }
             UUID userId;
-            if (!reqdata.TryGetValue("userID", out userId))
+            if (!reqdata.TryGetValue("userID", out iv) || !UUID.TryParse(iv.ToString(), out userId))
             {
                 throw new XmlRpc.XmlRpcFaultException(-32602, "invalid method parameters");
             }
@@ -213,15 +214,17 @@ namespace SilverSim.BackendHandlers.Robust.UserAccounts
             }
 
             UUID id;
-            if (!reqdata.TryGetValue("sessionID", out id))
+            IValue iv;
+            if (!reqdata.TryGetValue("sessionID", out iv) || !UUID.TryParse(iv.ToString(), out id))
             {
                 throw new XmlRpc.XmlRpcFaultException(-32602, "invalid method parameters");
             }
             string token;
-            if (!reqdata.TryGetValue("token", out token))
+            if (!reqdata.TryGetValue("token", out iv))
             {
                 throw new XmlRpc.XmlRpcFaultException(-32602, "invalid method parameters");
             }
+            token = iv.ToString();
 
             Map respdata = new Map();
             try
@@ -245,15 +248,17 @@ namespace SilverSim.BackendHandlers.Robust.UserAccounts
             }
 
             UUID id;
-            if (!reqdata.TryGetValue("sessionID", out id))
+            IValue iv;
+            if (!reqdata.TryGetValue("sessionID", out iv) || !UUID.TryParse(iv.ToString(), out id))
             {
                 throw new XmlRpc.XmlRpcFaultException(-32602, "invalid method parameters");
             }
             string token;
-            if (!reqdata.TryGetValue("token", out token))
+            if (!reqdata.TryGetValue("token", out iv))
             {
                 throw new XmlRpc.XmlRpcFaultException(-32602, "invalid method parameters");
             }
+            token = iv.ToString();
             string[] tokendata = token.Split(';');
             if (tokendata.Length != 2)
             {
@@ -286,8 +291,9 @@ namespace SilverSim.BackendHandlers.Robust.UserAccounts
                 throw new XmlRpc.XmlRpcFaultException(-32602, "invalid method parameters");
             }
 
+            IValue iv;
             UUID id;
-            if(!reqdata.TryGetValue("userID", out id))
+            if(!reqdata.TryGetValue("userID", out iv) || !UUID.TryParse(iv.ToString(), out id))
             {
                 throw new XmlRpc.XmlRpcFaultException(-32602, "invalid method parameters");
             }
@@ -319,11 +325,12 @@ namespace SilverSim.BackendHandlers.Robust.UserAccounts
             }
             UUID toid;
             UUID fromid;
-            if(!reqdata.TryGetValue("targetUserID", out toid))
+            IValue iv;
+            if(!reqdata.TryGetValue("targetUserID", out iv) || !UUID.TryParse(iv.ToString(), out toid))
             {
                 throw new XmlRpc.XmlRpcFaultException(-32602, "invalid method parameters");
             }
-            if (!reqdata.TryGetValue("userID", out fromid))
+            if (!reqdata.TryGetValue("userID", out iv) || !UUID.TryParse(iv.ToString(), out fromid))
             {
                 throw new XmlRpc.XmlRpcFaultException(-32602, "invalid method parameters");
             }
@@ -382,7 +389,8 @@ namespace SilverSim.BackendHandlers.Robust.UserAccounts
             }
 
             UUID userID;
-            if(!reqdata.TryGetValue("userID", out userID))
+            IValue iv;
+            if(!reqdata.TryGetValue("userID", out iv) || !UUID.TryParse(iv.ToString(), out userID))
             {
                 throw new XmlRpc.XmlRpcFaultException(-32602, "invalid method parameters");
             }
