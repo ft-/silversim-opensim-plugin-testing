@@ -133,6 +133,7 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
             m_Log.Info("Initializing agent post handler for " + m_AgentBaseURL);
             m_AuthorizationServices = loader.GetServicesByValue<AuthorizationServiceInterface>();
             m_HttpServer = loader.HttpServer;
+            PostAgentConnector = loader.GetService<PostAgentConnector>(m_PostAgentConnectorName);
             m_HttpServer.StartsWithUriHandlers.Add(m_AgentBaseURL, AgentPostHandler);
             try
             {
