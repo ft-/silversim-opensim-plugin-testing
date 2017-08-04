@@ -22,6 +22,7 @@
 using SilverSim.Scene.Types.Scene;
 using SilverSim.Types;
 using SilverSim.Types.Grid;
+using System;
 using System.Globalization;
 using System.IO;
 using System.Xml;
@@ -134,6 +135,10 @@ namespace SilverSim.OpenSimArchiver.RegionArchiver
 
                                 case "BlockDwell":
                                     scene.RegionSettings.BlockDwell = reader.ReadElementValueAsBoolean();
+                                    break;
+
+                                case "MaxBasePrims":
+                                    scene.RegionSettings.MaxBasePrims = reader.ReadElementValueAsInt();
                                     break;
 
                                 default:
@@ -403,6 +408,10 @@ namespace SilverSim.OpenSimArchiver.RegionArchiver
 
                                 case "Telehub":
                                     LoadRegionSettingsTelehub(reader, scene);
+                                    break;
+
+                                case "WalkableCoefficients":
+                                    scene.RegionSettings.WalkableCoefficientsSerialization = Convert.FromBase64String(reader.ReadElementValueAsString());
                                     break;
 
                                 default:

@@ -207,6 +207,7 @@ namespace SilverSim.OpenSimArchiver.RegionArchiver
                                 xmlwriter.WriteNamedValue("ResetHomeOnTeleport", settings.ResetHomeOnTeleport);
                                 xmlwriter.WriteNamedValue("AllowLandmark", settings.AllowLandmark);
                                 xmlwriter.WriteNamedValue("AllowDirectTeleport", settings.AllowDirectTeleport);
+                                xmlwriter.WriteNamedValue("MaxBasePrims", settings.MaxBasePrims);
                             }
                             xmlwriter.WriteEndElement();
                             xmlwriter.WriteStartElement("GroundTextures");
@@ -235,6 +236,7 @@ namespace SilverSim.OpenSimArchiver.RegionArchiver
                                 xmlwriter.WriteNamedValue("SunPosition", settings.SunPosition + 6);
                             }
                             xmlwriter.WriteEndElement();
+                            xmlwriter.WriteNamedValue("WalkableCoefficients", Convert.ToBase64String(settings.WalkableCoefficientsSerialization));
                             if(settings.TelehubObject != UUID.Zero)
                             {
                                 xmlwriter.WriteStartElement("Telehub");
