@@ -92,7 +92,7 @@ namespace SilverSim.OpenSimArchiver.RegionArchiver
                         /* skip temporary or attached */
                         continue;
                     }
-                    AssetData data = sog.Asset(xmloptions | XmlSerializationOptions.WriteXml2 | XmlSerializationOptions.WriteKeyframeMotion);
+                    AssetData data = sog.Asset(xmloptions | XmlSerializationOptions.WriteXml2 | XmlSerializationOptions.WriteKeyframeMotion | XmlSerializationOptions.WriteRezDate);
                     objectAssets.Add(sog.Name + "_" + ((int)sog.GlobalPosition.X).ToString() + "-" + ((int)sog.GlobalPosition.Y).ToString() + "-" + ((int)sog.GlobalPosition.Z).ToString() + "__" + sog.ID.ToString() + ".xml", data);
                 }
 
