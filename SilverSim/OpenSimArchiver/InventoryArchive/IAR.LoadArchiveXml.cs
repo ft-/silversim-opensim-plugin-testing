@@ -19,6 +19,7 @@
 // obligated to do so. If you do not wish to do so, delete this
 // exception statement from your version.
 
+using SilverSim.Types;
 using System.IO;
 using System.Xml;
 
@@ -80,11 +81,11 @@ namespace SilverSim.OpenSimArchiver.InventoryArchiver
                             {
                                 throw new IARFormatException();
                             }
-                            else if (majorVersion == 0)
+                            else if (majorVersion <= 1)
                             {
                                 if(!reader.IsEmptyElement)
                                 {
-                                    reader.Skip();
+                                    reader.ReadToEndElement("archive");
                                 }
                                 return;
                             }
