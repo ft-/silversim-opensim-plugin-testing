@@ -397,6 +397,10 @@ namespace SilverSim.OpenSimArchiver.InventoryArchiver
                                 item.AssetType = (AssetType)reader.ReadElementValueAsInt();
                                 break;
 
+                            case "AssetID":
+                                item.AssetID = UUID.Parse(reader.ReadElementValueAsString());
+                                break;
+
                             case "SalePrice":
                                 item.SaleInfo.Price = reader.ReadElementValueAsInt();
                                 break;
