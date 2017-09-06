@@ -35,6 +35,7 @@ namespace SilverSim.OpenSimArchiver.Common
         {
             var asset = new AssetData()
             {
+                ID = UUID.Parse(hdr.FileName.Substring(7, 36)),
                 FileName = hdr.FileName,
                 Name = "From Archive",
                 Creator = creator,
