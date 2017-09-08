@@ -109,7 +109,7 @@ namespace SilverSim.OpenSimArchiver.InventoryArchiver
             {
                 using (var reader = new TarArchiveReader(gzipStream))
                 {
-                    var inventoryPath = new Dictionary<string, UUID>();
+                    var inventoryPath = new Dictionary<UUID, UUID>();
                     var reassignedIds = new Dictionary<UUID, UUID>();
                     var linkItems = new List<InventoryItem>();
 
@@ -152,7 +152,7 @@ namespace SilverSim.OpenSimArchiver.InventoryArchiver
                         }
                     }
 
-                    inventoryPath[string.Empty] = parentFolder;
+                    inventoryPath[UUID.Zero] = parentFolder;
 
                     for (; ; )
                     {
@@ -227,7 +227,7 @@ namespace SilverSim.OpenSimArchiver.InventoryArchiver
         private static UUID GetPath(
             UUI principalID,
             InventoryServiceInterface inventoryService,
-            Dictionary<string, UUID> folders,
+            Dictionary<UUID, UUID> folders,
             string path,
             LoadOptions options)
         {
@@ -251,9 +251,16 @@ namespace SilverSim.OpenSimArchiver.InventoryArchiver
                 {
                     finalpath.Append("/");
                 }
+
+                string uuidstr = pathcomps[pathidx].Substring(pathcomps[pathidx].Length - 36);
+                UUID nextfolderid = UUID.Parse(uuidstr);
                 string pname = pathcomps[pathidx].Substring(0, pathcomps[pathidx].Length - 38);
                 finalpath.Append(pname);
-                if (!folders.ContainsKey(finalpath.ToString()))
+                if(folders.ContainsKey(nextfolderid))
+                {
+                    folderID = folders[nextfolderid];
+                }
+                else
                 {
                     var folder = new InventoryFolder()
                     {
@@ -263,7 +270,7 @@ namespace SilverSim.OpenSimArchiver.InventoryArchiver
                     };
                     inventoryService.Folder.Add(folder);
                     folderID = folder.ID;
-                    folders[finalpath.ToString()] = folderID;
+                    folders[nextfolderid] = folderID;
                 }
             }
             return folderID;
