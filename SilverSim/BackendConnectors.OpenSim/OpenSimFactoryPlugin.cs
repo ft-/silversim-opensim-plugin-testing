@@ -23,7 +23,15 @@ using Nini.Config;
 using SilverSim.Main.Common;
 using SilverSim.ServiceInterfaces;
 using SilverSim.ServiceInterfaces.Profile;
+using SilverSim.Viewer.Core.Teleport;
 using System.ComponentModel;
+using SilverSim.Main.Common.Caps;
+using SilverSim.Main.Common.CmdIO;
+using SilverSim.Scene.Management.Scene;
+using SilverSim.ServiceInterfaces.Teleport;
+using SilverSim.Viewer.Core;
+using System.Collections.Generic;
+using SilverSim.BackendConnectors.OpenSim.Teleport;
 
 namespace SilverSim.BackendConnectors.OpenSim
 {
@@ -39,5 +47,20 @@ namespace SilverSim.BackendConnectors.OpenSim
         public ProfileServiceInterface Instantiate(string url) => new Profile.ProfileConnector(url);
 
         public override string Name => "opensim-robust";
+    }
+
+    [Description("OpenSim Teleport Connector Factory")]
+    [PluginName("RobustTeleportPlugin")]
+    public class OpenSimTeleportPlugin : ServicePluginHelo, ITeleportHandlerFactoryServiceInterface, IPlugin
+    {
+        public override string Name => "opensim";
+
+        public TeleportHandlerServiceInterface Instantiate(CommandRegistry commandRegistry, CapsHttpRedirector capsRedirector, List<IProtocolExtender> packetHandlerPlugins, SceneList scenes) => 
+            new OpenSimTeleportProtocol(commandRegistry, capsRedirector, packetHandlerPlugins, scenes);
+
+        public void Startup(ConfigurationLoader loader)
+        {
+            /* intentionally left empty */
+        }
     }
 }
