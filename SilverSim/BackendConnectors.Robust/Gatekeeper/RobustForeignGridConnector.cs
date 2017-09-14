@@ -65,12 +65,19 @@ namespace SilverSim.BackendConnectors.Robust.Gatekeeper
             UUID regionid;
             rInfo = default(RegionInfo);
             message = default(string);
-            return TryLinkRegion(name, out regionid) && TryGetRegion(regionid, out rInfo, out message);
+            string externalname;
+            if(TryLinkRegion(name, out regionid, out externalname) && TryGetRegion(regionid, out rInfo, out message))
+            {
+                rInfo.Name = externalname;
+                return true;
+            }
+            return false;
         }
 
-        private bool TryLinkRegion(string name, out UUID id)
+        private bool TryLinkRegion(string name, out UUID id, out string external_name)
         {
             id = UUID.Zero;
+            external_name = default(string);
             var p = new Map();
             if (!string.IsNullOrEmpty(name))
             {
@@ -82,12 +89,13 @@ namespace SilverSim.BackendConnectors.Robust.Gatekeeper
             if (res.ReturnValue is Map)
             {
                 var d = (Map)res.ReturnValue;
-                if (bool.Parse(d["result"].ToString()))
+                if (!d["result"].AsBoolean)
                 {
                     return false;
                 }
 
                 id = d["uuid"].AsUUID;
+                external_name = d["external_name"].ToString();
                 return true;
             }
             else
@@ -110,7 +118,7 @@ namespace SilverSim.BackendConnectors.Robust.Gatekeeper
             if (res.ReturnValue is Map)
             {
                 var d = (Map)res.ReturnValue;
-                if (bool.Parse(d["result"].ToString()))
+                if (!d["result"].AsBoolean)
                 {
                     return false;
                 }
