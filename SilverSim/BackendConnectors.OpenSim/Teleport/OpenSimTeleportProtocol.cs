@@ -131,7 +131,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
             m_Scenes = loader.Scenes;
         }
 
-        public override GridType GridType => new GridType("opensim");
+        public override GridType GridType => new GridType("opensim-robust");
 
         public override void Cancel()
         {
