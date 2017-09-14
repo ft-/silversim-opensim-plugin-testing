@@ -53,7 +53,7 @@ namespace SilverSim.BackendConnectors.OpenSim
     [PluginName("RobustTeleportPlugin")]
     public class OpenSimTeleportPlugin : ServicePluginHelo, ITeleportHandlerFactoryServiceInterface, IPlugin
     {
-        public override string Name => "opensim";
+        public override string Name => "opensim-robust";
 
         public TeleportHandlerServiceInterface Instantiate(CommandRegistry commandRegistry, CapsHttpRedirector capsRedirector, List<IProtocolExtender> packetHandlerPlugins, SceneList scenes) => 
             new OpenSimTeleportProtocol(commandRegistry, capsRedirector, packetHandlerPlugins, scenes);

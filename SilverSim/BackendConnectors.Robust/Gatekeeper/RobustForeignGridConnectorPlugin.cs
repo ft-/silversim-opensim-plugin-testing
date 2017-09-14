@@ -29,7 +29,7 @@ namespace SilverSim.BackendConnectors.Robust.Gatekeeper
     [PluginName("OpenSimForeignGridConnector")]
     public class RobustForeignGridConnectorPlugin : ServicePluginHelo, IForeignGridConnectorPlugin, IPlugin
     {
-        public override string Name => "opensim";
+        public override string Name => "opensim-robust";
 
         public string DisplayName => "OpenSim";
 
