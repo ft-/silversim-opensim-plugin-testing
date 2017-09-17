@@ -65,7 +65,10 @@ namespace SilverSim.BackendHandlers.Robust.Inventory
             item.Permissions.Group = (InventoryPermissionsMask)dict.GetUInt("GroupPermissions");
             item.SaleInfo.Price = dict.GetInt("SalePrice");
             item.SaleInfo.Type = (InventoryItem.SaleInfoData.SaleType)dict.GetInt("SaleType");
-
+            if(dict.ContainsKey("LastOwner"))
+            {
+                item.LastOwner = new UUI(dict.GetUUID("LastOwner"));
+            }
             return item;
         }
 
