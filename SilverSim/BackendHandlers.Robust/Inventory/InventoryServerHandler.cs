@@ -547,6 +547,10 @@ namespace SilverSim.BackendHandlers.Robust.Inventory
             {
                 m_InventoryService.Folder.Add(folder);
             }
+            catch(InvalidParentFolderIdException)
+            {
+                throw;
+            }
             catch
             {
                 throw new FailureResultException();
@@ -643,6 +647,10 @@ namespace SilverSim.BackendHandlers.Robust.Inventory
             try
             {
                 m_InventoryService.Item.Add(item);
+            }
+            catch (InvalidParentFolderIdException)
+            {
+                throw;
             }
             catch
             {

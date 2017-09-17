@@ -60,7 +60,7 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
                 return false;
             }
 
-            folder = RobustInventoryConnector.FolderFromMap(foldermap);
+            folder = FolderFromMap(foldermap);
             return true;
         }
 
@@ -97,7 +97,7 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
                 InventoryFolder folder;
                 if(!Folder.TryGetValue(key, out folder))
                 {
-                    throw new InventoryInaccessibleException();
+                    throw new InventoryFolderNotFoundException(key);
                 }
 
                 return folder;
@@ -130,7 +130,7 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
                 return false;
             }
 
-            folder = RobustInventoryConnector.FolderFromMap(foldermap);
+            folder = FolderFromMap(foldermap);
             return true;
         }
 
@@ -163,7 +163,7 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
                 InventoryFolder folder;
                 if(!Folder.TryGetValue(principalID, key, out folder))
                 {
-                    throw new InventoryInaccessibleException();
+                    throw new InventoryFolderNotFoundException(key);
                 }
                 return folder;
             }
@@ -197,7 +197,7 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
                 return false;
             }
 
-            folder = RobustInventoryConnector.FolderFromMap(foldermap);
+            folder = FolderFromMap(foldermap);
             return true;
         }
 
@@ -296,7 +296,7 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
                 var itemdata = i.Value as Map;
                 if (itemdata != null)
                 {
-                    items.Add(RobustInventoryConnector.ItemFromMap(itemdata, m_GroupsService));
+                    items.Add(ItemFromMap(itemdata, m_GroupsService));
                 }
             }
             return items;
