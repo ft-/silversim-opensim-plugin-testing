@@ -265,7 +265,7 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
                 var folderdata = i.Value as Map;
                 if (folderdata != null)
                 {
-                    items.Add(RobustInventoryConnector.FolderFromMap(folderdata));
+                    items.Add(FolderFromMap(folderdata));
                 }
             }
             return items;
@@ -305,19 +305,15 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
         #endregion
 
         #region Methods
-        private Dictionary<string, string> SerializeFolder(InventoryFolder folder)
+        private Dictionary<string, string> SerializeFolder(InventoryFolder folder) => new Dictionary<string, string>
         {
-            var post = new Dictionary<string, string>
-            {
-                ["ID"] = (string)folder.ID,
-                ["ParentID"] = (string)folder.ParentFolderID,
-                ["Type"] = ((int)folder.InventoryType).ToString(),
-                ["Version"] = folder.Version.ToString(),
-                ["Name"] = folder.Name,
-                ["Owner"] = (string)folder.Owner.ID
-            };
-            return post;
-        }
+            ["ID"] = (string)folder.ID,
+            ["ParentID"] = (string)folder.ParentFolderID,
+            ["Type"] = ((int)folder.InventoryType).ToString(),
+            ["Version"] = folder.Version.ToString(),
+            ["Name"] = folder.Name,
+            ["Owner"] = (string)folder.Owner.ID
+        };
 
         void IInventoryFolderServiceInterface.Add(InventoryFolder folder)
         {

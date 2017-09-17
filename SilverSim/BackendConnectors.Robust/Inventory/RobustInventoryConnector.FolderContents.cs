@@ -51,7 +51,7 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
             }
             if (!map.ContainsKey("folder"))
             {
-                throw new InventoryInaccessibleException();
+                throw new InventoryFolderNotFoundException(key);
             }
 
             var foldermap = map["folder"] as Map;
@@ -60,7 +60,7 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
                 throw new InventoryInaccessibleException();
             }
 
-            return RobustInventoryConnector.FolderFromMap(foldermap);
+            return FolderFromMap(foldermap);
         }
         #endregion
 
