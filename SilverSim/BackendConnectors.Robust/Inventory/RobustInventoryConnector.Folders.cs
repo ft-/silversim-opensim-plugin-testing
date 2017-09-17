@@ -330,6 +330,15 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
             }
             if (!((AString)map["RESULT"]))
             {
+                IValue iv;
+                if (map.TryGetValue("FAULT", out iv))
+                {
+                    switch (iv.ToString())
+                    {
+                        case "ParentFolder":
+                            throw new InvalidParentFolderIdException();
+                    }
+                }
                 throw new InventoryFolderNotStoredException(folder.ID);
             }
         }
@@ -365,6 +374,15 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
             }
             if (!((AString)map["RESULT"]))
             {
+                IValue iv;
+                if (map.TryGetValue("FAULT", out iv))
+                {
+                    switch (iv.ToString())
+                    {
+                        case "ParentFolder":
+                            throw new InvalidParentFolderIdException();
+                    }
+                }
                 throw new InventoryFolderNotStoredException(folderID);
             }
         }

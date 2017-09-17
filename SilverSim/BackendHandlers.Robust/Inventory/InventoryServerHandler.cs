@@ -289,6 +289,23 @@ namespace SilverSim.BackendHandlers.Robust.Inventory
                     throw new FailureResultException();
                 }
             }
+            catch(InvalidParentFolderIdException)
+            {
+                using (HttpResponse res = httpreq.BeginResponse("text/xml"))
+                {
+                    using (XmlTextWriter writer = res.GetOutputStream().UTF8XmlTextWriter())
+                    {
+                        writer.WriteStartElement("ServerResponse");
+                        writer.WriteStartElement("RESULT");
+                        writer.WriteValue(false);
+                        writer.WriteEndElement();
+                        writer.WriteStartElement("FAULT");
+                        writer.WriteValue("ParentFolder");
+                        writer.WriteEndElement();
+                        writer.WriteEndElement();
+                    }
+                }
+            }
             catch (FailureResultException)
             {
                 using (HttpResponse res = httpreq.BeginResponse("text/xml"))
@@ -510,6 +527,7 @@ namespace SilverSim.BackendHandlers.Robust.Inventory
                     writer.WriteStartElement("ServerResponse");
                     int count = 0;
                     writer.WriteStartElement("ITEMS");
+                    writer.WriteAttributeString("type", "List");
                     foreach (InventoryItem item in folderitems)
                     {
                         writer.WriteItem("item_" + count.ToString(), item);
@@ -560,6 +578,10 @@ namespace SilverSim.BackendHandlers.Robust.Inventory
             try
             {
                 m_InventoryService.Folder.Move(principalID, folderID, parentID);
+            }
+            catch(InvalidParentFolderIdException)
+            {
+                throw;
             }
             catch
             {
@@ -660,6 +682,10 @@ namespace SilverSim.BackendHandlers.Robust.Inventory
                 {
                     m_InventoryService.Item.Move(principalID, idList[i], destList[i]);
                 }
+            }
+            catch(InvalidParentFolderIdException)
+            {
+                throw;
             }
             catch
             {
