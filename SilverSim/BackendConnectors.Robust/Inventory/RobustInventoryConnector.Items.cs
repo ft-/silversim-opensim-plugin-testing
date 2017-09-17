@@ -97,7 +97,7 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
                 InventoryItem item;
                 if(!Item.TryGetValue(key, out item))
                 {
-                    throw new InventoryInaccessibleException();
+                    throw new InventoryItemNotFoundException(key);
                 }
                 return item;
             }
@@ -172,13 +172,13 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
                 {
                     map = OpenSimResponse.Deserialize(s);
                 }
-                var itemmap = map["item"] as Map;
-                if (itemmap == null)
+                Map itemmap;
+                if(!map.TryGetValue("item", out itemmap))
                 {
-                    throw new InventoryInaccessibleException();
+                    throw new InventoryItemNotFoundException(key);
                 }
 
-                return RobustInventoryConnector.ItemFromMap(itemmap, m_GroupsService);
+                return ItemFromMap(itemmap, m_GroupsService);
             }
         }
 
@@ -288,9 +288,10 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
             ["GroupOwned"] = item.IsGroupOwned.ToString(),
             ["Folder"] = (string)item.ParentFolderID,
             ["Owner"] = (string)item.Owner.ID,
+            ["LastOwner"] = (string)item.LastOwner.ID,
             ["Name"] = item.Name,
             ["InvType"] = ((int)item.InventoryType).ToString(),
-            ["AssetType"] = ((uint)item.AssetType).ToString(),
+            ["AssetType"] = ((int)item.AssetType).ToString(),
             ["BasePermissions"] = ((uint)item.Permissions.Base).ToString(),
             ["CreationDate"] = ((uint)item.CreationDate.DateTimeToUnixTime()).ToString(),
             ["CreatorData"] = item.Creator.CreatorData,
@@ -298,7 +299,7 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
             ["GroupPermissions"] = ((uint)item.Permissions.Group).ToString(),
             ["Description"] = item.Description,
             ["EveryOnePermissions"] = ((uint)item.Permissions.EveryOne).ToString(),
-            ["Flags"] = item.Flags.ToString(),
+            ["Flags"] = ((uint)item.Flags).ToString(),
             ["NextPermissions"] = ((uint)item.Permissions.NextOwner).ToString(),
             ["SalePrice"] = ((uint)item.SaleInfo.Price).ToString(),
             ["SaleType"] = ((uint)item.SaleInfo.Type).ToString()

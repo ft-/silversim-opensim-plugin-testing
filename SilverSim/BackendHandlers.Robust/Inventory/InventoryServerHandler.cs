@@ -62,7 +62,7 @@ namespace SilverSim.BackendHandlers.Robust.Inventory
             item.Permissions.Current = (InventoryPermissionsMask)dict.GetUInt("CurrentPermissions");
             item.Permissions.Base = (InventoryPermissionsMask)dict.GetUInt("BasePermissions");
             item.Permissions.EveryOne = (InventoryPermissionsMask)dict.GetUInt("EveryOnePermissions");
-            item.Permissions.Group = (InventoryPermissionsMask)dict.GetUInt("groupPermissions");
+            item.Permissions.Group = (InventoryPermissionsMask)dict.GetUInt("GroupPermissions");
             item.SaleInfo.Price = dict.GetInt("SalePrice");
             item.SaleInfo.Type = (InventoryItem.SaleInfoData.SaleType)dict.GetInt("SaleType");
 
@@ -102,10 +102,11 @@ namespace SilverSim.BackendHandlers.Robust.Inventory
                 writer.WriteNamedValue("AssetID", item.AssetID);
                 writer.WriteNamedValue("AssetType", (int)item.AssetType);
                 writer.WriteNamedValue("BasePermissions", (uint)item.Permissions.Base);
-                writer.WriteNamedValue("CreationDate", (long)item.CreationDate.DateTimeToUnixTime());
+                writer.WriteNamedValue("CreationDate", item.CreationDate.DateTimeToUnixTime().ToString());
                 writer.WriteNamedValue("CreatorId", item.Creator.ID);
                 writer.WriteNamedValue("CreatorData", item.Creator.CreatorData);
                 writer.WriteNamedValue("CurrentPermissions", (uint)item.Permissions.Current);
+                writer.WriteNamedValue("Name", item.Name);
                 writer.WriteNamedValue("Description", item.Description);
                 writer.WriteNamedValue("EveryOnePermissions", (uint)item.Permissions.EveryOne);
                 writer.WriteNamedValue("Flags", (uint)item.Flags);
@@ -117,6 +118,7 @@ namespace SilverSim.BackendHandlers.Robust.Inventory
                 writer.WriteNamedValue("InvType", (int)item.InventoryType);
                 writer.WriteNamedValue("NextPermissions", (uint)item.Permissions.NextOwner);
                 writer.WriteNamedValue("Owner", item.Owner.ID);
+                writer.WriteNamedValue("LastOwner", item.LastOwner.ID);
                 writer.WriteNamedValue("SalePrice", item.SaleInfo.Price);
                 writer.WriteNamedValue("SaleType", (byte)item.SaleInfo.Type);
             }
@@ -302,6 +304,9 @@ namespace SilverSim.BackendHandlers.Robust.Inventory
                 }
             }
             catch
+#if DEBUG
+                (Exception e)
+#endif
             {
                 if (httpreq.Response != null)
                 {
@@ -309,6 +314,9 @@ namespace SilverSim.BackendHandlers.Robust.Inventory
                 }
                 else
                 {
+#if DEBUG
+                    m_Log.Debug("Exception at UPDATEITEM", e);
+#endif
                     using (HttpResponse res = httpreq.BeginResponse("text/xml"))
                     {
                         using (XmlTextWriter writer = res.GetOutputStream().UTF8XmlTextWriter())
@@ -719,12 +727,17 @@ namespace SilverSim.BackendHandlers.Robust.Inventory
             UUID principalID = reqdata.GetUUID("PRINCIPAL");
             string itemIDstring = reqdata.GetString("ITEMS");
             string[] uuidstrs = itemIDstring.Split(',');
-            var uuids = new UUID[uuidstrs.Length];
+            var uuids = new List<UUID>();
+
+            foreach(string uuidstr in uuidstrs)
+            {
+                uuids.Add(new UUID(uuidstr));
+            }
 
             List<InventoryItem> items;
             try
             {
-                items = m_InventoryService.Item[principalID, new List<UUID>(uuids)];
+                items = m_InventoryService.Item[principalID, uuids];
             }
             catch
             {

@@ -177,7 +177,7 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
                 InventoryType = (InventoryType)map["InvType"].AsInt,
                 Name = map["Name"].AsString.ToString(),
                 Owner = new UUI(map["Owner"].AsUUID),
-                IsGroupOwned = map["GroupOwned"].ToString().ToLower() == "true"
+                IsGroupOwned = map["GroupOwned"].ToString().ToLowerInvariant() == "true"
             };
 
             string creatorData = map["CreatorData"].AsString.ToString();
@@ -188,6 +188,12 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
             else
             {
                 item.Creator = new UUI(map["CreatorId"].AsUUID, creatorData);
+            }
+
+            IValue iv;
+            if(map.TryGetValue("LastOwner", out iv))
+            {
+                item.LastOwner.ID = iv.AsUUID;
             }
 
             item.Permissions.Base = (InventoryPermissionsMask)map["BasePermissions"].AsUInt;
