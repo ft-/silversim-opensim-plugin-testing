@@ -392,6 +392,11 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
             }
         }
 
+        void IInventoryItemServiceInterface.Copy(UUID principalID, UUID id, UUID newFolder)
+        {
+            CopyItem(principalID, id, newFolder);
+        }
+
         List<UUID> IInventoryItemServiceInterface.Delete(UUID principalID, List<UUID> itemids)
         {
             var deleted = new List<UUID>();
