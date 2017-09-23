@@ -550,107 +550,72 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
 
         public override bool TeleportTo(SceneInterface sceneInterface, IAgent agent, string gatekeeperURI, UUID regionID, Vector3 position, Vector3 lookAt, TeleportFlags flags)
         {
-            if (gatekeeperURI == sceneInterface.GatekeeperURI)
-            {
-                /* same grid */
-                lock (m_TeleportThreadLock)
-                {
-                    if (m_TeleportThread == null)
-                    {
-                        m_Log.DebugFormat("Teleport to region {0} at this grid requested for {1}: {2}", regionID.ToString(), agent.Owner.FullName, flags.ToString());
+            bool isSameGrid = gatekeeperURI == sceneInterface.GatekeeperURI;
 
-                        m_TeleportThread = ThreadManager.CreateThread(() =>
+            lock (m_TeleportThreadLock)
+            {
+                if (m_TeleportThread == null)
+                {
+                    m_Log.DebugFormat("Teleport to region {0} at {3} grid requested for {1}: {2}", regionID.ToString(), agent.Owner.FullName, flags.ToString(), isSameGrid ? "this" : "foreign");
+
+                    m_TeleportThread = ThreadManager.CreateThread(() =>
+                    {
+                        try
                         {
+                            DestinationInfo dInfo;
                             try
                             {
-                                DestinationInfo dInfo;
-                                try
+                                if (isSameGrid)
                                 {
                                     dInfo = TeleportTo_Step1_ThisGrid(sceneInterface, agent, gatekeeperURI, regionID, flags);
                                 }
-                                catch (TeleportFailedException e)
+                                else
                                 {
-                                    m_Log.DebugFormat("Teleport Failed: {0}: {1}\n{2}", e.GetType().FullName, e.Message, e.StackTrace);
-                                    agent.SendAlertMessage(e.Message, sceneInterface.ID);
-                                    return;
+                                    dInfo = TeleportTo_Step1_ForeignGrid(sceneInterface, agent, gatekeeperURI, regionID, flags);
                                 }
-                                catch (Exception e)
-                                {
-                                    m_Log.DebugFormat("Teleport Failed: {0}: {1}\n{2}", e.GetType().FullName, e.Message, e.StackTrace);
-                                    throw;
-                                }
-                                try
-                                {
-                                    TeleportTo_Step2(sceneInterface, agent, dInfo, position, lookAt, flags);
-                                }
-                                catch (Exception e)
-                                {
-                                    m_Log.DebugFormat("Teleport Failed: {0}: {1}\n{2}", e.GetType().FullName, e.Message, e.StackTrace);
-                                    TeleportFailed failedMsg = new TeleportFailed()
-                                    {
-                                        AgentID = agent.ID,
-                                        Reason = e.Message
-                                    };
-                                    agent.SendMessageIfRootAgent(failedMsg, sceneInterface.ID);
-                                }
-                            }
-                            finally
-                            {
-                                m_TeleportThread = null;
-                                agent.RemoveActiveTeleportService(this);
-                            }
-                        });
-                        agent.ActiveTeleportService = this;
-                        m_TeleportThread.Start();
-                        return true;
-                    }
-                    else
-                    {
-                        m_Log.DebugFormat("Teleport to region {0} at this grid requested for {1} not possible: {2}", regionID.ToString(), agent.Owner.FullName, flags.ToString());
-                    }
-                }
-            }
-            else
-            {
-                /* foreign grid */
-                lock (m_TeleportThreadLock)
-                {
-                    if (m_TeleportThread == null)
-                    {
-                        m_Log.DebugFormat("Teleport to region {0} at grid {2} requested for {1}: {3}", regionID.ToString(), agent.Owner.FullName, gatekeeperURI, flags.ToString());
-
-                        m_TeleportThread = ThreadManager.CreateThread(() =>
-                        {
-                            try
-                            {
-                                TeleportTo_Step1_ForeignGrid(sceneInterface, agent, gatekeeperURI, regionID, flags);
                             }
                             catch (TeleportFailedException e)
                             {
                                 m_Log.DebugFormat("Teleport Failed: {0}: {1}\n{2}", e.GetType().FullName, e.Message, e.StackTrace);
                                 agent.SendAlertMessage(e.Message, sceneInterface.ID);
+                                return;
                             }
                             catch (Exception e)
                             {
                                 m_Log.DebugFormat("Teleport Failed: {0}: {1}\n{2}", e.GetType().FullName, e.Message, e.StackTrace);
                                 throw;
                             }
-                            finally
+                            try
                             {
-                                m_TeleportThread = null;
-                                agent.RemoveActiveTeleportService(this);
+                                TeleportTo_Step2(sceneInterface, agent, dInfo, position, lookAt, flags);
                             }
-                        });
-                        agent.ActiveTeleportService = this;
-                        m_TeleportThread.Start();
-                        return true;
-                    }
-                    else
-                    {
-                        m_Log.DebugFormat("Teleport to region {0} at grid {2} requested for {1} not possible: {3}", regionID.ToString(), agent.Owner.FullName, gatekeeperURI, flags.ToString());
-                    }
+                            catch (Exception e)
+                            {
+                                m_Log.DebugFormat("Teleport Failed: {0}: {1}\n{2}", e.GetType().FullName, e.Message, e.StackTrace);
+                                var failedMsg = new TeleportFailed()
+                                {
+                                    AgentID = agent.ID,
+                                    Reason = e.Message
+                                };
+                                agent.SendMessageIfRootAgent(failedMsg, sceneInterface.ID);
+                            }
+                        }
+                        finally
+                        {
+                            m_TeleportThread = null;
+                            agent.RemoveActiveTeleportService(this);
+                        }
+                    });
+                    agent.ActiveTeleportService = this;
+                    m_TeleportThread.Start();
+                    return true;
+                }
+                else
+                {
+                    m_Log.DebugFormat("Teleport to region {0} at {3} grid requested for {1} not possible: {2}", regionID.ToString(), agent.Owner.FullName, flags.ToString(), isSameGrid ? "this" : "foreign");
                 }
             }
+
             return false;
         }
         #endregion
@@ -665,76 +630,37 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
             };
             agent.SendMessageIfRootAgent(teleStart, sceneInterface.ID);
 
-            if (regionName.StartsWith("http://") || regionName.StartsWith("https://"))
+#if DEBUG
+            m_Log.DebugFormat("Starting teleport to {0} for {1} ({2})", regionName, agent.Owner.FullName, agent.Owner.ID);
+#endif
+            var regionAddress = new RegionAddress(regionName);
+
+            if(regionAddress.IsForeignGrid && !regionAddress.TargetsGatekeeperUri(sceneInterface.GatekeeperURI))
             {
-                /* URI style HG location */
-                int pos = regionName.IndexOf(' ');
-                if (pos < 0 && !Uri.IsWellFormedUriString(regionName, UriKind.Absolute))
-                {
-                    throw new TeleportFailedException(this.GetLanguageString(agent.CurrentCulture, "HgUriStyleInvalid", "HG URI-Style is invalid"));
-                }
-                if (pos < 0)
-                {
-                    dInfo = GetRegionByName(regionName.Substring(0, pos), agent, string.Empty);
-                }
-                else
-                {
-                    dInfo = GetRegionByName(regionName.Substring(0, pos), agent, regionName.Substring(pos + 1));
-                }
+                dInfo = GetRegionByName(regionAddress.GatekeeperUri, agent, regionAddress.RegionName);
             }
             else
             {
-                if (regionName.Contains(":"))
+                GridServiceInterface gridService = sceneInterface.GridService;
+                if (gridService != null)
                 {
-                    /* HG notation based on hostname:port:region */
-                    string[] parts = regionName.Split(new char[] { ':' }, 3);
-                    string gkuri;
-                    if (parts.Length > 1)
+                    try
                     {
-                        gkuri = "http://" + parts[0] + ":" + parts[1] + "/";
-                        if (Uri.IsWellFormedUriString(gkuri, UriKind.Absolute))
+                        RegionInfo rInfo = gridService[sceneInterface.ScopeID, regionName];
+                        dInfo = new DestinationInfo(rInfo)
                         {
-                            switch (parts.Length)
-                            {
-                                case 3:
-                                    /* hostname:port:region */
-                                    dInfo = GetRegionByName(gkuri, agent, parts[2]);
-                                    break;
-
-                                case 2:
-                                    dInfo = GetRegionByName(gkuri, agent, string.Empty);
-                                    break;
-
-                                default:
-                                    break;
-                            }
-                        }
+                            GatekeeperURI = sceneInterface.GatekeeperURI,
+                            LocalToGrid = true
+                        };
                     }
-                }
-
-                if (dInfo == null)
-                {
-                    GridServiceInterface gridService = sceneInterface.GridService;
-                    if (gridService != null)
-                    {
-                        try
-                        {
-                            RegionInfo rInfo = gridService[sceneInterface.ScopeID, regionName];
-                            dInfo = new DestinationInfo(rInfo)
-                            {
-                                GatekeeperURI = sceneInterface.GatekeeperURI,
-                                LocalToGrid = true
-                            };
-                        }
-                        catch (KeyNotFoundException)
-                        {
-                            throw new TeleportFailedException(this.GetLanguageString(agent.CurrentCulture, "RegionNotFound", "Region not found."));
-                        }
-                    }
-                    else
+                    catch (KeyNotFoundException)
                     {
                         throw new TeleportFailedException(this.GetLanguageString(agent.CurrentCulture, "RegionNotFound", "Region not found."));
                     }
+                }
+                else
+                {
+                    throw new TeleportFailedException(this.GetLanguageString(agent.CurrentCulture, "RegionNotFound", "Region not found."));
                 }
             }
 
@@ -743,6 +669,10 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
 
         private DestinationInfo TeleportTo_Step1_ThisGrid(SceneInterface sceneInterface, IAgent agent, string gatekeeperURI, UUID regionID, TeleportFlags flags)
         {
+#if DEBUG
+            m_Log.DebugFormat("TeleportTo_Step1_ThisGrid(RegionID): {0} ({1})", agent.Owner.FullName, agent.Owner.ID);
+#endif
+
             GridServiceInterface gridService = sceneInterface.GridService;
             var teleStart = new TeleportStart()
             {
@@ -774,6 +704,10 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
 
         private DestinationInfo TeleportTo_Step1_ForeignGrid(SceneInterface sceneInterface, IAgent agent, string gatekeeperURI, UUID regionID, TeleportFlags flags)
         {
+#if DEBUG
+            m_Log.DebugFormat("TeleportTo_Step1_ForeignGrid(RegionID): {0} ({1})", agent.Owner.FullName, agent.Owner.ID);
+#endif
+
             var teleStart = new TeleportStart()
             {
                 TeleportFlags = flags
@@ -785,6 +719,9 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
 
         private DestinationInfo TeleportTo_Step1_ThisGrid(SceneInterface sceneInterface, IAgent agent, string gatekeeperURI, GridVector location, TeleportFlags flags)
         {
+#if DEBUG
+            m_Log.DebugFormat("TeleportTo_Step1_ThisGrid(Location): {0} ({1})", agent.Owner.FullName, agent.Owner.ID);
+#endif
             GridServiceInterface gridService = sceneInterface.GridService;
             var teleStart = new TeleportStart()
             {
@@ -816,6 +753,9 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
 
         private DestinationInfo TeleportTo_Step1_ForeignGrid(SceneInterface sceneInterface, IAgent agent, string gatekeeperURI, GridVector location, TeleportFlags flags)
         {
+#if DEBUG
+            m_Log.DebugFormat("TeleportTo_Step1_ForeignGrid(Location): {0} ({1})", agent.Owner.FullName, agent.Owner.ID);
+#endif
             var teleStart = new TeleportStart()
             {
                 TeleportFlags = flags
@@ -828,6 +768,9 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
 
         private void TeleportTo_Step2(SceneInterface scene, IAgent agent, DestinationInfo dInfo, Vector3 position, Vector3 lookAt, TeleportFlags flags)
         {
+#if DEBUG
+            m_Log.DebugFormat("TeleportTo_Step2: {0} ({1})", agent.Owner.FullName, agent.Owner.ID);
+#endif
             UUID sceneID = scene.ID;
             uint actualCircuitCode;
             var vagent = (ViewerAgent)agent;
@@ -1003,7 +946,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
                     SendTeleportProgress(agent, sceneID, this.GetLanguageString(agent.CurrentCulture, "TransferingToDestination", "Transfering to destination"), flags);
 
                     /* the moment we send this, there is no way to get the viewer back if something fails and the viewer connected successfully on other side */
-                    TeleportFinish teleFinish = new TeleportFinish()
+                    var teleFinish = new TeleportFinish()
                     {
                         AgentID = agent.ID,
                         LocationID = 0,
@@ -1071,6 +1014,9 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
         private ProtocolVersion QueryAccess(DestinationInfo dInfo, IAgent agent, Vector3 position)
         {
             string uri = BuildAgentUri(dInfo, agent);
+#if DEBUG
+            m_Log.DebugFormat("QueryAccess: {0} ({1}) at {2}", agent.Owner.FullName, agent.Owner.ID, uri);
+#endif
 
             string versionStr = string.Format("{0}.{1}", PROTOCOL_VERSION_MAJOR, PROTOCOL_VERSION_MINOR);
             var req = new Map
