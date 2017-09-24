@@ -19,6 +19,8 @@
 // obligated to do so. If you do not wish to do so, delete this
 // exception statement from your version.
 
+using log4net;
+using Nini.Config;
 using SilverSim.BackendConnectors.OpenSim.Teleport;
 using SilverSim.BackendConnectors.Robust.StructuredData.Agent;
 using SilverSim.Http.Client;
@@ -40,11 +42,15 @@ namespace SilverSim.BackendConnectors.OpenSim.PostAgent
     [Description("Remote Post Agent Connector")]
     public class RemotePostAgentConnector : PostAgentConnector
     {
-        public int TimeoutMs { get; set; }
+        protected static readonly ILog m_Log = LogManager.GetLogger("REMOTE POST AGENT CONNECTOR");
 
-        public RemotePostAgentConnector()
+        public int TimeoutMs { get; set; }
+        private readonly string GatekeeperURI;
+
+        public RemotePostAgentConnector(IConfig ownSection)
         {
             TimeoutMs = 20000;
+            GatekeeperURI = ownSection.GetString("GatekeeperURI", string.Empty);
         }
 
         private static string BuildAgentUri(RegionInfo destinationRegion, UUID agentID, string extra = "")
@@ -74,7 +80,21 @@ namespace SilverSim.BackendConnectors.OpenSim.PostAgent
 
             agentPostData.Session = authData.SessionInfo;
 
-            string agentURL = BuildAgentUri(authData.DestinationInfo, authData.AccountInfo.Principal.ID);
+            string agentURL;
+
+            if(0 == string.Compare(authData.DestinationInfo.GatekeeperURI, GatekeeperURI, true))
+            {
+                agentURL = BuildAgentUri(authData.DestinationInfo, authData.AccountInfo.Principal.ID);
+            }
+            else
+            {
+                agentURL = authData.AccountInfo.Principal.HomeURI.ToString();
+                if(!agentURL.EndsWith("/"))
+                {
+                    agentURL += "/";
+                }
+                agentURL += "homeagent";
+            }
 
             byte[] uncompressed_postdata;
             using (var ms = new MemoryStream())
@@ -93,6 +113,11 @@ namespace SilverSim.BackendConnectors.OpenSim.PostAgent
                     compressed_postdata = ms.ToArray();
                 }
             }
+
+#if DEBUG
+            m_Log.DebugFormat("Sending preferred POST request to {0}: Length={1}", agentURL, compressed_postdata.Length);
+#endif
+
             try
             {
                 using (Stream o = HttpClient.DoStreamRequest("POST", agentURL, null, "application/json", compressed_postdata.Length, (Stream ws) =>

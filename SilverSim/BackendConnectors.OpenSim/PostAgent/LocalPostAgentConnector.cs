@@ -79,26 +79,26 @@ namespace SilverSim.BackendConnectors.OpenSim.PostAgent
         private List<AuthorizationServiceInterface> m_AuthorizationServices;
         private CommandRegistry Commands;
         private string m_HomeURI;
-        public GridUserServiceInterface m_GridUserService = null;
+        public GridUserServiceInterface m_GridUserService;
         public string m_GridUserServiceName = string.Empty;
 
         private class StandaloneServicesContainer
         {
-            public ProfileServiceInterface ProfileService = null;
+            public ProfileServiceInterface ProfileService;
             public string ProfileServiceName = string.Empty;
-            public PresenceServiceInterface PresenceService = null;
+            public PresenceServiceInterface PresenceService;
             public string PresenceServiceName = string.Empty;
             public FriendsServiceInterface FriendsService;
             public string FriendsServiceName = string.Empty;
-            public OfflineIMServiceInterface OfflineIMService = null;
+            public OfflineIMServiceInterface OfflineIMService;
             public string OfflineIMServiceName = string.Empty;
-            public AssetServiceInterface AssetService = null;
+            public AssetServiceInterface AssetService;
             public string AssetServiceName = string.Empty;
-            public InventoryServiceInterface InventoryService = null;
+            public InventoryServiceInterface InventoryService;
             public string InventoryServiceName = string.Empty;
         }
 
-        private StandaloneServicesContainer StandaloneServices = null;
+        private StandaloneServicesContainer StandaloneServices;
 
         private sealed class GridParameterMap : ICloneable
         {

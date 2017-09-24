@@ -990,15 +990,15 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
                 uint circuitCode;
                 string capsPath;
 
-                string foreignAgentUri = dInfo.GatekeeperURI;
-                if (!foreignAgentUri.EndsWith("/"))
+                string homeAgentUri = agent.Owner.HomeURI.ToString();
+                if (!homeAgentUri.EndsWith("/"))
                 {
-                    foreignAgentUri += "/";
+                    homeAgentUri += "/";
                 }
-                foreignAgentUri += "foreignagent";
+                homeAgentUri += "homeagent";
 
 #if DEBUG
-                m_Log.DebugFormat("Sending grid POST to {0} for {1} ({2})", foreignAgentUri, agent.Owner.FullName, agent.Owner.ID);
+                m_Log.DebugFormat("Sending agent POST to {0} for {1} ({2})", homeAgentUri, agent.Owner.FullName, agent.Owner.ID);
 #endif
 
                 if (protoVersion.Major == 0 && protoVersion.Minor < 2)
@@ -1013,7 +1013,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
 
                 try
                 {
-                    PostAgent(scene.ID, agent, dInfo, UUID.Random, maxWearables, foreignAgentUri, out circuitCode, out capsPath);
+                    PostAgent(scene.ID, agent, dInfo, UUID.Random, maxWearables, homeAgentUri, out circuitCode, out capsPath);
                 }
                 catch (Exception e)
                 {
