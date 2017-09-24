@@ -296,6 +296,7 @@ namespace SilverSim.BackendHandlers.Robust.Grid
             }
             catch (Exception e)
             {
+                m_Log.DebugFormat("Remote response: {0}: {1}", e.GetType().FullName, e.Message);
                 DoAgentResponse(req, e.Message, false);
                 return;
             }
