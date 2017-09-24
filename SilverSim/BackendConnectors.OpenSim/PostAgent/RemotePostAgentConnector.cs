@@ -47,11 +47,6 @@ namespace SilverSim.BackendConnectors.OpenSim.PostAgent
             TimeoutMs = 20000;
         }
 
-        public override void Startup(ConfigurationLoader loader)
-        {
-            base.Startup(loader);
-        }
-
         private static string BuildAgentUri(RegionInfo destinationRegion, UUID agentID, string extra = "")
         {
             string agentURL = destinationRegion.ServerURI;
@@ -82,7 +77,7 @@ namespace SilverSim.BackendConnectors.OpenSim.PostAgent
             string agentURL = BuildAgentUri(authData.DestinationInfo, authData.AccountInfo.Principal.ID);
 
             byte[] uncompressed_postdata;
-            using (MemoryStream ms = new MemoryStream())
+            using (var ms = new MemoryStream())
             {
                 agentPostData.Serialize(ms, (int)WearableType.NumWearables);
                 uncompressed_postdata = ms.ToArray();
@@ -90,9 +85,9 @@ namespace SilverSim.BackendConnectors.OpenSim.PostAgent
 
             Map result;
             byte[] compressed_postdata;
-            using (MemoryStream ms = new MemoryStream())
+            using (var ms = new MemoryStream())
             {
-                using (GZipStream gz = new GZipStream(ms, CompressionMode.Compress))
+                using (var gz = new GZipStream(ms, CompressionMode.Compress))
                 {
                     gz.Write(uncompressed_postdata, 0, uncompressed_postdata.Length);
                     compressed_postdata = ms.ToArray();
