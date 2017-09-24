@@ -995,7 +995,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
                 {
                     homeAgentUri += "/";
                 }
-                homeAgentUri += "homeagent";
+                homeAgentUri += "homeagent/" + agent.ID;
 
 #if DEBUG
                 m_Log.DebugFormat("Sending agent POST to {0} for {1} ({2})", homeAgentUri, agent.Owner.FullName, agent.Owner.ID);

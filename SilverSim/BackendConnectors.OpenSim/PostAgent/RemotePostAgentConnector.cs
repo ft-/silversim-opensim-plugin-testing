@@ -93,7 +93,7 @@ namespace SilverSim.BackendConnectors.OpenSim.PostAgent
                 {
                     agentURL += "/";
                 }
-                agentURL += "homeagent";
+                agentURL += "homeagent/" + authData.AccountInfo.Principal.ID;
             }
 
             byte[] uncompressed_postdata;
