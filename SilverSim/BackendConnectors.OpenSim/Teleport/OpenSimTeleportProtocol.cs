@@ -176,12 +176,48 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
             agent.ActiveChilds.Remove(regionInfo.ID);
         }
 
-        private void PostAgent(UUID fromSceneID, IAgent agent, DestinationInfo destinationRegion, int maxAllowedWearables, out uint circuitCode, out string capsPath)
+        private void PostAgent(
+            UUID fromSceneID,
+            IAgent agent,
+            DestinationInfo destinationRegion,
+            int maxAllowedWearables,
+            out uint circuitCode,
+            out string capsPath) =>
+            PostAgent(fromSceneID, agent, destinationRegion, UUID.Random, maxAllowedWearables, out circuitCode, out capsPath);
+
+        private void PostAgent(
+            UUID fromSceneID,
+            IAgent agent,
+            DestinationInfo destinationRegion,
+            UUID capsId,
+            int maxAllowedWearables,
+            out uint circuitCode,
+            out string capsPath)
         {
-            PostAgent(fromSceneID, agent, destinationRegion, NewCircuitCode, UUID.Random, maxAllowedWearables, out circuitCode, out capsPath);
+            string agentUri = BuildAgentUri(destinationRegion, agent);
+#if DEBUG
+            m_Log.DebugFormat("Sending region POST to {0} for {1} ({2})", agentUri, agent.Owner.FullName, agent.Owner.ID);
+#endif
+            PostAgent(
+                fromSceneID,
+                agent,
+                destinationRegion,
+                capsId,
+                maxAllowedWearables,
+                agentUri,
+                out circuitCode,
+                out capsPath);
         }
 
-        private void PostAgent(UUID fromSceneID, IAgent agent, DestinationInfo destinationRegion, uint newCircuitCode, UUID capsId, int maxAllowedWearables, out uint circuitCode, out string capsPath)
+        private void PostAgent(
+            UUID fromSceneID,
+            IAgent agent,
+            DestinationInfo destinationRegion, 
+            UUID capsId,
+            int maxAllowedWearables, 
+            string agentURL, 
+            out uint circuitCode, 
+            out string capsPath)
         {
             var vagent = (ViewerAgent)agent;
             AgentCircuit acirc = vagent.Circuits[fromSceneID];
@@ -211,10 +247,8 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
 
             agentPostData.Session = agent.Session;
 
-            string agentURL = BuildAgentUri(destinationRegion, agent);
-
             byte[] uncompressed_postdata;
-            using (MemoryStream ms = new MemoryStream())
+            using (var ms = new MemoryStream())
             {
                 agentPostData.Serialize(ms, maxAllowedWearables);
                 uncompressed_postdata = ms.ToArray();
@@ -222,16 +256,19 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
 
             Map result;
             byte[] compressed_postdata;
-            using (MemoryStream ms = new MemoryStream())
+            using (var ms = new MemoryStream())
             {
-                using (GZipStream gz = new GZipStream(ms, CompressionMode.Compress))
+                using (var gz = new GZipStream(ms, CompressionMode.Compress))
                 {
                     gz.Write(uncompressed_postdata, 0, uncompressed_postdata.Length);
-                    compressed_postdata = ms.ToArray();
                 }
+                compressed_postdata = ms.ToArray();
             }
             try
             {
+#if DEBUG
+                m_Log.DebugFormat("Sending preferred POST request to {0}: Length={1}", agentURL, compressed_postdata.Length);
+#endif
                 using (Stream o = HttpClient.DoStreamRequest("POST", agentURL, null, "application/json", compressed_postdata.Length, (Stream ws) =>
                     ws.Write(compressed_postdata, 0, compressed_postdata.Length), true, TimeoutMs))
                 {
@@ -239,9 +276,18 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
                 }
             }
             catch
+#if DEBUG
+                (Exception e2)
+#endif
             {
+#if DEBUG
+                m_Log.Debug("Exception", e2);
+#endif
                 try
                 {
+#if DEBUG
+                    m_Log.DebugFormat("Sending old compressed POST request to {0}: Length={1}", agentURL, compressed_postdata.Length);
+#endif
                     using (Stream o = HttpClient.DoStreamRequest("POST", agentURL, null, "application/x-gzip", compressed_postdata.Length, (Stream ws) =>
                         ws.Write(compressed_postdata, 0, compressed_postdata.Length), false, TimeoutMs))
                     {
@@ -249,9 +295,18 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
                     }
                 }
                 catch
+#if DEBUG
+                    (Exception e3)
+#endif
                 {
+#if DEBUG
+                    m_Log.Debug("Exception", e3);
+#endif
                     try
                     {
+#if DEBUG
+                        m_Log.DebugFormat("Sending uncompressed POST request to {0}: Length={1}", agentURL, uncompressed_postdata.Length);
+#endif
                         using (Stream o = HttpClient.DoStreamRequest("POST", agentURL, null, "application/json", uncompressed_postdata.Length, (Stream ws) =>
                             ws.Write(uncompressed_postdata, 0, uncompressed_postdata.Length), false, TimeoutMs))
                         {
@@ -260,6 +315,9 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
                     }
                     catch (Exception e)
                     {
+#if DEBUG
+                        m_Log.Debug("Exception", e);
+#endif
                         /* connect failed */
                         agent.ActiveChilds.Remove(destinationRegion.ID);
                         throw new TeleportFailedException(e.Message);
@@ -741,7 +799,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
                         {
                             UUID seedId = UUID.Random;
                             string seedUri = NewCapsURL(dInfo.ServerURI, seedId);
-                            IPEndPoint ep = new IPEndPoint(((IPEndPoint)circ.RemoteEndPoint).Address, 0);
+                            var ep = new IPEndPoint(((IPEndPoint)circ.RemoteEndPoint).Address, 0);
                             targetCircuit = new AgentCircuit(
                                 Commands,
                                 vagent,
@@ -859,7 +917,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
                         /* we have to use PostAgent for TeleportFlags essentially */
                         try
                         {
-                            PostAgent(scene.ID, agent, dInfo, childInfo.CircuitCode, childInfo.SeedCapsID, maxWearables, out circuitCode, out capsPath);
+                            PostAgent(scene.ID, agent, dInfo, childInfo.SeedCapsID, maxWearables, out circuitCode, out capsPath);
                         }
                         catch (Exception e)
                         {
@@ -932,6 +990,17 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
                 uint circuitCode;
                 string capsPath;
 
+                string foreignAgentUri = dInfo.GatekeeperURI;
+                if (!foreignAgentUri.EndsWith("/"))
+                {
+                    foreignAgentUri += "/";
+                }
+                foreignAgentUri += "foreignagent";
+
+#if DEBUG
+                m_Log.DebugFormat("Sending grid POST to {0} for {1} ({2})", foreignAgentUri, agent.Owner.FullName, agent.Owner.ID);
+#endif
+
                 if (protoVersion.Major == 0 && protoVersion.Minor < 2)
                 {
                     throw new TeleportFailedException("Older teleport variant not yet implemented");
@@ -942,10 +1011,9 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
                     maxWearables = 15;
                 }
 
-                /* no child connection, so we need a new one */
                 try
                 {
-                    PostAgent(scene.ID, agent, dInfo, maxWearables, out circuitCode, out capsPath);
+                    PostAgent(scene.ID, agent, dInfo, UUID.Random, maxWearables, foreignAgentUri, out circuitCode, out capsPath);
                 }
                 catch (Exception e)
                 {
@@ -1202,11 +1270,11 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
 
         private Map DoXmlRpcWithHashResponse(string gatekeeperuri, string method, Map reqparams)
         {
-            XmlRpc.XmlRpcRequest req = new XmlRpc.XmlRpcRequest(method);
+            var req = new XmlRpc.XmlRpcRequest(method);
             req.Params.Add(reqparams);
             XmlRpc.XmlRpcResponse res = RPC.DoXmlRpcRequest(gatekeeperuri, req, TimeoutMs);
 
-            Map hash = (Map)res.ReturnValue;
+            var hash = (Map)res.ReturnValue;
             if (hash == null)
             {
                 throw new InvalidOperationException();
