@@ -57,7 +57,7 @@ namespace SilverSim.BackendHandlers.Robust.Grid
 
         private readonly string m_AgentBaseURL = "/agent/";
 
-        private readonly string m_GatekeeperURI;
+        private string m_GatekeeperURI;
 
         public int TimeoutMs { get; set; }
 
@@ -67,10 +67,6 @@ namespace SilverSim.BackendHandlers.Robust.Grid
             m_AgentBaseURL = agentBaseURL;
             m_PostAgentConnectorName = ownSection.GetString("PostAgentConnector", "PostAgentConnector");
             m_GatekeeperURI = ownSection.GetString("GatekeeperURI", string.Empty);
-            if (!m_GatekeeperURI.EndsWith("/"))
-            {
-                m_GatekeeperURI += "/";
-            }
         }
 
         protected string HeloRequester(string uri)
@@ -118,6 +114,14 @@ namespace SilverSim.BackendHandlers.Robust.Grid
             m_PostAgentConnector = loader.GetService<PostAgentConnector>(m_PostAgentConnectorName);
             m_AuthorizationServices = loader.GetServicesByValue<AuthorizationServiceInterface>();
             m_HttpServer = loader.HttpServer;
+            if (string.IsNullOrEmpty(m_GatekeeperURI))
+            {
+                m_GatekeeperURI = m_HttpServer.ServerURI;
+            }
+            if (!m_GatekeeperURI.EndsWith("/"))
+            {
+                m_GatekeeperURI += "/";
+            }
             m_HttpServer.StartsWithUriHandlers.Add(m_AgentBaseURL, AgentPostHandler);
             try
             {
@@ -290,6 +294,18 @@ namespace SilverSim.BackendHandlers.Robust.Grid
                 return;
             }
 
+            string oldgridname;
+            try
+            {
+                oldgridname = SetTravelingData(ref ad);
+            }
+            catch(Exception e)
+            {
+                m_Log.DebugFormat("Remote response: {0}: {1}", e.GetType().FullName, e.Message);
+                DoAgentResponse(req, e.Message, false);
+                return;
+            }
+
             try
             {
                 m_PostAgentConnector.PostAgent(agentPost.Circuit, ad);
@@ -297,6 +313,14 @@ namespace SilverSim.BackendHandlers.Robust.Grid
             catch (Exception e)
             {
                 m_Log.DebugFormat("Remote response: {0}: {1}", e.GetType().FullName, e.Message);
+                try
+                {
+                    AbortTravelingData(ad, oldgridname);
+                }
+                catch
+                {
+                    /* ignore */
+                }
                 DoAgentResponse(req, e.Message, false);
                 return;
             }
@@ -304,5 +328,14 @@ namespace SilverSim.BackendHandlers.Robust.Grid
         }
 
         public abstract bool TryVerifyIdentity(HttpRequest req, PostData data);
+
+        public virtual string SetTravelingData(ref AuthorizationServiceInterface.AuthorizationData ad)
+        {
+            return string.Empty;
+        }
+
+        public virtual void AbortTravelingData(AuthorizationServiceInterface.AuthorizationData ad, string oldgridexternalname)
+        {
+        }
     }
 }

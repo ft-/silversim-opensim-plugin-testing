@@ -24,10 +24,12 @@ using SilverSim.BackendConnectors.Robust.StructuredData.Agent;
 using SilverSim.Main.Common;
 using SilverSim.Main.Common.HttpServer;
 using SilverSim.ServiceInterfaces.Account;
+using SilverSim.ServiceInterfaces.Authorization;
 using SilverSim.ServiceInterfaces.Traveling;
 using SilverSim.Types;
 using SilverSim.Types.Account;
 using SilverSim.Types.TravelingData;
+using System;
 
 namespace SilverSim.BackendHandlers.Robust.Grid
 {
@@ -36,7 +38,7 @@ namespace SilverSim.BackendHandlers.Robust.Grid
     {
         private readonly string m_UserAccountServiceName;
         private readonly string m_TravelingDataServiceName;
-        private readonly string m_HomeURI;
+        private string m_HomeURI;
         UserAccountServiceInterface m_UserAccountService;
         TravelingDataServiceInterface m_TravelingDataService;
 
@@ -51,15 +53,23 @@ namespace SilverSim.BackendHandlers.Robust.Grid
         public override void Startup(ConfigurationLoader loader)
         {
             base.Startup(loader);
+            if(string.IsNullOrEmpty(m_HomeURI))
+            {
+                m_HomeURI = loader.HttpServer.ServerURI;
+            }
+            if(!m_HomeURI.EndsWith("/"))
+            {
+                m_HomeURI += "/";
+            }
             m_UserAccountService = loader.GetService<UserAccountServiceInterface>(m_UserAccountServiceName);
             m_TravelingDataService = loader.GetService<TravelingDataServiceInterface>(m_TravelingDataServiceName);
         }
 
         public override bool TryVerifyIdentity(HttpRequest req, PostData data)
         {
-            if(data.Account.Principal.HomeURI == null || data.Account.Principal.HomeURI.ToString() != m_HomeURI)
+            if(data.Account.Principal.HomeURI == null || !URI.IsSameService(data.Account.Principal.HomeURI.ToString(), m_HomeURI))
             {
-                m_Log.InfoFormat("Failed to verify agent {0} at Home Grid (Code 1)", data.Account.Principal.FullName);
+                m_Log.InfoFormat("Failed to verify agent {0} at Home Grid (Code 1) against {1}", data.Account.Principal.FullName, m_HomeURI);
                 DoAgentResponse(req, "Failed to verify agent at Home Grid (Code 1)", false);
                 return false;
             }
@@ -76,11 +86,11 @@ namespace SilverSim.BackendHandlers.Robust.Grid
 
             try
             {
-                tInfo = m_TravelingDataService.GetTravelingData(data.Account.Principal.ID);
+                tInfo = m_TravelingDataService.GetTravelingData(data.Session.SessionID);
             }
-            catch
+            catch(Exception e)
             {
-                m_Log.InfoFormat("Failed to verify agent {0} at Home Grid (Code 3)", data.Account.Principal.FullName);
+                m_Log.InfoFormat("Failed to verify agent {0} at Home Grid (Code 3): {1}", data.Account.Principal.FullName, e.Message);
                 DoAgentResponse(req, "Failed to verify agent at Home Grid (Code 3)", false);
                 return false;
             }
@@ -95,6 +105,26 @@ namespace SilverSim.BackendHandlers.Robust.Grid
 
             data.Account.Principal = account.Principal;
             return true;
+        }
+
+        public override string SetTravelingData(ref AuthorizationServiceInterface.AuthorizationData ad)
+        {
+            TravelingDataInfo tInfo = m_TravelingDataService.GetTravelingData(ad.SessionInfo.SessionID);
+            string oldgrid = tInfo.GridExternalName;
+            tInfo.GridExternalName = ad.DestinationInfo.GatekeeperURI;
+            m_TravelingDataService.Store(tInfo);
+            SessionInfo sessionInfo = ad.SessionInfo;
+            sessionInfo.ServiceSessionID = ad.DestinationInfo.GatekeeperURI + ";" + tInfo.ServiceToken;
+            ad.SessionInfo = sessionInfo;
+            return oldgrid;
+        }
+
+        public override void AbortTravelingData(AuthorizationServiceInterface.AuthorizationData ad, string oldgridexternalname)
+        {
+            TravelingDataInfo tInfo = m_TravelingDataService.GetTravelingData(ad.SessionInfo.SessionID);
+            string oldgrid = tInfo.GridExternalName;
+            tInfo.GridExternalName = oldgridexternalname;
+            m_TravelingDataService.Store(tInfo);
         }
     }
 }

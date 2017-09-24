@@ -88,12 +88,12 @@ namespace SilverSim.BackendConnectors.OpenSim.PostAgent
             }
             else
             {
-                agentURL = authData.AccountInfo.Principal.HomeURI.ToString();
+                agentURL = authData.DestinationInfo.GatekeeperURI;
                 if(!agentURL.EndsWith("/"))
                 {
                     agentURL += "/";
                 }
-                agentURL += "homeagent/" + authData.AccountInfo.Principal.ID;
+                agentURL += "foreignagent/" + authData.AccountInfo.Principal.ID;
             }
 
             byte[] uncompressed_postdata;
@@ -159,7 +159,15 @@ namespace SilverSim.BackendConnectors.OpenSim.PostAgent
                 if (!result["success"].AsBoolean)
                 {
                     /* not authorized */
-                    throw new OpenSimTeleportProtocol.TeleportFailedException("Not authorized");
+                    if (result.ContainsKey("reason"))
+                    {
+                        /* not authorized */
+                        throw new OpenSimTeleportProtocol.TeleportFailedException(result["reason"].ToString());
+                    }
+                    else
+                    {
+                        throw new OpenSimTeleportProtocol.TeleportFailedException("Not authorized");
+                    }
                 }
             }
             else if (result.ContainsKey("reason"))

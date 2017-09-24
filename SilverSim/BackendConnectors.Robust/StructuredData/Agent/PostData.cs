@@ -386,6 +386,11 @@ namespace SilverSim.BackendConnectors.Robust.StructuredData.Agent
                 /* Service URLs */
                 w.Write("\"serviceurls\":{");
                 prefix = string.Empty;
+                if (Account.Principal.HomeURI != null)
+                {
+                    WriteJSONString(w, "HomeURI", Account.Principal.HomeURI.ToString());
+                    prefix = ",";
+                }
                 foreach (KeyValuePair<string, string> kvp in Account.ServiceURLs)
                 {
                     w.Write(prefix);
@@ -395,6 +400,11 @@ namespace SilverSim.BackendConnectors.Robust.StructuredData.Agent
                 w.Write("},");
                 w.Write("\"service_urls\":[");
                 prefix = string.Empty;
+                if (Account.Principal.HomeURI != null)
+                {
+                    w.Write(string.Format("\"{0}\", \"{1}\"", "HomeURI", Account.Principal.HomeURI.ToString()));
+                    prefix = ",";
+                }
                 foreach (KeyValuePair<string, string> kvp in Account.ServiceURLs)
                 {
                     w.Write(prefix);

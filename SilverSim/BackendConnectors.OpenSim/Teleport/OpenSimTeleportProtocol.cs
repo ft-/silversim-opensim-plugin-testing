@@ -330,7 +330,14 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
                 if (!result["success"].AsBoolean)
                 {
                     /* not authorized */
-                    throw new TeleportFailedException(this.GetLanguageString(agent.CurrentCulture, "NotAuthorized", "Not authorized"));
+                    if (result.ContainsKey("reason"))
+                    {
+                        throw new TeleportFailedException(result["reason"].ToString());
+                    }
+                    else
+                    {
+                        throw new TeleportFailedException(this.GetLanguageString(agent.CurrentCulture, "NotAuthorized", "Not authorized"));
+                    }
                 }
             }
             else if (result.ContainsKey("reason"))
