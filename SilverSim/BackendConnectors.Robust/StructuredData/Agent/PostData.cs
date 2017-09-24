@@ -28,6 +28,7 @@ using SilverSim.Types.Grid;
 using SilverSim.Types.StructuredData.Json;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Runtime.Serialization;
 using System.Text;
@@ -294,7 +295,7 @@ namespace SilverSim.BackendConnectors.Robust.StructuredData.Agent
 
         private void WriteJSONValue(TextWriter w, string name, double value)
         {
-            w.Write(string.Format("\"{0}\":{1}", Json.SerializeString(name), value));
+            w.Write(string.Format(CultureInfo.InvariantCulture, "\"{0}\":{1}", Json.SerializeString(name), value));
         }
 
         private void WriteJSONValue(TextWriter w, string name, bool value)
