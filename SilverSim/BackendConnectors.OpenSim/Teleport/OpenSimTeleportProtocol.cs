@@ -1354,13 +1354,13 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
 
             /*-----------------------------------------------------------------*/
             /* Appearance */
-            Map appearancePack = new Map();
+            var appearancePack = new Map();
             AppearanceInfo appearance = agent.Appearance;
 
             appearancePack.Add("height", appearance.AvatarHeight);
 
             {
-                AnArray vParams = new AnArray();
+                var vParams = new AnArray();
                 foreach(byte vp in appearance.VisualParams)
                 {
                     vParams.Add(vp);
@@ -1369,7 +1369,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
             }
 
             {
-                AnArray texArray = new AnArray();
+                var texArray = new AnArray();
                 int i;
                 for (i = 0; i < AppearanceInfo.AvatarTextureData.TextureCount; ++i)
                 {
@@ -1380,7 +1380,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
 
             {
                 int i;
-                AnArray wearables = new AnArray();
+                var wearables = new AnArray();
                 for (i = 0; i < (int)WearableType.NumWearables && i < maxAllowedWearables; ++i)
                 {
                     AnArray ar;
@@ -1394,7 +1394,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
                         continue;
                     }
                     List<AgentWearables.WearableInfo> wearablesList = appearance.Wearables[(WearableType)i];
-                    AnArray wearablesBlock = new AnArray();
+                    var wearablesBlock = new AnArray();
                     foreach(AgentWearables.WearableInfo wearable in wearablesList)
                     {
                         var wp = new Map
@@ -1413,12 +1413,12 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
             }
 
             {
-                AnArray attachments = new AnArray();
+                var attachments = new AnArray();
                 foreach(KeyValuePair<AttachmentPoint, RwLockedDictionary<UUID, UUID>> kvpOuter in appearance.Attachments)
                 {
                     foreach(KeyValuePair<UUID, UUID> kvp in kvpOuter.Value)
                     {
-                        Map ap = new Map
+                        var ap = new Map
                         {
                             { "point", (int)kvpOuter.Key },
                             { "item", kvp.Key }
