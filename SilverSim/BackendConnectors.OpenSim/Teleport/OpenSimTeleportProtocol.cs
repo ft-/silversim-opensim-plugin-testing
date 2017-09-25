@@ -1505,21 +1505,16 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
                 uncompressed_postdata = ms.ToArray();
             }
 
-            using (FileStream w = new FileStream("putagent.json", FileMode.Create))
-            {
-                w.Write(uncompressed_postdata, 0, uncompressed_postdata.Length);
-            }
-
             string resultStr;
 
             byte[] compressed_postdata;
-            using (MemoryStream ms = new MemoryStream())
+            using (var ms = new MemoryStream())
             {
-                using (GZipStream gz = new GZipStream(ms, CompressionMode.Compress))
+                using (var gz = new GZipStream(ms, CompressionMode.Compress))
                 {
                     gz.Write(uncompressed_postdata, 0, uncompressed_postdata.Length);
-                    compressed_postdata = ms.ToArray();
                 }
+                compressed_postdata = ms.ToArray();
             }
             try
             {
