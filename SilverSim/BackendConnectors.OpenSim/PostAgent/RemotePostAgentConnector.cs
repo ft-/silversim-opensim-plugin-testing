@@ -110,8 +110,8 @@ namespace SilverSim.BackendConnectors.OpenSim.PostAgent
                 using (var gz = new GZipStream(ms, CompressionMode.Compress))
                 {
                     gz.Write(uncompressed_postdata, 0, uncompressed_postdata.Length);
-                    compressed_postdata = ms.ToArray();
                 }
+                compressed_postdata = ms.ToArray();
             }
 
 #if DEBUG
