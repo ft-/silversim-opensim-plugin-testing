@@ -7,6 +7,6 @@
 		<dependency name="SilverSim.BackendConnectors.Simian"/>
 	</dependencies>
 	<files>
-		<file name="bin/plugins/SilverSim.BackendHandlers.Robust.Simulation.dll"/>
+		<file name="bin/plugins/SilverSim.BackendHandlers.Robust.Simulation.dll" is-version-src="true"/>
 	</files>
 </package>

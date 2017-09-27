@@ -12,6 +12,6 @@
 		<dependency name="SilverSim.Meta.Core"/>
 	</dependencies>
 	<files>
-		<file name="bin/plugins/SilverSim.OpenSimArchiver.dll"/>
+		<file name="bin/plugins/SilverSim.OpenSimArchiver.dll" is-version-src="true"/>
 	</files>
 </package>

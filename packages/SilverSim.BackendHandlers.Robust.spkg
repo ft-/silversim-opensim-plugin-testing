@@ -21,6 +21,6 @@
 		<dependency name="SilverSim.Meta.Core"/>
 	</dependencies>
 	<files>
-		<file name="bin/plugins/SilverSim.BackendHandlers.Robust.dll"/>
+		<file name="bin/plugins/SilverSim.BackendHandlers.Robust.dll" is-version-src="true"/>
 	</files>
 </package>

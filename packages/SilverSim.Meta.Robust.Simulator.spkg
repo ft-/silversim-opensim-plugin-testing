@@ -1,6 +1,8 @@
 <?xml version="1.0"?>
 <package>
 	<name>SilverSim.Meta.Robust.Simulator</name>
+	<version>meta</version>
+	<license>Affero GPLv3 License+Link Exception</license>
 	<dependencies>
 		<dependency name="log4net"/>
 		<dependency name="SilverSim.Meta.Core.Simulator"/>
