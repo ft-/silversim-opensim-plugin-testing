@@ -8,7 +8,6 @@
 		<dependency name="SilverSim.Meta.Core.Grid"/>
 		<dependency name="SilverSim.BackendConnectors.OpenSim"/>
 		<dependency name="SilverSim.BackendConnectors.Robust"/>
-		<dependency name="SilverSim.BackendHandlers.Robust.Simulation"/>
 		<dependency name="SilverSim.BackendHandlers.Robust"/>
 	</dependencies>
 </package>

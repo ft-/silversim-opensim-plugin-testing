@@ -10,7 +10,6 @@
 		<dependency name="SilverSim.BackendConnectors.Flotsam"/>
 		<dependency name="SilverSim.BackendConnectors.OpenSim"/>
 		<dependency name="SilverSim.BackendConnectors.Robust"/>
-		<dependency name="SilverSim.BackendConnectors.Simian"/>
 		<dependency name="SilverSim.BackendHandlers.Robust.Simulation"/>
 		<dependency name="SilverSim.BackendHandlers.Robust"/>
 	</dependencies>
