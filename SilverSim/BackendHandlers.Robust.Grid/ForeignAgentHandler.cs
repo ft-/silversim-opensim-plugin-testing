@@ -25,10 +25,12 @@ using SilverSim.BackendConnectors.Robust.UserAgent;
 using SilverSim.Main.Common;
 using SilverSim.Main.Common.HttpServer;
 using SilverSim.ServiceInterfaces.UserAgents;
+using System.ComponentModel;
 
 namespace SilverSim.BackendHandlers.Robust.Grid
 {
     [PluginName("ForeignAgentHandler")]
+    [Description("Robust Foreign Agent Handler Service")]
     public class ForeignAgentHandler : GridPostAgentHandler
     {
         public ForeignAgentHandler(IConfig ownSection) 

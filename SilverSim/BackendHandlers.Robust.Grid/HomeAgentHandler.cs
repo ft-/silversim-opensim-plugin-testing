@@ -30,10 +30,12 @@ using SilverSim.Types;
 using SilverSim.Types.Account;
 using SilverSim.Types.TravelingData;
 using System;
+using System.ComponentModel;
 
 namespace SilverSim.BackendHandlers.Robust.Grid
 {
     [PluginName("HomeAgentHandler")]
+    [Description("Robust Home Agent Handler Service")]
     public class HomeAgentHandler : GridPostAgentHandler
     {
         private readonly string m_UserAccountServiceName;
