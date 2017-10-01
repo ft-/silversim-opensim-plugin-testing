@@ -831,7 +831,7 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
             {
                 try
                 {
-                    HttpClient.DoRequest("DELETE", (string)o, null, string.Empty, string.Empty, false, 10000);
+                    new HttpClient.Delete((string)o) { TimeoutMs = 10000 }.ExecuteRequest();
                 }
                 catch(Exception e)
                 {

@@ -174,13 +174,10 @@ namespace SilverSim.BackendConnectors.OpenSim.PostAgent
             var headers = new Dictionary<string, string>();
             try
             {
-                using (Stream responseStream = HttpClient.DoStreamRequest("HEAD", uri, null, string.Empty, string.Empty, false, 20000, headers))
+                new HttpClient.Head(uri)
                 {
-                    using (var reader = new StreamReader(responseStream))
-                    {
-                        reader.ReadToEnd();
-                    }
-                }
+                    Headers = headers
+                }.ExecuteRequest();
 
                 if (!headers.ContainsKey("x-handlers-provided"))
                 {

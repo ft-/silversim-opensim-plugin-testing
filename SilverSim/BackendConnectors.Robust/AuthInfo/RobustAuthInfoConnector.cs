@@ -100,7 +100,7 @@ namespace SilverSim.BackendConnectors.Robust.AuthInfo
                 ["TOKEN"] = secureSessionId.ToString()
             };
             Map map;
-            using (Stream s = HttpClient.DoStreamPostRequest(m_Uri, null, postvals, false, TimeoutMs))
+            using (Stream s = new HttpClient.Post(m_Uri, postvals) { TimeoutMs = TimeoutMs }.ExecuteStreamRequest())
             {
                 map = OpenSimResponse.Deserialize(s);
             }
@@ -135,7 +135,7 @@ namespace SilverSim.BackendConnectors.Robust.AuthInfo
                 ["LIFETIME"] = lifetime_extension_in_minutes.ToString()
             };
             Map map;
-            using (Stream s = HttpClient.DoStreamPostRequest(m_Uri, null, postvals, false, TimeoutMs))
+            using (Stream s = new HttpClient.Post(m_Uri, postvals) { TimeoutMs = TimeoutMs }.ExecuteStreamRequest())
             {
                 map = OpenSimResponse.Deserialize(s);
             }
@@ -155,7 +155,7 @@ namespace SilverSim.BackendConnectors.Robust.AuthInfo
                 ["LIFETIME"] = lifetime_in_minutes.ToString()
             };
             Map map;
-            using (Stream s = HttpClient.DoStreamPostRequest(m_Uri, null, postvals, false, TimeoutMs))
+            using (Stream s = new HttpClient.Post(m_Uri, postvals) { TimeoutMs = TimeoutMs }.ExecuteStreamRequest())
             {
                 map = OpenSimResponse.Deserialize(s);
             }

@@ -76,7 +76,7 @@ namespace SilverSim.BackendConnectors.Robust.Grid
                 ["REGIONID"] = regionID.ToString(),
                 ["METHOD"] = "get_region_by_uuid"
             };
-            using (Stream s = HttpClient.DoStreamPostRequest(m_GridURI, null, post, false, TimeoutMs))
+            using (Stream s = new HttpClient.Post(m_GridURI, post) { TimeoutMs = TimeoutMs }.ExecuteStreamRequest())
             {
                 return TryDeserializeRegion(OpenSimResponse.Deserialize(s), out rInfo);
             }
@@ -90,7 +90,7 @@ namespace SilverSim.BackendConnectors.Robust.Grid
                 ["REGIONID"] = regionID.ToString(),
                 ["METHOD"] = "get_region_by_uuid"
             };
-            using (Stream s = HttpClient.DoStreamPostRequest(m_GridURI, null, post, false, TimeoutMs))
+            using (Stream s = new HttpClient.Post(m_GridURI, post) { TimeoutMs = TimeoutMs }.ExecuteStreamRequest())
             {
                 return TryDeserializeRegion(OpenSimResponse.Deserialize(s));
             }
@@ -106,7 +106,7 @@ namespace SilverSim.BackendConnectors.Robust.Grid
                     ["REGIONID"] = regionID.ToString(),
                     ["METHOD"] = "get_region_by_uuid"
                 };
-                using (Stream s = HttpClient.DoStreamPostRequest(m_GridURI, null, post, false, TimeoutMs))
+                using (Stream s = new HttpClient.Post(m_GridURI, post) { TimeoutMs = TimeoutMs }.ExecuteStreamRequest())
                 {
                     return DeserializeRegion(OpenSimResponse.Deserialize(s));
                 }
@@ -122,7 +122,7 @@ namespace SilverSim.BackendConnectors.Robust.Grid
                 ["Y"] = gridY.ToString(),
                 ["METHOD"] = "get_region_by_position"
             };
-            using (Stream s = HttpClient.DoStreamPostRequest(m_GridURI, null, post, false, TimeoutMs))
+            using (Stream s = new HttpClient.Post(m_GridURI, post) { TimeoutMs = TimeoutMs }.ExecuteStreamRequest())
             {
                 return TryDeserializeRegion(OpenSimResponse.Deserialize(s), out rInfo);
             }
@@ -137,7 +137,7 @@ namespace SilverSim.BackendConnectors.Robust.Grid
                 ["Y"] = gridY.ToString(),
                 ["METHOD"] = "get_region_by_position"
             };
-            using (Stream s = HttpClient.DoStreamPostRequest(m_GridURI, null, post, false, TimeoutMs))
+            using (Stream s = new HttpClient.Post(m_GridURI, post) { TimeoutMs = TimeoutMs }.ExecuteStreamRequest())
             {
                 return TryDeserializeRegion(OpenSimResponse.Deserialize(s));
             }
@@ -154,7 +154,7 @@ namespace SilverSim.BackendConnectors.Robust.Grid
                     ["Y"] = gridY.ToString(),
                     ["METHOD"] = "get_region_by_position"
                 };
-                using (Stream s = HttpClient.DoStreamPostRequest(m_GridURI, null, post, false, TimeoutMs))
+                using (Stream s = new HttpClient.Post(m_GridURI, post) { TimeoutMs = TimeoutMs }.ExecuteStreamRequest())
                 {
                     return DeserializeRegion(OpenSimResponse.Deserialize(s));
                 }
@@ -169,7 +169,7 @@ namespace SilverSim.BackendConnectors.Robust.Grid
                 ["NAME"] = regionName,
                 ["METHOD"] = "get_region_by_name"
             };
-            using (Stream s = HttpClient.DoStreamPostRequest(m_GridURI, null, post, false, TimeoutMs))
+            using (Stream s = new HttpClient.Post(m_GridURI, post) { TimeoutMs = TimeoutMs }.ExecuteStreamRequest())
             {
                 return TryDeserializeRegion(OpenSimResponse.Deserialize(s), out rInfo);
             }
@@ -183,7 +183,7 @@ namespace SilverSim.BackendConnectors.Robust.Grid
                 ["NAME"] = regionName,
                 ["METHOD"] = "get_region_by_name"
             };
-            using (Stream s = HttpClient.DoStreamPostRequest(m_GridURI, null, post, false, TimeoutMs))
+            using (Stream s = new HttpClient.Post(m_GridURI, post) { TimeoutMs = TimeoutMs }.ExecuteStreamRequest())
             {
                 return TryDeserializeRegion(OpenSimResponse.Deserialize(s));
             }
@@ -199,7 +199,7 @@ namespace SilverSim.BackendConnectors.Robust.Grid
                     ["NAME"] = regionName,
                     ["METHOD"] = "get_region_by_name"
                 };
-                using (Stream s = HttpClient.DoStreamPostRequest(m_GridURI, null, post, false, TimeoutMs))
+                using (Stream s = new HttpClient.Post(m_GridURI, post) { TimeoutMs = TimeoutMs }.ExecuteStreamRequest())
                 {
                     return DeserializeRegion(OpenSimResponse.Deserialize(s));
                 }
@@ -214,7 +214,7 @@ namespace SilverSim.BackendConnectors.Robust.Grid
                 ["REGIONID"] = regionID.ToString(),
                 ["METHOD"] = "get_region_by_uuid"
             };
-            using (Stream s = HttpClient.DoStreamPostRequest(m_GridURI, null, post, false, TimeoutMs))
+            using (Stream s = new HttpClient.Post(m_GridURI, post) { TimeoutMs = TimeoutMs }.ExecuteStreamRequest())
             {
                 return TryDeserializeRegion(OpenSimResponse.Deserialize(s), out rInfo);
             }
@@ -228,7 +228,7 @@ namespace SilverSim.BackendConnectors.Robust.Grid
                 ["REGIONID"] = regionID.ToString(),
                 ["METHOD"] = "get_region_by_uuid"
             };
-            using (Stream s = HttpClient.DoStreamPostRequest(m_GridURI, null, post, false, TimeoutMs))
+            using (Stream s = new HttpClient.Post(m_GridURI, post) { TimeoutMs = TimeoutMs }.ExecuteStreamRequest())
             {
                 return TryDeserializeRegion(OpenSimResponse.Deserialize(s));
             }
@@ -244,7 +244,7 @@ namespace SilverSim.BackendConnectors.Robust.Grid
                     ["REGIONID"] = regionID.ToString(),
                     ["METHOD"] = "get_region_by_uuid"
                 };
-                using (Stream s = HttpClient.DoStreamPostRequest(m_GridURI, null, post, false, TimeoutMs))
+                using (Stream s = new HttpClient.Post(m_GridURI, post) { TimeoutMs = TimeoutMs }.ExecuteStreamRequest())
                 {
                     return DeserializeRegion(OpenSimResponse.Deserialize(s));
                 }
@@ -291,7 +291,7 @@ namespace SilverSim.BackendConnectors.Robust.Grid
                 ["VERSIONMIN"] = "0",
                 ["VERSIONMAX"] = "1"
             };
-            using (Stream s = HttpClient.DoStreamPostRequest(m_GridURI, null, post, false, TimeoutMs))
+            using (Stream s = new HttpClient.Post(m_GridURI, post) { TimeoutMs = TimeoutMs }.ExecuteStreamRequest())
             {
                 CheckResult(OpenSimResponse.Deserialize(s));
             }
@@ -305,7 +305,7 @@ namespace SilverSim.BackendConnectors.Robust.Grid
                 ["REGIONID"] = (string)regionID,
                 ["METHOD"] = "deregister"
             };
-            using (Stream s = HttpClient.DoStreamPostRequest(m_GridURI, null, post, false, TimeoutMs))
+            using (Stream s = new HttpClient.Post(m_GridURI, post) { TimeoutMs = TimeoutMs }.ExecuteStreamRequest())
             {
                 CheckResult(OpenSimResponse.Deserialize(s));
             }
@@ -397,7 +397,7 @@ namespace SilverSim.BackendConnectors.Robust.Grid
                 ["METHOD"] = "get_hyperlinks"
             };
             Map res;
-            using (Stream s = HttpClient.DoStreamPostRequest(m_GridURI, null, post, false, TimeoutMs))
+            using (Stream s = new HttpClient.Post(m_GridURI, post) { TimeoutMs = TimeoutMs }.ExecuteStreamRequest())
             {
                 res = OpenSimResponse.Deserialize(s);
             }
@@ -412,7 +412,7 @@ namespace SilverSim.BackendConnectors.Robust.Grid
                 ["METHOD"] = "get_default_regions"
             };
             Map res;
-            using (Stream s = HttpClient.DoStreamPostRequest(m_GridURI, null, post, false, TimeoutMs))
+            using (Stream s = new HttpClient.Post(m_GridURI, post) { TimeoutMs = TimeoutMs }.ExecuteStreamRequest())
             {
                 res = OpenSimResponse.Deserialize(s);
             }
@@ -427,7 +427,7 @@ namespace SilverSim.BackendConnectors.Robust.Grid
                 ["METHOD"] = "get_fallback_regions"
             };
             Map res;
-            using (Stream s = HttpClient.DoStreamPostRequest(m_GridURI, null, post, false, TimeoutMs))
+            using (Stream s = new HttpClient.Post(m_GridURI, post) { TimeoutMs = TimeoutMs }.ExecuteStreamRequest())
             {
                 res = OpenSimResponse.Deserialize(s);
             }
@@ -442,7 +442,7 @@ namespace SilverSim.BackendConnectors.Robust.Grid
                 ["METHOD"] = "get_default_hypergrid_regions"
             };
             Map res;
-            using (Stream s = HttpClient.DoStreamPostRequest(m_GridURI, null, post, false, TimeoutMs))
+            using (Stream s = new HttpClient.Post(m_GridURI, post) { TimeoutMs = TimeoutMs }.ExecuteStreamRequest())
             {
                 res = OpenSimResponse.Deserialize(s);
             }
@@ -461,7 +461,7 @@ namespace SilverSim.BackendConnectors.Robust.Grid
                 ["METHOD"] = "get_region_range"
             };
             Map res;
-            using (Stream s = HttpClient.DoStreamPostRequest(m_GridURI, null, post, false, TimeoutMs))
+            using (Stream s = new HttpClient.Post(m_GridURI, post) { TimeoutMs = TimeoutMs }.ExecuteStreamRequest())
             {
                 res = OpenSimResponse.Deserialize(s);
             }
@@ -477,7 +477,7 @@ namespace SilverSim.BackendConnectors.Robust.Grid
                 ["METHOD"] = "get_neighbours"
             };
             Map res;
-            using (Stream s = HttpClient.DoStreamPostRequest(m_GridURI, null, post, false, TimeoutMs))
+            using (Stream s = new HttpClient.Post(m_GridURI, post) { TimeoutMs = TimeoutMs }.ExecuteStreamRequest())
             {
                 res = OpenSimResponse.Deserialize(s);
             }
@@ -496,7 +496,7 @@ namespace SilverSim.BackendConnectors.Robust.Grid
                 ["METHOD"] = "get_region_range"
             };
             Map res;
-            using (Stream s = HttpClient.DoStreamPostRequest(m_GridURI, null, post, false, TimeoutMs))
+            using (Stream s = new HttpClient.Post(m_GridURI, post) { TimeoutMs = TimeoutMs }.ExecuteStreamRequest())
             {
                 res = OpenSimResponse.Deserialize(s);
             }
@@ -530,7 +530,7 @@ namespace SilverSim.BackendConnectors.Robust.Grid
                 ["METHOD"] = "get_regions_by_name"
             };
             Map res;
-            using (Stream s = HttpClient.DoStreamPostRequest(m_GridURI, null, post, false, TimeoutMs))
+            using (Stream s = new HttpClient.Post(m_GridURI, post) { TimeoutMs = TimeoutMs }.ExecuteStreamRequest())
             {
                 res = OpenSimResponse.Deserialize(s);
             }
@@ -544,7 +544,7 @@ namespace SilverSim.BackendConnectors.Robust.Grid
                 ["METHOD"] = "get_grid_extra_features"
             };
             Map m;
-            using(Stream s = HttpClient.DoStreamPostRequest(m_GridURI, null, post, false, TimeoutMs))
+            using (Stream s = new HttpClient.Post(m_GridURI, post) { TimeoutMs = TimeoutMs }.ExecuteStreamRequest())
             {
                 m = OpenSimResponse.Deserialize(s) as Map;
             }

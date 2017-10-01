@@ -163,7 +163,7 @@ namespace SilverSim.BackendConnectors.Robust.GridInfo
                 Map m;
                 try
                 {
-                    using (Stream s = HttpClient.DoStreamGetRequest(m_GridURI + "/json_grid_info", null, TimeoutMs))
+                    using (Stream s = new HttpClient.Get(m_GridURI + "/json_grid_info") { TimeoutMs = TimeoutMs }.ExecuteStreamRequest())
                     {
                         m = Json.Deserialize(s) as Map;
                     }

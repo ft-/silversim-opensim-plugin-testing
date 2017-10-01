@@ -97,7 +97,7 @@ namespace SilverSim.OpenSimArchiver
             try
             {
                 using (Stream s = Uri.IsWellFormedUriString(args[2], UriKind.Absolute) ?
-                    HttpClient.DoStreamGetRequest(args[2], null, 20000) :
+                    new HttpClient.Get(args[2]).ExecuteStreamRequest() :
                     new FileStream(args[2], FileMode.Open, FileAccess.Read))
                 {
                     Assets.AssetsLoad.Load(assetService, owner, s);

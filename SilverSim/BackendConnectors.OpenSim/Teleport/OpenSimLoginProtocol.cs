@@ -275,7 +275,13 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
             }
 
             Map jsonres;
-            using (Stream s = HttpClient.DoStreamRequest("QUERYACCESS", uri, null, "application/json", Json.Serialize(req), false, TimeoutMs))
+            using (Stream s = new HttpClient.Request(uri)
+            {
+                Method = "QUERYACCESS",
+                RequestContentType = "application/json",
+                RequestBody = Json.Serialize(req),
+                TimeoutMs = TimeoutMs
+            }.ExecuteStreamRequest())
             {
                 jsonres = Json.Deserialize(s) as Map;
             }
@@ -561,8 +567,12 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
             m_Log.DebugFormat("Connecting to agent URL {0}", agentURL);
             try
             {
-                using (Stream o = HttpClient.DoStreamRequest("POST", agentURL, null, "application/json", compressed_postdata.Length, (Stream ws) =>
-                    ws.Write(compressed_postdata, 0, compressed_postdata.Length), true, TimeoutMs))
+                using (Stream o = new HttpClient.Post(agentURL, "application/json", compressed_postdata.Length, (Stream ws) =>
+                    ws.Write(compressed_postdata, 0, compressed_postdata.Length))
+                {
+                    IsCompressed = true,
+                    TimeoutMs = TimeoutMs
+                }.ExecuteStreamRequest())
                 {
                     result = (Map)Json.Deserialize(o);
                 }
@@ -571,8 +581,11 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
             {
                 try
                 {
-                    using (Stream o = HttpClient.DoStreamRequest("POST", agentURL, null, "application/x-gzip", compressed_postdata.Length, (Stream ws) =>
-                        ws.Write(compressed_postdata, 0, compressed_postdata.Length), false, TimeoutMs))
+                    using (Stream o = new HttpClient.Post(agentURL, "application/x-gzip", compressed_postdata.Length, (Stream ws) =>
+                        ws.Write(compressed_postdata, 0, compressed_postdata.Length))
+                    {
+                        TimeoutMs = TimeoutMs
+                    }.ExecuteStreamRequest())
                     {
                         result = (Map)Json.Deserialize(o);
                     }
@@ -581,8 +594,11 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
                 {
                     try
                     {
-                        using (Stream o = HttpClient.DoStreamRequest("POST", agentURL, null, "application/json", uncompressed_postdata.Length, (Stream ws) =>
-                            ws.Write(uncompressed_postdata, 0, uncompressed_postdata.Length), false, TimeoutMs))
+                        using (Stream o = new HttpClient.Post(agentURL, "application/json", uncompressed_postdata.Length, (Stream ws) =>
+                            ws.Write(uncompressed_postdata, 0, uncompressed_postdata.Length))
+                        {
+                            TimeoutMs = TimeoutMs
+                        }.ExecuteStreamRequest())
                         {
                             result = (Map)Json.Deserialize(o);
                         }

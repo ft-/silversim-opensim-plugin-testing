@@ -120,8 +120,12 @@ namespace SilverSim.BackendConnectors.OpenSim.PostAgent
 
             try
             {
-                using (Stream o = HttpClient.DoStreamRequest("POST", agentURL, null, "application/json", compressed_postdata.Length, (Stream ws) =>
-                    ws.Write(compressed_postdata, 0, compressed_postdata.Length), true, TimeoutMs))
+                using (Stream o = new HttpClient.Post(agentURL, "application/json", compressed_postdata.Length, (Stream ws) =>
+                    ws.Write(compressed_postdata, 0, compressed_postdata.Length))
+                {
+                    IsCompressed = true,
+                    TimeoutMs = TimeoutMs
+                }.ExecuteStreamRequest())
                 {
                     result = (Map)Json.Deserialize(o);
                 }
@@ -130,8 +134,11 @@ namespace SilverSim.BackendConnectors.OpenSim.PostAgent
             {
                 try
                 {
-                    using (Stream o = HttpClient.DoStreamRequest("POST", agentURL, null, "application/x-gzip", compressed_postdata.Length, (Stream ws) =>
-                        ws.Write(compressed_postdata, 0, compressed_postdata.Length), false, TimeoutMs))
+                    using (Stream o = new HttpClient.Post(agentURL, "application/x-gzip", compressed_postdata.Length, (Stream ws) =>
+                        ws.Write(compressed_postdata, 0, compressed_postdata.Length))
+                    {
+                        TimeoutMs = TimeoutMs
+                    }.ExecuteStreamRequest())
                     {
                         result = (Map)Json.Deserialize(o);
                     }
@@ -140,8 +147,11 @@ namespace SilverSim.BackendConnectors.OpenSim.PostAgent
                 {
                     try
                     {
-                        using (Stream o = HttpClient.DoStreamRequest("POST", agentURL, null, "application/json", uncompressed_postdata.Length, (Stream ws) =>
-                            ws.Write(uncompressed_postdata, 0, uncompressed_postdata.Length), false, TimeoutMs))
+                        using (Stream o = new HttpClient.Post(agentURL, "application/json", uncompressed_postdata.Length, (Stream ws) =>
+                            ws.Write(uncompressed_postdata, 0, uncompressed_postdata.Length))
+                        {
+                            TimeoutMs = TimeoutMs
+                        }.ExecuteStreamRequest())
                         {
                             result = (Map)Json.Deserialize(o);
                         }

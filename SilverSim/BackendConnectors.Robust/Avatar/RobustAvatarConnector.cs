@@ -101,7 +101,7 @@ namespace SilverSim.BackendConnectors.Robust.Avatar
                     ["VERSIONMAX"] = "1"
                 };
                 Map map;
-                using(Stream s = HttpClient.DoStreamPostRequest(m_AvatarURI, null, post, false, TimeoutMs))
+                using(Stream s = new HttpClient.Post(m_AvatarURI, post) { TimeoutMs = TimeoutMs }.ExecuteStreamRequest())
                 {
                     map = OpenSimResponse.Deserialize(s);
                 }
@@ -144,7 +144,7 @@ namespace SilverSim.BackendConnectors.Robust.Avatar
                     post["METHOD"] = "resetavatar";
                 }
                 Map map;
-                using(Stream s = HttpClient.DoStreamPostRequest(m_AvatarURI, null, post, false, TimeoutMs))
+                using (Stream s = new HttpClient.Post(m_AvatarURI, post) { TimeoutMs = TimeoutMs }.ExecuteStreamRequest())
                 {
                     map = OpenSimResponse.Deserialize(s);
                 }
@@ -203,7 +203,10 @@ namespace SilverSim.BackendConnectors.Robust.Avatar
                 outStr.Append("&VERSIONMIN=0&VERSIONMAX=1");
 
                 Map map;
-                using(Stream s = HttpClient.DoStreamRequest("POST", m_AvatarURI, null, "application/x-www-form-urlencoded", outStr.ToString(), false, TimeoutMs))
+                using (Stream s = new HttpClient.Post(m_AvatarURI, "application/x-www-form-urlencoded", outStr.ToString())
+                {
+                    TimeoutMs = TimeoutMs
+                }.ExecuteStreamRequest())
                 {
                     map = OpenSimResponse.Deserialize(s);
                 }
@@ -243,7 +246,7 @@ namespace SilverSim.BackendConnectors.Robust.Avatar
                     ["VERSIONMAX"] = "1"
                 };
                 Map map;
-                using(Stream s = HttpClient.DoStreamPostRequest(m_AvatarURI, null, post, false, TimeoutMs))
+                using(Stream s = new HttpClient.Post(m_AvatarURI, post) { TimeoutMs = TimeoutMs }.ExecuteStreamRequest())
                 {
                     map = OpenSimResponse.Deserialize(s);
                 }
@@ -273,7 +276,7 @@ namespace SilverSim.BackendConnectors.Robust.Avatar
             post["VERSIONMIN"] = "0";
             post["VERSIONMAX"] = "1";
             Map map;
-            using(Stream s = HttpClient.DoStreamPostRequest(m_AvatarURI, null, post, false, TimeoutMs))
+            using (Stream s = new HttpClient.Post(m_AvatarURI, post) { TimeoutMs = TimeoutMs }.ExecuteStreamRequest())
             {
                 map = OpenSimResponse.Deserialize(s);
             }
@@ -298,7 +301,7 @@ namespace SilverSim.BackendConnectors.Robust.Avatar
                 ["VERSIONMAX"] = "1"
             };
             Map map;
-            using(Stream s = HttpClient.DoStreamPostRequest(m_AvatarURI, null, post, false, TimeoutMs))
+            using (Stream s = new HttpClient.Post(m_AvatarURI, post) { TimeoutMs = TimeoutMs }.ExecuteStreamRequest())
             {
                 map = OpenSimResponse.Deserialize(s);
             }

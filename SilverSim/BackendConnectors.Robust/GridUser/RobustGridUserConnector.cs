@@ -111,7 +111,7 @@ namespace SilverSim.BackendConnectors.Robust.GridUser
                 ["METHOD"] = "getgriduserinfo"
             };
             Map map;
-            using (Stream s = HttpClient.DoStreamPostRequest(m_GridUserURI, null, post, false, TimeoutMs))
+            using (Stream s = new HttpClient.Post(m_GridUserURI, post) { TimeoutMs = TimeoutMs }.ExecuteStreamRequest())
             {
                 map = OpenSimResponse.Deserialize(s);
             }
@@ -186,7 +186,7 @@ namespace SilverSim.BackendConnectors.Robust.GridUser
                 ["UserID"] = (string)userID,
                 ["METHOD"] = "loggedin"
             };
-            using (Stream s = HttpClient.DoStreamPostRequest(m_GridUserURI, null, post, false, TimeoutMs))
+            using (Stream s = new HttpClient.Post(m_GridUserURI, post) { TimeoutMs = TimeoutMs }.ExecuteStreamRequest())
             {
                 CheckResult(OpenSimResponse.Deserialize(s));
             }
@@ -202,7 +202,7 @@ namespace SilverSim.BackendConnectors.Robust.GridUser
                 ["LookAt"] = lastLookAt.ToString(),
                 ["METHOD"] = "loggedout"
             };
-            using (Stream s = HttpClient.DoStreamPostRequest(m_GridUserURI, null, post, false, TimeoutMs))
+            using (Stream s = new HttpClient.Post(m_GridUserURI, post) { TimeoutMs = TimeoutMs }.ExecuteStreamRequest())
             {
                 CheckResult(OpenSimResponse.Deserialize(s));
             }
@@ -218,7 +218,7 @@ namespace SilverSim.BackendConnectors.Robust.GridUser
                 ["LookAt"] = homeLookAt.ToString(),
                 ["METHOD"] = "sethome"
             };
-            using (Stream s = HttpClient.DoStreamPostRequest(m_GridUserURI, null, post, false, TimeoutMs))
+            using (Stream s = new HttpClient.Post(m_GridUserURI, post) { TimeoutMs = TimeoutMs }.ExecuteStreamRequest())
             {
                 CheckResult(OpenSimResponse.Deserialize(s));
             }
@@ -234,7 +234,7 @@ namespace SilverSim.BackendConnectors.Robust.GridUser
                 ["LookAt"] = lastLookAt.ToString(),
                 ["METHOD"] = "setposition"
             };
-            using (Stream s = HttpClient.DoStreamPostRequest(m_GridUserURI, null, post, false, TimeoutMs))
+            using (Stream s = new HttpClient.Post(m_GridUserURI, post) { TimeoutMs = TimeoutMs }.ExecuteStreamRequest())
             {
                 CheckResult(OpenSimResponse.Deserialize(s));
             }

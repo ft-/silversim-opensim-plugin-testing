@@ -129,7 +129,10 @@ namespace SilverSim.BackendConnectors.Robust.Asset
         {
             try
             {
-                HttpClient.DoGetRequest(m_AssetURI + "assets/" + key.ToString() + "/metadata", null, TimeoutMs);
+                new HttpClient.Get(m_AssetURI + "assets/" + key.ToString() + "/metadata")
+                {
+                    TimeoutMs = TimeoutMs
+                }.ExecuteRequest();
             }
             catch(HttpException e)
             {
@@ -241,7 +244,10 @@ namespace SilverSim.BackendConnectors.Robust.Asset
 
             try
             {
-                using (Stream xmlres = HttpClient.DoStreamRequest("POST", m_AssetURI + "get_assets_exist", null, "text/xml", xmlreq.ToString(), false, TimeoutMs))
+                using (Stream xmlres = new HttpClient.Post(m_AssetURI + "get_assets_exist", "text/xml", xmlreq.ToString())
+                {
+                    TimeoutMs = TimeoutMs
+                }.ExecuteStreamRequest())
                 {
                     try
                     {
@@ -281,7 +287,10 @@ namespace SilverSim.BackendConnectors.Robust.Asset
         {
             try
             {
-                using (Stream stream = HttpClient.DoStreamGetRequest(m_AssetURI + "assets/" + key.ToString(), null, TimeoutMs))
+                using (Stream stream = new HttpClient.Get(m_AssetURI + "assets/" + key.ToString())
+                {
+                    TimeoutMs = TimeoutMs
+                }.ExecuteStreamRequest())
                 {
                     assetData = AssetXml.ParseAssetData(stream);
                     return true;
@@ -319,7 +328,10 @@ namespace SilverSim.BackendConnectors.Robust.Asset
         {
             try
             {
-                using (Stream stream = HttpClient.DoStreamGetRequest(m_AssetURI + "assets/" + key.ToString() + "/metadata", null, TimeoutMs))
+                using (Stream stream = new HttpClient.Get(m_AssetURI + "assets/" + key.ToString() + "/metadata")
+                {
+                    TimeoutMs = TimeoutMs
+                }.ExecuteStreamRequest())
                 {
                     metadata = AssetXml.ParseAssetMetadata(stream);
                     return true;
@@ -361,7 +373,10 @@ namespace SilverSim.BackendConnectors.Robust.Asset
         {
             try
             {
-                s = HttpClient.DoStreamGetRequest(m_AssetURI + "assets/" + key.ToString() + "/data", null, TimeoutMs);
+                s = new HttpClient.Get(m_AssetURI + "assets/" + key.ToString() + "/data")
+                {
+                    TimeoutMs = TimeoutMs
+                }.ExecuteStreamRequest();
                 return true;
             }
             catch
@@ -447,9 +462,9 @@ namespace SilverSim.BackendConnectors.Robust.Asset
             if (m_EnableCompression)
             {
                 byte[] compressedAsset;
-                using (MemoryStream ms = new MemoryStream())
+                using (var ms = new MemoryStream())
                 {
-                    using (GZipStream gz = new GZipStream(ms, CompressionMode.Compress))
+                    using (var gz = new GZipStream(ms, CompressionMode.Compress))
                     {
                         gz.Write(header, 0, header.Length);
                         WriteAssetDataAsBase64(gz, asset);
@@ -457,24 +472,32 @@ namespace SilverSim.BackendConnectors.Robust.Asset
                     }
                     compressedAsset = ms.ToArray();
                 }
-                HttpClient.DoRequest("POST", m_AssetURI + "assets",
-                    null, "text/xml", compressedAsset.Length, (Stream st) =>
+                new HttpClient.Post(m_AssetURI + "assets",
+                    "text/xml", compressedAsset.Length, (Stream st) =>
                     {
                         /* Stream based asset conversion method here */
                         st.Write(compressedAsset, 0, compressedAsset.Length);
-                    }, m_EnableCompression, TimeoutMs);
+                    })
+                {
+                    IsCompressed = m_EnableCompression,
+                    TimeoutMs = TimeoutMs
+                }.ExecuteRequest();
             }
             else
             {
                 int base64_codegroups = (asset.Data.Length + 2) / 3;
-                HttpClient.DoRequest("POST", m_AssetURI + "assets",
-                    null, "text/xml", 4 * base64_codegroups + header.Length + footer.Length, (Stream st) =>
+                new HttpClient.Post(m_AssetURI + "assets",
+                    "text/xml", 4 * base64_codegroups + header.Length + footer.Length, (Stream st) =>
                     {
                         /* Stream based asset conversion method here */
                         st.Write(header, 0, header.Length);
                         WriteAssetDataAsBase64(st, asset);
                         st.Write(footer, 0, footer.Length);
-                    }, m_EnableCompression, TimeoutMs);
+                    })
+                {
+                    IsCompressed = m_EnableCompression,
+                    TimeoutMs = TimeoutMs
+                }.ExecuteRequest();
             }
         }
 
@@ -502,7 +525,10 @@ namespace SilverSim.BackendConnectors.Robust.Asset
         {
             try
             {
-                HttpClient.DoRequest("DELETE", m_AssetURI + "/" + id.ToString(), null, string.Empty, null, false, TimeoutMs);
+                new HttpClient.Delete(m_AssetURI + "/" + id.ToString())
+                {
+                    TimeoutMs = TimeoutMs
+                }.ExecuteRequest();
             }
             catch
             {

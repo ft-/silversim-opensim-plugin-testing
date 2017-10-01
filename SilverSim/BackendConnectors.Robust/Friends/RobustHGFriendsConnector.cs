@@ -75,7 +75,7 @@ namespace SilverSim.BackendConnectors.Robust.Friends
                 ["SESSIONID"] = (string)m_SessionID
             };
             Map res;
-            using (Stream s = HttpClient.DoStreamPostRequest(m_Uri, null, post, false, TimeoutMs))
+            using (Stream s = new HttpClient.Post(m_Uri, post) { TimeoutMs = TimeoutMs }.ExecuteStreamRequest())
             {
                 res = OpenSimResponse.Deserialize(s);
             }
@@ -121,7 +121,7 @@ namespace SilverSim.BackendConnectors.Robust.Friends
                 ["MyFlags"] = ((int)fi.UserGivenFlags).ToString(),
                 ["TheirFlags"] = ((int)fi.FriendGivenFlags).ToString()
             };
-            using (Stream s = HttpClient.DoStreamPostRequest(m_Uri, null, post, false, TimeoutMs))
+            using (Stream s = new HttpClient.Post(m_Uri, post) { TimeoutMs = TimeoutMs }.ExecuteStreamRequest())
             {
                 CheckResult(OpenSimResponse.Deserialize(s));
             }
@@ -138,7 +138,7 @@ namespace SilverSim.BackendConnectors.Robust.Friends
                 ["MyFlags"] = "0",
                 ["TheirFlags"] = "0"
             };
-            using (Stream s = HttpClient.DoStreamPostRequest(m_Uri, null, post, false, TimeoutMs))
+            using (Stream s = new HttpClient.Post(m_Uri, post) { TimeoutMs = TimeoutMs }.ExecuteStreamRequest())
             {
                 CheckResult(OpenSimResponse.Deserialize(s));
             }
@@ -160,7 +160,7 @@ namespace SilverSim.BackendConnectors.Robust.Friends
                 ["UserFlags"] = "-1",
                 ["Rights"] = ((int)fi.UserGivenFlags).ToString()
             };
-            using (Stream s = HttpClient.DoStreamPostRequest(m_Uri, null, post, false, TimeoutMs))
+            using (Stream s = new HttpClient.Post(m_Uri, post) { TimeoutMs = TimeoutMs }.ExecuteStreamRequest())
             {
                 CheckResult(OpenSimResponse.Deserialize(s));
             }

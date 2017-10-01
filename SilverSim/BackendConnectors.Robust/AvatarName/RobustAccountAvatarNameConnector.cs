@@ -94,7 +94,7 @@ namespace SilverSim.BackendConnectors.Robust.AvatarName
                 ["METHOD"] = "getaccount"
             };
             Map map;
-            using (Stream s = HttpClient.DoStreamPostRequest(m_UserAccountURI, null, post, false, TimeoutMs))
+            using (Stream s = new HttpClient.Post(m_UserAccountURI, post) { TimeoutMs = TimeoutMs }.ExecuteStreamRequest())
             {
                 map = OpenSimResponse.Deserialize(s);
             }
@@ -146,7 +146,7 @@ namespace SilverSim.BackendConnectors.Robust.AvatarName
                 ["METHOD"] = "getaccounts"
             };
             Map map;
-            using(Stream s = HttpClient.DoStreamPostRequest(m_UserAccountURI, null, post, false, TimeoutMs))
+            using (Stream s = new HttpClient.Post(m_UserAccountURI, post) { TimeoutMs = TimeoutMs }.ExecuteStreamRequest())
             {
                 map = OpenSimResponse.Deserialize(s);
             }
@@ -185,7 +185,7 @@ namespace SilverSim.BackendConnectors.Robust.AvatarName
                 ["METHOD"] = "getaccount"
             };
             Map map;
-            using (Stream s = HttpClient.DoStreamPostRequest(m_UserAccountURI, null, post, false, TimeoutMs))
+            using (Stream s = new HttpClient.Post(m_UserAccountURI, post) { TimeoutMs = TimeoutMs }.ExecuteStreamRequest())
             {
                 map = OpenSimResponse.Deserialize(s);
             }

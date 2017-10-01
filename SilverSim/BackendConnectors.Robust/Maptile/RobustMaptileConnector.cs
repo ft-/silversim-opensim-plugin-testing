@@ -89,7 +89,7 @@ namespace SilverSim.BackendConnectors.Robust.Maptile
                 ["TYPE"] = data.ContentType,
                 ["SCOPEID"] = data.ScopeID.ToString()
             };
-            HttpClient.DoPostRequest(m_Url + "map", null, postVals, false, TimeoutMs);
+            new HttpClient.Post(m_Url + "map", postVals) { TimeoutMs = TimeoutMs }.ExecuteRequest();
         }
 
         public override bool TryGetValue(UUID scopeid, GridVector location, int zoomlevel, out MaptileData data)
@@ -97,7 +97,7 @@ namespace SilverSim.BackendConnectors.Robust.Maptile
             string requrl = m_Url + string.Format("map-{0}-{1}-{2}-0.jpg", zoomlevel, location.X, location.Y);
             try
             {
-                using (Stream s = HttpClient.DoStreamGetRequest(requrl, null, TimeoutMs))
+                using (Stream s = new HttpClient.Get(requrl) { TimeoutMs = TimeoutMs }.ExecuteStreamRequest())
                 {
                     data = new MaptileData()
                     {

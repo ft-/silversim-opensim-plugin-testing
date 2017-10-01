@@ -96,7 +96,7 @@ namespace SilverSim.BackendConnectors.Robust.IM
                 ["METHOD"] = "STORE"
             };
             Map map;
-            using(Stream s = HttpClient.DoStreamPostRequest(m_OfflineIMURI, null, post, false, TimeoutMs))
+            using(Stream s = new HttpClient.Post(m_OfflineIMURI, post) { TimeoutMs = TimeoutMs }.ExecuteStreamRequest())
             {
                 map = OpenSimResponse.Deserialize(s);
             }
@@ -118,7 +118,7 @@ namespace SilverSim.BackendConnectors.Robust.IM
                 ["METHOD"] = "GET"
             };
             Map map;
-            using(Stream s = HttpClient.DoStreamPostRequest(m_OfflineIMURI, null, post, false, TimeoutMs))
+            using (Stream s = new HttpClient.Post(m_OfflineIMURI, post) { TimeoutMs = TimeoutMs }.ExecuteStreamRequest())
             {
                 map = OpenSimResponse.Deserialize(s);
             }

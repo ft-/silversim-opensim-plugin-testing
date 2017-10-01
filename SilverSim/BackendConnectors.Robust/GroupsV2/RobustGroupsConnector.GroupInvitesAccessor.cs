@@ -59,7 +59,7 @@ namespace SilverSim.BackendConnectors.Robust.GroupsV2
                     ["METHOD"] = "INVITE"
                 };
                 Map m;
-                using (Stream s = HttpClient.DoStreamPostRequest(m_Uri, null, post, false, TimeoutMs))
+                using (Stream s = new HttpClient.Post(m_Uri, post) { TimeoutMs = TimeoutMs }.ExecuteStreamRequest())
                 {
                     m = OpenSimResponse.Deserialize(s);
                 }

@@ -184,7 +184,7 @@ namespace SilverSim.OpenSimArchiver
             try
             {
                 using (Stream s = Uri.IsWellFormedUriString(filename, UriKind.Absolute) ?
-                    HttpClient.DoStreamGetRequest(filename, null, 20000) :
+                    new HttpClient.Get(filename).ExecuteStreamRequest() :
                     new FileStream(filename, FileMode.Open, FileAccess.Read))
                 {
                     RegionArchiver.OAR.Load(m_Scenes, scene, options, s, io);

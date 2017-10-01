@@ -45,7 +45,7 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
                 ["METHOD"] = "GETFOLDER"
             };
             Map map;
-            using(Stream s = HttpClient.DoStreamPostRequest(m_InventoryURI, null, post, false, TimeoutMs))
+            using(Stream s = new HttpClient.Post(m_InventoryURI, post) { TimeoutMs = TimeoutMs }.ExecuteStreamRequest())
             {
                 map = OpenSimResponse.Deserialize(s);
             }
@@ -87,7 +87,7 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
                 ["METHOD"] = "GETFOLDER"
             };
             Map map;
-            using (Stream s = HttpClient.DoStreamPostRequest(m_InventoryURI, null, post, false, TimeoutMs))
+            using (Stream s = new HttpClient.Post(m_InventoryURI, post) { TimeoutMs = TimeoutMs }.ExecuteStreamRequest())
             {
                 map = OpenSimResponse.Deserialize(s);
             }
@@ -111,7 +111,7 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
                     ["METHOD"] = "GETFOLDERCONTENT"
                 };
                 Map map;
-                using(Stream s = HttpClient.DoStreamPostRequest(m_InventoryURI, null, post, false, TimeoutMs))
+                using (Stream s = new HttpClient.Post(m_InventoryURI, post) { TimeoutMs = TimeoutMs }.ExecuteStreamRequest())
                 {
                     map = OpenSimResponse.Deserialize(s);
                 }
@@ -210,7 +210,7 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
                 Map map;
                 try
                 {
-                    using (Stream s = HttpClient.DoStreamPostRequest(m_InventoryURI, null, post, false, TimeoutMs))
+                    using (Stream s = new HttpClient.Post(m_InventoryURI, post) { TimeoutMs = TimeoutMs }.ExecuteStreamRequest())
                     {
                         map = OpenSimResponse.Deserialize(s);
                     }
