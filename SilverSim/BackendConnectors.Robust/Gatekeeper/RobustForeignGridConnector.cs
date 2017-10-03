@@ -79,10 +79,7 @@ namespace SilverSim.BackendConnectors.Robust.Gatekeeper
             id = UUID.Zero;
             external_name = default(string);
             var p = new Map();
-            if (!string.IsNullOrEmpty(name))
-            {
-                p.Add("region_name", name);
-            }
+            p.Add("region_name", name ?? string.Empty );
             var req = new XmlRpc.XmlRpcRequest("link_region");
             req.Params.Add(p);
             XmlRpc.XmlRpcResponse res = RPC.DoXmlRpcRequest(m_GatekeeperUrl, req, TimeoutMs);

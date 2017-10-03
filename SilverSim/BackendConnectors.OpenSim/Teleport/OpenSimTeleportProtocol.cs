@@ -1193,7 +1193,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
             UUID regionId;
             var req = new Map
             {
-                { "region_name", name }
+                { "region_name", name ?? string.Empty }
             };
             Map response = DoXmlRpcWithHashResponse(gatekeeperuri, "link_region", req);
             if (!response["result"].AsBoolean)
