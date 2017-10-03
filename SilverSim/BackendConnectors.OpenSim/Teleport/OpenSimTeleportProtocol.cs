@@ -55,8 +55,8 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
     [Description("OpenSim Teleport Protocol")]
     public class OpenSimTeleportProtocol : TeleportHandlerServiceInterface, IPlugin
     {
-        private const int PROTOCOL_VERSION_MAJOR = 0;
-        private const int PROTOCOL_VERSION_MINOR = 6;
+        internal const int PROTOCOL_VERSION_MAJOR = 0;
+        internal const int PROTOCOL_VERSION_MINOR = 6;
 
         protected static readonly ILog m_Log = LogManager.GetLogger("OPENSIM TELEPORT PROTOCOL");
         private static readonly Random m_RandomNumber = new Random();
@@ -918,13 +918,13 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
                     uint circuitCode;
                     string capsPath;
 
-                    ProtocolVersion protoVersion = QueryAccess(dInfo, agent, position);
-                    if (protoVersion.Major == 0 && protoVersion.Minor < 2)
+                    double protoVersion = QueryAccess(dInfo, agent, position);
+                    if (protoVersion < 0.2)
                     {
                         throw new TeleportFailedException("Older teleport variant not yet implemented");
                     }
-                    int maxWearables = (int)WearableType.NumWearables;
-                    if(protoVersion.Major == 0 && protoVersion.Minor < 4)
+                    var maxWearables = (int)WearableType.NumWearables;
+                    if(protoVersion < 0.4)
                     {
                         maxWearables = 15;
                     }
@@ -981,7 +981,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
                     };
                     agent.SendMessageIfRootAgent(teleFinish, scene.ID);
 
-                    if (protoVersion.Major == 0 && protoVersion.Minor < 2)
+                    if (protoVersion < 0.2)
                     {
                         PutAgent(sceneID, dInfo, agent, circuitCode, maxWearables, false, BuildAgentUri(scene.GetRegionInfo(), agent, "/release"));
                     }
@@ -1003,7 +1003,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
             }
             else
             {
-                ProtocolVersion protoVersion = QueryAccess(dInfo, agent, position);
+                double protoVersion = QueryAccess(dInfo, agent, position);
                 uint circuitCode;
                 string capsPath;
 
@@ -1018,12 +1018,12 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
                 m_Log.DebugFormat("Sending agent POST to {0} for {1} ({2})", homeAgentUri, agent.Owner.FullName, agent.Owner.ID);
 #endif
 
-                if (protoVersion.Major == 0 && protoVersion.Minor < 2)
+                if (protoVersion < 0.2)
                 {
                     throw new TeleportFailedException("Older teleport variant not yet implemented");
                 }
-                int maxWearables = (int)WearableType.NumWearables;
-                if (protoVersion.Major == 0 && protoVersion.Minor < 4)
+                var maxWearables = (int)WearableType.NumWearables;
+                if (protoVersion < 0.4)
                 {
                     maxWearables = 15;
                 }
@@ -1059,7 +1059,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
                 };
                 agent.SendMessageIfRootAgent(teleFinish, scene.ID);
 
-                if (protoVersion.Major == 0 && protoVersion.Minor < 2)
+                if (protoVersion < 0.2)
                 {
                     PutAgent(sceneID, dInfo, agent, circuitCode, maxWearables, false, BuildAgentUri(scene.GetRegionInfo(), agent, "/release"));
                 }
@@ -1106,7 +1106,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
             }
         }
 
-        private ProtocolVersion QueryAccess(DestinationInfo dInfo, IAgent agent, Vector3 position)
+        private double QueryAccess(DestinationInfo dInfo, IAgent agent, Vector3 position)
         {
             string uri = BuildAgentUri(dInfo, agent);
 #if DEBUG
@@ -1114,23 +1114,24 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
 #endif
 
             string versionStr = string.Format("{0}.{1}", PROTOCOL_VERSION_MAJOR, PROTOCOL_VERSION_MINOR);
+            double maxVersion = double.Parse(versionStr, System.Globalization.CultureInfo.InvariantCulture);
             var req = new Map
             {
                 { "position", position.ToString() },
                 { "my_version", "SIMULATION/" + versionStr },
-                { "simulation_service_supported_min", "0.3" },
-                { "simulation_service_supported_max", versionStr },
-                { "simulation_service_accepted_min", "0.3" },
-                { "simulation_service_accepted_max", versionStr }
+                { "simulation_service_supported_min", 0.3 },
+                { "simulation_service_supported_max", maxVersion },
+                { "simulation_service_accepted_min", 0.3 },
+                { "simulation_service_accepted_max", maxVersion }
             };
             var entityctx = new Map
             {
-                { "InboundVersion", versionStr },
-                { "OutboundVersion", versionStr },
+                { "InboundVersion", maxVersion },
+                { "OutboundVersion", maxVersion },
                 { "WearablesCount", (int)WearableType.NumWearables }
             };
             req.Add("context", entityctx);
-            var features = new Map();
+            var features = new AnArray();
             req.Add("features", features);
             if (agent.Owner.HomeURI != null)
             {
@@ -1158,11 +1159,11 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
                 throw new TeleportFailedException(jsonres["reason"].ToString());
             }
 
-            ProtocolVersion protoVersion;
-            string versionAsDouble;
+            double protoVersion;
+            IValue versionAsDouble;
             if (jsonres.TryGetValue("negotiated_outbound_version", out versionAsDouble))
             {
-                protoVersion = new ProtocolVersion(versionAsDouble, 0);
+                protoVersion = double.Parse(versionAsDouble.ToString(), System.Globalization.CultureInfo.InvariantCulture);
             }
             else
             {
@@ -1171,17 +1172,16 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
                 {
                     throw new TeleportFailedException(this.GetLanguageString(agent.CurrentCulture, "TeleportProtocolError", "Teleport Protocol Error"));
                 }
-                protoVersion = new ProtocolVersion(version);
+                protoVersion = double.Parse(version.Substring(11));
             }
 
-            if (protoVersion.Major > PROTOCOL_VERSION_MAJOR)
+            if (protoVersion > PROTOCOL_VERSION_MAJOR + PROTOCOL_VERSION_MINOR / 10.0)
             {
-                protoVersion.Major = PROTOCOL_VERSION_MAJOR;
-                protoVersion.Minor = PROTOCOL_VERSION_MINOR;
+                protoVersion = PROTOCOL_VERSION_MAJOR + PROTOCOL_VERSION_MINOR / 10.0;
             }
-            else if (protoVersion.Major == PROTOCOL_VERSION_MAJOR && protoVersion.Minor > PROTOCOL_VERSION_MINOR)
+            else if (protoVersion > PROTOCOL_VERSION_MAJOR + PROTOCOL_VERSION_MINOR / 10.0)
             {
-                protoVersion.Minor = PROTOCOL_VERSION_MINOR;
+                protoVersion = PROTOCOL_VERSION_MAJOR + PROTOCOL_VERSION_MINOR / 10.0;
             }
             return protoVersion;
         }

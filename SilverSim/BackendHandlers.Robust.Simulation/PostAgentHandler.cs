@@ -1154,8 +1154,9 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
             response.Add("reason", reason);
             /* CAUTION! never ever make version parameters a configuration parameter */
             string versionStr = string.Format("{0}.{1}", versionMajor, versionMinor);
+            double maxVersion = double.Parse(versionStr, System.Globalization.CultureInfo.InvariantCulture);
             response.Add("version", "SIMULATION/" + versionStr);
-            response.Add("negotiated_outbound_version", versionStr);
+            response.Add("negotiated_outbound_version", maxVersion);
             string acceptedMaxVersion;
             if(jsonreq.TryGetValue("simulation_service_accepted_max", out acceptedMaxVersion))
             {
@@ -1183,9 +1184,9 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
                 {
                     versionMinor = PROTOCOL_VERSION_MINOR;
                 }
-                response.Add("negotiated_inbound_version", string.Format("{0}.{1}", versionMajor, versionMinor));
+                response.Add("negotiated_inbound_version", double.Parse(string.Format("{0}.{1}", versionMajor, versionMinor), System.Globalization.CultureInfo.InvariantCulture));
             }
-            response.Add("features", new Map());
+            response.Add("features", new AnArray());
             using(HttpResponse res = req.BeginResponse("application/json"))
             {
                 using(Stream s = res.GetOutputStream())
