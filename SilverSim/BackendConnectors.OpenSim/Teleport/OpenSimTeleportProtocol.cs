@@ -790,7 +790,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
         private void TeleportTo_Step2(SceneInterface scene, IAgent agent, DestinationInfo dInfo, Vector3 position, Vector3 lookAt, TeleportFlags flags)
         {
 #if DEBUG
-            m_Log.DebugFormat("TeleportTo_Step2: {0} ({1})", agent.Owner.FullName, agent.Owner.ID);
+            m_Log.DebugFormat("TeleportTo_Step2: {0} ({1}) to {2}@{3} ({4},{5})", agent.Owner.FullName, agent.Owner.ID, dInfo.Name, dInfo.GatekeeperURI, dInfo.Location.GridX, dInfo.Location.GridY);
 #endif
             UUID sceneID = scene.ID;
             uint actualCircuitCode;
@@ -1191,7 +1191,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
         private DestinationInfo GetRegionByName(string gatekeeperuri, IAgent agent, string name)
         {
             UUID regionId;
-            Map req = new Map
+            var req = new Map
             {
                 { "region_name", name }
             };
@@ -1235,30 +1235,34 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
             {
                 dInfo.ID = response["uuid"].AsUUID;
             }
+            var location = new GridVector();
             if (response.ContainsKey("x"))
             {
-                dInfo.Location.X = (ushort)response["x"].AsUInt;
+                location.X = response["x"].AsUInt;
             }
             if (response.ContainsKey("y"))
             {
-                dInfo.Location.Y = (ushort)response["y"].AsUInt;
+                location.Y = response["y"].AsUInt;
             }
+            dInfo.Location = location;
+            var size = new GridVector();
             if (response.ContainsKey("size_x"))
             {
-                dInfo.Size.X = (ushort)response["size_x"].AsUInt;
+                size.X = response["size_x"].AsUInt;
             }
             else
             {
-                dInfo.Size.GridX = 1;
+                size.GridX = 1;
             }
             if (response.ContainsKey("size_y"))
             {
-                dInfo.Size.Y = (ushort)response["size_y"].AsUInt;
+                size.Y = response["size_y"].AsUInt;
             }
             else
             {
-                dInfo.Size.GridY = 1;
+                size.GridY = 1;
             }
+            dInfo.Size = size;
             if (response.ContainsKey("region_name"))
             {
                 dInfo.Name = response["region_name"].ToString();
