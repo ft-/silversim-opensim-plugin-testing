@@ -24,6 +24,7 @@ using SilverSim.Main.Common;
 using SilverSim.Main.Common.HttpServer;
 using SilverSim.ServiceInterfaces;
 using SilverSim.ServiceInterfaces.IM;
+using SilverSim.ServiceInterfaces.ServerParam;
 using SilverSim.Types;
 using SilverSim.Types.IM;
 using SilverSim.Types.StructuredData.XmlRpc;
@@ -76,16 +77,12 @@ namespace SilverSim.BackendConnectors.Robust.IM
 
     [Description("OpenSim InstantMessage Server")]
     [PluginName("IMHandler")]
-    public sealed class RobustIMHandler : IPlugin, IServiceURLsGetInterface
+    [ServerParam("RobustIM.DisallowOfflineIM", DefaultValue = true, Description = "Disable Offline HM pass-thru from IM handler", ParameterType = typeof(bool), Type = ServerParamType.GlobalOnly)]
+    public sealed class RobustIMHandler : IPlugin, IServiceURLsGetInterface, IServerParamListener
     {
-        private readonly bool m_DisallowOfflineIM;
+        private bool m_DisallowOfflineIM = true;
         private IMServiceInterface m_IMService;
         private BaseHttpServer m_HttpServer;
-
-        public RobustIMHandler(IConfig ownSection)
-        {
-            m_DisallowOfflineIM = ownSection.GetBoolean("DisallowOfflineIM", true);
-        }
 
         public void Startup(ConfigurationLoader loader)
         {
@@ -93,6 +90,19 @@ namespace SilverSim.BackendConnectors.Robust.IM
             HttpXmlRpcHandler xmlRpc = loader.GetService<HttpXmlRpcHandler>("XmlRpcServer");
             xmlRpc.XmlRpcMethods.Add("grid_instant_message", IMReceived);
             m_IMService = loader.GetService<IMServiceInterface>("IMService");
+        }
+
+        [ServerParam("RobustIM.DisallowOfflineIM")]
+        public void HandleDisallowOfflineIM(UUID regionid, string value)
+        {
+            if (regionid != UUID.Zero)
+            {
+                return;
+            }
+            if(!bool.TryParse(value, out m_DisallowOfflineIM))
+            {
+                m_DisallowOfflineIM = false;
+            }
         }
 
         void IServiceURLsGetInterface.GetServiceURLs(Dictionary<string, string> dict)
