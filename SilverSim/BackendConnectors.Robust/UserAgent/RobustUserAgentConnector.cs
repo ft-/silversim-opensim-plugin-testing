@@ -224,7 +224,7 @@ namespace SilverSim.BackendConnectors.Robust.UserAgent
             var dInfo = new DestinationInfo()
             {
                 /* assume that HomeURI supports Gatekeeper services */
-                GatekeeperURI = user.HomeURI.ToString(),
+                GridURI = user.HomeURI.ToString(),
                 LocalToGrid = false,
                 ID = res["uuid"].AsUUID
             };

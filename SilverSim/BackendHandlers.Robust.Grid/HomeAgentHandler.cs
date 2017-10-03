@@ -113,10 +113,10 @@ namespace SilverSim.BackendHandlers.Robust.Grid
         {
             TravelingDataInfo tInfo = m_TravelingDataService.GetTravelingData(ad.SessionInfo.SessionID);
             string oldgrid = tInfo.GridExternalName;
-            tInfo.GridExternalName = ad.DestinationInfo.GatekeeperURI;
+            tInfo.GridExternalName = ad.DestinationInfo.GridURI;
             m_TravelingDataService.Store(tInfo);
             SessionInfo sessionInfo = ad.SessionInfo;
-            sessionInfo.ServiceSessionID = ad.DestinationInfo.GatekeeperURI + ";" + tInfo.ServiceToken;
+            sessionInfo.ServiceSessionID = ad.DestinationInfo.GridURI + ";" + tInfo.ServiceToken;
             ad.SessionInfo = sessionInfo;
             return oldgrid;
         }

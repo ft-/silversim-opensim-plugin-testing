@@ -82,13 +82,13 @@ namespace SilverSim.BackendConnectors.OpenSim.PostAgent
 
             string agentURL;
 
-            if(0 == string.Compare(authData.DestinationInfo.GatekeeperURI, GatekeeperURI, true))
+            if(0 == string.Compare(authData.DestinationInfo.GridURI, GatekeeperURI, true))
             {
                 agentURL = BuildAgentUri(authData.DestinationInfo, authData.AccountInfo.Principal.ID);
             }
             else
             {
-                agentURL = authData.DestinationInfo.GatekeeperURI;
+                agentURL = authData.DestinationInfo.GridURI;
                 if(!agentURL.EndsWith("/"))
                 {
                     agentURL += "/";

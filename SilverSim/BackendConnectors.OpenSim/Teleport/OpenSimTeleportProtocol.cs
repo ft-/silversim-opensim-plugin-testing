@@ -20,6 +20,7 @@
 // exception statement from your version.
 
 using log4net;
+using SilverSim.BackendConnectors.Robust.Gatekeeper;
 using SilverSim.BackendConnectors.Robust.StructuredData.Agent;
 using SilverSim.Http.Client;
 using SilverSim.Main.Common;
@@ -658,7 +659,17 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
 
             if(regionAddress.IsForeignGrid && !regionAddress.TargetsGatekeeperUri(sceneInterface.GatekeeperURI))
             {
-                dInfo = GetRegionByName(regionAddress.GatekeeperUri, agent, regionAddress.RegionName);
+                var gatekeeper = new RobustForeignGridConnector(regionAddress.GatekeeperUri);
+                RegionInfo rInfo = null;
+                string msg;
+                if(gatekeeper.TryGetValue(regionAddress.RegionName, out rInfo, out msg))
+                {
+                    dInfo = new DestinationInfo(rInfo);
+                }
+                else
+                {
+                    throw new TeleportFailedException(this.GetLanguageString(agent.CurrentCulture, "RegionNotFound", "Region not found."));
+                }
             }
             else
             {
@@ -670,7 +681,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
                         RegionInfo rInfo = gridService[sceneInterface.ScopeID, regionName];
                         dInfo = new DestinationInfo(rInfo)
                         {
-                            GatekeeperURI = sceneInterface.GatekeeperURI,
+                            GridURI = sceneInterface.GatekeeperURI,
                             LocalToGrid = true
                         };
                     }
@@ -694,12 +705,13 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
             m_Log.DebugFormat("TeleportTo_Step1_ThisGrid(RegionID): {0} ({1})", agent.Owner.FullName, agent.Owner.ID);
 #endif
 
-            GridServiceInterface gridService = sceneInterface.GridService;
             var teleStart = new TeleportStart()
             {
                 TeleportFlags = flags
             };
             agent.SendMessageIfRootAgent(teleStart, sceneInterface.ID);
+
+            GridServiceInterface gridService = sceneInterface.GridService;
 
             if (gridService == null)
             {
@@ -719,7 +731,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
             return new DestinationInfo(rInfo)
             {
                 LocalToGrid = true,
-                GatekeeperURI = gatekeeperURI
+                GridURI = gatekeeperURI
             };
         }
 
@@ -735,7 +747,20 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
             };
             agent.SendMessageIfRootAgent(teleStart, sceneInterface.ID);
 
-            return GetRegionById(gatekeeperURI, agent, regionID);
+            var gatekeeper = new RobustForeignGridConnector(gatekeeperURI);
+            RegionInfo rInfo;
+            string msg;
+            if (gatekeeper.TryGetRegion(gatekeeperURI, out rInfo, out msg))
+            {
+                return new DestinationInfo(rInfo)
+                {
+                    GridURI = gatekeeperURI
+                };
+            }
+            else
+            {
+                throw new TeleportFailedException(this.GetLanguageString(agent.CurrentCulture, "RegionNotFound", "Region not found"));
+            }
         }
 
         private DestinationInfo TeleportTo_Step1_ThisGrid(SceneInterface sceneInterface, IAgent agent, string gatekeeperURI, GridVector location, TeleportFlags flags)
@@ -768,7 +793,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
             return new DestinationInfo(rInfo)
             {
                 LocalToGrid = true,
-                GatekeeperURI = gatekeeperURI
+                GridURI = gatekeeperURI
             };
         }
 
@@ -790,7 +815,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
         private void TeleportTo_Step2(SceneInterface scene, IAgent agent, DestinationInfo dInfo, Vector3 position, Vector3 lookAt, TeleportFlags flags)
         {
 #if DEBUG
-            m_Log.DebugFormat("TeleportTo_Step2: {0} ({1}) to {2}@{3} ({4},{5})", agent.Owner.FullName, agent.Owner.ID, dInfo.Name, dInfo.GatekeeperURI, dInfo.Location.GridX, dInfo.Location.GridY);
+            m_Log.DebugFormat("TeleportTo_Step2: {0} ({1}) to {2}@{3} ({4},{5})", agent.Owner.FullName, agent.Owner.ID, dInfo.Name, dInfo.GridURI, dInfo.Location.GridX, dInfo.Location.GridY);
 #endif
             UUID sceneID = scene.ID;
             uint actualCircuitCode;
@@ -800,7 +825,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
 
             SendTeleportProgress(agent, sceneID, this.GetLanguageString(agent.CurrentCulture, "ConnectDestinationSimulator", "Connecting to destination simulator"), flags);
 
-            if (scene.GatekeeperURI == dInfo.GatekeeperURI)
+            if (scene.GatekeeperURI == dInfo.GridURI)
             {
                 if (dInfo.ServerURI == scene.ServerURI)
                 {
@@ -825,7 +850,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
                                 m_CapsRedirector,
                                 seedId,
                                 vagent.ServiceURLs,
-                                dInfo.GatekeeperURI,
+                                dInfo.GridURI,
                                 m_PacketHandlerPlugins,
                                 ep)
                             {
@@ -1184,130 +1209,6 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
                 protoVersion = PROTOCOL_VERSION_MAJOR + PROTOCOL_VERSION_MINOR / 10.0;
             }
             return protoVersion;
-        }
-        #endregion
-
-        #region Gatekeeper connector
-        private DestinationInfo GetRegionByName(string gatekeeperuri, IAgent agent, string name)
-        {
-            UUID regionId;
-            var req = new Map
-            {
-                { "region_name", name ?? string.Empty }
-            };
-            Map response = DoXmlRpcWithHashResponse(gatekeeperuri, "link_region", req);
-            if (!response["result"].AsBoolean)
-            {
-                return null;
-            }
-            regionId = response["uuid"].AsUUID;
-            return GetRegionById(gatekeeperuri, agent, regionId);
-        }
-
-        private DestinationInfo GetRegionById(string gatekeeperuri, IAgent agent, UUID regionId)
-        {
-            var req = new Map
-            {
-                ["region_uuid"] = regionId,
-                ["agent_id"] = agent.ID
-            };
-            if (agent.Owner.HomeURI != null)
-            {
-                req.Add("agent_home_uri", agent.Owner.HomeURI.ToString());
-            }
-            Map response = DoXmlRpcWithHashResponse(gatekeeperuri, "get_region", req);
-            if (!response["result"].AsBoolean)
-            {
-                string message = "The teleport destination could not be found.";
-                if (response.ContainsKey("message"))
-                {
-                    message = response["message"].ToString();
-                }
-                throw new TeleportFailedException(message);
-            }
-
-            var dInfo = new DestinationInfo()
-            {
-                GatekeeperURI = gatekeeperuri,
-                LocalToGrid = false
-            };
-            if(response.ContainsKey("uuid"))
-            {
-                dInfo.ID = response["uuid"].AsUUID;
-            }
-            var location = new GridVector();
-            if (response.ContainsKey("x"))
-            {
-                location.X = response["x"].AsUInt;
-            }
-            if (response.ContainsKey("y"))
-            {
-                location.Y = response["y"].AsUInt;
-            }
-            dInfo.Location = location;
-            var size = new GridVector();
-            if (response.ContainsKey("size_x"))
-            {
-                size.X = response["size_x"].AsUInt;
-            }
-            else
-            {
-                size.GridX = 1;
-            }
-            if (response.ContainsKey("size_y"))
-            {
-                size.Y = response["size_y"].AsUInt;
-            }
-            else
-            {
-                size.GridY = 1;
-            }
-            dInfo.Size = size;
-            if (response.ContainsKey("region_name"))
-            {
-                dInfo.Name = response["region_name"].ToString();
-            }
-
-            if (response.ContainsKey("http_port"))
-            {
-                dInfo.ServerHttpPort = response["http_port"].AsUInt;
-            }
-            if (response.ContainsKey("internal_port"))
-            {
-                dInfo.ServerPort = response["internal_port"].AsUInt;
-            }
-            if (response.ContainsKey("hostname"))
-            {
-                IPAddress[] address = Dns.GetHostAddresses(response["hostname"].ToString());
-                if (response.ContainsKey("internal_port") && address.Length > 0)
-                {
-                    dInfo.SimIP = new IPEndPoint(address[0], (int)dInfo.ServerPort);
-                }
-            }
-            if (response.ContainsKey("server_uri"))
-            {
-                dInfo.ServerURI = response["server_uri"].ToString();
-            }
-            else if(response.ContainsKey("hostname") && response.ContainsKey("http_port"))
-            {
-                dInfo.ServerURI = string.Format("http://{0}:{1}/", response["hostname"], dInfo.ServerHttpPort);
-            }
-            return dInfo;
-        }
-
-        private Map DoXmlRpcWithHashResponse(string gatekeeperuri, string method, Map reqparams)
-        {
-            var req = new XmlRpc.XmlRpcRequest(method);
-            req.Params.Add(reqparams);
-            XmlRpc.XmlRpcResponse res = RPC.DoXmlRpcRequest(gatekeeperuri, req, TimeoutMs);
-
-            var hash = (Map)res.ReturnValue;
-            if (hash == null)
-            {
-                throw new InvalidOperationException();
-            }
-
-            return hash;
         }
         #endregion
 

@@ -21,9 +21,11 @@
 
 using SilverSim.Main.Common.Rpc;
 using SilverSim.ServiceInterfaces.Grid;
+using SilverSim.Threading;
 using SilverSim.Types;
 using SilverSim.Types.Grid;
 using SilverSim.Types.StructuredData.XmlRpc;
+using System.Net;
 
 namespace SilverSim.BackendConnectors.Robust.Gatekeeper
 {
@@ -101,7 +103,7 @@ namespace SilverSim.BackendConnectors.Robust.Gatekeeper
             }
         }
 
-        private bool TryGetRegion(UUID id, out RegionInfo rInfo, out string message)
+        public bool TryGetRegion(UUID id, out RegionInfo rInfo, out string message)
         {
             rInfo = default(RegionInfo);
             message = default(string);
@@ -129,8 +131,8 @@ namespace SilverSim.BackendConnectors.Robust.Gatekeeper
                     },
                     Size = new GridVector
                     {
-                        X = d["size_x"].AsUInt,
-                        Y = d["size_y"].AsUInt
+                        X = d.ContainsKey("size_x") ? d["size_x"].AsUInt : 256,
+                        Y = d.ContainsKey("size_y") ? d["size_y"].AsUInt : 256
                     },
                     Name = d["region_name"].ToString(),
                     GridURI = m_GatekeeperUrl,
@@ -140,7 +142,24 @@ namespace SilverSim.BackendConnectors.Robust.Gatekeeper
                     ServerIP = d["hostname"].ToString(),
                     ProtocolVariant = "OpenSim",
                 };
-                if(d.ContainsKey("message"))
+                if (d.ContainsKey("hostname"))
+                {
+                    IPAddress[] address = DnsNameCache.GetHostAddresses(d["hostname"].ToString());
+                    if (d.ContainsKey("internal_port") && address.Length > 0)
+                    {
+                        rInfo.SimIP = new IPEndPoint(address[0], (int)rInfo.ServerPort);
+                    }
+                }
+                if (d.ContainsKey("server_uri"))
+                {
+                    rInfo.ServerURI = d["server_uri"].ToString();
+                }
+                else if (d.ContainsKey("hostname") && d.ContainsKey("http_port"))
+                {
+                    rInfo.ServerURI = string.Format("http://{0}:{1}/", d["hostname"], rInfo.ServerHttpPort);
+                }
+
+                if (d.ContainsKey("message"))
                 {
                     message = d["message"].ToString();
                 }

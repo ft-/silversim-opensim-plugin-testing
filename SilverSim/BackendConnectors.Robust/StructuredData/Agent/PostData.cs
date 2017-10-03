@@ -125,12 +125,12 @@ namespace SilverSim.BackendConnectors.Robust.StructuredData.Agent
             if (parms.ContainsKey("gatekeeper_serveruri"))
             {
                 agentparams.Destination.ServerURI = parms["destination_serveruri"].ToString();
-                agentparams.Destination.GatekeeperURI = parms["gatekeeper_serveruri"].ToString();
+                agentparams.Destination.GridURI = parms["gatekeeper_serveruri"].ToString();
                 agentparams.Destination.LocalToGrid = false;
             }
             else
             {
-                agentparams.Destination.GatekeeperURI = string.Empty;
+                agentparams.Destination.GridURI = string.Empty;
                 agentparams.Destination.LocalToGrid = true;
             }
 
@@ -356,7 +356,7 @@ namespace SilverSim.BackendConnectors.Robust.StructuredData.Agent
                 {
                     WriteJSONString(w, "destination_serveruri", Destination.ServerURI);
                     w.Write(",");
-                    WriteJSONString(w, "gatekeeper_serveruri", Destination.GatekeeperURI);
+                    WriteJSONString(w, "gatekeeper_serveruri", Destination.GridURI);
                     w.Write(",");
                 }
 
