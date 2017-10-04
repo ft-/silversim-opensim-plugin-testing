@@ -551,6 +551,10 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
                                 agent.SendMessageIfRootAgent(failedMsg, sceneInterface.ID);
                             }
                         }
+                        catch(Exception e)
+                        {
+                            m_Log.DebugFormat("Exception at teleport handling", e);
+                        }
                         finally
                         {
                             agent.RemoveActiveTeleportService(this);
@@ -750,7 +754,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
             var gatekeeper = new RobustForeignGridConnector(gatekeeperURI);
             RegionInfo rInfo;
             string msg;
-            if (gatekeeper.TryGetRegion(gatekeeperURI, out rInfo, out msg))
+            if (gatekeeper.TryGetRegion(regionID, out rInfo, out msg))
             {
                 return new DestinationInfo(rInfo)
                 {
