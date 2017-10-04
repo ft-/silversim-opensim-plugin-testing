@@ -250,7 +250,7 @@ namespace SilverSim.BackendHandlers.Robust.Asset
                     (int)data.Type,
                     data.Local.ToString(),
                     data.Temporary.ToString(),
-                    data.Creator.ToString(),
+                    UUID.Zero,
                     flags);
 
             byte[] header = assetbase_header.ToUTF8Bytes();
@@ -361,7 +361,7 @@ namespace SilverSim.BackendHandlers.Robust.Asset
                 (int)data.Type,
                 data.Local.ToString(),
                 data.Temporary.ToString(),
-                data.Creator.ToString(),
+                UUID.Zero,
                 flags);
             byte[] header = assetbase_header.ToUTF8Bytes();
             byte[] footer = assetbase_footer.ToUTF8Bytes();

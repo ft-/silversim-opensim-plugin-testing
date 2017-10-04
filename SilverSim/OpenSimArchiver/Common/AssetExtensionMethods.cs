@@ -38,7 +38,6 @@ namespace SilverSim.OpenSimArchiver.Common
                 ID = UUID.Parse(hdr.FileName.Substring(7, 36)),
                 FileName = hdr.FileName,
                 Name = "From Archive",
-                Creator = creator,
                 Data = new byte[hdr.Length]
             };
 

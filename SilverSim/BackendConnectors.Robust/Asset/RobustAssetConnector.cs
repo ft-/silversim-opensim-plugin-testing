@@ -454,7 +454,7 @@ namespace SilverSim.BackendConnectors.Robust.Asset
                 (int)asset.Type,
                 asset.Local.ToString(),
                 asset.Temporary.ToString(),
-                asset.Creator.ToString(),
+                UUID.Zero,
                 flags);
 
             byte[] header = assetbase_header.ToUTF8Bytes();
