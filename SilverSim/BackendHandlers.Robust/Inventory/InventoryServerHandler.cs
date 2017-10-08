@@ -75,7 +75,7 @@ namespace SilverSim.BackendHandlers.Robust.Inventory
         public static InventoryFolder ToFolder(this Dictionary<string, object> dict) => new InventoryFolder()
         {
             ParentFolderID = dict.GetUUID("ParentID"),
-            InventoryType = (InventoryType)dict.GetInt("Type"),
+            DefaultType = (AssetType)dict.GetInt("Type"),
             Version = dict.GetInt("Version"),
             Name = dict.GetString("Name"),
             Owner = new UUI(dict.GetUUID("Owner")),
@@ -88,7 +88,7 @@ namespace SilverSim.BackendHandlers.Robust.Inventory
             writer.WriteAttributeString("type", "List");
             {
                 writer.WriteNamedValue("ParentID", folder.ParentFolderID);
-                writer.WriteNamedValue("Type", (int)folder.InventoryType);
+                writer.WriteNamedValue("Type", (int)folder.DefaultType);
                 writer.WriteNamedValue("Version", folder.Version);
                 writer.WriteNamedValue("Name", folder.Name);
                 writer.WriteNamedValue("Owner", folder.Owner.ID);

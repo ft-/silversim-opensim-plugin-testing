@@ -161,7 +161,7 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
             Owner = new UUI(map["Owner"].AsUUID),
             Name = map["Name"].AsString.ToString(),
             Version = map["Version"].AsInteger,
-            InventoryType = (InventoryType)map["Type"].AsInt,
+            DefaultType = (AssetType)map["Type"].AsInt,
             ParentFolderID = map["ParentID"].AsUUID
         };
         internal static InventoryItem ItemFromMap(Map map, GroupsServiceInterface groupsService)

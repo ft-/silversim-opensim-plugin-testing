@@ -309,7 +309,7 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
         {
             ["ID"] = (string)folder.ID,
             ["ParentID"] = (string)folder.ParentFolderID,
-            ["Type"] = ((int)folder.InventoryType).ToString(),
+            ["Type"] = ((int)folder.DefaultType).ToString(),
             ["Version"] = folder.Version.ToString(),
             ["Name"] = folder.Name,
             ["Owner"] = (string)folder.Owner.ID
