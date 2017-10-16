@@ -47,6 +47,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.IO.Compression;
+using System.Linq;
 using System.Net;
 using System.Runtime.Serialization;
 using System.Threading;
@@ -745,7 +746,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
             m_Log.DebugFormat("TeleportTo_Step1_ForeignGrid(RegionID): {0} ({1})", agent.Owner.FullName, agent.Owner.ID);
 #endif
 
-            var teleStart = new TeleportStart()
+            var teleStart = new TeleportStart
             {
                 TeleportFlags = flags
             };
@@ -758,7 +759,8 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
             {
                 return new DestinationInfo(rInfo)
                 {
-                    GridURI = gatekeeperURI
+                    GridURI = gatekeeperURI,
+                    LocalToGrid = false
                 };
             }
             else
@@ -806,7 +808,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
 #if DEBUG
             m_Log.DebugFormat("TeleportTo_Step1_ForeignGrid(Location): {0} ({1})", agent.Owner.FullName, agent.Owner.ID);
 #endif
-            var teleStart = new TeleportStart()
+            var teleStart = new TeleportStart
             {
                 TeleportFlags = flags
             };
@@ -815,6 +817,30 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
             throw new TeleportFailedException(this.GetLanguageString(agent.CurrentCulture, "TeleportNotSupported", "Teleport via location not supported into HG"));
         }
         #endregion
+
+        private void DisconnectAgentFromGrid(IAgent agent)
+        {
+            /* disconnect childs */
+            foreach (AgentChildInfo child in agent.ActiveChilds.Values.ToArray())
+            {
+                try
+                {
+                    DisableSimulator(child.DestinationInfo.ID, agent, child.DestinationInfo);
+                }
+                catch
+                {
+                    /* ignore fails here */
+                }
+            }
+            try
+            {
+                ReleaseAgent(agent.SceneID);
+            }
+            catch
+            {
+                /* ignore fails */
+            }
+        }
 
         private void TeleportTo_Step2(SceneInterface scene, IAgent agent, DestinationInfo dInfo, Vector3 position, Vector3 lookAt, TeleportFlags flags)
         {
@@ -889,7 +915,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
                             SendTeleportProgress(agent, sceneID, this.GetLanguageString(agent.CurrentCulture, "TransferingToDestination", "Transfering to destination"), flags);
 
                             /* the moment we send this, there is no way to get the viewer back if something fails and the viewer connected successfully on other side */
-                            var teleFinish = new TeleportFinish()
+                            var teleFinish = new TeleportFinish
                             {
                                 AgentID = agent.ID,
                                 LocationID = 4,
@@ -916,7 +942,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
                             SendTeleportProgress(agent, sceneID, this.GetLanguageString(agent.CurrentCulture, "TransferingToDestination", "Transfering to destination"), flags);
 
                             /* the moment we send this, there is no way to get the viewer back if something fails and the viewer connected successfully on other side */
-                            var teleFinish = new TeleportFinish()
+                            var teleFinish = new TeleportFinish
                             {
                                 AgentID = agent.ID,
                                 LocationID = 4,
@@ -996,7 +1022,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
                     SendTeleportProgress(agent, sceneID, this.GetLanguageString(agent.CurrentCulture, "TransferingToDestination", "Transfering to destination"), flags);
 
                     /* the moment we send this, there is no way to get the viewer back if something fails and the viewer connected successfully on other side */
-                    var teleFinish = new TeleportFinish()
+                    var teleFinish = new TeleportFinish
                     {
                         AgentID = agent.ID,
                         LocationID = 0,
@@ -1074,7 +1100,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
                 SendTeleportProgress(agent, sceneID, this.GetLanguageString(agent.CurrentCulture, "TransferingToDestination", "Transfering to destination"), flags);
 
                 /* the moment we send this, there is no way to get the viewer back if something fails and the viewer connected successfully on other side */
-                var teleFinish = new TeleportFinish()
+                var teleFinish = new TeleportFinish
                 {
                     AgentID = agent.ID,
                     LocationID = 0,
@@ -1102,7 +1128,8 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
 
                     /* agent is over there */
 
-                    /* TODO: handle disconnect of child agents */
+                    /* disconnect of child agents */
+                    //DisconnectAgentFromGrid(agent);
 
                     /* remotes are disconnecting too so we simply leave it to them */
                     agent.SceneID = UUID.Zero;
