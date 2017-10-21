@@ -64,7 +64,7 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
         private List<AuthorizationServiceInterface> m_AuthorizationServices;
         protected SceneList Scenes { get; private set; }
         protected PostAgentConnector PostAgentConnector { get; private set; }
-        private readonly string m_PostAgentConnectorName;
+        private readonly string m_PostAgentConnectorName = string.Empty;
 
         protected List<AuthorizationServiceInterface> AuthorizationServices => m_AuthorizationServices;
 
@@ -105,6 +105,7 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
 
         protected PostAgentHandler(string agentBaseURL, IConfig ownSection)
         {
+            m_PostAgentConnectorName = ownSection.GetString("PostAgentConnector", "PostAgentConnector");
             m_AgentBaseURL = agentBaseURL;
         }
         
