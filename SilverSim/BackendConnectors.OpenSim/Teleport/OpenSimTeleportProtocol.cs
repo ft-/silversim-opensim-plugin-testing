@@ -374,6 +374,9 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
         {
             uint circuitCode;
             string capsPath;
+#if DEBUG
+            m_Log.DebugFormat("Enabling simulator {0} ({1}) at {2} for {3}", destinationRegion.Name, destinationRegion.ID, destinationRegion.ServerURI, agent.Owner.FullName);
+#endif
             try
             {
                 PostAgent(fromSceneID, agent, destinationRegion, 15, out circuitCode, out capsPath);
@@ -390,6 +393,9 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
         public override void DisableSimulator(UUID fromSceneID, IAgent agent, RegionInfo regionInfo)
         {
             string uri = BuildAgentUri(regionInfo, agent, "?auth=" + agent.Session.SessionID.ToString());
+#if DEBUG
+            m_Log.DebugFormat("Disabling simulator {0} ({1}) at {2}", regionInfo.Name, regionInfo.ID, uri);
+#endif
             new HttpClient.Delete(uri) { TimeoutMs = TimeoutMs }.ExecuteRequest();
             agent.ActiveChilds.Remove(regionInfo.ID);
         }
@@ -818,14 +824,18 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
         }
         #endregion
 
-        private void DisconnectAgentFromGrid(IAgent agent)
+        private void DisconnectAgentFromGrid(IAgent agent, UUID destinationRegionID)
         {
             /* disconnect childs */
             foreach (AgentChildInfo child in agent.ActiveChilds.Values.ToArray())
             {
                 try
                 {
-                    DisableSimulator(child.DestinationInfo.ID, agent, child.DestinationInfo);
+                    /* do not disconnect destination region */
+                    if (child.DestinationInfo.ID != destinationRegionID)
+                    {
+                        DisableSimulator(child.DestinationInfo.ID, agent, child.DestinationInfo);
+                    }
                 }
                 catch
                 {
@@ -1129,7 +1139,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
                     /* agent is over there */
 
                     /* disconnect of child agents */
-                    //DisconnectAgentFromGrid(agent);
+                    DisconnectAgentFromGrid(agent, dInfo.ID);
 
                     /* remotes are disconnecting too so we simply leave it to them */
                     agent.SceneID = UUID.Zero;
