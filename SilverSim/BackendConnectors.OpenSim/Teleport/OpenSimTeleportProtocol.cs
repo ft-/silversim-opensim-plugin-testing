@@ -25,7 +25,6 @@ using SilverSim.BackendConnectors.Robust.StructuredData.Agent;
 using SilverSim.Http.Client;
 using SilverSim.Main.Common;
 using SilverSim.Main.Common.CmdIO;
-using SilverSim.Main.Common.Rpc;
 using SilverSim.Scene.Management.Scene;
 using SilverSim.Scene.Types.Agent;
 using SilverSim.Scene.Types.Neighbor;
@@ -39,7 +38,6 @@ using SilverSim.Types.Agent;
 using SilverSim.Types.Asset.Format;
 using SilverSim.Types.Grid;
 using SilverSim.Types.StructuredData.Json;
-using SilverSim.Types.StructuredData.XmlRpc;
 using SilverSim.Viewer.Core;
 using SilverSim.Viewer.Messages.Teleport;
 using System;
@@ -216,9 +214,9 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
             IAgent agent,
             DestinationInfo destinationRegion, 
             UUID capsId,
-            int maxAllowedWearables, 
-            string agentURL, 
-            out uint circuitCode, 
+            int maxAllowedWearables,
+            string agentURL,
+            out uint circuitCode,
             out string capsPath)
         {
             var vagent = (ViewerAgent)agent;
@@ -842,6 +840,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
                     /* ignore fails here */
                 }
             }
+            Thread.Sleep(2000); /* we have to ensure for a little processing delay due to viewer-sim protocol relationship */
             try
             {
                 ReleaseAgent(agent.SceneID);
