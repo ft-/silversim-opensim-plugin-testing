@@ -173,13 +173,10 @@ namespace SilverSim.Backend.OpenSim.Neighbor.Neighbor
                 {
                     { "success", false }
                 };
-                using (HttpResponse resp = req.BeginResponse())
+                using (HttpResponse resp = req.BeginResponse("application/json"))
+                using (Stream outStream = resp.GetOutputStream())
                 {
-                    resp.ContentType = "application/json";
-                    using (Stream outStream = resp.GetOutputStream())
-                    {
-                        Json.Serialize(m, outStream);
-                    }
+                    Json.Serialize(m, outStream);
                 }
                 return;
             }
@@ -202,13 +199,10 @@ namespace SilverSim.Backend.OpenSim.Neighbor.Neighbor
                 m.Add("success", false);
             }
 
-            using (HttpResponse resp = req.BeginResponse())
+            using (HttpResponse resp = req.BeginResponse("application/json"))
+            using (Stream outStream = resp.GetOutputStream())
             {
-                resp.ContentType = "application/json";
-                using (Stream outStream = resp.GetOutputStream())
-                {
-                    Json.Serialize(m, outStream);
-                }
+                Json.Serialize(m, outStream);
             }
         }
     }

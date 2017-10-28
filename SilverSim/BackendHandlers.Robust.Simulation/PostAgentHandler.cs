@@ -229,12 +229,12 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
                 {
                     using(Stream gzHttpBody = new GZipStream(httpBody, CompressionMode.Decompress))
                     {
-                        AgentPostHandler_POST(req, gzHttpBody, agentID, regionID, action);
+                        AgentPostHandler_POST(req, gzHttpBody);
                     }
                 }
                 else if (req.ContentType == "application/json")
                 {
-                    AgentPostHandler_POST(req, httpBody, agentID, regionID, action);
+                    AgentPostHandler_POST(req, httpBody);
                 }
                 else
                 {
@@ -245,7 +245,7 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
             }
         }
 
-        private void AgentPostHandler_POST(HttpRequest req, Stream httpBody, UUID agentID, UUID regionID, string action)
+        private void AgentPostHandler_POST(HttpRequest req, Stream httpBody)
         {
             PostData agentPost;
 
@@ -315,7 +315,7 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
              * 
              * Now, we can validate the access of the agent.
              */
-            var ad = new AuthorizationServiceInterface.AuthorizationData()
+            var ad = new AuthorizationServiceInterface.AuthorizationData
             {
                 ClientInfo = agentPost.Client,
                 SessionInfo = agentPost.Session,
@@ -524,7 +524,7 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
                     foreach (IValue gval in groups)
                     {
                         var group = (Map)gval;
-                        var g = new ChildAgentUpdate.GroupDataEntry()
+                        var g = new ChildAgentUpdate.GroupDataEntry
                         {
                             AcceptNotices = group["accept_notices"].AsBoolean
                         };
@@ -547,7 +547,7 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
                     foreach (IValue aval in anims)
                     {
                         var anim = (Map)aval;
-                        var a = new ChildAgentUpdate.AnimationDataEntry()
+                        var a = new ChildAgentUpdate.AnimationDataEntry
                         {
                             Animation = anim["animation"].AsUUID
                         };
@@ -589,7 +589,7 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
             /*-----------------------------------------------------------------*/
             /* Appearance */
             var appearancePack = (Map)param["packed_appearance"];
-            var Appearance = new AppearanceInfo()
+            var Appearance = new AppearanceInfo
             {
                 AvatarHeight = appearancePack["height"].AsReal
             };
@@ -634,7 +634,7 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
                     foreach (IValue val in ar)
                     {
                         var wp = (Map)val;
-                        var wi = new AgentWearables.WearableInfo()
+                        var wi = new AgentWearables.WearableInfo
                         {
                             ItemID = wp["item"].AsUUID,
                             AssetID = wp.ContainsKey("asset") ? wp["asset"].AsUUID : UUID.Zero
@@ -735,11 +735,9 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
                 catch
                 {
                     using (HttpResponse res = req.BeginResponse())
+                    using (StreamWriter s = res.GetOutputStream().UTF8StreamWriter())
                     {
-                        using (StreamWriter s = res.GetOutputStream().UTF8StreamWriter())
-                        {
-                            s.Write(false.ToString());
-                        }
+                        s.Write(false.ToString());
                     }
                     return;
                 }
@@ -773,11 +771,9 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
                     byte[] resultBytes = resultStr.ToUTF8Bytes();
 
                     using (HttpResponse res = req.BeginResponse("text/plain"))
+                    using (Stream s = res.GetOutputStream(resultBytes.Length))
                     {
-                        using (Stream s = res.GetOutputStream(resultBytes.Length))
-                        {
-                            s.Write(resultBytes, 0, resultBytes.Length);
-                        }
+                        s.Write(resultBytes, 0, resultBytes.Length);
                     }
                 }
                 else
@@ -802,11 +798,9 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
                 string resultStr = success.ToString();
                 byte[] resultBytes = resultStr.ToUTF8Bytes();
                 using (HttpResponse res = req.BeginResponse("text/plain"))
+                using (Stream s = res.GetOutputStream(resultBytes.Length))
                 {
-                    using (Stream s = res.GetOutputStream(resultBytes.Length))
-                    {
-                        s.Write(resultBytes, 0, resultBytes.Length);
-                    }
+                    s.Write(resultBytes, 0, resultBytes.Length);
                 }
             }
             catch
@@ -871,11 +865,9 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
                 if (!scene.Agents.TryGetValue(childAgentPosition.AgentID, out agent))
                 {
                     using (HttpResponse res = req.BeginResponse())
+                    using (StreamWriter s = res.GetOutputStream().UTF8StreamWriter())
                     {
-                        using (StreamWriter s = res.GetOutputStream().UTF8StreamWriter())
-                        {
-                            s.Write(false.ToString());
-                        }
+                        s.Write(false.ToString());
                     }
                     return;
                 }
@@ -884,11 +876,9 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
                 {
                     agent.HandleMessage(childAgentPosition);
                     using (HttpResponse res = req.BeginResponse())
+                    using (StreamWriter s = res.GetOutputStream().UTF8StreamWriter())
                     {
-                        using (StreamWriter s = res.GetOutputStream().UTF8StreamWriter())
-                        {
-                            s.Write(true.ToString());
-                        }
+                        s.Write(true.ToString());
                     }
                 }
                 catch
@@ -1185,12 +1175,10 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
                 response.Add("negotiated_inbound_version", double.Parse(string.Format("{0}.{1}", versionMajor, versionMinor), System.Globalization.CultureInfo.InvariantCulture));
             }
             response.Add("features", new AnArray());
-            using(HttpResponse res = req.BeginResponse("application/json"))
+            using (HttpResponse res = req.BeginResponse("application/json"))
+            using (Stream s = res.GetOutputStream())
             {
-                using(Stream s = res.GetOutputStream())
-                {
-                    Json.Serialize(response, s);
-                }
+                Json.Serialize(response, s);
             }
         }
     }

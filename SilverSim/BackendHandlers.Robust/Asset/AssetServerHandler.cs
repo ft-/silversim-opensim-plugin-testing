@@ -473,13 +473,11 @@ namespace SilverSim.BackendHandlers.Robust.Asset
                 {
                     m_TemporaryAssetService.Store(data);
                     using (HttpResponse res = req.BeginResponse())
+                    using (XmlTextWriter writer = res.GetOutputStream().UTF8XmlTextWriter())
                     {
-                        using (XmlTextWriter writer = res.GetOutputStream().UTF8XmlTextWriter())
-                        {
-                            writer.WriteStartElement("string");
-                            writer.WriteValue(data.ID.ToString());
-                            writer.WriteEndElement();
-                        }
+                        writer.WriteStartElement("string");
+                        writer.WriteValue(data.ID.ToString());
+                        writer.WriteEndElement();
                     }
                 }
                 catch
@@ -492,13 +490,11 @@ namespace SilverSim.BackendHandlers.Robust.Asset
             {
                 m_PersistentAssetService.Store(data);
                 using (HttpResponse res = req.BeginResponse())
+                using (XmlTextWriter writer = res.GetOutputStream().UTF8XmlTextWriter())
                 {
-                    using (XmlTextWriter writer = res.GetOutputStream().UTF8XmlTextWriter())
-                    {
-                        writer.WriteStartElement("string");
-                        writer.WriteValue(data.ID.ToString());
-                        writer.WriteEndElement();
-                    }
+                    writer.WriteStartElement("string");
+                    writer.WriteValue(data.ID.ToString());
+                    writer.WriteEndElement();
                 }
             }
             catch(HttpResponse.ConnectionCloseException)
@@ -509,13 +505,11 @@ namespace SilverSim.BackendHandlers.Robust.Asset
             catch(Exception)
             {
                 using (HttpResponse res = req.BeginResponse())
+                using (XmlTextWriter writer = res.GetOutputStream().UTF8XmlTextWriter())
                 {
-                    using (XmlTextWriter writer = res.GetOutputStream().UTF8XmlTextWriter())
-                    {
-                        writer.WriteStartElement("string");
-                        writer.WriteValue(data.ID.ToString());
-                        writer.WriteEndElement();
-                    }
+                    writer.WriteStartElement("string");
+                    writer.WriteValue(data.ID.ToString());
+                    writer.WriteEndElement();
                 }
             }
         }
@@ -642,36 +636,33 @@ namespace SilverSim.BackendHandlers.Robust.Asset
                 }
             }
 
-            using (HttpResponse res = req.BeginResponse())
+            using (HttpResponse res = req.BeginResponse("text/xml"))
+            using (XmlTextWriter writer = res.GetOutputStream().UTF8XmlTextWriter())
             {
-                res.ContentType = "text/xml";
-                using (XmlTextWriter writer = res.GetOutputStream().UTF8XmlTextWriter())
+                writer.WriteStartElement("ArrayOfBoolean");
+                foreach (UUID id in ids)
                 {
-                    writer.WriteStartElement("ArrayOfBoolean");
-                    foreach (UUID id in ids)
+                    bool found = false;
+                    try
                     {
-                        bool found = false;
-                        try
-                        {
-                            found = asset1[id];
-                        }
-                        catch
-                        {
-                            /* no action needed */
-                        }
-                        writer.WriteStartElement("boolean");
-                        if (found)
-                        {
-                            writer.WriteValue("true");
-                        }
-                        else
-                        {
-                            writer.WriteValue("false");
-                        }
-                        writer.WriteEndElement();
+                        found = asset1[id];
+                    }
+                    catch
+                    {
+                        /* no action needed */
+                    }
+                    writer.WriteStartElement("boolean");
+                    if (found)
+                    {
+                        writer.WriteValue("true");
+                    }
+                    else
+                    {
+                        writer.WriteValue("false");
                     }
                     writer.WriteEndElement();
                 }
+                writer.WriteEndElement();
             }
         }
     }

@@ -224,7 +224,7 @@ namespace SilverSim.BackendHandlers.Robust.Friends
 
         private void StoreFriendHandler(HttpRequest req, Dictionary<string, object> reqdata)
         {
-            FriendInfo fi = new FriendInfo();
+            var fi = new FriendInfo();
             object o;
             if(!reqdata.TryGetValue("PRINCIPALID", out o) || !UUI.TryParse(o.ToString(), out fi.User))
             {
@@ -260,7 +260,7 @@ namespace SilverSim.BackendHandlers.Robust.Friends
                 throw new FailureResultException();
             }
 
-            var fi = new FriendInfo()
+            var fi = new FriendInfo
             {
                 User = new UUI(id),
                 Friend = friend,
@@ -299,7 +299,7 @@ namespace SilverSim.BackendHandlers.Robust.Friends
                 throw new FailureResultException();
             }
 
-            var fi = new FriendInfo()
+            var fi = new FriendInfo
             {
                 User = id,
                 Friend = friend,

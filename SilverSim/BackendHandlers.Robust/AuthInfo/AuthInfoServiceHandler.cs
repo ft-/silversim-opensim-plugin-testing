@@ -313,20 +313,18 @@ namespace SilverSim.BackendHandlers.Robust.AuthInfo
             ai = m_AuthInfoService[id];
 
             using (HttpResponse res = req.BeginResponse("text/xml"))
+            using (XmlTextWriter writer = res.GetOutputStream().UTF8XmlTextWriter())
             {
-                using (XmlTextWriter writer = res.GetOutputStream().UTF8XmlTextWriter())
-                {
-                    writer.WriteStartElement("ServerResponse");
-                    writer.WriteStartElement("Result");
-                    writer.WriteAttributeString("type", "List");
-                    writer.WriteNamedValue("PrincipalID", ai.ID.ToString());
-                    writer.WriteNamedValue("AccountType", string.Empty);
-                    writer.WriteNamedValue("PasswordHash", ai.PasswordHash);
-                    writer.WriteNamedValue("PasswordSalt", ai.PasswordSalt);
-                    writer.WriteNamedValue("WebLoginKey", string.Empty);
-                    writer.WriteEndElement();
-                    writer.WriteEndElement();
-                }
+                writer.WriteStartElement("ServerResponse");
+                writer.WriteStartElement("Result");
+                writer.WriteAttributeString("type", "List");
+                writer.WriteNamedValue("PrincipalID", ai.ID.ToString());
+                writer.WriteNamedValue("AccountType", string.Empty);
+                writer.WriteNamedValue("PasswordHash", ai.PasswordHash);
+                writer.WriteNamedValue("PasswordSalt", ai.PasswordSalt);
+                writer.WriteNamedValue("WebLoginKey", string.Empty);
+                writer.WriteEndElement();
+                writer.WriteEndElement();
             }
         }
 

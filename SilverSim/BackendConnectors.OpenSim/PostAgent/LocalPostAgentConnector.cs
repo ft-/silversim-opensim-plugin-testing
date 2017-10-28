@@ -38,6 +38,7 @@ using SilverSim.Scene.Types.Agent;
 using SilverSim.Scene.Types.Scene;
 using SilverSim.ServiceInterfaces.Asset;
 using SilverSim.ServiceInterfaces.Authorization;
+using SilverSim.ServiceInterfaces.Economy;
 using SilverSim.ServiceInterfaces.Friends;
 using SilverSim.ServiceInterfaces.Grid;
 using SilverSim.ServiceInterfaces.GridUser;
@@ -100,6 +101,8 @@ namespace SilverSim.BackendConnectors.OpenSim.PostAgent
         }
 
         private StandaloneServicesContainer StandaloneServices;
+
+        private Dictionary<string, EconomyServiceInterface> EconomyServices;
 
         private sealed class GridParameterMap : ICloneable
         {
@@ -195,6 +198,7 @@ namespace SilverSim.BackendConnectors.OpenSim.PostAgent
         public override void Startup(ConfigurationLoader loader)
         {
             base.Startup(loader);
+            EconomyServices = loader.GetServicesByKeyValue<EconomyServiceInterface>();
             m_HttpServer = loader.HttpServer;
             m_CapsRedirector = loader.CapsRedirector;
             Scenes = loader.Scenes;
@@ -239,13 +243,6 @@ namespace SilverSim.BackendConnectors.OpenSim.PostAgent
                         continue;
                     }
                     var map = new GridParameterMap();
-                    map.AssetServerURI = section.GetString("AssetServerURI", map.HomeURI);
-                    map.GridUserServerURI = section.GetString("GridUserServerURI", m_DefaultGridUserServerURI);
-                    map.PresenceServerURI = section.GetString("PresenceServerURI", string.Empty);
-                    map.AvatarServerURI = section.GetString("AvatarServerURI", string.Empty);
-                    map.InventoryServerURI = section.GetString("InventoryServerURI", map.HomeURI);
-                    map.OfflineIMServerURI = section.GetString("OfflineIMServerURI", string.Empty);
-                    map.FriendsServerURI = section.GetString("FriendsServerURI", string.Empty);
                     map.HomeURI = section.GetString("HomeURI");
                     if (string.IsNullOrEmpty(map.HomeURI))
                     {
@@ -255,6 +252,14 @@ namespace SilverSim.BackendConnectors.OpenSim.PostAgent
                             map.HomeURI += "/";
                         }
                     }
+
+                    map.AssetServerURI = section.GetString("AssetServerURI", map.HomeURI);
+                    map.GridUserServerURI = section.GetString("GridUserServerURI", m_DefaultGridUserServerURI);
+                    map.PresenceServerURI = section.GetString("PresenceServerURI", string.Empty);
+                    map.AvatarServerURI = section.GetString("AvatarServerURI", string.Empty);
+                    map.InventoryServerURI = section.GetString("InventoryServerURI", map.HomeURI);
+                    map.OfflineIMServerURI = section.GetString("OfflineIMServerURI", string.Empty);
+                    map.FriendsServerURI = section.GetString("FriendsServerURI", string.Empty);
 
                     if (!Uri.IsWellFormedUriString(map.HomeURI, UriKind.Absolute))
                     {
