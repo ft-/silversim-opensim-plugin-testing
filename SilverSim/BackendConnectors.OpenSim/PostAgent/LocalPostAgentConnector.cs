@@ -57,9 +57,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Globalization;
-using System.IO;
 using System.Net;
-using System.Threading;
 
 namespace SilverSim.BackendConnectors.OpenSim.PostAgent
 {
@@ -74,6 +72,7 @@ namespace SilverSim.BackendConnectors.OpenSim.PostAgent
         private Main.Common.Caps.CapsHttpRedirector m_CapsRedirector;
         private readonly string m_DefaultGridUserServerURI = string.Empty;
         private readonly string m_DefaultPresenceServerURI = string.Empty;
+        private readonly string m_EconomyServiceName = string.Empty;
         private readonly Dictionary<string, IAssetServicePlugin> m_AssetServicePlugins = new Dictionary<string, IAssetServicePlugin>();
         private readonly Dictionary<string, IInventoryServicePlugin> m_InventoryServicePlugins = new Dictionary<string, IInventoryServicePlugin>();
         private readonly Dictionary<string, IProfileServicePlugin> m_ProfileServicePlugins = new Dictionary<string, IProfileServicePlugin>();
@@ -83,6 +82,7 @@ namespace SilverSim.BackendConnectors.OpenSim.PostAgent
         private string m_HomeURI;
         public GridUserServiceInterface m_GridUserService;
         public string m_GridUserServiceName = string.Empty;
+        public EconomyServiceInterface m_EconomyService;
 
         private class StandaloneServicesContainer
         {
@@ -101,8 +101,6 @@ namespace SilverSim.BackendConnectors.OpenSim.PostAgent
         }
 
         private StandaloneServicesContainer StandaloneServices;
-
-        private Dictionary<string, EconomyServiceInterface> EconomyServices;
 
         private sealed class GridParameterMap : ICloneable
         {
@@ -144,6 +142,7 @@ namespace SilverSim.BackendConnectors.OpenSim.PostAgent
         {
             m_DefaultGridUserServerURI = ownSection.GetString("DefaultGridUserServerURI", string.Empty);
             m_DefaultPresenceServerURI = ownSection.GetString("DefaultPresenceServerURI", string.Empty);
+            m_EconomyServiceName = ownSection.GetString("EconomyService", string.Empty);
             m_GridUserServiceName = ownSection.GetString("GridUserService", "GridUserService");
             if (ownSection.GetBoolean("IsStandalone", false))
             {
@@ -198,13 +197,16 @@ namespace SilverSim.BackendConnectors.OpenSim.PostAgent
         public override void Startup(ConfigurationLoader loader)
         {
             base.Startup(loader);
-            EconomyServices = loader.GetServicesByKeyValue<EconomyServiceInterface>();
             m_HttpServer = loader.HttpServer;
             m_CapsRedirector = loader.CapsRedirector;
             Scenes = loader.Scenes;
             Commands = loader.CommandRegistry;
             m_HomeURI = loader.HomeURI;
             m_GridUserService = loader.GetService<GridUserServiceInterface>(m_GridUserServiceName);
+            if (!string.IsNullOrEmpty(m_EconomyServiceName))
+            {
+                m_EconomyService = loader.GetService<EconomyServiceInterface>(m_EconomyServiceName);
+            }
 
             if (StandaloneServices != null)
             {
@@ -522,6 +524,10 @@ namespace SilverSim.BackendConnectors.OpenSim.PostAgent
                 m_PacketHandlerPlugins,
                 Scenes)
             };
+            if(m_EconomyService != null)
+            {
+                serviceList.Add(m_EconomyService);
+            }
             var agent = new ViewerAgent(
                 Scenes,
                 authData.AccountInfo.Principal.ID,
