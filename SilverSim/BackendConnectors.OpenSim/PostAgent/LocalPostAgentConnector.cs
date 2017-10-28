@@ -58,6 +58,7 @@ using System.ComponentModel;
 using System.Globalization;
 using System.IO;
 using System.Net;
+using System.Threading;
 
 namespace SilverSim.BackendConnectors.OpenSim.PostAgent
 {
@@ -116,7 +117,7 @@ namespace SilverSim.BackendConnectors.OpenSim.PostAgent
 
             public object Clone()
             {
-                var m = new GridParameterMap()
+                var m = new GridParameterMap
                 {
                     HomeURI = HomeURI,
                     GatekeeperURI = GatekeeperURI,
@@ -592,6 +593,9 @@ namespace SilverSim.BackendConnectors.OpenSim.PostAgent
                 agent.Circuits.Clear();
                 throw new OpenSimTeleportProtocol.TeleportFailedException(e.Message);
             }
+
+            agent.EconomyService?.Login(authData.DestinationInfo.ID, authData.AccountInfo.Principal, authData.SessionInfo.SessionID, authData.SessionInfo.SecureSessionID);
+
             if (!circuitInfo.IsChild)
             {
                 /* make agent a root agent */
