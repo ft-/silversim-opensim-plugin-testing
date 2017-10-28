@@ -594,7 +594,14 @@ namespace SilverSim.BackendConnectors.OpenSim.PostAgent
                 throw new OpenSimTeleportProtocol.TeleportFailedException(e.Message);
             }
 
-            agent.EconomyService?.Login(authData.DestinationInfo.ID, authData.AccountInfo.Principal, authData.SessionInfo.SessionID, authData.SessionInfo.SecureSessionID);
+            try
+            {
+                agent.EconomyService?.Login(authData.DestinationInfo.ID, authData.AccountInfo.Principal, authData.SessionInfo.SessionID, authData.SessionInfo.SecureSessionID);
+            }
+            catch (Exception e)
+            {
+                m_Log.Warn("Could not contact EconomyService", e);
+            }
 
             if (!circuitInfo.IsChild)
             {
@@ -615,7 +622,7 @@ namespace SilverSim.BackendConnectors.OpenSim.PostAgent
 
             try
             {
-                presenceService.Report(new PresenceInfo()
+                presenceService.Report(new PresenceInfo
                 {
                     UserID = agent.Owner,
                     SessionID = agent.SessionID,
