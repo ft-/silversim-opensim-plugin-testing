@@ -142,7 +142,7 @@ namespace SilverSim.BackendConnectors.OpenSim.PostAgent
         {
             m_DefaultGridUserServerURI = ownSection.GetString("DefaultGridUserServerURI", string.Empty);
             m_DefaultPresenceServerURI = ownSection.GetString("DefaultPresenceServerURI", string.Empty);
-            m_EconomyServiceName = ownSection.GetString("EconomyService", string.Empty);
+            m_EconomyServiceName = ownSection.GetString("EconomyService", "EconomyService");
             m_GridUserServiceName = ownSection.GetString("GridUserService", "GridUserService");
             if (ownSection.GetBoolean("IsStandalone", false))
             {
@@ -203,9 +203,9 @@ namespace SilverSim.BackendConnectors.OpenSim.PostAgent
             Commands = loader.CommandRegistry;
             m_HomeURI = loader.HomeURI;
             m_GridUserService = loader.GetService<GridUserServiceInterface>(m_GridUserServiceName);
-            if (!string.IsNullOrEmpty(m_EconomyServiceName))
+            if (!loader.TryGetService(m_EconomyServiceName, out m_EconomyService))
             {
-                m_EconomyService = loader.GetService<EconomyServiceInterface>(m_EconomyServiceName);
+                m_EconomyService = null;
             }
 
             if (StandaloneServices != null)
