@@ -146,7 +146,7 @@ namespace SilverSim.BackendConnectors.OpenSim.PostAgent
             m_GridUserServiceName = ownSection.GetString("GridUserService", "GridUserService");
             if (ownSection.GetBoolean("IsStandalone", false))
             {
-                StandaloneServices = new StandaloneServicesContainer()
+                StandaloneServices = new StandaloneServicesContainer
                 {
                     FriendsServiceName = ownSection.GetString("FriendsService", "FriendsService"),
                     OfflineIMServiceName = ownSection.GetString("OfflineIMService", "OfflineIMService"),
