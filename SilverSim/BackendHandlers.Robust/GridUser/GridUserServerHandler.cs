@@ -66,13 +66,10 @@ namespace SilverSim.BackendHandlers.Robust.GridUser
             m_GridUserService = loader.GetService<GridUserServiceInterface>(m_GridUserServiceName);
             m_UserAccountService = loader.GetService<UserAccountServiceInterface>(m_UserAccountServiceName);
             m_AvatarNameService = loader.GetService<AvatarNameServiceInterface>(m_AvatarNameStorageName);
-            try
+            BaseHttpServer https;
+            if(loader.TryGetHttpsServer(out https))
             {
-                loader.HttpsServer.UriHandlers.Add("/griduser", GridUserHandler);
-            }
-            catch
-            {
-                /* intentionally left empty */
+                https.UriHandlers.Add("/griduser", GridUserHandler);
             }
         }
 

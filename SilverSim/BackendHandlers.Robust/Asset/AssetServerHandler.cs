@@ -72,14 +72,11 @@ namespace SilverSim.BackendHandlers.Robust.Asset
                 m_TemporaryAssetService = loader.GetService<AssetServiceInterface>(m_TemporaryAssetServiceName);
             }
             m_ResourceAssetService = loader.GetService<AssetServiceInterface>("ResourceAssetService");
-            try
+            BaseHttpServer https;
+            if(loader.TryGetHttpsServer(out https))
             {
-                loader.HttpsServer.StartsWithUriHandlers.Add("/assets", AssetHandler);
-                loader.HttpsServer.UriHandlers.Add("/get_assets_exist", GetAssetsExistHandler);
-            }
-            catch
-            {
-                /* intentionally left empty */
+                https.StartsWithUriHandlers.Add("/assets", AssetHandler);
+                https.UriHandlers.Add("/get_assets_exist", GetAssetsExistHandler);
             }
         }
 

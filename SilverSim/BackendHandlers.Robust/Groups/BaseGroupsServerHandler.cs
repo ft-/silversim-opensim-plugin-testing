@@ -61,13 +61,10 @@ namespace SilverSim.BackendHandlers.Robust.Groups
             GroupsService = loader.GetService<GroupsServiceInterface>(m_GroupsServiceName);
             HttpServer = loader.HttpServer;
             HttpServer.UriHandlers.Add(UrlPath, GroupsHandler);
-            try
+            BaseHttpServer https;
+            if(loader.TryGetHttpsServer(out https))
             {
-                loader.HttpsServer.UriHandlers.Add(UrlPath, GroupsHandler);
-            }
-            catch
-            {
-                /* intentionally left empty */
+                https.UriHandlers.Add(UrlPath, GroupsHandler);
             }
         }
 

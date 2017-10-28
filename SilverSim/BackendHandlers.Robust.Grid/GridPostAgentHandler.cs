@@ -120,13 +120,10 @@ namespace SilverSim.BackendHandlers.Robust.Grid
                 m_GatekeeperURI += "/";
             }
             m_HttpServer.StartsWithUriHandlers.Add(m_AgentBaseURL, AgentPostHandler);
-            try
+            BaseHttpServer https;
+            if(loader.TryGetHttpsServer(out https))
             {
-                loader.HttpsServer.StartsWithUriHandlers.Add(m_AgentBaseURL, AgentPostHandler);
-            }
-            catch
-            {
-                /* intentionally left empty */
+                https.StartsWithUriHandlers.Add(m_AgentBaseURL, AgentPostHandler);
             }
         }
 
@@ -219,12 +216,12 @@ namespace SilverSim.BackendHandlers.Robust.Grid
                 {
                     using (Stream gzHttpBody = new GZipStream(httpBody, CompressionMode.Decompress))
                     {
-                        AgentPostHandler_POST(req, gzHttpBody, agentID, regionID, action);
+                        AgentPostHandler_POST(req, gzHttpBody);
                     }
                 }
                 else if (req.ContentType == "application/json")
                 {
-                    AgentPostHandler_POST(req, httpBody, agentID, regionID, action);
+                    AgentPostHandler_POST(req, httpBody);
                 }
                 else
                 {
@@ -235,7 +232,7 @@ namespace SilverSim.BackendHandlers.Robust.Grid
             }
         }
 
-        private void AgentPostHandler_POST(HttpRequest req, Stream httpBody, UUID agentID, UUID regionID, string action)
+        private void AgentPostHandler_POST(HttpRequest req, Stream httpBody)
         {
             PostData agentPost;
 
@@ -264,7 +261,7 @@ namespace SilverSim.BackendHandlers.Robust.Grid
              * 
              * Now, we can validate the access of the agent.
              */
-            var ad = new AuthorizationServiceInterface.AuthorizationData()
+            var ad = new AuthorizationServiceInterface.AuthorizationData
             {
                 ClientInfo = agentPost.Client,
                 SessionInfo = agentPost.Session,

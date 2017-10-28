@@ -117,13 +117,10 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
             m_HttpServer = loader.HttpServer;
             PostAgentConnector = loader.GetService<PostAgentConnector>(m_PostAgentConnectorName);
             m_HttpServer.StartsWithUriHandlers.Add(m_AgentBaseURL, AgentPostHandler);
-            try
+            BaseHttpServer https;
+            if(loader.TryGetHttpsServer(out https))
             {
                 loader.HttpsServer.StartsWithUriHandlers.Add(m_AgentBaseURL, AgentPostHandler);
-            }
-            catch
-            {
-                /* intentionally left empty */
             }
         }
 

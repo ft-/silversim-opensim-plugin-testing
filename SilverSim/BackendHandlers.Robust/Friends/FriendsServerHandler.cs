@@ -67,13 +67,10 @@ namespace SilverSim.BackendHandlers.Robust.Friends
             m_HttpServer = loader.HttpServer;
 
             m_HttpServer.UriHandlers.Add("/friends", FriendsHandler);
-            try
+            BaseHttpServer https;
+            if(loader.TryGetHttpsServer(out https))
             {
-                loader.HttpsServer.UriHandlers.Add("/friends", FriendsHandler);
-            }
-            catch
-            {
-                /* intentionally left empty */
+                https.UriHandlers.Add("/friends", FriendsHandler);
             }
         }
 

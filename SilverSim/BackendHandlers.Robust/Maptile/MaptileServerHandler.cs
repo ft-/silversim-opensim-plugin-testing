@@ -57,13 +57,10 @@ namespace SilverSim.BackendHandlers.Robust.Maptile
             m_Log.Info("Initializing handler for maptile server");
             m_MaptileService = loader.GetService<MaptileServiceInterface>(m_MaptileServiceName);
             loader.HttpServer.StartsWithUriHandlers.Add("/map", MaptileHandler);
-            try
+            BaseHttpServer https;
+            if(loader.TryGetHttpsServer(out https))
             {
-                loader.HttpsServer.StartsWithUriHandlers.Add("/map", MaptileHandler);
-            }
-            catch(ConfigurationLoader.ServiceNotFoundException)
-            {
-                /* intentionally ignored */
+                https.StartsWithUriHandlers.Add("/map", MaptileHandler);
             }
         }
 

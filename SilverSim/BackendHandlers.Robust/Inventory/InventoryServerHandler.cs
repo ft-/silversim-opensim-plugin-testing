@@ -219,13 +219,10 @@ namespace SilverSim.BackendHandlers.Robust.Inventory
             m_HttpServer = loader.HttpServer;
             m_HttpServer.UriHandlers.Add("/xinventory", InventoryHandler);
             m_InventoryService = loader.GetService<InventoryServiceInterface>(m_InventoryServiceName);
-            try
+            BaseHttpServer https;
+            if(loader.TryGetHttpsServer(out https))
             {
-                loader.HttpsServer.UriHandlers.Add("/xinventory", InventoryHandler);
-            }
-            catch
-            {
-                /* intentionally left empty */
+                https.UriHandlers.Add("/xinventory", InventoryHandler);
             }
         }
 

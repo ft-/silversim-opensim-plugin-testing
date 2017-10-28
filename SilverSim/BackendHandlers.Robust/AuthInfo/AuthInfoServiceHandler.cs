@@ -58,13 +58,10 @@ namespace SilverSim.BackendHandlers.Robust.AuthInfo
         {
             m_AuthInfoService = loader.GetService<AuthInfoServiceInterface>(m_AuthInfoServiceName);
             loader.HttpServer.UriHandlers.Add("/auth/plain", HandlePlainRequests);
-            try
+            BaseHttpServer https;
+            if(loader.TryGetHttpsServer(out https))
             {
-                loader.HttpsServer.UriHandlers.Add("/auth/plain", HandlePlainRequests);
-            }
-            catch
-            {
-                /* intentionally left empty */
+                https.UriHandlers.Add("/auth/plain", HandlePlainRequests);
             }
         }
 

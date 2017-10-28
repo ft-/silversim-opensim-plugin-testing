@@ -52,13 +52,10 @@ namespace SilverSim.Backend.OpenSim.Neighbor.Neighbor
             m_Log.Info("Initializing handler for /region");
             m_HttpServer = loader.HttpServer;
             m_HttpServer.StartsWithUriHandlers.Add("/region", RegionPostHandler);
-            try
+            BaseHttpServer https;
+            if(loader.TryGetHttpsServer(out https))
             {
-                loader.HttpsServer.StartsWithUriHandlers.Add("/region", RegionPostHandler);
-            }
-            catch
-            {
-                /* intentionally left empty */
+                https.StartsWithUriHandlers.Add("/region", RegionPostHandler);
             }
         }
 
