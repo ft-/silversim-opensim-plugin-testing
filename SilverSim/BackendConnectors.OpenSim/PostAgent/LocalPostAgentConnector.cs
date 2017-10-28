@@ -242,8 +242,10 @@ namespace SilverSim.BackendConnectors.OpenSim.PostAgent
                         m_Log.WarnFormat("Skipping section {0} for missing entries (HomeURI, AssetServerURI and InventoryServerURI are required)", section.Name);
                         continue;
                     }
-                    var map = new GridParameterMap();
-                    map.HomeURI = section.GetString("HomeURI");
+                    var map = new GridParameterMap
+                    {
+                        HomeURI = section.GetString("HomeURI")
+                    };
                     if (string.IsNullOrEmpty(map.HomeURI))
                     {
                         map.HomeURI = m_HttpServer.ServerURI;

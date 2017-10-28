@@ -224,7 +224,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
 
             var agentPostData = new PostData();
 
-            var childInfo = new AgentChildInfo()
+            var childInfo = new AgentChildInfo
             {
                 DestinationInfo = destinationRegion,
                 TeleportService = this
@@ -235,7 +235,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
 
             agentPostData.Appearance = agent.Appearance;
 
-            agentPostData.Circuit = new CircuitInfo()
+            agentPostData.Circuit = new CircuitInfo
             {
                 CircuitCode = acirc.CircuitCode,
                 CapsPath = capsId.ToString(),
