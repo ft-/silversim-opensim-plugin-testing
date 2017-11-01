@@ -1455,7 +1455,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
             IObject obj = agent.SittingOnObject;
             if (obj != null)
             {
-                req.Add("parent_part", obj.LocalID);
+                req.Add("parent_part", obj.LocalID[fromSceneID]);
                 req.Add("sit_offset", agent.LocalPosition);
             }
 
