@@ -37,7 +37,7 @@ namespace SilverSim.BackendConnectors.Robust.Grid
             structparam.Add("x", parcelid.RegionPosX.ToString());
             structparam.Add("y", parcelid.RegionPosY.ToString());
 
-            var req = new XmlRpc.XmlRpcRequest()
+            var req = new XmlRpc.XmlRpcRequest
             {
                 MethodName = "land_data"
             };
@@ -65,7 +65,7 @@ namespace SilverSim.BackendConnectors.Robust.Grid
                 return false;
             }
 
-            parcelInfo = new ParcelMetaInfo()
+            parcelInfo = new ParcelMetaInfo
             {
                 AABBMax = p["AABBMax"].AsVector3,
                 AABBMin = p["AABBMin"].AsVector3,

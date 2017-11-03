@@ -140,7 +140,7 @@ namespace SilverSim.BackendConnectors.Robust.IM
                     continue;
                 }
 
-                var im = new GridInstantMessage()
+                var im = new GridInstantMessage
                 {
                     BinaryBucket = m["BinaryBucket"].ToString().FromHexStringToByteArray(),
                     Dialog = (GridInstantMessageDialog)m["Dialog"].AsInt,

@@ -238,12 +238,12 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
             if(agent.KnownFriends.TryGetValue(fromID, out fi) && fi.Friend.EqualsGrid(gim.FromAgent))
             {
                 fi.UserGivenFlags = (FriendRightFlags)newRights;
-                var m = new ChangeUserRights()
+                var m = new ChangeUserRights
                 {
                     AgentID = agent.Owner.ID,
                     SessionID = agent.Session.SessionID
                 };
-                var r = new ChangeUserRights.RightsEntry()
+                var r = new ChangeUserRights.RightsEntry
                 {
                     AgentRelated = gim.FromAgent.ID,
                     RelatedRights = (FriendRightFlags)newRights
@@ -283,7 +283,7 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
                 return false;
             }
 
-            var m = new TerminateFriendship()
+            var m = new TerminateFriendship
             {
                 AgentID = agent.Owner.ID,
                 SessionID = agent.Session.SessionID,
@@ -373,7 +373,7 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
             InventoryServiceInterface inventoryService = agent.InventoryService;
             if(inventoryService.Folder.TryGetValue(gim.ToAgent.ID, AssetType.CallingCard, out folder))
             {
-                var item = new InventoryItem()
+                var item = new InventoryItem
                 {
                     AssetID = UUID.Zero,
                     AssetType = AssetType.CallingCard,

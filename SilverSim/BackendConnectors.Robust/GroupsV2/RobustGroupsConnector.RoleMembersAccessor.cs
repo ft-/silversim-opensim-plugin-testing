@@ -170,7 +170,7 @@ namespace SilverSim.BackendConnectors.Robust.GroupsV2
                     var data = iv as Map;
                     if (null != data)
                     {
-                        var member = new GroupRolemembership()
+                        var member = new GroupRolemembership
                         {
                             RoleID = data["RoleID"].AsUUID,
                             Group = group,

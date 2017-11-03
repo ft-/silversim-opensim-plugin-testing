@@ -111,7 +111,7 @@ namespace SilverSim.BackendConnectors.Robust.AvatarName
                 uui = default(UUI);
                 return false;
             }
-            uui = new UUI()
+            uui = new UUI
             {
                 FirstName = m["FirstName"].ToString(),
                 LastName = m["LastName"].ToString(),
@@ -158,7 +158,7 @@ namespace SilverSim.BackendConnectors.Robust.AvatarName
                 try
                 {
                     var m = iv as Map;
-                    results.Add(new UUI()
+                    results.Add(new UUI
                     {
                         FirstName = m["FirstName"].ToString(),
                         LastName = m["LastName"].ToString(),
@@ -201,7 +201,7 @@ namespace SilverSim.BackendConnectors.Robust.AvatarName
                 return false;
             }
 
-            uui = new UUI()
+            uui = new UUI
             {
                 FirstName = m["FirstName"].ToString(),
                 LastName = m["LastName"].ToString(),

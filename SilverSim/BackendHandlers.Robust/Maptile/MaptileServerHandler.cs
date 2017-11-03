@@ -167,7 +167,7 @@ namespace SilverSim.BackendHandlers.Robust.Maptile
                 return;
             }
 
-            var nd = new MaptileData()
+            var nd = new MaptileData
             {
                 Location = new GridVector(x, y),
                 ContentType = type,

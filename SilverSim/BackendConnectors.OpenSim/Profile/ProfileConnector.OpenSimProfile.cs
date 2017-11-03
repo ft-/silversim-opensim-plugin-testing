@@ -44,7 +44,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
 
             protected IValue OpenSimXmlRpcCall(string methodName, Map structparam)
             {
-                var req = new XmlRpc.XmlRpcRequest()
+                var req = new XmlRpc.XmlRpcRequest
                 {
                     MethodName = methodName
                 };
@@ -69,7 +69,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
 
             protected bool TryOpenSimXmlRpcCall(string methodName, Map structparam, out IValue iv)
             {
-                var req = new XmlRpc.XmlRpcRequest()
+                var req = new XmlRpc.XmlRpcRequest
                 {
                     MethodName = methodName
                 };
@@ -96,7 +96,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
 
             protected bool TryOpenSimXmlRpcCall(string methodName, Map structparam)
             {
-                var req = new XmlRpc.XmlRpcRequest()
+                var req = new XmlRpc.XmlRpcRequest
                 {
                     MethodName = methodName
                 };
@@ -149,7 +149,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
                 }
                 var res = (Map)(((AnArray)iv)[0]);
 
-                classified = new ProfileClassified()
+                classified = new ProfileClassified
                 {
                     ClassifiedID = res["classifieduuid"].AsUUID,
                     Creator = new UUI(res["creatoruuid"].AsUUID),
@@ -239,7 +239,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
                 return classifieds;
             }
 
-            private ProfilePick ConvertToProfilePick(Map res) => new ProfilePick()
+            private ProfilePick ConvertToProfilePick(Map res) => new ProfilePick
             {
                 PickID = res["pickuuid"].AsUUID,
                 Creator = new UUI(res["creatoruuid"].AsUUID),
@@ -397,7 +397,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
                     return false;
                 }
                 var res = (Map)(((AnArray)iv)[0]);
-                prefs = new ProfilePreferences()
+                prefs = new ProfilePreferences
                 {
                     User = user,
                     IMviaEmail = Convert.ToBoolean(res["imviaemail"].ToString()),
@@ -429,7 +429,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
                         ["avatar_id"] = user.ID
                     };
                     var res = (Map)(((AnArray)OpenSimXmlRpcCall("user_preferences_request", map))[0]);
-                    return new ProfilePreferences()
+                    return new ProfilePreferences
                     {
                         User = user,
                         IMviaEmail = Convert.ToBoolean(res["imviaemail"].ToString()),
@@ -457,7 +457,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
                         ["avatar_id"] = user.ID
                     };
                     var res = (Map)(((AnArray)OpenSimXmlRpcCall("avatar_properties_request", map))[0]);
-                    return new ProfileProperties()
+                    return new ProfileProperties
                     {
                         User = user,
                         Partner = new UUI(res["Partner"].AsUUID),

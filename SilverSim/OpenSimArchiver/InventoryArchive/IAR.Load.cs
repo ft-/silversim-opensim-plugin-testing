@@ -262,7 +262,7 @@ namespace SilverSim.OpenSimArchiver.InventoryArchiver
                 }
                 else
                 {
-                    var folder = new InventoryFolder()
+                    var folder = new InventoryFolder
                     {
                         Owner = principalID,
                         ParentFolderID = folderID,
@@ -311,7 +311,7 @@ namespace SilverSim.OpenSimArchiver.InventoryArchiver
             UUI principal,
             List<AvatarNameServiceInterface> nameServices)
         {
-            var item = new InventoryItem()
+            var item = new InventoryItem
             {
                 Owner = principal
             };

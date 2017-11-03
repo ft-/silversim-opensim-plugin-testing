@@ -28,7 +28,7 @@ namespace SilverSim.BackendConnectors.Flotsam.Groups
 {
     public static class FlotsamExtensionMethods
     {
-        public static GroupInfo ToGroupInfo(this Map m, AvatarNameServiceInterface avatarNameService) => new GroupInfo()
+        public static GroupInfo ToGroupInfo(this Map m, AvatarNameServiceInterface avatarNameService) => new GroupInfo
         {
             ID = new UGI { ID = m["GroupID"].AsUUID, GroupName = m["Name"].ToString() },
             Charter = m["Charter"].ToString(),
@@ -42,13 +42,13 @@ namespace SilverSim.BackendConnectors.Flotsam.Groups
             OwnerRoleID = m["OwnerRoleID"].AsUUID
         };
 
-        public static DirGroupInfo ToDirGroupInfo(this Map m) => new DirGroupInfo()
+        public static DirGroupInfo ToDirGroupInfo(this Map m) => new DirGroupInfo
         {
             MemberCount = m["Members"].AsInt,
             ID = new UGI { GroupName = m["Name"].ToString(), ID = m["GroupID"].AsUUID }
         };
 
-        public static GroupMember ToGroupMember(this Map m, UGI group, AvatarNameServiceInterface avatarNameService) => new GroupMember()
+        public static GroupMember ToGroupMember(this Map m, UGI group, AvatarNameServiceInterface avatarNameService) => new GroupMember
         {
             IsListInProfile = Convert.ToBoolean(m["ListInProfile"].ToString()),
             Contribution = m["Contribution"].AsInt,
@@ -58,7 +58,7 @@ namespace SilverSim.BackendConnectors.Flotsam.Groups
             Group = group
         };
 
-        public static GroupMember ToGroupMember(this Map m, AvatarNameServiceInterface avatarNameService) => new GroupMember()
+        public static GroupMember ToGroupMember(this Map m, AvatarNameServiceInterface avatarNameService) => new GroupMember
         {
             IsListInProfile = Convert.ToBoolean(m["ListInProfile"].ToString()),
             Contribution = m["Contribution"].AsInt,
@@ -68,7 +68,7 @@ namespace SilverSim.BackendConnectors.Flotsam.Groups
             Group = new UGI { ID = m["GroupID"].AsUUID, GroupName = m["GroupName"].ToString() }
         };
 
-        public static GroupMembership ToGroupMembership(this Map m, AvatarNameServiceInterface avatarNameService) => new GroupMembership()
+        public static GroupMembership ToGroupMembership(this Map m, AvatarNameServiceInterface avatarNameService) => new GroupMembership
         {
             IsListInProfile = Convert.ToBoolean(m["ListInProfile"].ToString()),
             Contribution = m["Contribution"].AsInt,
@@ -88,14 +88,14 @@ namespace SilverSim.BackendConnectors.Flotsam.Groups
             IsShownInList = Convert.ToBoolean(m["OPenEnrollment"].ToString())
         };
 
-        public static GroupRolemember ToGroupRolemember(this Map m, UGI group, AvatarNameServiceInterface avatarNameService) => new GroupRolemember()
+        public static GroupRolemember ToGroupRolemember(this Map m, UGI group, AvatarNameServiceInterface avatarNameService) => new GroupRolemember
         {
             RoleID = m["RoleID"].AsUUID,
             Principal = avatarNameService.ResolveName(new UUI(m["AgentID"].AsUUID)),
             Group = group
         };
 
-        public static GroupRolemembership ToGroupRolemembership(this Map m, UGI group, AvatarNameServiceInterface avatarNameService) => new GroupRolemembership()
+        public static GroupRolemembership ToGroupRolemembership(this Map m, UGI group, AvatarNameServiceInterface avatarNameService) => new GroupRolemembership
         {
             RoleID = m["RoleID"].AsUUID,
             GroupTitle = m["Title"].ToString(),
@@ -103,7 +103,7 @@ namespace SilverSim.BackendConnectors.Flotsam.Groups
             Principal = avatarNameService.ResolveName(new UUI(m["AgentID"].AsUUID))
         };
 
-        public static GroupRolemembership ToGroupRolemembership(this Map m, AvatarNameServiceInterface avatarNameService) => new GroupRolemembership()
+        public static GroupRolemembership ToGroupRolemembership(this Map m, AvatarNameServiceInterface avatarNameService) => new GroupRolemembership
         {
             RoleID = m["RoleID"].AsUUID,
             GroupTitle = m["Title"].ToString(),
@@ -111,7 +111,7 @@ namespace SilverSim.BackendConnectors.Flotsam.Groups
             Principal = avatarNameService.ResolveName(new UUI(m["AgentID"].AsUUID))
         };
 
-        public static GroupRole ToGroupRole(this Map m, UGI group) => new GroupRole()
+        public static GroupRole ToGroupRole(this Map m, UGI group) => new GroupRole
         {
             Group = group,
             ID = m["RoleID"].AsUUID,
@@ -122,7 +122,7 @@ namespace SilverSim.BackendConnectors.Flotsam.Groups
             Powers = (GroupPowers)m["Powers"].AsULong
         };
 
-        public static GroupNotice ToGroupNotice(this Map m) => new GroupNotice()
+        public static GroupNotice ToGroupNotice(this Map m) => new GroupNotice
         {
             Group = new UGI(m["GroupID"].AsUUID),
             ID = m["NoticeID"].AsUUID,

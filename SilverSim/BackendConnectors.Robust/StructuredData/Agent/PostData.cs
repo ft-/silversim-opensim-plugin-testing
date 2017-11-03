@@ -106,7 +106,7 @@ namespace SilverSim.BackendConnectors.Robust.StructuredData.Agent
 
             /*-----------------------------------------------------------------*/
             /* Destination */
-            agentparams.Destination = new DestinationInfo()
+            agentparams.Destination = new DestinationInfo
             {
                 ID = parms["destination_uuid"].AsUUID,
                 Location = new GridVector { X = parms["destination_x"].AsUInt, Y = parms["destination_y"].AsUInt },
@@ -136,7 +136,7 @@ namespace SilverSim.BackendConnectors.Robust.StructuredData.Agent
 
             /*-----------------------------------------------------------------*/
             /* Account */
-            agentparams.Account = new UserAccount()
+            agentparams.Account = new UserAccount
             {
                 Principal = new UUI { ID = parms["agent_id"].AsUUID, FirstName = parms["first_name"].ToString(), LastName = parms["last_name"].ToString() },
                 IsLocalToGrid = false,
@@ -145,7 +145,7 @@ namespace SilverSim.BackendConnectors.Robust.StructuredData.Agent
 
             /*-----------------------------------------------------------------*/
             /* Client Info */
-            agentparams.Client = new ClientInfo()
+            agentparams.Client = new ClientInfo
             {
                 ClientIP = parms["client_ip"].ToString(),
                 ClientVersion = parms["viewer"].ToString(),
@@ -247,7 +247,7 @@ namespace SilverSim.BackendConnectors.Robust.StructuredData.Agent
                         foreach (IValue val in ar)
                         {
                             var wp = (Map)val;
-                            var wi = new AgentWearables.WearableInfo()
+                            var wi = new AgentWearables.WearableInfo
                             {
                                 ItemID = wp["item"].AsUUID,
                                 AssetID = (wp.ContainsKey("asset")) ?

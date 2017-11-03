@@ -116,7 +116,7 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
                     map = OpenSimResponse.Deserialize(s);
                 }
 
-                var folderContent = new InventoryFolderContent()
+                var folderContent = new InventoryFolderContent
                 {
                     Owner = new UUI(principalID),
                     FolderID = folderID,
@@ -240,7 +240,7 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
                     var fc = kvp.Value as Map;
                     if(kvp.Key.StartsWith("F_") && null != fc)
                     {
-                        var folderContent = new InventoryFolderContent()
+                        var folderContent = new InventoryFolderContent
                         {
                             Owner = new UUI(fc["OWNER"].AsUUID),
                             FolderID = fc["FID"].AsUUID,

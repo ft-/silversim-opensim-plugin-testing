@@ -227,7 +227,7 @@ namespace SilverSim.OpenSimArchiver.RegionArchiver
 
             private static GridVector LoadArchiveXmlVersion1_Region(XmlTextReader reader, List<RegionInfo> regionInfos, GridVector loc)
             {
-                var rinfo = new RegionInfo()
+                var rinfo = new RegionInfo
                 {
                     Location = loc
                 };

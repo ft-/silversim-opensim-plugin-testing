@@ -68,7 +68,7 @@ namespace SilverSim.BackendConnectors.Robust.GroupsV2
                 }
 
                 var res = (Map)m["RESULT"];
-                gam = new GroupActiveMembership()
+                gam = new GroupActiveMembership
                 {
                     User = principal,
                     Group = new UGI { ID = res["GroupID"].AsUUID, GroupName = res["GroupName"].ToString() },

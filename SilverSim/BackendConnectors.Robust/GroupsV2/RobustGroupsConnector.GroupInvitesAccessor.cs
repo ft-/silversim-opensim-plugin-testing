@@ -80,7 +80,7 @@ namespace SilverSim.BackendConnectors.Robust.GroupsV2
                     gi = default(GroupInvite);
                     return false;
                 }
-                gi = new GroupInvite()
+                gi = new GroupInvite
                 {
                     ID = resultMap["InviteID"].AsUUID,
                     Group = new UGI(resultMap["GroupID"].AsUUID),

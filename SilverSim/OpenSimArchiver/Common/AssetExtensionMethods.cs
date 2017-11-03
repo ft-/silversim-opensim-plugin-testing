@@ -33,7 +33,7 @@ namespace SilverSim.OpenSimArchiver.Common
             TarArchiveReader.Header hdr,
             UUI creator)
         {
-            var asset = new AssetData()
+            var asset = new AssetData
             {
                 ID = UUID.Parse(hdr.FileName.Substring(7, 36)),
                 FileName = hdr.FileName,

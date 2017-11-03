@@ -72,7 +72,7 @@ namespace SilverSim.BackendHandlers.Robust.Inventory
             return item;
         }
 
-        public static InventoryFolder ToFolder(this Dictionary<string, object> dict) => new InventoryFolder()
+        public static InventoryFolder ToFolder(this Dictionary<string, object> dict) => new InventoryFolder
         {
             ParentFolderID = dict.GetUUID("ParentID"),
             DefaultType = (AssetType)dict.GetInt("Type"),

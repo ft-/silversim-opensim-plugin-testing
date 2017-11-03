@@ -63,7 +63,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
                         ["ClassifiedId"] = id
                     };
                     var reslist = (Map)RPC.DoJson20RpcRequest(m_Uri, "classifieds_info_query", (string)UUID.Random, m, m_Connector.TimeoutMs);
-                    classified = new ProfileClassified()
+                    classified = new ProfileClassified
                     {
                         ClassifiedID = id,
                         Creator = new UUI(reslist["CreatorId"].AsUUID),
@@ -178,7 +178,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
                     };
                     var reslist = (Map)RPC.DoJson20RpcRequest(m_Uri, "pickinforequest", (string)UUID.Random, m, m_Connector.TimeoutMs);
 
-                    pick = new ProfilePick()
+                    pick = new ProfilePick
                     {
                         PickID = reslist["PickId"].AsUUID,
                         Creator = user,
@@ -236,7 +236,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
                     };
                     var reslist = (Map)RPC.DoJson20RpcRequest(m_Uri, "pickinforequest", (string)UUID.Random, m, m_Connector.TimeoutMs);
 
-                    var pick = new ProfilePick()
+                    var pick = new ProfilePick
                     {
                         PickID = reslist["PickId"].AsUUID,
                         Creator = user,
@@ -361,7 +361,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
                         ["UserId"] = user.ID
                     };
                     var reslist = (Map)RPC.DoJson20RpcRequest(m_Uri, "user_preferences_request", (string)UUID.Random, m, m_Connector.TimeoutMs);
-                    prefs = new ProfilePreferences()
+                    prefs = new ProfilePreferences
                     {
                         User = user,
                         IMviaEmail = (ABoolean)reslist["IMViaEmail"],
@@ -401,14 +401,13 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
                     {
                         ["UserId"] = user.ID
                     };
-                    Map reslist = (Map)RPC.DoJson20RpcRequest(m_Uri, "user_preferences_request", (string)UUID.Random, m, m_Connector.TimeoutMs);
-                    ProfilePreferences prefs = new ProfilePreferences()
+                    var reslist = (Map)RPC.DoJson20RpcRequest(m_Uri, "user_preferences_request", (string)UUID.Random, m, m_Connector.TimeoutMs);
+                    return new ProfilePreferences
                     {
                         User = user,
                         IMviaEmail = (ABoolean)reslist["IMViaEmail"],
                         Visible = (ABoolean)reslist["Visible"]
                     };
-                    return prefs;
                 }
                 set
                 {
@@ -431,7 +430,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
                         ["UserId"] = user.ID
                     };
                     var reslist = (Map)RPC.DoJson20RpcRequest(m_Uri, "avatar_properties_request", (string)UUID.Random, m, m_Connector.TimeoutMs);
-                    return new ProfileProperties()
+                    return new ProfileProperties
                     {
                         User = user,
                         Partner = new UUI(reslist["PartnerId"].AsUUID),

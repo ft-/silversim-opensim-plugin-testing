@@ -72,7 +72,7 @@ namespace SilverSim.BackendConnectors.Robust.GroupsV2
                 {
                     if (iv is Map)
                     {
-                        var notice = new GroupNotice()
+                        var notice = new GroupNotice
                         {
                             Group = group
                         };

@@ -115,7 +115,7 @@ namespace SilverSim.BackendHandlers.Robust.Groups
                 return;
             }
 
-            var gim = new GridInstantMessage()
+            var gim = new GridInstantMessage
             {
                 FromGroup = grec.ID,
                 ToAgent = agent,

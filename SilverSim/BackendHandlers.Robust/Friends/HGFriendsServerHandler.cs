@@ -168,7 +168,7 @@ namespace SilverSim.BackendHandlers.Robust.Friends
                 return;
             }
 
-            var fi = new FriendInfo()
+            var fi = new FriendInfo
             {
                 User = new UUI(userid),
                 Friend = friendid,

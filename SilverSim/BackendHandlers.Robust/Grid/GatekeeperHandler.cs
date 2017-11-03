@@ -220,7 +220,7 @@ namespace SilverSim.BackendHandlers.Robust.Grid
 
             resdata.Add("result", success);
 
-            return new XmlRpc.XmlRpcResponse()
+            return new XmlRpc.XmlRpcResponse
             {
                 ReturnValue = resdata
             };
@@ -290,7 +290,7 @@ namespace SilverSim.BackendHandlers.Robust.Grid
             {
                 resdata.Add("result", false);
             }
-            return new XmlRpc.XmlRpcResponse()
+            return new XmlRpc.XmlRpcResponse
             {
                 ReturnValue = resdata
             };

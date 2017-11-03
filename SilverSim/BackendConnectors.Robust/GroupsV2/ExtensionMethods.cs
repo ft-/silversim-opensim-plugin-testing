@@ -33,7 +33,7 @@ namespace SilverSim.BackendConnectors.Robust.GroupsV2
         public static DirGroupInfo ToDirGroupInfo(this IValue iv)
         {
             Map m = (Map)iv;
-            return new DirGroupInfo()
+            return new DirGroupInfo
             {
                 ID = new UGI { ID = m["GroupID"].AsUUID, GroupName = m["Name"].ToString() },
                 MemberCount = m["NMembers"].AsInt,
@@ -350,7 +350,7 @@ namespace SilverSim.BackendConnectors.Robust.GroupsV2
         public static GroupRolemember ToGroupRolemember(this IValue iv)
         {
             var m = (Map)iv;
-            return new GroupRolemember()
+            return new GroupRolemember
             {
                 RoleID = m["RoleID"].AsUUID,
                 Principal = new UUI(m["MemberID"].ToString())
@@ -369,7 +369,7 @@ namespace SilverSim.BackendConnectors.Robust.GroupsV2
         {
             var m = (Map)iv;
 
-            var notice = new GroupNotice()
+            var notice = new GroupNotice
             {
                 ID = m["NoticeID"].AsUUID,
                 Timestamp = Date.UnixTimeToDateTime(m["Timestamp"].AsULong),

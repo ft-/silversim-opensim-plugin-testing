@@ -111,10 +111,10 @@ namespace SilverSim.BackendConnectors.Robust.UserAgent
             return friendsOnline;
         }
 
-        public override UserAgentServiceInterface.UserInfo GetUserInfo(UUI user)
+        public override UserInfo GetUserInfo(UUI user)
         {
             Dictionary<string, string> info = GetUserInfo_Internal(user);
-            var userInfo = new UserInfo()
+            var userInfo = new UserInfo
             {
                 FirstName = info.ContainsKey("user_firstname") ? info["user_firstname"] : user.FirstName,
                 LastName = info.ContainsKey("user_lastname") ? info["user_lastname"] : user.LastName
@@ -221,7 +221,7 @@ namespace SilverSim.BackendConnectors.Robust.UserAgent
                 throw new KeyNotFoundException();
             }
 
-            var dInfo = new DestinationInfo()
+            var dInfo = new DestinationInfo
             {
                 /* assume that HomeURI supports Gatekeeper services */
                 GridURI = user.HomeURI.ToString(),

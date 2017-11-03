@@ -99,7 +99,7 @@ namespace SilverSim.BackendConnectors.Robust.Maptile
             {
                 using (Stream s = new HttpClient.Get(requrl) { TimeoutMs = TimeoutMs }.ExecuteStreamRequest())
                 {
-                    data = new MaptileData()
+                    data = new MaptileData
                     {
                         Location = location,
                         ZoomLevel = zoomlevel,

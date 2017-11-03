@@ -478,7 +478,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
                             catch (Exception e)
                             {
                                 m_Log.DebugFormat("Teleport Failed: {0}: {1}\n{2}", e.GetType().FullName, e.Message, e.StackTrace);
-                                TeleportFailed failedMsg = new TeleportFailed()
+                                var failedMsg = new TeleportFailed
                                 {
                                     AgentID = agent.ID,
                                     Reason = e.Message
@@ -548,7 +548,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
                             catch (Exception e)
                             {
                                 m_Log.DebugFormat("Teleport Failed: {0}: {1}\n{2}", e.GetType().FullName, e.Message, e.StackTrace);
-                                var failedMsg = new TeleportFailed()
+                                var failedMsg = new TeleportFailed
                                 {
                                     AgentID = agent.ID,
                                     Reason = e.Message
@@ -623,7 +623,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
                             catch (Exception e)
                             {
                                 m_Log.DebugFormat("Teleport Failed: {0}: {1}\n{2}", e.GetType().FullName, e.Message, e.StackTrace);
-                                var failedMsg = new TeleportFailed()
+                                var failedMsg = new TeleportFailed
                                 {
                                     AgentID = agent.ID,
                                     Reason = e.Message
@@ -655,7 +655,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
         private DestinationInfo TeleportTo_Step1_RegionNameLookup(SceneInterface sceneInterface, IAgent agent, string regionName, TeleportFlags flags)
         {
             DestinationInfo dInfo = null;
-            var teleStart = new TeleportStart()
+            var teleStart = new TeleportStart
             {
                 TeleportFlags = flags
             };
@@ -714,7 +714,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
             m_Log.DebugFormat("TeleportTo_Step1_ThisGrid(RegionID): {0} ({1})", agent.Owner.FullName, agent.Owner.ID);
 #endif
 
-            var teleStart = new TeleportStart()
+            var teleStart = new TeleportStart
             {
                 TeleportFlags = flags
             };
@@ -779,7 +779,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
             m_Log.DebugFormat("TeleportTo_Step1_ThisGrid(Location): {0} ({1})", agent.Owner.FullName, agent.Owner.ID);
 #endif
             GridServiceInterface gridService = sceneInterface.GridService;
-            var teleStart = new TeleportStart()
+            var teleStart = new TeleportStart
             {
                 TeleportFlags = flags
             };
@@ -1148,7 +1148,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
 
         private static void SendTeleportProgress(IAgent agent, UUID sceneID, string message, TeleportFlags flags)
         {
-            var progressMsg = new TeleportProgress()
+            var progressMsg = new TeleportProgress
             {
                 AgentID = agent.ID,
                 TeleportFlags = flags,

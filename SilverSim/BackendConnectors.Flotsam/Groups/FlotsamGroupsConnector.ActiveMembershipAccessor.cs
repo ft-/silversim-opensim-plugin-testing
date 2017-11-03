@@ -48,7 +48,7 @@ namespace SilverSim.BackendConnectors.Flotsam.Groups
             {
                 if (m["error"].ToString() == "No Active Group Specified")
                 {
-                    gam = new GroupActiveMembership()
+                    gam = new GroupActiveMembership
                     {
                         Group = UGI.Unknown,
                         SelectedRoleID = UUID.Zero,
@@ -60,7 +60,7 @@ namespace SilverSim.BackendConnectors.Flotsam.Groups
                 return false;
             }
 
-            gam = new GroupActiveMembership()
+            gam = new GroupActiveMembership
             {
                 User = m_AvatarNameService.ResolveName(principal),
                 Group = new UGI { ID = m["GroupID"].AsUUID, GroupName = m["GroupName"].ToString() },

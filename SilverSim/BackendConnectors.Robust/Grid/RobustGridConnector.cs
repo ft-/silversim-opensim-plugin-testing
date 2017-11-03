@@ -562,7 +562,7 @@ namespace SilverSim.BackendConnectors.Robust.Grid
 
         private RegionInfo Deserialize(Map map)
         {
-            var r = new RegionInfo()
+            var r = new RegionInfo
             {
                 ID = map["uuid"].ToString(),
                 Location = new GridVector { X = map["locX"].AsUInt, Y = map["locY"].AsUInt },

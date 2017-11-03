@@ -48,7 +48,7 @@ namespace SilverSim.BackendConnectors.Flotsam.Groups
                 return false;
             }
 
-            inv = new GroupInvite()
+            inv = new GroupInvite
             {
                 ID = groupInviteID,
                 Group = new UGI(m["GroupID"].AsUUID),

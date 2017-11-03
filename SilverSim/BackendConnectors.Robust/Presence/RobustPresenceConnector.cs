@@ -102,7 +102,7 @@ namespace SilverSim.BackendConnectors.Robust.Presence
                 foreach (IValue iv in m.Values)
                 {
                     var pm = (Map)iv;
-                    presences.Add(new PresenceInfo()
+                    presences.Add(new PresenceInfo
                     {
                         RegionID = pm["RegionID"].ToString(),
                         UserID = new UUI(pm["UserID"].ToString())
@@ -163,7 +163,7 @@ namespace SilverSim.BackendConnectors.Robust.Presence
                 {
                     throw new PresenceNotFoundException();
                 }
-                return new PresenceInfo()
+                return new PresenceInfo
                 {
                     RegionID = m["RegionID"].ToString(),
                     UserID = new UUI(m["UserID"].ToString()),

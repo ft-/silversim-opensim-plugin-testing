@@ -113,7 +113,7 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
             {
                 resdata.Add("result", false);
             }
-            return new XmlRpc.XmlRpcResponse()
+            return new XmlRpc.XmlRpcResponse
             {
                 ReturnValue = resdata
             };
@@ -151,7 +151,7 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
             {
                 resdata.Add("result", false);
             }
-            return new XmlRpc.XmlRpcResponse()
+            return new XmlRpc.XmlRpcResponse
             {
                 ReturnValue = resdata
             };

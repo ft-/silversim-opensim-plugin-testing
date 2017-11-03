@@ -110,7 +110,7 @@ namespace SilverSim.BackendConnectors.Flotsam.Groups
 
         protected IValue FlotsamXmlRpcCall(UUI requestingAgent, string methodName, Map structparam)
         {
-            var req = new XmlRpc.XmlRpcRequest()
+            var req = new XmlRpc.XmlRpcRequest
             {
                 MethodName = methodName
             };
@@ -140,7 +140,7 @@ namespace SilverSim.BackendConnectors.Flotsam.Groups
 
         protected IValue FlotsamXmlRpcGetCall(UUI requestingAgent, string methodName, Map structparam)
         {
-            var req = new XmlRpc.XmlRpcRequest()
+            var req = new XmlRpc.XmlRpcRequest
             {
                 MethodName = methodName
             };

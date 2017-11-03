@@ -1101,7 +1101,7 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
                 reason = "Destination is a variable-sized region, and source is an old simulator. Consider upgrading.";
             }
 
-            var agentUUI = new UUI()
+            var agentUUI = new UUI
             {
                 ID = agentID
             };

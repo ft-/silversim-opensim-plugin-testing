@@ -373,7 +373,7 @@ namespace SilverSim.BackendHandlers.Robust.Profile
             ProfileClassified classified;
             if(!m_ProfileService.Classifieds.TryGetValue(new UUI(creatorID), classifiedID, out classified))
             {
-                classified = new ProfileClassified()
+                classified = new ProfileClassified
                 {
                     ClassifiedID = classifiedID,
                     Creator = new UUI(creatorID)
@@ -525,7 +525,7 @@ namespace SilverSim.BackendHandlers.Robust.Profile
             ProfilePick pick;
             if(!m_ProfileService.Picks.TryGetValue(new UUI(creatorID), pickID, out pick))
             {
-                pick = new ProfilePick()
+                pick = new ProfilePick
                 {
                     PickID = pickID,
                     Creator = new UUI(creatorID)
@@ -601,7 +601,7 @@ namespace SilverSim.BackendHandlers.Robust.Profile
             ProfilePreferences prefs;
             if(!m_ProfileService.Preferences.TryGetValue(new UUI(id), out prefs))
             {
-                prefs = new ProfilePreferences()
+                prefs = new ProfilePreferences
                 {
                     User = new UUI(id),
                     Visible = true,
@@ -634,7 +634,7 @@ namespace SilverSim.BackendHandlers.Robust.Profile
             ProfilePreferences prefs;
             if (!m_ProfileService.Preferences.TryGetValue(new UUI(id), out prefs))
             {
-                prefs = new ProfilePreferences()
+                prefs = new ProfilePreferences
                 {
                     User = new UUI(id),
                     Visible = true,
@@ -1152,7 +1152,7 @@ namespace SilverSim.BackendHandlers.Robust.Profile
             }
             try
             {
-                var pick = new ProfilePick()
+                var pick = new ProfilePick
                 {
                     PickID = structParam["pick_id"].AsUUID,
                     Creator = new UUI(structParam["creator_id"].AsUUID),

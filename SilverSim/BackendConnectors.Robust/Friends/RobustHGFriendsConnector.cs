@@ -81,7 +81,7 @@ namespace SilverSim.BackendConnectors.Robust.Friends
             }
             if (res.ContainsKey("Value") && res["Value"] != null)
             {
-                fInfo = new FriendInfo()
+                fInfo = new FriendInfo
                 {
                     User = user,
                     Friend = friend,

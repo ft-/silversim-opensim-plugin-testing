@@ -155,7 +155,7 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
         #endregion
 
         #region Map converson
-        internal static InventoryFolder FolderFromMap(Map map) => new InventoryFolder()
+        internal static InventoryFolder FolderFromMap(Map map) => new InventoryFolder
         {
             ID = map["ID"].AsUUID,
             Owner = new UUI(map["Owner"].AsUUID),

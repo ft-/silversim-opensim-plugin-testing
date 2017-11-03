@@ -142,7 +142,7 @@ namespace SilverSim.BackendConnectors.Robust.Friends
                     if(kvp.Key.StartsWith("friend"))
                     {
                         var m = (Map)kvp.Value;
-                        var fi = new FriendInfo()
+                        var fi = new FriendInfo
                         {
                             User = user
                         };

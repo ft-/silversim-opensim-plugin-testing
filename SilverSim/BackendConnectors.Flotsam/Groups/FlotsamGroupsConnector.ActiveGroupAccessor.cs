@@ -50,7 +50,7 @@ namespace SilverSim.BackendConnectors.Flotsam.Groups
                 return false;
             }
 
-            ugi = new UGI()
+            ugi = new UGI
             {
                 ID = m["GroupID"].AsUUID,
                 GroupName = m["GroupName"].ToString()

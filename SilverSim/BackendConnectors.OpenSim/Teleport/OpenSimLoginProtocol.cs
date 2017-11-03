@@ -330,7 +330,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
              * 
              * Now, we can validate the access of the agent.
              */
-            var ad = new AuthorizationServiceInterface.AuthorizationData()
+            var ad = new AuthorizationServiceInterface.AuthorizationData
             {
                 ClientInfo = clientInfo,
                 SessionInfo = sessionInfo,
@@ -497,7 +497,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
 
             try
             {
-                m_LocalPresenceService.Report(new PresenceInfo()
+                m_LocalPresenceService.Report(new PresenceInfo
                 {
                     UserID = agent.Owner,
                     SessionID = agent.SessionID,
@@ -526,7 +526,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
                 return;
             }
 
-            var agentPostData = new PostData()
+            var agentPostData = new PostData
             {
                 Account = account,
 

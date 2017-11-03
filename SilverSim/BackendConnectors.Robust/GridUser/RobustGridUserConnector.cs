@@ -83,7 +83,7 @@ namespace SilverSim.BackendConnectors.Robust.GridUser
 
         private GridUserInfo FromResult(Map map)
         {
-            var info = new GridUserInfo()
+            var info = new GridUserInfo
             {
                 User = new UUI(map["UserID"].ToString()),
                 HomeRegionID = map["HomeRegionID"].ToString(),
