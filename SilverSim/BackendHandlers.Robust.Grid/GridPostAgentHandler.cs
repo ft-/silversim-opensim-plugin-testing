@@ -247,10 +247,6 @@ namespace SilverSim.BackendHandlers.Robust.Grid
                 return;
             }
 
-            string assetServerURI = agentPost.Account.ServiceURLs["AssetServerURI"];
-            string inventoryServerURI = agentPost.Account.ServiceURLs["InventoryServerURI"];
-            string gatekeeperURI = m_GatekeeperURI;
-
             if(!TryVerifyIdentity(req, agentPost))
             {
                 return;
