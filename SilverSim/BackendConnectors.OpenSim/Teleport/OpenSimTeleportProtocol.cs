@@ -1244,9 +1244,9 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
             {
                 protoVersion = PROTOCOL_VERSION_MAJOR + PROTOCOL_VERSION_MINOR / 10.0;
             }
-            else if (protoVersion > PROTOCOL_VERSION_MAJOR + PROTOCOL_VERSION_MINOR / 10.0)
+            else if (protoVersion < PROTOCOL_VERSION_MINOR + PROTOCOL_VERSION_MINOR / 10.0)
             {
-                protoVersion = PROTOCOL_VERSION_MAJOR + PROTOCOL_VERSION_MINOR / 10.0;
+                protoVersion = PROTOCOL_VERSION_MINOR + PROTOCOL_VERSION_MINOR / 10.0;
             }
             return protoVersion;
         }
