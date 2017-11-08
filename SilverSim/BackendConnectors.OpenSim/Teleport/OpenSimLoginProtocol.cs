@@ -34,6 +34,7 @@ using SilverSim.Scene.Types.Agent;
 using SilverSim.Scene.Types.Scene;
 using SilverSim.ServiceInterfaces.Asset;
 using SilverSim.ServiceInterfaces.Authorization;
+using SilverSim.ServiceInterfaces.Economy;
 using SilverSim.ServiceInterfaces.Friends;
 using SilverSim.ServiceInterfaces.Grid;
 using SilverSim.ServiceInterfaces.GridUser;
@@ -88,6 +89,8 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
         private OfflineIMServiceInterface m_LocalOfflineIMService;
         private readonly string m_LocalGroupsServiceName;
         private GroupsServiceInterface m_LocalGroupsService;
+        private readonly string m_LocalEconomyServiceName;
+        private EconomyServiceInterface m_LocalEconomyService;
 
         private List<AuthorizationServiceInterface> m_AuthorizationServices;
         private List<IProtocolExtender> m_PacketHandlerPlugins = new List<IProtocolExtender>();
@@ -116,6 +119,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
                 m_LocalPresenceServiceName = ownConfig.GetString("LocalPresenceService", "PresenceService");
                 m_LocalOfflineIMServiceName = ownConfig.GetString("LocalOfflineIMService", "OfflineIMService");
                 m_LocalGroupsServiceName = ownConfig.GetString("LocalGroupsService", string.Empty);
+                m_LocalEconomyServiceName = ownConfig.GetString("LocalEconomyService", "EconomyService");
             }
         }
 
@@ -145,6 +149,10 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
                 if(!string.IsNullOrEmpty(m_LocalGroupsServiceName))
                 {
                     m_LocalGroupsService = loader.GetService<GroupsServiceInterface>(m_LocalGroupsServiceName);
+                }
+                if(!loader.TryGetService(m_LocalEconomyServiceName, out m_LocalEconomyService))
+                {
+                    m_LocalEconomyService = null;
                 }
             }
         }
@@ -395,6 +403,10 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
             serviceList.Add(m_GridUserService);
             serviceList.Add(gridService);
             serviceList.Add(m_LocalOfflineIMService);
+            if(m_LocalEconomyService != null)
+            {
+                serviceList.Add(m_LocalEconomyService);
+            }
             serviceList.Add(new OpenSimTeleportProtocol(
                 Commands,
                 m_CapsRedirector,
@@ -478,6 +490,16 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
                 agent.Circuits.Clear();
                 throw new OpenSimTeleportProtocol.TeleportFailedException(e.Message);
             }
+
+            try
+            {
+                agent.EconomyService?.Login(destinationInfo.ID, account.Principal, sessionInfo.SessionID, sessionInfo.SecureSessionID);
+            }
+            catch (Exception e)
+            {
+                m_Log.Warn("Could not contact EconomyService", e);
+            }
+
             if (!circuitInfo.IsChild)
             {
                 /* make agent a root agent */
