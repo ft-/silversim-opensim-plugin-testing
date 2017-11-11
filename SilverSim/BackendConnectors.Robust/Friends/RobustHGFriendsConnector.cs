@@ -58,7 +58,7 @@ namespace SilverSim.BackendConnectors.Robust.Friends
             {
                 throw new FriendUpdateFailedException();
             }
-            if (map["RESULT"].ToString().ToLower() != "true")
+            if (!string.Equals(map["RESULT"].ToString(), "true", StringComparison.CurrentCultureIgnoreCase))
             {
                 throw new FriendUpdateFailedException();
             }
@@ -168,7 +168,16 @@ namespace SilverSim.BackendConnectors.Robust.Friends
 
         public override void StoreOffer(FriendInfo fi)
         {
-            throw new NotImplementedException();
+            var post = new Dictionary<string, string>
+            {
+                ["METHOD"] = "newfriendship",
+                ["PrincipalID"] = fi.Friend.ID.ToString(),
+                ["Friend"] = fi.User + ";" + fi.Secret,
+            };
+            using (Stream s = new HttpClient.Post(m_Uri, post) { TimeoutMs = TimeoutMs }.ExecuteStreamRequest())
+            {
+                CheckResult(OpenSimResponse.Deserialize(s));
+            }
         }
 
         public bool ValidateFriendshipOffered(UUI user, UUI friend)

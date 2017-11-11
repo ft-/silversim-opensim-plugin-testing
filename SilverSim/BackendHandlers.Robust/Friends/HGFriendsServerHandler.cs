@@ -84,6 +84,7 @@ namespace SilverSim.BackendHandlers.Robust.Friends
             m_Handlers.Add("friendship_offered", HandleFriendshipOffered);
             m_Handlers.Add("newfriendship", HandleNewFriendship);
             m_Handlers.Add("validate_friendship_offered", HandleValidateFriendshipOffered);
+            m_Handlers.Add("getfriendperms", HandleGetFriendPerms);
         }
 
         public void GetServiceURLs(Dictionary<string, string> dict)
@@ -180,6 +181,56 @@ namespace SilverSim.BackendHandlers.Robust.Friends
                 {
                     FailureResult(httpreq);
                 }
+            }
+        }
+
+        private void HandleGetFriendPerms(HttpRequest req, Dictionary<string, object> reqdata)
+        {
+            UUI user;
+            UUI friend;
+            UUID sessionid;
+            object o;
+            if(!reqdata.TryGetValue("PrincipalID", out o) || !UUI.TryParse(o.ToString(), out user) ||
+                !reqdata.TryGetValue("Friend", out o) || !UUI.TryParse(o.ToString(), out friend) ||
+                !reqdata.TryGetValue("SESSIONID", out o) || !UUID.TryParse(o.ToString(), out sessionid))
+            {
+                FailureResult(req);
+                return;
+            }
+
+            TravelingDataInfo travelingData;
+            try
+            {
+                travelingData = m_TravelingDataService.GetTravelingData(sessionid);
+            }
+            catch
+            {
+                FailureResult(req);
+                return;
+            }
+
+            if(travelingData.UserID != user.ID)
+            {
+                FailureResult(req);
+                return;
+            }
+
+            FriendInfo finfo;
+            if(m_FriendsService.TryGetValue(user, friend, out finfo))
+            {
+                using (HttpResponse res = req.BeginResponse("text/xml"))
+                using (XmlTextWriter writer = res.GetOutputStream().UTF8XmlTextWriter())
+                {
+                    writer.WriteStartElement("ServerResponse");
+                    writer.WriteNamedValue("RESULT", "Success");
+                    writer.WriteNamedValue("Value", ((uint)finfo.FriendGivenFlags).ToString());
+                    writer.WriteEndElement();
+                }
+
+            }
+            else
+            {
+                FailureResult(req);
             }
         }
 
