@@ -342,6 +342,30 @@ namespace SilverSim.BackendHandlers.Robust.Friends
                 return;
             }
 
+            if(friendID.HomeURI == null)
+            {
+                FailureResult(req);
+                return;
+            }
+
+            var userAgentConn = new RobustUserAgentConnector(friendID.HomeURI.ToString());
+
+            try
+            {
+                friendID = userAgentConn.GetUUI(friendID, friendID);
+            }
+            catch
+            {
+                FailureResult(req);
+                return;
+            }
+
+            UUI lookupid;
+            if (!m_AvatarNameService.TryGetValue(friendID, out lookupid))
+            {
+                m_AvatarNameService.Store(friendID);
+            }
+
             m_FriendsService.StoreOffer(new FriendInfo { User = new UUI(userID), Friend = friendID, Secret = secret });
             /* TODO: forward to sim */
             SuccessResult(req);
