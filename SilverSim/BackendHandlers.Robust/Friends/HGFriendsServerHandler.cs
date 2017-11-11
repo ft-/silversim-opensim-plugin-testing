@@ -23,8 +23,10 @@ using Nini.Config;
 using SilverSim.Main.Common;
 using SilverSim.Main.Common.HttpServer;
 using SilverSim.ServiceInterfaces;
+using SilverSim.ServiceInterfaces.AvatarName;
 using SilverSim.ServiceInterfaces.Friends;
 using SilverSim.ServiceInterfaces.Presence;
+using SilverSim.Threading;
 using SilverSim.Types;
 using SilverSim.Types.Friends;
 using SilverSim.Types.Presence;
@@ -43,9 +45,14 @@ namespace SilverSim.BackendHandlers.Robust.Friends
     {
         private FriendsServiceInterface m_FriendsService;
         private readonly string m_FriendsServiceName;
+        private IFriendsStatusNotifyServiceInterface m_FriendsStatusNotifier;
+        private readonly string m_FriendsStatusNotifierName;
         private BaseHttpServer m_HttpServer;
         private readonly string m_PresenceServiceName;
         private PresenceServiceInterface m_PresenceService;
+        private AvatarNameServiceInterface m_AvatarNameService;
+        private RwLockedList<AvatarNameServiceInterface> m_AvatarNameServices = new RwLockedList<AvatarNameServiceInterface>();
+        private readonly string[] m_AvatarNameServiceNames;
 
         private readonly Dictionary<string, Action<HttpRequest, Dictionary<string, object>>> m_Handlers = new Dictionary<string, Action<HttpRequest, Dictionary<string, object>>>();
 
@@ -53,6 +60,13 @@ namespace SilverSim.BackendHandlers.Robust.Friends
         {
             m_FriendsServiceName = ownSection.GetString("FriendsService", "FriendsService");
             m_PresenceServiceName = ownSection.GetString("PresenceService", "PresenceService");
+            m_FriendsStatusNotifierName = ownSection.GetString("FriendsStatusNotifier", string.Empty);
+            m_AvatarNameServiceNames = ownSection.GetString("AvatarNameServices", string.Empty).Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+            if(m_AvatarNameServiceNames.Length == 1 && string.IsNullOrEmpty(m_AvatarNameServiceNames[0]))
+            {
+                m_AvatarNameServiceNames = new string[0];
+            }
+            m_AvatarNameService = new AggregatingAvatarNameService(m_AvatarNameServices);
             m_Handlers.Add("statusnotification", HandleOnlineStatusNotification);
             m_Handlers.Add("deletefriendship", HandleDeleteFriendship);
         }
@@ -67,11 +81,20 @@ namespace SilverSim.BackendHandlers.Robust.Friends
             m_HttpServer = loader.HttpServer;
             m_FriendsService = loader.GetService<FriendsServiceInterface>(m_FriendsServiceName);
             m_PresenceService = loader.GetService<PresenceServiceInterface>(m_PresenceServiceName);
+            if (!string.IsNullOrEmpty(m_FriendsStatusNotifierName))
+            {
+                m_FriendsStatusNotifier = loader.GetService<IFriendsStatusNotifyServiceInterface>(m_FriendsStatusNotifierName);
+            }
             m_HttpServer.UriHandlers.Add("/hgfriends", HGFriendsHandler);
             BaseHttpServer https;
             if(loader.TryGetHttpsServer(out https))
             {
                 https.UriHandlers.Add("/hgfriends", HGFriendsHandler);
+            }
+
+            foreach (string service in m_AvatarNameServiceNames)
+            {
+                m_AvatarNameServices.Add(loader.GetService<AvatarNameServiceInterface>(service.Trim()));
             }
         }
 
@@ -189,13 +212,14 @@ namespace SilverSim.BackendHandlers.Robust.Friends
         {
             UUID principalID = UUID.Zero;
             object o;
-            if(!reqdata.TryGetValue("userID", out o) || UUID.TryParse(o.ToString(), out principalID))
+            UUI principal;
+            if(!reqdata.TryGetValue("userID", out o) || !UUID.TryParse(o.ToString(), out principalID) || !m_AvatarNameService.TryGetValue(principalID, out principal))
             {
                 FailureResult(req);
                 return;
             }
 
-            bool online;
+            bool online = false;
             if(reqdata.TryGetValue("online", out o))
             {
                 bool.TryParse(o.ToString(), out online);
@@ -219,21 +243,31 @@ namespace SilverSim.BackendHandlers.Robust.Friends
                 }
             }
 
+            Action<UUI, List<KeyValuePair<UUI, string>>> notifyFriends;
+            if(online)
+            {
+                notifyFriends = m_FriendsStatusNotifier.NotifyAsOnline;
+            }
+            else
+            {
+                notifyFriends = m_FriendsStatusNotifier.NotifyAsOffline;
+            }
+
             var onlineFriends = new List<UUID>();
 
             foreach(KeyValuePair<UUI, string> kvp in friends)
             {
                 FriendInfo fi;
-                if(m_FriendsService.TryGetValue(new UUI(principalID), kvp.Key, out fi) &&
+                if(m_FriendsService.TryGetValue(principal, kvp.Key, out fi) &&
                     fi.Secret == kvp.Value)
                 {
                     List<PresenceInfo> pi = m_PresenceService[principalID];
-                    if(pi.Count != 0)
+                    if (pi.Count != 0 && (fi.UserGivenFlags & FriendRightFlags.SeeOnline) != 0)
                     {
                         onlineFriends.Add(kvp.Key.ID);
                     }
 
-#warning TODO: Implement status notification sending
+                    notifyFriends(principal, new List<KeyValuePair<UUI, string>> { kvp });
                 }
             }
 

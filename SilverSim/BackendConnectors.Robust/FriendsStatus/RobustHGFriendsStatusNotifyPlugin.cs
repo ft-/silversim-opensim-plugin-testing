@@ -64,7 +64,7 @@ namespace SilverSim.BackendConnectors.Robust.FriendsStatus
 
             foreach (string service in m_AvatarNameServiceNames)
             {
-                m_AvatarNameServices.Add(loader.GetService<AvatarNameServiceInterface>(service));
+                m_AvatarNameServices.Add(loader.GetService<AvatarNameServiceInterface>(service.Trim()));
             }
         }
     }
