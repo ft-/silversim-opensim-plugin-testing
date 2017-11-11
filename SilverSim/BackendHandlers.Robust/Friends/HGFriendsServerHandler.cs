@@ -350,9 +350,10 @@ namespace SilverSim.BackendHandlers.Robust.Friends
 
             var userAgentConn = new RobustUserAgentConnector(friendID.HomeURI.ToString());
 
+            UUI lookupid;
             try
             {
-                friendID = userAgentConn.GetUUI(friendID, friendID);
+                lookupid = userAgentConn.GetUUI(friendID, friendID);
             }
             catch
             {
@@ -360,10 +361,20 @@ namespace SilverSim.BackendHandlers.Robust.Friends
                 return;
             }
 
-            UUI lookupid;
+            if(!lookupid.EqualsGrid(friendID))
+            {
+                FailureResult(req);
+                return;
+            }
+
             if (!m_AvatarNameService.TryGetValue(friendID, out lookupid))
             {
                 m_AvatarNameService.Store(friendID);
+            }
+            else if (!lookupid.EqualsGrid(friendID))
+            {
+                FailureResult(req);
+                return;
             }
 
             m_FriendsService.StoreOffer(new FriendInfo { User = new UUI(userID), Friend = friendID, Secret = secret });
