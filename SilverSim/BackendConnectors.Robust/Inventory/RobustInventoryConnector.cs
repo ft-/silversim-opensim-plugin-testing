@@ -177,7 +177,7 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
                 InventoryType = (InventoryType)map["InvType"].AsInt,
                 Name = map["Name"].AsString.ToString(),
                 Owner = new UUI(map["Owner"].AsUUID),
-                IsGroupOwned = map["GroupOwned"].ToString().ToLowerInvariant() == "true"
+                IsGroupOwned = string.Equals(map["GroupOwned"].ToString(), "true", StringComparison.InvariantCultureIgnoreCase)
             };
 
             string creatorData = map["CreatorData"].AsString.ToString();

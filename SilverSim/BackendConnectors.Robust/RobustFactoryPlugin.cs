@@ -19,7 +19,6 @@
 // obligated to do so. If you do not wish to do so, delete this
 // exception statement from your version.
 
-using Nini.Config;
 using SilverSim.Main.Common;
 using SilverSim.ServiceInterfaces;
 using SilverSim.ServiceInterfaces.Asset;
@@ -27,7 +26,6 @@ using SilverSim.ServiceInterfaces.Friends;
 using SilverSim.ServiceInterfaces.Inventory;
 using SilverSim.ServiceInterfaces.UserAgents;
 using System.ComponentModel;
-using System;
 
 namespace SilverSim.BackendConnectors.Robust
 {

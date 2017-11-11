@@ -158,21 +158,8 @@ namespace SilverSim.BackendConnectors.Robust.UserAgent
 
         public override ServerURIs GetServerURLs(UUI user)
         {
-            var hash = new Map
-            {
-                ["userID"] = user.ID
-            };
-            Map res = DoXmlRpcWithHashResponse("get_server_urls", hash);
             var serverUrls = new ServerURIs();
-            foreach (string key in res.Keys)
-            {
-                if(key.StartsWith("SRV_") && res[key] != null)
-                {
-                    string serverType = key.Substring(4);
-                    serverUrls.Add(serverType, res[key].ToString());
-                }
-            }
-
+            serverUrls.GetServerURLs(user, m_Uri);
             return serverUrls;
         }
 
