@@ -21,6 +21,7 @@
 
 using SilverSim.BackendConnectors.Robust.Common;
 using SilverSim.Http.Client;
+using SilverSim.ServiceInterfaces.AvatarName;
 using SilverSim.ServiceInterfaces.Friends;
 using SilverSim.Types;
 using System.Collections.Generic;
@@ -33,9 +34,11 @@ namespace SilverSim.BackendConnectors.Robust.FriendsStatus
     public sealed class RobustHGFriendsStatusNotifyService : IFriendsStatusNotifyServiceInterface
     {
         public int TimeoutMs { get; set; }
+        private readonly IFriendsStatusNotifyServiceInterface m_Notifier;
+        private readonly AvatarNameServiceInterface m_AvatarNameService;
 
         private readonly string m_Url;
-        public RobustHGFriendsStatusNotifyService(string url)
+        public RobustHGFriendsStatusNotifyService(string url, IFriendsStatusNotifyServiceInterface notifier, AvatarNameServiceInterface avatarNameService)
         {
             m_Url = url;
             if(!m_Url.EndsWith("/"))
@@ -44,6 +47,8 @@ namespace SilverSim.BackendConnectors.Robust.FriendsStatus
             }
             m_Url += "hgfriends";
             TimeoutMs = 20000;
+            m_Notifier = notifier;
+            m_AvatarNameService = avatarNameService;
         }
 
         public void NotifyAsOffline(UUI notifier, List<KeyValuePair<UUI, string>> list) => Notify(notifier, list, false);
@@ -74,9 +79,10 @@ namespace SilverSim.BackendConnectors.Robust.FriendsStatus
             foreach(KeyValuePair<string, IValue> kvp in res)
             {
                 UUID id;
-                if(kvp.Key.StartsWith("friend_") && UUID.TryParse(kvp.Value.ToString(), out id))
+                UUI uui;
+                if(kvp.Key.StartsWith("friend_") && UUID.TryParse(kvp.Value.ToString(), out id) && m_AvatarNameService.TryGetValue(id, out uui))
                 {
-
+                    m_Notifier.NotifyAsOnline(uui, new List<KeyValuePair<UUI, string>> { new KeyValuePair<UUI, string>(notifier, string.Empty) });
                 }
             }
         }

@@ -19,9 +19,13 @@
 // obligated to do so. If you do not wish to do so, delete this
 // exception statement from your version.
 
+using Nini.Config;
 using SilverSim.Main.Common;
 using SilverSim.ServiceInterfaces;
+using SilverSim.ServiceInterfaces.AvatarName;
 using SilverSim.ServiceInterfaces.Friends;
+using SilverSim.Threading;
+using System;
 using System.ComponentModel;
 
 namespace SilverSim.BackendConnectors.Robust.FriendsStatus
@@ -30,13 +34,38 @@ namespace SilverSim.BackendConnectors.Robust.FriendsStatus
     [Description("OpenSim HGFriends Connector Factory")]
     public sealed class RobustHGFriendsStatusNotifyPlugin : ServicePluginHelo, IFriendsStatusNotifyServicePlugin, IPlugin
     {
+        private readonly string m_LocalFriendsStatusNotifierName;
+        private IFriendsStatusNotifyServiceInterface m_LocalFriendsStatusNotifier;
+        private readonly RwLockedList<AvatarNameServiceInterface> m_AvatarNameServices = new RwLockedList<AvatarNameServiceInterface>();
+        private readonly AggregatingAvatarNameService m_AvatarNameService;
+        private readonly string[] m_AvatarNameServiceNames;
+
+        public RobustHGFriendsStatusNotifyPlugin(IConfig config)
+        {
+            m_AvatarNameService = new AggregatingAvatarNameService(m_AvatarNameServices);
+            m_LocalFriendsStatusNotifierName = config.GetString("LocalFriendsStatusNotifier", string.Empty);
+            m_AvatarNameServiceNames = config.GetString("LocalAvatarNameServices", string.Empty).Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+            if(m_AvatarNameServiceNames.Length == 1 && string.IsNullOrEmpty(m_AvatarNameServiceNames[0]))
+            {
+                m_AvatarNameServiceNames = new string[0];
+            }
+        }
+
         public override string Name => "opensim-robust";
 
-        public IFriendsStatusNotifyServiceInterface Instantiate(string url) => new RobustHGFriendsStatusNotifyService(url);
+        public IFriendsStatusNotifyServiceInterface Instantiate(string url) => new RobustHGFriendsStatusNotifyService(url, m_LocalFriendsStatusNotifier, m_AvatarNameService);
 
         public void Startup(ConfigurationLoader loader)
         {
-            /* intentionally left empty */
+            if(!string.IsNullOrEmpty(m_LocalFriendsStatusNotifierName))
+            {
+                m_LocalFriendsStatusNotifier = loader.GetService<IFriendsStatusNotifyServiceInterface>(m_LocalFriendsStatusNotifierName);
+            }
+
+            foreach (string service in m_AvatarNameServiceNames)
+            {
+                m_AvatarNameServices.Add(loader.GetService<AvatarNameServiceInterface>(service));
+            }
         }
     }
 }
