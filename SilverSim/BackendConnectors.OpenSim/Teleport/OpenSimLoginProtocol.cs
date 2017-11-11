@@ -44,6 +44,7 @@ using SilverSim.ServiceInterfaces.Inventory;
 using SilverSim.ServiceInterfaces.Presence;
 using SilverSim.ServiceInterfaces.Profile;
 using SilverSim.ServiceInterfaces.ServerParam;
+using SilverSim.ServiceInterfaces.Traveling;
 using SilverSim.ServiceInterfaces.UserAgents;
 using SilverSim.Types;
 using SilverSim.Types.Account;
@@ -83,6 +84,8 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
         private ProfileServiceInterface m_LocalProfileService;
         private readonly string m_LocalPresenceServiceName;
         private PresenceServiceInterface m_LocalPresenceService;
+        private readonly string m_LocalTravelingDataServiceName;
+        private TravelingDataServiceInterface m_LocalTravelingDataService;
         private readonly string m_LocalFriendsServiceName;
         private FriendsServiceInterface m_LocalFriendsService;
         private readonly string m_LocalOfflineIMServiceName;
@@ -120,6 +123,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
                 m_LocalOfflineIMServiceName = ownConfig.GetString("LocalOfflineIMService", "OfflineIMService");
                 m_LocalGroupsServiceName = ownConfig.GetString("LocalGroupsService", string.Empty);
                 m_LocalEconomyServiceName = ownConfig.GetString("LocalEconomyService", "EconomyService");
+                m_LocalTravelingDataServiceName = ownConfig.GetString("LocalTravelingDataService", "TravelingDataService");
             }
         }
 
@@ -146,7 +150,8 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
                 m_LocalFriendsService = loader.GetService<FriendsServiceInterface>(m_LocalFriendsServiceName);
                 m_LocalPresenceService = loader.GetService<PresenceServiceInterface>(m_LocalPresenceServiceName);
                 m_LocalOfflineIMService = loader.GetService<OfflineIMServiceInterface>(m_LocalOfflineIMServiceName);
-                if(!string.IsNullOrEmpty(m_LocalGroupsServiceName))
+                m_LocalTravelingDataService = loader.GetService<TravelingDataServiceInterface>(m_LocalTravelingDataServiceName);
+                if (!string.IsNullOrEmpty(m_LocalGroupsServiceName))
                 {
                     m_LocalGroupsService = loader.GetService<GroupsServiceInterface>(m_LocalGroupsServiceName);
                 }
@@ -323,6 +328,45 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
             return protoVersion;
         }
 
+        public class StandalonePresenceService : PresenceServiceInterface
+        {
+            private readonly PresenceServiceInterface m_PresenceService;
+            private readonly TravelingDataServiceInterface m_TravelingDataService;
+
+            public StandalonePresenceService(PresenceServiceInterface presenceService, TravelingDataServiceInterface travelingDataService)
+            {
+                m_PresenceService = presenceService;
+                m_TravelingDataService = travelingDataService;
+            }
+
+            public override List<PresenceInfo> this[UUID userID] => m_PresenceService[userID];
+
+            public override PresenceInfo this[UUID sessionID, UUID userID] => m_PresenceService[sessionID, userID];
+
+            public override List<PresenceInfo> GetPresencesInRegion(UUID regionId) => m_PresenceService.GetPresencesInRegion(regionId);
+
+            public override void Login(PresenceInfo pInfo) => m_PresenceService.Login(pInfo);
+
+            public override void Logout(UUID sessionID, UUID userID)
+            {
+                m_PresenceService.Logout(sessionID, userID);
+                m_TravelingDataService.Remove(sessionID);
+            }
+
+            public override void LogoutRegion(UUID regionID)
+            {
+                m_PresenceService.LogoutRegion(regionID);
+                foreach (PresenceInfo pinfo in GetPresencesInRegion(regionID))
+                {
+                    m_TravelingDataService.Remove(pinfo.SessionID);
+                }
+            }
+
+            public override void Remove(UUID scopeID, UUID accountID) => m_PresenceService.Remove(scopeID, accountID);
+
+            public override void Report(PresenceInfo pInfo) => m_PresenceService.Report(pInfo);
+        }
+
         private void PostAgent_Local(UserAccount account, ClientInfo clientInfo, SessionInfo sessionInfo, DestinationInfo destinationInfo, CircuitInfo circuitInfo, AppearanceInfo appearance, UUID capsId, int maxAllowedWearables, out string capsPath)
         {
             UserAgentServiceInterface userAgentService;
@@ -399,7 +443,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
             }
             serviceList.Add(m_LocalFriendsService);
             serviceList.Add(userAgentService);
-            serviceList.Add(m_LocalPresenceService);
+            serviceList.Add(new StandalonePresenceService(m_LocalPresenceService, m_LocalTravelingDataService));
             serviceList.Add(m_GridUserService);
             serviceList.Add(gridService);
             serviceList.Add(m_LocalOfflineIMService);
