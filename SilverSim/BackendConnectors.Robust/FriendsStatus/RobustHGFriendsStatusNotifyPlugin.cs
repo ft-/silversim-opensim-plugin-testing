@@ -44,7 +44,7 @@ namespace SilverSim.BackendConnectors.Robust.FriendsStatus
         {
             m_AvatarNameService = new AggregatingAvatarNameService(m_AvatarNameServices);
             m_LocalFriendsStatusNotifierName = config.GetString("LocalFriendsStatusNotifier", string.Empty);
-            m_AvatarNameServiceNames = config.GetString("LocalAvatarNameServices", string.Empty).Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+            m_AvatarNameServiceNames = config.GetString("AvatarNameServices", string.Empty).Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
             if(m_AvatarNameServiceNames.Length == 1 && string.IsNullOrEmpty(m_AvatarNameServiceNames[0]))
             {
                 m_AvatarNameServiceNames = new string[0];
