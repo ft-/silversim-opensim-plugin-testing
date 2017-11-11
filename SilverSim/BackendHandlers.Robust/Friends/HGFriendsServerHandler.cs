@@ -20,17 +20,23 @@
 // exception statement from your version.
 
 using Nini.Config;
+using SilverSim.BackendConnectors.Robust.Friends;
+using SilverSim.BackendConnectors.Robust.UserAgent;
 using SilverSim.Main.Common;
 using SilverSim.Main.Common.HttpServer;
 using SilverSim.ServiceInterfaces;
+using SilverSim.ServiceInterfaces.Account;
 using SilverSim.ServiceInterfaces.AvatarName;
 using SilverSim.ServiceInterfaces.Friends;
 using SilverSim.ServiceInterfaces.Presence;
+using SilverSim.ServiceInterfaces.Traveling;
 using SilverSim.Threading;
 using SilverSim.Types;
 using SilverSim.Types.Friends;
 using SilverSim.Types.Presence;
+using SilverSim.Types.ServerURIs;
 using SilverSim.Types.StructuredData.REST;
+using SilverSim.Types.TravelingData;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -50,7 +56,11 @@ namespace SilverSim.BackendHandlers.Robust.Friends
         private BaseHttpServer m_HttpServer;
         private readonly string m_PresenceServiceName;
         private PresenceServiceInterface m_PresenceService;
+        private UserAccountServiceInterface m_UserAccountService;
+        private readonly string m_UserAccountServiceName;
         private AvatarNameServiceInterface m_AvatarNameService;
+        private readonly string m_TravelingDataServiceName;
+        private TravelingDataServiceInterface m_TravelingDataService;
         private RwLockedList<AvatarNameServiceInterface> m_AvatarNameServices = new RwLockedList<AvatarNameServiceInterface>();
         private readonly string[] m_AvatarNameServiceNames;
 
@@ -58,9 +68,11 @@ namespace SilverSim.BackendHandlers.Robust.Friends
 
         public HGFriendsServerHandler(IConfig ownSection)
         {
+            m_UserAccountServiceName = ownSection.GetString("UserAccountService", "UserAccountService");
             m_FriendsServiceName = ownSection.GetString("FriendsService", "FriendsService");
             m_PresenceServiceName = ownSection.GetString("PresenceService", "PresenceService");
             m_FriendsStatusNotifierName = ownSection.GetString("FriendsStatusNotifier", string.Empty);
+            m_TravelingDataServiceName = ownSection.GetString("TravelingDataService", "TravelingDataService");
             m_AvatarNameServiceNames = ownSection.GetString("AvatarNameServices", string.Empty).Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
             if(m_AvatarNameServiceNames.Length == 1 && string.IsNullOrEmpty(m_AvatarNameServiceNames[0]))
             {
@@ -69,6 +81,9 @@ namespace SilverSim.BackendHandlers.Robust.Friends
             m_AvatarNameService = new AggregatingAvatarNameService(m_AvatarNameServices);
             m_Handlers.Add("statusnotification", HandleOnlineStatusNotification);
             m_Handlers.Add("deletefriendship", HandleDeleteFriendship);
+            m_Handlers.Add("friendship_offered", HandleFriendshipOffered);
+            m_Handlers.Add("newfriendship", HandleNewFriendship);
+            m_Handlers.Add("validate_friendship_offered", HandleValidateFriendshipOffered);
         }
 
         public void GetServiceURLs(Dictionary<string, string> dict)
@@ -81,6 +96,8 @@ namespace SilverSim.BackendHandlers.Robust.Friends
             m_HttpServer = loader.HttpServer;
             m_FriendsService = loader.GetService<FriendsServiceInterface>(m_FriendsServiceName);
             m_PresenceService = loader.GetService<PresenceServiceInterface>(m_PresenceServiceName);
+            m_UserAccountService = loader.GetService<UserAccountServiceInterface>(m_UserAccountServiceName);
+            m_TravelingDataService = loader.GetService<TravelingDataServiceInterface>(m_TravelingDataServiceName);
             if (!string.IsNullOrEmpty(m_FriendsStatusNotifierName))
             {
                 m_FriendsStatusNotifier = loader.GetService<IFriendsStatusNotifyServiceInterface>(m_FriendsStatusNotifierName);
@@ -164,6 +181,203 @@ namespace SilverSim.BackendHandlers.Robust.Friends
                     FailureResult(httpreq);
                 }
             }
+        }
+
+        private void HandleNewFriendship(HttpRequest req, Dictionary<string, object> reqdata)
+        {
+            UUID sessionID;
+            object o;
+
+            UUID userID;
+            UUI friendID;
+            string secret;
+
+            if (!reqdata.TryGetValue("PrincipalID", out o) || !UUID.TryParse(o.ToString(), out userID))
+            {
+                FailureResult(req);
+                return;
+            }
+            if (!reqdata.TryGetValue("Friend", out o) || !TryParseUUIWithSecret(o.ToString(), out friendID, out secret))
+            {
+                FailureResult(req);
+                return;
+            }
+
+            if (!m_UserAccountService.ContainsKey(UUID.Zero, userID))
+            {
+                FailureResult(req);
+                return;
+            }
+
+            FriendInfo finfo;
+            FriendInfo ofinfo;
+            if (m_FriendsService.TryGetValue(friendID, new UUI(userID), out finfo) &&
+                !m_FriendsService.TryGetValue(new UUI(userID), friendID, out ofinfo))
+            {
+                /* valid offer entry, skip the major validation */
+                if (secret == finfo.Secret)
+                {
+                    finfo.UserGivenFlags = FriendRightFlags.SeeOnline;
+                    finfo.FriendGivenFlags = FriendRightFlags.SeeOnline;
+                    m_FriendsService.Store(finfo);
+                    SuccessResult(req);
+                }
+                else
+                {
+                    FailureResult(req);
+                }
+                return;
+            }
+
+            if (!reqdata.TryGetValue("SESSIONID", out o) || !UUID.TryParse(o.ToString(), out sessionID))
+            {
+                FailureResult(req);
+                return;
+            }
+
+            TravelingDataInfo travelingInfo;
+
+            try
+            {
+                travelingInfo = m_TravelingDataService.GetTravelingData(sessionID);
+            }
+            catch
+            {
+                FailureResult(req);
+                return;
+            }
+            
+            if(travelingInfo.UserID != userID)
+            {
+                FailureResult(req);
+                return;
+            }
+
+            m_FriendsService.StoreOffer(new FriendInfo { User = new UUI(userID), Friend = friendID, Secret = secret });
+            /* TODO: forward to sim */
+            SuccessResult(req);
+        }
+
+        private bool TryParseUUIWithSecret(string input, out UUI friend, out string secret)
+        {
+            string[] parts = input.Split(';');
+            if (parts.Length > 3)
+            {
+                /* fourth part is secret */
+                secret = parts[3];
+                return UUI.TryParse(parts[0] + ";" + parts[1] + ";" + parts[2], out friend);
+            }
+            else
+            {
+                secret = string.Empty;
+                return UUI.TryParse(input, out friend);
+            }
+        }
+
+        private void HandleValidateFriendshipOffered(HttpRequest req, Dictionary<string, object> reqdata)
+        {
+            UUID userID;
+            UUID friendID;
+            object o;
+            if(!reqdata.TryGetValue("PrincipalID", out o) || !UUID.TryParse(o.ToString(), out userID))
+            {
+                FailureResult(req);
+                return;
+            }
+            if(!reqdata.TryGetValue("Friend", out o) || !UUID.TryParse(o.ToString(), out friendID))
+            {
+                FailureResult(req);
+                return;
+            }
+            UUI user;
+            UUI friend;
+            if(!m_AvatarNameService.TryGetValue(userID, out user) || 
+                !m_AvatarNameService.TryGetValue(friendID, out friend))
+            {
+                FailureResult(req);
+                return;
+            }
+            FriendInfo finfo;
+            if(m_FriendsService.TryGetValue(user, friend, out finfo))
+            {
+                SuccessResult(req);
+            }
+            else
+            {
+                FailureResult(req);
+            }
+        }
+
+        private void HandleFriendshipOffered(HttpRequest req, Dictionary<string, object> reqdata)
+        {
+            UUI friendid;
+            UUID toId;
+            try
+            {
+                friendid = new UUI(UUID.Parse(reqdata["FromID"].ToString()))
+                {
+                    FullName = reqdata["FromName"].ToString()
+                };
+                toId = UUID.Parse(reqdata["ToID"].ToString());
+            }
+            catch
+            {
+                FailureResult(req);
+                return;
+            }
+
+            if(!m_UserAccountService.ContainsKey(UUID.Zero, toId) || friendid.HomeURI == null)
+            {
+                FailureResult(req);
+                return;
+            }
+
+            UUI foundid;
+            if(m_AvatarNameService.TryGetValue(friendid.ID, out foundid) && !foundid.EqualsGrid(friendid))
+            {
+                FailureResult(req);
+            }
+
+            var userAgentConn = new RobustUserAgentConnector(friendid.HomeURI.ToString());
+            UUI lookupid;
+            try
+            {
+                lookupid = userAgentConn.GetUUI(friendid, friendid);
+            }
+            catch
+            {
+                FailureResult(req);
+                return;
+            }
+
+            if(!lookupid.EqualsGrid(friendid))
+            {
+                FailureResult(req);
+                return;
+            }
+
+            ServerURIs serveruris = userAgentConn.GetServerURLs(friendid);
+
+            string friendsServerURI;
+            try
+            {
+                friendsServerURI = serveruris.FriendsServerURI;
+            }
+            catch
+            {
+                FailureResult(req);
+                return;
+            }
+
+            var friendsConn = new RobustHGFriendsConnector(friendsServerURI, UUID.Zero, string.Empty);
+            if(!friendsConn.ValidateFriendshipOffered(new UUI(toId), friendid))
+            {
+                FailureResult(req);
+                return;
+            }
+            
+            /* TODO: forward to simulator */
+            SuccessResult(req);
         }
 
         private void HandleDeleteFriendship(HttpRequest req, Dictionary<string, object> reqdata)

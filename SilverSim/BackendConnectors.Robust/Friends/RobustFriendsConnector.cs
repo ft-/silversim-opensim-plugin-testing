@@ -154,11 +154,11 @@ namespace SilverSim.BackendConnectors.Robust.Friends
                             {
                                 /* fourth part is secret */
                                 fi.Secret = parts[3];
-                                fi.Friend.FullName = parts[0] + ";" + parts[1] + ";" + parts[2];
+                                fi.Friend = new UUI(parts[0] + ";" + parts[1] + ";" + parts[2]);
                             }
                             else
                             {
-                                fi.Friend.FullName = friend;
+                                fi.Friend = new UUI(friend);
                             }
 
                             fi.UserGivenFlags = (FriendRightFlags)m["MyFlags"].AsInt;
@@ -216,11 +216,11 @@ namespace SilverSim.BackendConnectors.Robust.Friends
             {
                 ["METHOD"] = "storefriend",
                 ["PrincipalID"] = (user.HomeURI != null && !user.HomeURI.ToString().StartsWith(m_HomeUri)) ?
-                user.ToString() + ";" + secret :
+                user + ";" + secret :
                 user.ID.ToString(),
 
                 ["Friend"] = (friend.HomeURI != null && !friend.HomeURI.ToString().StartsWith(m_HomeUri)) ?
-                friend.ToString() + ";" + secret :
+                friend + ";" + secret :
                 friend.ID.ToString(),
 
                 ["MyFlags"] = ((int)flags).ToString()

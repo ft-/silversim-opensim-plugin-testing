@@ -170,5 +170,24 @@ namespace SilverSim.BackendConnectors.Robust.Friends
         {
             throw new NotImplementedException();
         }
+
+        public bool ValidateFriendshipOffered(UUI user, UUI friend)
+        {
+            var post = new Dictionary<string, string>
+            {
+                ["METHOD"] = "validate_friendship_offered",
+                ["PrincipalID"] = user.ID.ToString(),
+                ["Friend"] = friend.ID.ToString()
+            };
+            using (Stream s = new HttpClient.Post(m_Uri, post) { TimeoutMs = TimeoutMs }.ExecuteStreamRequest())
+            {
+                Map map = OpenSimResponse.Deserialize(s);
+                if (!map.ContainsKey("RESULT"))
+                {
+                    throw new FriendUpdateFailedException();
+                }
+                return string.Equals(map["RESULT"].ToString(), "true", StringComparison.CurrentCultureIgnoreCase);
+            }
+        }
     }
 }
