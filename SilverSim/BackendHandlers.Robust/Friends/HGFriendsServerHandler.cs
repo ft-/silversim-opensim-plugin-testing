@@ -85,6 +85,7 @@ namespace SilverSim.BackendHandlers.Robust.Friends
             m_Handlers.Add("newfriendship", HandleNewFriendship);
             m_Handlers.Add("validate_friendship_offered", HandleValidateFriendshipOffered);
             m_Handlers.Add("getfriendperms", HandleGetFriendPerms);
+            m_Handlers.Add("grant_rights", HandleGrantRights);
         }
 
         public void GetServiceURLs(Dictionary<string, string> dict)
@@ -181,6 +182,43 @@ namespace SilverSim.BackendHandlers.Robust.Friends
                 {
                     FailureResult(httpreq);
                 }
+            }
+        }
+
+        private void HandleGrantRights(HttpRequest req, Dictionary<string, object> reqdata)
+        {
+            UUI user;
+            UUI friend;
+            object o;
+            string secret;
+            uint flags;
+
+            if (!reqdata.TryGetValue("PrincipalID", out o) || !UUI.TryParse(o.ToString(), out user) ||
+                !reqdata.TryGetValue("Friend", out o) || !UUI.TryParse(o.ToString(), out friend) ||
+                !reqdata.TryGetValue("Rights", out o) || !uint.TryParse(o.ToString(), out flags))
+            {
+                FailureResult(req);
+                return;
+            }
+
+            if(!reqdata.TryGetValue("SECRET", out o))
+            {
+                FailureResult(req);
+                return;
+            }
+
+            secret = o.ToString();
+
+            FriendInfo finfo;
+            if(m_FriendsService.TryGetValue(user, friend, out finfo))
+            {
+                finfo.UserGivenFlags = (FriendRightFlags)flags;
+                m_FriendsService.StoreRights(finfo);
+                SuccessResult(req);
+            }
+            else
+            {
+                FailureResult(req);
             }
         }
 
