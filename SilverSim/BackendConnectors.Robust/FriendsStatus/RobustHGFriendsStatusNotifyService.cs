@@ -76,13 +76,16 @@ namespace SilverSim.BackendConnectors.Robust.FriendsStatus
                 res = OpenSimResponse.Deserialize(s);
             }
 
-            foreach(KeyValuePair<string, IValue> kvp in res)
+            if (isOnline)
             {
-                UUID id;
-                UUI uui;
-                if(kvp.Key.StartsWith("friend_") && UUID.TryParse(kvp.Value.ToString(), out id) && m_AvatarNameService.TryGetValue(id, out uui))
+                foreach (KeyValuePair<string, IValue> kvp in res)
                 {
-                    m_Notifier.NotifyAsOnline(uui, new List<KeyValuePair<UUI, string>> { new KeyValuePair<UUI, string>(notifier, string.Empty) });
+                    UUID id;
+                    UUI uui;
+                    if (kvp.Key.StartsWith("friend_") && UUID.TryParse(kvp.Value.ToString(), out id) && m_AvatarNameService.TryGetValue(id, out uui))
+                    {
+                        m_Notifier.NotifyAsOnline(uui, new List<KeyValuePair<UUI, string>> { new KeyValuePair<UUI, string>(notifier, string.Empty) });
+                    }
                 }
             }
         }

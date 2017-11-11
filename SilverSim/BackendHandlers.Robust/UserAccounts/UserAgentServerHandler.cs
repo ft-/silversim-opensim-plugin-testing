@@ -123,6 +123,10 @@ namespace SilverSim.BackendHandlers.Robust.UserAccounts
             m_PresenceService = loader.GetService<PresenceServiceInterface>(m_PresenceServiceName);
             m_TravelingDataService = loader.GetService<TravelingDataServiceInterface>(m_TravelingDataServiceName);
             m_AuthInfoService = loader.GetService<AuthInfoServiceInterface>(m_AuthInfoServiceName);
+            if(!string.IsNullOrEmpty(m_FriendsServiceName))
+            {
+                m_FriendsService = loader.GetService<FriendsServiceInterface>(m_FriendsServiceName);
+            }
         }
 
         XmlRpc.XmlRpcResponse GetUUID(XmlRpc.XmlRpcRequest req)

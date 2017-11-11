@@ -160,7 +160,7 @@ namespace SilverSim.BackendConnectors.Robust.IM
                 }
                 catch
                 {
-                    p.Add("result", "FALSE");
+                    p.Add("success", "FALSE");
                     res.ReturnValue = p;
                     return res;
                 }
@@ -170,7 +170,7 @@ namespace SilverSim.BackendConnectors.Robust.IM
                 }
             }
 
-            p.Add("result", im.ResultInfo ? "TRUE" : "FALSE");
+            p.Add("success", im.ResultInfo ? "TRUE" : "FALSE");
             res.ReturnValue = p;
 
             return res;
