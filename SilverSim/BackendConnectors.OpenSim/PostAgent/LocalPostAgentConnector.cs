@@ -47,6 +47,7 @@ using SilverSim.ServiceInterfaces.IM;
 using SilverSim.ServiceInterfaces.Inventory;
 using SilverSim.ServiceInterfaces.Presence;
 using SilverSim.ServiceInterfaces.Profile;
+using SilverSim.ServiceInterfaces.Traveling;
 using SilverSim.ServiceInterfaces.UserAgents;
 using SilverSim.Threading;
 using SilverSim.Types;
@@ -90,6 +91,8 @@ namespace SilverSim.BackendConnectors.OpenSim.PostAgent
             public string ProfileServiceName = string.Empty;
             public PresenceServiceInterface PresenceService;
             public string PresenceServiceName = string.Empty;
+            public TravelingDataServiceInterface TravelingDataService;
+            public string TravelingDataServiceName = string.Empty;
             public FriendsServiceInterface FriendsService;
             public string FriendsServiceName = string.Empty;
             public OfflineIMServiceInterface OfflineIMService;
@@ -101,6 +104,45 @@ namespace SilverSim.BackendConnectors.OpenSim.PostAgent
         }
 
         private StandaloneServicesContainer StandaloneServices;
+
+        public class StandalonePresenceService : PresenceServiceInterface
+        {
+            private readonly PresenceServiceInterface m_PresenceService;
+            private readonly TravelingDataServiceInterface m_TravelingDataService;
+
+            public StandalonePresenceService(PresenceServiceInterface presenceService, TravelingDataServiceInterface travelingDataService)
+            {
+                m_PresenceService = presenceService;
+                m_TravelingDataService = travelingDataService;
+            }
+
+            public override List<PresenceInfo> this[UUID userID] => m_PresenceService[userID];
+
+            public override PresenceInfo this[UUID sessionID, UUID userID] => m_PresenceService[sessionID, userID];
+
+            public override List<PresenceInfo> GetPresencesInRegion(UUID regionId) => m_PresenceService.GetPresencesInRegion(regionId);
+
+            public override void Login(PresenceInfo pInfo) => m_PresenceService.Login(pInfo);
+
+            public override void Logout(UUID sessionID, UUID userID)
+            {
+                m_PresenceService.Logout(sessionID, userID);
+                m_TravelingDataService.Remove(sessionID);
+            }
+
+            public override void LogoutRegion(UUID regionID)
+            {
+                m_PresenceService.LogoutRegion(regionID);
+                foreach (PresenceInfo pinfo in GetPresencesInRegion(regionID))
+                {
+                    m_TravelingDataService.Remove(pinfo.SessionID);
+                }
+            }
+
+            public override void Remove(UUID scopeID, UUID accountID) => m_PresenceService.Remove(scopeID, accountID);
+
+            public override void Report(PresenceInfo pInfo) => m_PresenceService.Report(pInfo);
+        }
 
         private sealed class GridParameterMap : ICloneable
         {
@@ -153,7 +195,8 @@ namespace SilverSim.BackendConnectors.OpenSim.PostAgent
                     PresenceServiceName = ownSection.GetString("PresenceService", "PresenceService"),
                     ProfileServiceName = ownSection.GetString("ProfileService", "ProfileService"),
                     AssetServiceName = ownSection.GetString("AssetService", "AssetService"),
-                    InventoryServiceName = ownSection.GetString("InventoryService", "InventoryService")
+                    InventoryServiceName = ownSection.GetString("InventoryService", "InventoryService"),
+                    TravelingDataServiceName = ownSection.GetString("TravelingDataService", "TravelingDataService")
                 };
             }
         }
@@ -216,6 +259,7 @@ namespace SilverSim.BackendConnectors.OpenSim.PostAgent
                 StandaloneServices.ProfileService = loader.GetService<ProfileServiceInterface>(StandaloneServices.ProfileServiceName);
                 StandaloneServices.AssetService = loader.GetService<AssetServiceInterface>(StandaloneServices.AssetServiceName);
                 StandaloneServices.InventoryService = loader.GetService<InventoryServiceInterface>(StandaloneServices.InventoryServiceName);
+                StandaloneServices.TravelingDataService = loader.GetService<TravelingDataServiceInterface>(StandaloneServices.TravelingDataServiceName);
             }
 
             m_AuthorizationServices = loader.GetServicesByValue<AuthorizationServiceInterface>();
@@ -404,6 +448,7 @@ namespace SilverSim.BackendConnectors.OpenSim.PostAgent
                 profileService = StandaloneServices.ProfileService;
                 friendsService = StandaloneServices.FriendsService;
                 offlineIMService = StandaloneServices.OfflineIMService;
+                presenceService = new StandalonePresenceService(StandaloneServices.PresenceService, StandaloneServices.TravelingDataService);
             }
             else
             {
