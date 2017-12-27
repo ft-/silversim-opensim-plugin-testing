@@ -1208,7 +1208,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
             {
                 Method = "QUERYACCESS",
                 RequestContentType = "application/json",
-                RequestBody = Json.Serialize(req),
+                RequestBody = Json.Serialize(req).ToUTF8Bytes(),
                 TimeoutMs = TimeoutMs
             }.ExecuteStreamRequest())
             {
