@@ -25,7 +25,10 @@ using SilverSim.BackendConnectors.Robust.UserAgent;
 using SilverSim.Main.Common;
 using SilverSim.Main.Common.HttpServer;
 using SilverSim.ServiceInterfaces.UserAgents;
+using SilverSim.ServiceInterfaces;
+using System.Collections.Generic;
 using System.ComponentModel;
+using System;
 
 namespace SilverSim.BackendHandlers.Robust.Grid
 {
@@ -33,9 +36,32 @@ namespace SilverSim.BackendHandlers.Robust.Grid
     [Description("Robust Foreign Agent Handler Service")]
     public class ForeignAgentHandler : GridPostAgentHandler
     {
+        private List<IServiceURLsInspectInterface> m_ServiceURLsInspectInterfaces;
+
         public ForeignAgentHandler(IConfig ownSection) 
             : base("/foreignagent/", ownSection)
         {
+        }
+
+        public override void Startup(ConfigurationLoader loader)
+        {
+            base.Startup(loader);
+            m_ServiceURLsInspectInterfaces = loader.GetServicesByValue<IServiceURLsInspectInterface>();
+        }
+
+        protected override void InspectServiceURLs(IReadOnlyDictionary<string, string> serviceURLs)
+        {
+            foreach(IServiceURLsInspectInterface service in m_ServiceURLsInspectInterfaces)
+            {
+                try
+                {
+                    service.InspectServiceURLs(serviceURLs);
+                }
+                catch(Exception e)
+                {
+                    m_Log.Warn($"Exception at {service.GetType()}", e);
+                }
+            }
         }
 
         public override bool TryVerifyIdentity(HttpRequest req, PostData agentPost)

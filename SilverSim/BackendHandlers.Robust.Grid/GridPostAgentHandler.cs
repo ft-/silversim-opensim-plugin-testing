@@ -22,17 +22,12 @@
 using log4net;
 using Nini.Config;
 using SilverSim.BackendConnectors.OpenSim.PostAgent;
-using SilverSim.BackendConnectors.OpenSim.Teleport;
 using SilverSim.BackendConnectors.Robust.StructuredData.Agent;
 using SilverSim.Http.Client;
 using SilverSim.Main.Common;
 using SilverSim.Main.Common.HttpServer;
-using SilverSim.Scene.ServiceInterfaces.Teleport;
 using SilverSim.ServiceInterfaces.Authorization;
 using SilverSim.Types;
-using SilverSim.Types.Agent;
-using SilverSim.Types.Asset.Format;
-using SilverSim.Types.Grid;
 using SilverSim.Types.StructuredData.Json;
 using System;
 using System.Collections.Generic;
@@ -125,6 +120,11 @@ namespace SilverSim.BackendHandlers.Robust.Grid
             {
                 https.StartsWithUriHandlers.Add(m_AgentBaseURL, AgentPostHandler);
             }
+        }
+
+        protected virtual void InspectServiceURLs(IReadOnlyDictionary<string, string> serviceURLs)
+        {
+            /* intentionally left empty */
         }
 
         public ShutdownOrder ShutdownOrder => ShutdownOrder.Any;
@@ -295,6 +295,8 @@ namespace SilverSim.BackendHandlers.Robust.Grid
                 DoAgentResponse(req, e.Message, false);
                 return;
             }
+
+            InspectServiceURLs(agentPost.Account.ServiceURLs);
 
             try
             {
