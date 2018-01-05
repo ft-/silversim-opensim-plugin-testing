@@ -152,8 +152,12 @@ namespace SilverSim.BackendHandlers.Robust.MuteList
             string b64list;
             try
             {
+                byte[] data;
                 list = m_MuteListService.GetList(agentid, mutecrc);
-                b64list = Convert.ToBase64String(list.ToBinaryData());
+                data = list.ToBinaryData();
+                b64list = (list.Count != 0 && new Crc32().Compute(data) == mutecrc) ?
+                    Convert.ToBase64String(new byte[1] { 1 }) :
+                    Convert.ToBase64String(list.ToBinaryData());
             }
             catch (UseCachedMuteListException)
             {
