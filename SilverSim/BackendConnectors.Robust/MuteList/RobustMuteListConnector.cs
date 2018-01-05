@@ -21,6 +21,8 @@
 
 using log4net;
 using Nini.Config;
+using SilverSim.BackendConnectors.Robust.Common;
+using SilverSim.Http.Client;
 using SilverSim.Main.Common;
 using SilverSim.ServiceInterfaces.MuteList;
 using SilverSim.Types;
@@ -29,10 +31,6 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
-using System.Linq;
-using System.Text;
-using SilverSim.Http.Client;
-using SilverSim.BackendConnectors.Robust.Common;
 
 namespace SilverSim.BackendConnectors.Robust.MuteList
 {
