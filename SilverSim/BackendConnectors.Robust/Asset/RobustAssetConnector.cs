@@ -410,7 +410,6 @@ namespace SilverSim.BackendConnectors.Robust.Asset
                 /* Do not store temporary or local assets on specified server unless explicitly wanted */
                 return;
             }
-            asset.Sanitize();
             string assetbase_header = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<AssetBase>";
             string flags = string.Empty;
             assetbase_header += (asset.Data.Length != 0) ? "<Data>" : "<Data/>";
