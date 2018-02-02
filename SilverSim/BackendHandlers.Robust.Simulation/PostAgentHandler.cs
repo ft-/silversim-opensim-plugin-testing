@@ -128,7 +128,10 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
 
         public virtual void Shutdown()
         {
-            m_HttpServer.StartsWithUriHandlers.Remove(m_AgentBaseURL);
+            if (m_HttpServer != null)
+            {
+                m_HttpServer.StartsWithUriHandlers.Remove(m_AgentBaseURL);
+            }
         }
 
         private void GetAgentParams(string uri, out UUID agentID, out UUID regionID, out string action)
