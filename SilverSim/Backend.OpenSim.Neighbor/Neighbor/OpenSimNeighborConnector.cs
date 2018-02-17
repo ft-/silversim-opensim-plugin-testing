@@ -21,9 +21,9 @@
 
 using log4net;
 using SilverSim.Http.Client;
-using SilverSim.Types.StructuredData.Json;
 using SilverSim.Types;
 using SilverSim.Types.Grid;
+using SilverSim.Types.StructuredData.Json;
 using System;
 using System.IO;
 

@@ -28,7 +28,6 @@ using SilverSim.ServiceInterfaces.Groups;
 using SilverSim.Threading;
 using SilverSim.Types;
 using SilverSim.Types.StructuredData.XmlRpc;
-using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;

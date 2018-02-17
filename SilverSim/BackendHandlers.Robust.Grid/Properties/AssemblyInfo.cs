@@ -19,7 +19,6 @@
 // obligated to do so. If you do not wish to do so, delete this
 // exception statement from your version.
 
-using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 
 [assembly: AssemblyTitle("Robust Grid Backend Handlers")]

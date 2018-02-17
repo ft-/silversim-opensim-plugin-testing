@@ -31,9 +31,9 @@ using SilverSim.Types.StructuredData.REST;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Xml;
-using System.Linq;
 
 namespace SilverSim.BackendHandlers.Robust.Groups
 {

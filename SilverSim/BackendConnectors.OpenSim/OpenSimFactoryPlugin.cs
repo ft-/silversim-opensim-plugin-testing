@@ -19,19 +19,18 @@
 // obligated to do so. If you do not wish to do so, delete this
 // exception statement from your version.
 
-using Nini.Config;
+using SilverSim.BackendConnectors.OpenSim.Teleport;
 using SilverSim.Main.Common;
-using SilverSim.ServiceInterfaces;
-using SilverSim.ServiceInterfaces.Profile;
-using SilverSim.Viewer.Core.Teleport;
-using System.ComponentModel;
 using SilverSim.Main.Common.Caps;
 using SilverSim.Main.Common.CmdIO;
 using SilverSim.Scene.Management.Scene;
+using SilverSim.ServiceInterfaces;
+using SilverSim.ServiceInterfaces.Profile;
 using SilverSim.ServiceInterfaces.Teleport;
 using SilverSim.Viewer.Core;
+using SilverSim.Viewer.Core.Teleport;
 using System.Collections.Generic;
-using SilverSim.BackendConnectors.OpenSim.Teleport;
+using System.ComponentModel;
 
 namespace SilverSim.BackendConnectors.OpenSim
 {

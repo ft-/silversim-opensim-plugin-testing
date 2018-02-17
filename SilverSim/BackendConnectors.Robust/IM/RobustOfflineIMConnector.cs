@@ -27,11 +27,9 @@ using SilverSim.Main.Common;
 using SilverSim.ServiceInterfaces.IM;
 using SilverSim.Types;
 using SilverSim.Types.IM;
-using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
-using System.Linq;
 
 namespace SilverSim.BackendConnectors.Robust.IM
 {
