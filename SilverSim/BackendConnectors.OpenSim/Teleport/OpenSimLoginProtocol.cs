@@ -207,11 +207,14 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
                         }
                         else if (m_GridService.TryGetValue(account.ScopeID, uriMatch.Groups[1].Value, out ri))
                         {
+                            destinationInfo.UpdateFromRegion(ri);
+                            destinationInfo.LookAt = Vector3.UnitY;
                             destinationInfo.Position = new Vector3(
                                 double.Parse(uriMatch.Groups[2].Value, System.Globalization.CultureInfo.InvariantCulture),
                                 double.Parse(uriMatch.Groups[3].Value, System.Globalization.CultureInfo.InvariantCulture),
                                 double.Parse(uriMatch.Groups[4].Value, System.Globalization.CultureInfo.InvariantCulture));
                             destinationInfo.StartLocation = "url";
+                            destinationInfo.TeleportFlags = flags | TeleportFlags.ViaLocation;
                         }
                     }
                     break;
