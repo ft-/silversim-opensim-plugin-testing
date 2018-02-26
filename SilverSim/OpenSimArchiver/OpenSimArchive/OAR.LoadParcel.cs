@@ -170,11 +170,12 @@ namespace SilverSim.OpenSimArchiver.RegionArchiver
                                     break;
 
                                 case "Category":
-                                    pinfo.Category = (ParcelCategory)reader.ReadElementValueAsUInt();
+                                    int parcelCat = reader.ReadElementValueAsInt();
+                                    pinfo.Category = (ParcelCategory)Math.Max(parcelCat, 0);
                                     break;
 
                                 case "ClaimDate":
-                                    pinfo.ClaimDate = Date.UnixTimeToDateTime(reader.ReadElementValueAsULong());
+                                    pinfo.ClaimDate = reader.ReadElementValueAsCrazyDate();
                                     break;
 
                                 case "ClaimPrice":
