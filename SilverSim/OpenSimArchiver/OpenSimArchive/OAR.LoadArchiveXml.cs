@@ -430,6 +430,7 @@ namespace SilverSim.OpenSimArchiver.RegionArchiver
             {
                 uint majorVersion = 0;
                 uint minorVersion = 0;
+                bool isEmptyElement;
 
                 for (; ;)
                 {
@@ -441,10 +442,7 @@ namespace SilverSim.OpenSimArchiver.RegionArchiver
                     switch(reader.NodeType)
                     {
                         case XmlNodeType.Element:
-                            if(reader.IsEmptyElement)
-                            {
-                                throw new OARFormatException();
-                            }
+                            isEmptyElement = reader.IsEmptyElement;
                             if(reader.Name != "archive")
                             {
                                 throw new OARFormatException();
@@ -477,7 +475,17 @@ namespace SilverSim.OpenSimArchiver.RegionArchiver
                                 while (reader.MoveToNextAttribute());
                             }
 
-                            if(majorVersion == 0 && minorVersion != 0)
+                            if(majorVersion == 0 && minorVersion < 7 && isEmptyElement)
+                            {
+                                var rInfo = new RegionInfo();
+                                rInfo.RegionSize = new GridVector(256, 256);
+                                return rInfo;
+                            }
+                            else if(isEmptyElement)
+                            {
+                                throw new OARFormatException();
+                            }
+                            else if(majorVersion == 0 && minorVersion != 0)
                             {
                                 return LoadArchiveXmlVersion0(reader);
                             }
