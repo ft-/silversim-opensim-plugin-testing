@@ -35,15 +35,15 @@ namespace SilverSim.BackendConnectors.Robust.GroupsV2
         {
             public int TimeoutMs = 20000;
             private readonly string m_Uri;
-            private readonly Func<UUI, string> m_GetGroupsAgentID;
+            private readonly Func<UGUI, string> m_GetGroupsAgentID;
 
-            public GroupsAccessor(string uri, Func<UUI, string> getGroupsAgentID)
+            public GroupsAccessor(string uri, Func<UGUI, string> getGroupsAgentID)
             {
                 m_Uri = uri;
                 m_GetGroupsAgentID = getGroupsAgentID;
             }
 
-            private GroupInfo CreateOrUpdate(UUI requestingAgent, GroupInfo group, string op)
+            private GroupInfo CreateOrUpdate(UGUI requestingAgent, GroupInfo group, string op)
             {
                 Dictionary<string, string> post = group.ToPost();
                 post.Remove("OwnerRoleID");
@@ -67,18 +67,18 @@ namespace SilverSim.BackendConnectors.Robust.GroupsV2
                 return m["RESULT"].ToGroup();
             }
 
-            public GroupInfo Create(UUI requestingAgent, GroupInfo group) =>
+            public GroupInfo Create(UGUI requestingAgent, GroupInfo group) =>
                 CreateOrUpdate(requestingAgent, group, "ADD");
 
-            public GroupInfo Update(UUI requestingAgent, GroupInfo group) =>
+            public GroupInfo Update(UGUI requestingAgent, GroupInfo group) =>
                 CreateOrUpdate(requestingAgent, group, "UPDATE");
 
-            public void Delete(UUI requestingAgent, UGI group)
+            public void Delete(UGUI requestingAgent, UGI group)
             {
                 throw new NotSupportedException();
             }
 
-            public bool TryGetValue(UUI requestingAgent, UUID groupID, out UGI ugi)
+            public bool TryGetValue(UGUI requestingAgent, UUID groupID, out UGI ugi)
             {
                 var post = new Dictionary<string, string>
                 {
@@ -106,7 +106,7 @@ namespace SilverSim.BackendConnectors.Robust.GroupsV2
                 return true;
             }
 
-            public bool ContainsKey(UUI requestingAgent, UUID groupID)
+            public bool ContainsKey(UGUI requestingAgent, UUID groupID)
             {
                 var post = new Dictionary<string, string>
                 {
@@ -131,7 +131,7 @@ namespace SilverSim.BackendConnectors.Robust.GroupsV2
                 return true;
             }
 
-            public UGI this[UUI requestingAgent, UUID groupID]
+            public UGI this[UGUI requestingAgent, UUID groupID]
             {
                 get
                 {
@@ -144,7 +144,7 @@ namespace SilverSim.BackendConnectors.Robust.GroupsV2
                 }
             }
 
-            public bool TryGetValue(UUI requestingAgent, UGI group, out GroupInfo groupInfo)
+            public bool TryGetValue(UGUI requestingAgent, UGI group, out GroupInfo groupInfo)
             {
                 var post = new Dictionary<string, string>
                 {
@@ -172,7 +172,7 @@ namespace SilverSim.BackendConnectors.Robust.GroupsV2
                 return true;
             }
 
-            public bool ContainsKey(UUI requestingAgent, UGI group)
+            public bool ContainsKey(UGUI requestingAgent, UGI group)
             {
                 var post = new Dictionary<string, string>
                 {
@@ -197,7 +197,7 @@ namespace SilverSim.BackendConnectors.Robust.GroupsV2
                 return true;
             }
 
-            public GroupInfo this[UUI requestingAgent, UGI group]
+            public GroupInfo this[UGUI requestingAgent, UGI group]
             {
                 get
                 {
@@ -210,7 +210,7 @@ namespace SilverSim.BackendConnectors.Robust.GroupsV2
                 }
             }
 
-            public bool TryGetValue(UUI requestingAgent, string groupName, out GroupInfo groupInfo)
+            public bool TryGetValue(UGUI requestingAgent, string groupName, out GroupInfo groupInfo)
             {
                 var post = new Dictionary<string, string>
                 {
@@ -238,7 +238,7 @@ namespace SilverSim.BackendConnectors.Robust.GroupsV2
                 return true;
             }
 
-            public bool ContainsKey(UUI requestingAgent, string groupName)
+            public bool ContainsKey(UGUI requestingAgent, string groupName)
             {
                 var post = new Dictionary<string, string>
                 {
@@ -263,7 +263,7 @@ namespace SilverSim.BackendConnectors.Robust.GroupsV2
                 return true;
             }
 
-            public GroupInfo this[UUI requestingAgent, string groupName]
+            public GroupInfo this[UGUI requestingAgent, string groupName]
             {
                 get
                 {
@@ -276,7 +276,7 @@ namespace SilverSim.BackendConnectors.Robust.GroupsV2
                 }
             }
 
-            public List<DirGroupInfo> GetGroupsByName(UUI requestingAgent, string query)
+            public List<DirGroupInfo> GetGroupsByName(UGUI requestingAgent, string query)
             {
                 var post = new Dictionary<string, string>
                 {

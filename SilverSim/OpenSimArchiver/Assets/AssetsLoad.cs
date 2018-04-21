@@ -33,7 +33,7 @@ namespace SilverSim.OpenSimArchiver.Assets
     {
         public static void Load(
             AssetServiceInterface assetService,
-            UUI owner,
+            UGUI owner,
             Stream inputFile)
         {
             using (var gzipStream = new GZipStream(inputFile, CompressionMode.Decompress))

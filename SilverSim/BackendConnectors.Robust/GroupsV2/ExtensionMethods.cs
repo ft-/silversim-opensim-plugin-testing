@@ -59,7 +59,7 @@ namespace SilverSim.BackendConnectors.Robust.GroupsV2
 
             if(m.ContainsKey("FounderUUI"))
             {
-                group.Founder = new UUI(m["FounderUUI"].ToString());
+                group.Founder = new UGUI(m["FounderUUI"].ToString());
             }
             else if(m.ContainsKey("FounderID"))
             {
@@ -285,7 +285,7 @@ namespace SilverSim.BackendConnectors.Robust.GroupsV2
 
             if(m.ContainsKey("AgentID"))
             {
-                member.Principal = new UUI(m["AgentID"].ToString());
+                member.Principal = new UGUI(m["AgentID"].ToString());
             }
 
             if(m.ContainsKey("Contribution"))
@@ -353,11 +353,11 @@ namespace SilverSim.BackendConnectors.Robust.GroupsV2
             return new GroupRolemember
             {
                 RoleID = m["RoleID"].AsUUID,
-                Principal = new UUI(m["MemberID"].ToString())
+                Principal = new UGUI(m["MemberID"].ToString())
             };
         }
 
-        public static Dictionary<string, string> ToPost(this GroupRolemember m, Func<UUI, string> getGroupsAgentID) => new Dictionary<string, string>
+        public static Dictionary<string, string> ToPost(this GroupRolemember m, Func<UGUI, string> getGroupsAgentID) => new Dictionary<string, string>
         {
             ["RoleID"] = (string)m.RoleID,
             ["MemberID"] = getGroupsAgentID(m.Principal)
@@ -385,13 +385,13 @@ namespace SilverSim.BackendConnectors.Robust.GroupsV2
                 string attachOwnerId = m["AttachmentOwnerID"].ToString();
                 if (0 != attachOwnerId.Length)
                 {
-                    notice.AttachmentOwner = new UUI(attachOwnerId);
+                    notice.AttachmentOwner = new UGUI(attachOwnerId);
                 }
             }
             return notice;
         }
 
-        public static Dictionary<string, string> ToPost(this GroupNotice notice, Func<UUI, string> getGroupsAgentID)
+        public static Dictionary<string, string> ToPost(this GroupNotice notice, Func<UGUI, string> getGroupsAgentID)
         {
             var post = new Dictionary<string, string>
             {

@@ -35,15 +35,15 @@ namespace SilverSim.BackendConnectors.Robust.GroupsV2
         {
             public int TimeoutMs = 20000;
             private readonly string m_Uri;
-            private readonly Func<UUI, string> m_GetGroupsAgentID;
+            private readonly Func<UGUI, string> m_GetGroupsAgentID;
 
-            public NoticesAccessor(string uri, Func<UUI, string> getGroupsAgentID)
+            public NoticesAccessor(string uri, Func<UGUI, string> getGroupsAgentID)
             {
                 m_Uri = uri;
                 m_GetGroupsAgentID = getGroupsAgentID;
             }
 
-            public List<GroupNotice> GetNotices(UUI requestingAgent, UGI group)
+            public List<GroupNotice> GetNotices(UGUI requestingAgent, UGI group)
             {
                 var post = new Dictionary<string, string>
                 {
@@ -83,7 +83,7 @@ namespace SilverSim.BackendConnectors.Robust.GroupsV2
                 return groupnotices;
             }
 
-            public bool TryGetValue(UUI requestingAgent, UUID groupNoticeID, out GroupNotice notice)
+            public bool TryGetValue(UGUI requestingAgent, UUID groupNoticeID, out GroupNotice notice)
             {
                 var post = new Dictionary<string, string>
                 {
@@ -113,7 +113,7 @@ namespace SilverSim.BackendConnectors.Robust.GroupsV2
                 return true;
             }
 
-            public bool ContainsKey(UUI requestingAgent, UUID groupNoticeID)
+            public bool ContainsKey(UGUI requestingAgent, UUID groupNoticeID)
             {
                 var post = new Dictionary<string, string>
                 {
@@ -139,7 +139,7 @@ namespace SilverSim.BackendConnectors.Robust.GroupsV2
                 return true;
             }
 
-            public GroupNotice this[UUI requestingAgent, UUID groupNoticeID]
+            public GroupNotice this[UGUI requestingAgent, UUID groupNoticeID]
             {
                 get
                 {
@@ -170,7 +170,7 @@ namespace SilverSim.BackendConnectors.Robust.GroupsV2
                 }
             }
 
-            public void Add(UUI requestingAgent, GroupNotice notice)
+            public void Add(UGUI requestingAgent, GroupNotice notice)
             {
                 Dictionary<string, string> post = notice.ToPost(m_GetGroupsAgentID);
                 post["GroupID"] = (string)notice.Group.ID;
@@ -179,7 +179,7 @@ namespace SilverSim.BackendConnectors.Robust.GroupsV2
                 BooleanResponseRequest(m_Uri, post, false, TimeoutMs);
             }
 
-            public void Delete(UUI requestingAgent, UUID groupNoticeID)
+            public void Delete(UGUI requestingAgent, UUID groupNoticeID)
             {
                 throw new NotSupportedException();
             }

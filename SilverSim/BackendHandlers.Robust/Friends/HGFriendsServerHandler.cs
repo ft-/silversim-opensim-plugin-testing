@@ -187,14 +187,14 @@ namespace SilverSim.BackendHandlers.Robust.Friends
 
         private void HandleGrantRights(HttpRequest req, Dictionary<string, object> reqdata)
         {
-            UUI user;
-            UUI friend;
+            UGUI user;
+            UGUI friend;
             object o;
             string secret;
             uint flags;
 
-            if (!reqdata.TryGetValue("PrincipalID", out o) || !UUI.TryParse(o.ToString(), out user) ||
-                !reqdata.TryGetValue("Friend", out o) || !UUI.TryParse(o.ToString(), out friend) ||
+            if (!reqdata.TryGetValue("PrincipalID", out o) || !UGUI.TryParse(o.ToString(), out user) ||
+                !reqdata.TryGetValue("Friend", out o) || !UGUI.TryParse(o.ToString(), out friend) ||
                 !reqdata.TryGetValue("Rights", out o) || !uint.TryParse(o.ToString(), out flags))
             {
                 FailureResult(req);
@@ -224,12 +224,12 @@ namespace SilverSim.BackendHandlers.Robust.Friends
 
         private void HandleGetFriendPerms(HttpRequest req, Dictionary<string, object> reqdata)
         {
-            UUI user;
-            UUI friend;
+            UGUI user;
+            UGUI friend;
             UUID sessionid;
             object o;
-            if(!reqdata.TryGetValue("PrincipalID", out o) || !UUI.TryParse(o.ToString(), out user) ||
-                !reqdata.TryGetValue("Friend", out o) || !UUI.TryParse(o.ToString(), out friend) ||
+            if(!reqdata.TryGetValue("PrincipalID", out o) || !UGUI.TryParse(o.ToString(), out user) ||
+                !reqdata.TryGetValue("Friend", out o) || !UGUI.TryParse(o.ToString(), out friend) ||
                 !reqdata.TryGetValue("SESSIONID", out o) || !UUID.TryParse(o.ToString(), out sessionid))
             {
                 FailureResult(req);
@@ -278,7 +278,7 @@ namespace SilverSim.BackendHandlers.Robust.Friends
             object o;
 
             UUID userID;
-            UUI friendID;
+            UGUIWithName friendID;
             string secret;
 
             if (!reqdata.TryGetValue("PrincipalID", out o) || !UUID.TryParse(o.ToString(), out userID))
@@ -300,8 +300,8 @@ namespace SilverSim.BackendHandlers.Robust.Friends
 
             FriendInfo finfo;
             FriendInfo ofinfo;
-            if (m_FriendsService.TryGetValue(friendID, new UUI(userID), out finfo) &&
-                !m_FriendsService.TryGetValue(new UUI(userID), friendID, out ofinfo))
+            if (m_FriendsService.TryGetValue(friendID, new UGUI(userID), out finfo) &&
+                !m_FriendsService.TryGetValue(new UGUI(userID), friendID, out ofinfo))
             {
                 /* valid offer entry, skip the major validation */
                 if (secret == finfo.Secret)
@@ -350,7 +350,7 @@ namespace SilverSim.BackendHandlers.Robust.Friends
 
             var userAgentConn = new RobustUserAgentConnector(friendID.HomeURI.ToString());
 
-            UUI lookupid;
+            UGUIWithName lookupid;
             try
             {
                 lookupid = userAgentConn.GetUUI(friendID, friendID);
@@ -377,24 +377,24 @@ namespace SilverSim.BackendHandlers.Robust.Friends
                 return;
             }
 
-            m_FriendsService.StoreOffer(new FriendInfo { User = new UUI(userID), Friend = friendID, Secret = secret });
+            m_FriendsService.StoreOffer(new FriendInfo { User = new UGUI(userID), Friend = friendID, Secret = secret });
             /* TODO: forward to sim */
             SuccessResult(req);
         }
 
-        private bool TryParseUUIWithSecret(string input, out UUI friend, out string secret)
+        private bool TryParseUUIWithSecret(string input, out UGUIWithName friend, out string secret)
         {
             string[] parts = input.Split(';');
             if (parts.Length > 3)
             {
                 /* fourth part is secret */
                 secret = parts[3];
-                return UUI.TryParse(parts[0] + ";" + parts[1] + ";" + parts[2], out friend);
+                return UGUIWithName.TryParse(parts[0] + ";" + parts[1] + ";" + parts[2], out friend);
             }
             else
             {
                 secret = string.Empty;
-                return UUI.TryParse(input, out friend);
+                return UGUIWithName.TryParse(input, out friend);
             }
         }
 
@@ -413,8 +413,8 @@ namespace SilverSim.BackendHandlers.Robust.Friends
                 FailureResult(req);
                 return;
             }
-            UUI user;
-            UUI friend;
+            UGUI user;
+            UGUI friend;
             if(!m_AvatarNameService.TryGetValue(userID, out user) || 
                 !m_AvatarNameService.TryGetValue(friendID, out friend))
             {
@@ -434,11 +434,11 @@ namespace SilverSim.BackendHandlers.Robust.Friends
 
         private void HandleFriendshipOffered(HttpRequest req, Dictionary<string, object> reqdata)
         {
-            UUI friendid;
+            UGUIWithName friendid;
             UUID toId;
             try
             {
-                friendid = new UUI(UUID.Parse(reqdata["FromID"].ToString()))
+                friendid = new UGUIWithName(UUID.Parse(reqdata["FromID"].ToString()))
                 {
                     FullName = reqdata["FromName"].ToString()
                 };
@@ -456,14 +456,14 @@ namespace SilverSim.BackendHandlers.Robust.Friends
                 return;
             }
 
-            UUI foundid;
+            UGUI foundid;
             if(m_AvatarNameService.TryGetValue(friendid.ID, out foundid) && !foundid.EqualsGrid(friendid))
             {
                 FailureResult(req);
             }
 
             var userAgentConn = new RobustUserAgentConnector(friendid.HomeURI.ToString());
-            UUI lookupid;
+            UGUIWithName lookupid;
             try
             {
                 lookupid = userAgentConn.GetUUI(friendid, friendid);
@@ -494,7 +494,7 @@ namespace SilverSim.BackendHandlers.Robust.Friends
             }
 
             var friendsConn = new RobustHGFriendsConnector(friendsServerURI, UUID.Zero, string.Empty);
-            if(!friendsConn.ValidateFriendshipOffered(new UUI(toId), friendid))
+            if(!friendsConn.ValidateFriendshipOffered(new UGUI(toId), friendid))
             {
                 FailureResult(req);
                 return;
@@ -508,7 +508,7 @@ namespace SilverSim.BackendHandlers.Robust.Friends
         {
             string secret;
             UUID userid;
-            UUI friendid;
+            UGUI friendid;
             object o;
             if(!reqdata.TryGetValue("SECRET", out o))
             {
@@ -523,7 +523,7 @@ namespace SilverSim.BackendHandlers.Robust.Friends
                 return;
             }
 
-            if(!reqdata.TryGetValue("Friend", out o) || !UUI.TryParse(o.ToString(), out friendid))
+            if(!reqdata.TryGetValue("Friend", out o) || !UGUI.TryParse(o.ToString(), out friendid))
             {
                 FailureResult(req);
                 return;
@@ -531,7 +531,7 @@ namespace SilverSim.BackendHandlers.Robust.Friends
 
             var fi = new FriendInfo
             {
-                User = new UUI(userid),
+                User = new UGUI(userid),
                 Friend = friendid,
                 Secret = secret
             };
@@ -550,7 +550,7 @@ namespace SilverSim.BackendHandlers.Robust.Friends
         {
             UUID principalID = UUID.Zero;
             object o;
-            UUI principal;
+            UGUI principal;
             if(!reqdata.TryGetValue("userID", out o) || !UUID.TryParse(o.ToString(), out principalID) || !m_AvatarNameService.TryGetValue(principalID, out principal))
             {
                 FailureResult(req);
@@ -567,21 +567,21 @@ namespace SilverSim.BackendHandlers.Robust.Friends
                 FailureResult(req);
             }
 
-            var friends = new List<KeyValuePair<UUI, string>>();
+            var friends = new List<KeyValuePair<UGUI, string>>();
             foreach (KeyValuePair<string, object> kvp in reqdata)
             {
                 if (kvp.Key.StartsWith("friend_"))
                 {
-                    UUI uui;
+                    UGUI uui;
                     string val = kvp.Value.ToString();
-                    if (UUI.TryParse(val, out uui))
+                    if (UGUI.TryParse(val, out uui))
                     {
-                        friends.Add(new KeyValuePair<UUI, string>(uui, GetSecret(val)));
+                        friends.Add(new KeyValuePair<UGUI, string>(uui, GetSecret(val)));
                     }
                 }
             }
 
-            Action<UUI, List<KeyValuePair<UUI, string>>> notifyFriends;
+            Action<UGUI, List<KeyValuePair<UGUI, string>>> notifyFriends;
             if(online)
             {
                 notifyFriends = m_FriendsStatusNotifier.NotifyAsOnline;
@@ -593,7 +593,7 @@ namespace SilverSim.BackendHandlers.Robust.Friends
 
             var onlineFriends = new List<UUID>();
 
-            foreach(KeyValuePair<UUI, string> kvp in friends)
+            foreach(KeyValuePair<UGUI, string> kvp in friends)
             {
                 FriendInfo fi;
                 if(m_FriendsService.TryGetValue(principal, kvp.Key, out fi) &&
@@ -605,7 +605,7 @@ namespace SilverSim.BackendHandlers.Robust.Friends
                         onlineFriends.Add(kvp.Key.ID);
                     }
 
-                    notifyFriends(principal, new List<KeyValuePair<UUI, string>> { kvp });
+                    notifyFriends(principal, new List<KeyValuePair<UGUI, string>> { kvp });
                 }
             }
 

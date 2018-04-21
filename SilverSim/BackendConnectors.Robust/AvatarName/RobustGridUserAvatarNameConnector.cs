@@ -78,20 +78,20 @@ namespace SilverSim.BackendConnectors.Robust.AvatarName
         }
         #endregion
 
-        private UUI FromResult(Map map)
+        private UGUIWithName FromResult(Map map)
         {
-            UUI uui = new UUI(map["UserID"].ToString());
+            UGUIWithName uui = new UGUIWithName(map["UserID"].ToString());
             uui.IsAuthoritative = null != uui.HomeURI;
             return uui;
         }
 
-        public override bool TryGetValue(string firstName, string lastName, out UUI uui)
+        public override bool TryGetValue(string firstName, string lastName, out UGUIWithName uui)
         {
-            uui = default(UUI);
+            uui = default(UGUIWithName);
             return false;
         }
 
-        public override UUI this[string firstName, string lastName] 
+        public override UGUIWithName this[string firstName, string lastName] 
         { 
             get
             {
@@ -99,12 +99,12 @@ namespace SilverSim.BackendConnectors.Robust.AvatarName
             }
         }
 
-        public override List<UUI> Search(string[] names)
+        public override List<UGUIWithName> Search(string[] names)
         {
-            return new List<UUI>();
+            return new List<UGUIWithName>();
         }
 
-        public override bool TryGetValue(UUID userID, out UUI uui)
+        public override bool TryGetValue(UUID userID, out UGUIWithName uui)
         {
             Dictionary<string, string> post = new Dictionary<string, string>();
             post["UserID"] = (string)userID;
@@ -116,24 +116,24 @@ namespace SilverSim.BackendConnectors.Robust.AvatarName
             }
             if (!map.ContainsKey("result"))
             {
-                uui = default(UUI);
+                uui = default(UGUIWithName);
                 return false;
             }
             Map m = map["result"] as Map;
             if (null == m)
             {
-                uui = default(UUI);
+                uui = default(UGUIWithName);
                 return false;
             }
             uui = FromResult(m);
             return true;
         }
 
-        public override UUI this[UUID userID]
+        public override UGUIWithName this[UUID userID]
         {
             get
             {
-                UUI uui;
+                UGUIWithName uui;
                 if(!TryGetValue(userID, out uui))
                 {
                     throw new KeyNotFoundException();
@@ -142,7 +142,7 @@ namespace SilverSim.BackendConnectors.Robust.AvatarName
             }
         }
 
-        public override void Store(UUI uui)
+        public override void Store(UGUIWithName uui)
         {
             /* no action needed */
         }

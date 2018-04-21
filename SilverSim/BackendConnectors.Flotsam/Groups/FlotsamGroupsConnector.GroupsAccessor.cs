@@ -30,7 +30,7 @@ namespace SilverSim.BackendConnectors.Flotsam.Groups
 {
     public partial class FlotsamGroupsConnector : GroupsServiceInterface.IGroupsInterface
     {
-        GroupInfo IGroupsInterface.Create(UUI requestingAgent, GroupInfo group)
+        GroupInfo IGroupsInterface.Create(UGUI requestingAgent, GroupInfo group)
         {
             var m = new Map
             {
@@ -56,7 +56,7 @@ namespace SilverSim.BackendConnectors.Flotsam.Groups
             return res.ToGroupInfo(m_AvatarNameService);
         }
 
-        GroupInfo IGroupsInterface.Update(UUI requestingAgent, GroupInfo group)
+        GroupInfo IGroupsInterface.Update(UGUI requestingAgent, GroupInfo group)
         {
             var m = new Map
             {
@@ -73,12 +73,12 @@ namespace SilverSim.BackendConnectors.Flotsam.Groups
             return Groups[requestingAgent, group.ID];
         }
 
-        void IGroupsInterface.Delete(UUI requestingAgent, UGI group)
+        void IGroupsInterface.Delete(UGUI requestingAgent, UGI group)
         {
             throw new NotImplementedException();
         }
 
-        bool IGroupsInterface.TryGetValue(UUI requestingAgent, UUID groupID, out UGI ugi)
+        bool IGroupsInterface.TryGetValue(UGUI requestingAgent, UUID groupID, out UGI ugi)
         {
             var m = new Map
             {
@@ -94,7 +94,7 @@ namespace SilverSim.BackendConnectors.Flotsam.Groups
             return true;
         }
 
-        bool IGroupsInterface.ContainsKey(UUI requestingAgent, UUID groupID)
+        bool IGroupsInterface.ContainsKey(UGUI requestingAgent, UUID groupID)
         {
             var m = new Map
             {
@@ -108,7 +108,7 @@ namespace SilverSim.BackendConnectors.Flotsam.Groups
             return true;
         }
 
-        UGI IGroupsInterface.this[UUI requestingAgent, UUID groupID]
+        UGI IGroupsInterface.this[UGUI requestingAgent, UUID groupID]
         {
             get
             {
@@ -125,7 +125,7 @@ namespace SilverSim.BackendConnectors.Flotsam.Groups
             }
         }
 
-        bool IGroupsInterface.TryGetValue(UUI requestingAgent, UGI group, out GroupInfo groupInfo)
+        bool IGroupsInterface.TryGetValue(UGUI requestingAgent, UGI group, out GroupInfo groupInfo)
         {
             var m = new Map
             {
@@ -141,7 +141,7 @@ namespace SilverSim.BackendConnectors.Flotsam.Groups
             return true;
         }
 
-        bool IGroupsInterface.ContainsKey(UUI requestingAgent, UGI group)
+        bool IGroupsInterface.ContainsKey(UGUI requestingAgent, UGI group)
         {
             var m = new Map
             {
@@ -155,7 +155,7 @@ namespace SilverSim.BackendConnectors.Flotsam.Groups
             return true;
         }
 
-        GroupInfo IGroupsInterface.this[UUI requestingAgent, UGI group]
+        GroupInfo IGroupsInterface.this[UGUI requestingAgent, UGI group]
         {
             get
             {
@@ -172,7 +172,7 @@ namespace SilverSim.BackendConnectors.Flotsam.Groups
             }
         }
 
-        bool IGroupsInterface.TryGetValue(UUI requestingAgent, string groupName, out GroupInfo groupInfo)
+        bool IGroupsInterface.TryGetValue(UGUI requestingAgent, string groupName, out GroupInfo groupInfo)
         {
             var m = new Map
             {
@@ -188,7 +188,7 @@ namespace SilverSim.BackendConnectors.Flotsam.Groups
             return true;
         }
 
-        bool IGroupsInterface.ContainsKey(UUI requestingAgent, string groupName)
+        bool IGroupsInterface.ContainsKey(UGUI requestingAgent, string groupName)
         {
             var m = new Map
             {
@@ -202,7 +202,7 @@ namespace SilverSim.BackendConnectors.Flotsam.Groups
             return true;
         }
 
-        GroupInfo IGroupsInterface.this[UUI requestingAgent, string groupName]
+        GroupInfo IGroupsInterface.this[UGUI requestingAgent, string groupName]
         {
             get
             {
@@ -219,7 +219,7 @@ namespace SilverSim.BackendConnectors.Flotsam.Groups
             }
         }
 
-        List<DirGroupInfo> IGroupsInterface.GetGroupsByName(UUI requestingAgent, string query)
+        List<DirGroupInfo> IGroupsInterface.GetGroupsByName(UGUI requestingAgent, string query)
         {
             var m = new Map
             {

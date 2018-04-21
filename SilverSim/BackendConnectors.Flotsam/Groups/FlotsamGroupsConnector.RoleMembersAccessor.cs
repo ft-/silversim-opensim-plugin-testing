@@ -29,7 +29,7 @@ namespace SilverSim.BackendConnectors.Flotsam.Groups
 {
     public partial class FlotsamGroupsConnector : GroupsServiceInterface.IGroupRolemembersInterface
     {
-        bool IGroupRolemembersInterface.TryGetValue(UUI requestingAgent, UGI group, UUID roleID, UUI principal, out GroupRolemember role)
+        bool IGroupRolemembersInterface.TryGetValue(UGUI requestingAgent, UGI group, UUID roleID, UGUI principal, out GroupRolemember role)
         {
             var m = new Map
             {
@@ -58,7 +58,7 @@ namespace SilverSim.BackendConnectors.Flotsam.Groups
             return false;
         }
 
-        bool IGroupRolemembersInterface.ContainsKey(UUI requestingAgent, UGI group, UUID roleID, UUI principal)
+        bool IGroupRolemembersInterface.ContainsKey(UGUI requestingAgent, UGI group, UUID roleID, UGUI principal)
         {
             var m = new Map
             {
@@ -85,7 +85,7 @@ namespace SilverSim.BackendConnectors.Flotsam.Groups
             return false;
         }
 
-        GroupRolemember IGroupRolemembersInterface.this[UUI requestingAgent, UGI group, UUID roleID, UUI principal]
+        GroupRolemember IGroupRolemembersInterface.this[UGUI requestingAgent, UGI group, UUID roleID, UGUI principal]
         {
             get
             {
@@ -115,7 +115,7 @@ namespace SilverSim.BackendConnectors.Flotsam.Groups
             }
         }
 
-        List<GroupRolemembership> IGroupRolemembersInterface.this[UUI requestingAgent, UUI principal]
+        List<GroupRolemembership> IGroupRolemembersInterface.this[UGUI requestingAgent, UGUI principal]
         {
             get
             {
@@ -141,10 +141,10 @@ namespace SilverSim.BackendConnectors.Flotsam.Groups
             }
         }
 
-        List<GroupRolemember> IGroupRolemembersInterface.this[UUI requestingAgent, UGI group, UUID roleID] =>
+        List<GroupRolemember> IGroupRolemembersInterface.this[UGUI requestingAgent, UGI group, UUID roleID] =>
             new List<GroupRolemember>(Rolemembers[requestingAgent, group].Where(g => g.RoleID.Equals(roleID)));
 
-        List<GroupRolemember> IGroupRolemembersInterface.this[UUI requestingAgent, UGI group]
+        List<GroupRolemember> IGroupRolemembersInterface.this[UGUI requestingAgent, UGI group]
         {
             get
             {
@@ -169,7 +169,7 @@ namespace SilverSim.BackendConnectors.Flotsam.Groups
             }
         }
 
-        void IGroupRolemembersInterface.Add(UUI requestingAgent, GroupRolemember rolemember)
+        void IGroupRolemembersInterface.Add(UGUI requestingAgent, GroupRolemember rolemember)
         {
             var m = new Map
             {
@@ -180,7 +180,7 @@ namespace SilverSim.BackendConnectors.Flotsam.Groups
             FlotsamXmlRpcCall(requestingAgent, "groups.addAgentToGroupRole", m);
         }
 
-        void IGroupRolemembersInterface.Delete(UUI requestingAgent, UGI group, UUID roleID, UUI principal)
+        void IGroupRolemembersInterface.Delete(UGUI requestingAgent, UGI group, UUID roleID, UGUI principal)
         {
             var m = new Map
             {

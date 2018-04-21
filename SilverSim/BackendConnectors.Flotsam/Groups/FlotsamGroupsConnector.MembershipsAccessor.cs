@@ -28,7 +28,7 @@ namespace SilverSim.BackendConnectors.Flotsam.Groups
 {
     public partial class FlotsamGroupsConnector : GroupsServiceInterface.IGroupMembershipsInterface
     {
-        bool IGroupMembershipsInterface.TryGetValue(UUI requestingAgent, UGI group, UUI principal, out GroupMembership gmem)
+        bool IGroupMembershipsInterface.TryGetValue(UGUI requestingAgent, UGI group, UGUI principal, out GroupMembership gmem)
         {
             var m = new Map
             {
@@ -45,7 +45,7 @@ namespace SilverSim.BackendConnectors.Flotsam.Groups
             return true;
         }
 
-        bool IGroupMembershipsInterface.ContainsKey(UUI requestingAgent, UGI group, UUI principal)
+        bool IGroupMembershipsInterface.ContainsKey(UGUI requestingAgent, UGI group, UGUI principal)
         {
             var m = new Map
             {
@@ -56,7 +56,7 @@ namespace SilverSim.BackendConnectors.Flotsam.Groups
             return m != null;
         }
 
-        GroupMembership IGroupMembershipsInterface.this[UUI requestingAgent, UGI group, UUI principal]
+        GroupMembership IGroupMembershipsInterface.this[UGUI requestingAgent, UGI group, UGUI principal]
         {
             get
             {
@@ -74,7 +74,7 @@ namespace SilverSim.BackendConnectors.Flotsam.Groups
             }
         }
 
-        List<GroupMembership> IGroupMembershipsInterface.this[UUI requestingAgent, UUI principal]
+        List<GroupMembership> IGroupMembershipsInterface.this[UGUI requestingAgent, UGUI principal]
         {
             get
             {

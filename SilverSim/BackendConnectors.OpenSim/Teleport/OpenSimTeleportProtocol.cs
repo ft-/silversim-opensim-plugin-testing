@@ -196,7 +196,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
         {
             string agentUri = BuildAgentUri(destinationRegion, agent);
 #if DEBUG
-            m_Log.DebugFormat("Sending region POST to {0} for {1} ({2})", agentUri, agent.Owner.FullName, agent.Owner.ID);
+            m_Log.DebugFormat("Sending region POST to {0} for {1} ({2})", agentUri, agent.NamedOwner.FullName, agent.Owner.ID);
 #endif
             PostAgent(
                 fromSceneID,
@@ -373,7 +373,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
             uint circuitCode;
             string capsPath;
 #if DEBUG
-            m_Log.DebugFormat("Enabling simulator {0} ({1}) at {2} for {3}", destinationRegion.Name, destinationRegion.ID, destinationRegion.ServerURI, agent.Owner.FullName);
+            m_Log.DebugFormat("Enabling simulator {0} ({1}) at {2} for {3}", destinationRegion.Name, destinationRegion.ID, destinationRegion.ServerURI, agent.NamedOwner.FullName);
 #endif
             try
             {
@@ -405,7 +405,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
             {
                 if (m_TeleportThread == null)
                 {
-                    m_Log.DebugFormat("Teleport home requested for {0}", agent.Owner.FullName);
+                    m_Log.DebugFormat("Teleport home requested for {0}", agent.NamedOwner.FullName);
 
                     m_TeleportThread = ThreadManager.CreateThread(() =>
                     {
@@ -436,7 +436,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
                 }
                 else
                 {
-                    m_Log.DebugFormat("Teleport home requested for {0} not possible", agent.Owner.FullName);
+                    m_Log.DebugFormat("Teleport home requested for {0} not possible", agent.NamedOwner.FullName);
                 }
             }
             return false;
@@ -449,7 +449,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
             {
                 if (m_TeleportThread == null)
                 {
-                    m_Log.DebugFormat("Teleport to {0} requested for {1}: {2}", regionName, agent.Owner.FullName, flags.ToString());
+                    m_Log.DebugFormat("Teleport to {0} requested for {1}: {2}", regionName, agent.NamedOwner.FullName, flags.ToString());
 
                     m_TeleportThread = ThreadManager.CreateThread(() =>
                     {
@@ -498,7 +498,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
                 }
                 else
                 {
-                    m_Log.DebugFormat("Teleport to {0} requested for {1} not possible: {2}", regionName, agent.Owner.FullName, flags.ToString());
+                    m_Log.DebugFormat("Teleport to {0} requested for {1} not possible: {2}", regionName, agent.NamedOwner.FullName, flags.ToString());
                 }
             }
             return false;
@@ -512,7 +512,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
             {
                 if (m_TeleportThread == null)
                 {
-                    m_Log.DebugFormat("Teleport to {4} grid at {0},{1} requested for {2}: {3}", location.GridX, location.GridY, agent.Owner.FullName, flags.ToString(), isSameGrid ? "this" : "foreign");
+                    m_Log.DebugFormat("Teleport to {4} grid at {0},{1} requested for {2}: {3}", location.GridX, location.GridY, agent.NamedOwner.FullName, flags.ToString(), isSameGrid ? "this" : "foreign");
 
                     m_TeleportThread = ThreadManager.CreateThread(() =>
                     {
@@ -572,7 +572,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
                 }
                 else
                 {
-                    m_Log.DebugFormat("Teleport to {4} grid at {0},{1} requested for {2} not possible: {3}", location.GridX, location.GridY, agent.Owner.FullName, flags.ToString(), isSameGrid ? "this": "foreign");
+                    m_Log.DebugFormat("Teleport to {4} grid at {0},{1} requested for {2} not possible: {3}", location.GridX, location.GridY, agent.NamedOwner.FullName, flags.ToString(), isSameGrid ? "this": "foreign");
                 }
             }
 
@@ -587,7 +587,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
             {
                 if (m_TeleportThread == null)
                 {
-                    m_Log.DebugFormat("Teleport to region {0} at {3} grid requested for {1}: {2}", regionID.ToString(), agent.Owner.FullName, flags.ToString(), isSameGrid ? "this" : "foreign");
+                    m_Log.DebugFormat("Teleport to region {0} at {3} grid requested for {1}: {2}", regionID.ToString(), agent.NamedOwner.FullName, flags.ToString(), isSameGrid ? "this" : "foreign");
 
                     m_TeleportThread = ThreadManager.CreateThread(() =>
                     {
@@ -643,7 +643,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
                 }
                 else
                 {
-                    m_Log.DebugFormat("Teleport to region {0} at {3} grid requested for {1} not possible: {2}", regionID.ToString(), agent.Owner.FullName, flags.ToString(), isSameGrid ? "this" : "foreign");
+                    m_Log.DebugFormat("Teleport to region {0} at {3} grid requested for {1} not possible: {2}", regionID.ToString(), agent.NamedOwner.FullName, flags.ToString(), isSameGrid ? "this" : "foreign");
                 }
             }
 
@@ -662,7 +662,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
             agent.SendMessageIfRootAgent(teleStart, sceneInterface.ID);
 
 #if DEBUG
-            m_Log.DebugFormat("Starting teleport to {0} for {1} ({2})", regionName, agent.Owner.FullName, agent.Owner.ID);
+            m_Log.DebugFormat("Starting teleport to {0} for {1} ({2})", regionName, agent.NamedOwner.FullName, agent.Owner.ID);
 #endif
             var regionAddress = new RegionAddress(regionName);
 
@@ -711,7 +711,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
         private DestinationInfo TeleportTo_Step1_ThisGrid(SceneInterface sceneInterface, IAgent agent, string gatekeeperURI, UUID regionID, TeleportFlags flags)
         {
 #if DEBUG
-            m_Log.DebugFormat("TeleportTo_Step1_ThisGrid(RegionID): {0} ({1})", agent.Owner.FullName, agent.Owner.ID);
+            m_Log.DebugFormat("TeleportTo_Step1_ThisGrid(RegionID): {0} ({1})", agent.NamedOwner.FullName, agent.Owner.ID);
 #endif
 
             var teleStart = new TeleportStart
@@ -747,7 +747,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
         private DestinationInfo TeleportTo_Step1_ForeignGrid(SceneInterface sceneInterface, IAgent agent, string gatekeeperURI, UUID regionID, TeleportFlags flags)
         {
 #if DEBUG
-            m_Log.DebugFormat("TeleportTo_Step1_ForeignGrid(RegionID): {0} ({1})", agent.Owner.FullName, agent.Owner.ID);
+            m_Log.DebugFormat("TeleportTo_Step1_ForeignGrid(RegionID): {0} ({1})", agent.NamedOwner.FullName, agent.Owner.ID);
 #endif
 
             var teleStart = new TeleportStart
@@ -776,7 +776,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
         private DestinationInfo TeleportTo_Step1_ThisGrid(SceneInterface sceneInterface, IAgent agent, string gatekeeperURI, GridVector location, TeleportFlags flags)
         {
 #if DEBUG
-            m_Log.DebugFormat("TeleportTo_Step1_ThisGrid(Location): {0} ({1})", agent.Owner.FullName, agent.Owner.ID);
+            m_Log.DebugFormat("TeleportTo_Step1_ThisGrid(Location): {0} ({1})", agent.NamedOwner.FullName, agent.Owner.ID);
 #endif
             GridServiceInterface gridService = sceneInterface.GridService;
             var teleStart = new TeleportStart
@@ -810,7 +810,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
         private DestinationInfo TeleportTo_Step1_ForeignGrid(SceneInterface sceneInterface, IAgent agent, string gatekeeperURI, GridVector location, TeleportFlags flags)
         {
 #if DEBUG
-            m_Log.DebugFormat("TeleportTo_Step1_ForeignGrid(Location): {0} ({1})", agent.Owner.FullName, agent.Owner.ID);
+            m_Log.DebugFormat("TeleportTo_Step1_ForeignGrid(Location): {0} ({1})", agent.NamedOwner.FullName, agent.Owner.ID);
 #endif
             var teleStart = new TeleportStart
             {
@@ -854,7 +854,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
         private void TeleportTo_Step2(SceneInterface scene, IAgent agent, DestinationInfo dInfo, Vector3 position, Vector3 lookAt, TeleportFlags flags)
         {
 #if DEBUG
-            m_Log.DebugFormat("TeleportTo_Step2: {0} ({1}) to {2}@{3} ({4},{5})", agent.Owner.FullName, agent.Owner.ID, dInfo.Name, dInfo.GridURI, dInfo.Location.GridX, dInfo.Location.GridY);
+            m_Log.DebugFormat("TeleportTo_Step2: {0} ({1}) to {2}@{3} ({4},{5})", agent.NamedOwner.FullName, agent.Owner.ID, dInfo.Name, dInfo.GridURI, dInfo.Location.GridX, dInfo.Location.GridY);
 #endif
             UUID sceneID = scene.ID;
             uint actualCircuitCode;
@@ -1079,7 +1079,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
                 homeAgentUri += "homeagent/" + agent.ID;
 
 #if DEBUG
-                m_Log.DebugFormat("Sending agent POST to {0} for {1} ({2})", homeAgentUri, agent.Owner.FullName, agent.Owner.ID);
+                m_Log.DebugFormat("Sending agent POST to {0} for {1} ({2})", homeAgentUri, agent.NamedOwner.FullName, agent.Owner.ID);
 #endif
 
                 if (protoVersion < 0.2)
@@ -1175,7 +1175,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Teleport
         {
             string uri = BuildAgentUri(dInfo, agent);
 #if DEBUG
-            m_Log.DebugFormat("QueryAccess: {0} ({1}) at {2}", agent.Owner.FullName, agent.Owner.ID, uri);
+            m_Log.DebugFormat("QueryAccess: {0} ({1}) at {2}", agent.NamedOwner.FullName, agent.Owner.ID, uri);
 #endif
 
             string versionStr = string.Format("{0}.{1}", PROTOCOL_VERSION_MAJOR, PROTOCOL_VERSION_MINOR);

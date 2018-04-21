@@ -75,7 +75,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
                 m_Robust = new RobustProfileConnector(connector, url);
             }
 
-            Dictionary<UUID, string> IClassifiedsInterface.GetClassifieds(UUI user)
+            Dictionary<UUID, string> IClassifiedsInterface.GetClassifieds(UGUI user)
             {
                 Dictionary<UUID, string> res;
                 try
@@ -113,7 +113,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
                 throw new ProfileAutoDetectFailedException();
             }
 
-            bool IClassifiedsInterface.TryGetValue(UUI user, UUID id, out ProfileClassified classified)
+            bool IClassifiedsInterface.TryGetValue(UGUI user, UUID id, out ProfileClassified classified)
             {
                 try
                 {
@@ -155,7 +155,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
                 return false;
             }
 
-            bool IClassifiedsInterface.ContainsKey(UUI user, UUID id)
+            bool IClassifiedsInterface.ContainsKey(UGUI user, UUID id)
             {
                 try
                 {
@@ -196,7 +196,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
                 return false;
             }
 
-            ProfileClassified IClassifiedsInterface.this[UUI user, UUID id]
+            ProfileClassified IClassifiedsInterface.this[UGUI user, UUID id]
             {
                 get
                 {
@@ -311,7 +311,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
                 throw new ProfileAutoDetectFailedException();
             }
 
-            Dictionary<UUID, string> IPicksInterface.GetPicks(UUI user)
+            Dictionary<UUID, string> IPicksInterface.GetPicks(UGUI user)
             {
                 Dictionary<UUID, string> res;
                 try
@@ -349,7 +349,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
                 throw new ProfileAutoDetectFailedException();
             }
 
-            bool IPicksInterface.TryGetValue(UUI user, UUID id, out ProfilePick pick)
+            bool IPicksInterface.TryGetValue(UGUI user, UUID id, out ProfilePick pick)
             {
                 try
                 {
@@ -392,7 +392,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
                 return false;
             }
 
-            bool IPicksInterface.ContainsKey(UUI user, UUID id)
+            bool IPicksInterface.ContainsKey(UGUI user, UUID id)
             {
                 try
                 {
@@ -434,7 +434,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
                 return false;
             }
 
-            ProfilePick IPicksInterface.this[UUI user, UUID id]
+            ProfilePick IPicksInterface.this[UGUI user, UUID id]
             {
                 get
                 {
@@ -549,7 +549,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
                 throw new ProfileAutoDetectFailedException();
             }
 
-            bool INotesInterface.TryGetValue(UUI user, UUI target, out string notes)
+            bool INotesInterface.TryGetValue(UGUI user, UGUI target, out string notes)
             {
                 try
                 {
@@ -592,7 +592,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
                 return false;
             }
 
-            bool INotesInterface.ContainsKey(UUI user, UUI target)
+            bool INotesInterface.ContainsKey(UGUI user, UGUI target)
             {
                 try
                 {
@@ -634,7 +634,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
                 return false;
             }
 
-            string INotesInterface.this[UUI user, UUI target]
+            string INotesInterface.this[UGUI user, UGUI target]
             {
                 get
                 {
@@ -711,7 +711,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
                 }
             }
 
-            bool IUserPreferencesInterface.TryGetValue(UUI user, out ProfilePreferences prefs)
+            bool IUserPreferencesInterface.TryGetValue(UGUI user, out ProfilePreferences prefs)
             {
                 try
                 {
@@ -754,7 +754,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
                 return false;
             }
 
-            bool IUserPreferencesInterface.ContainsKey(UUI user)
+            bool IUserPreferencesInterface.ContainsKey(UGUI user)
             {
                 try
                 {
@@ -796,7 +796,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
                 return false;
             }
 
-            ProfilePreferences IUserPreferencesInterface.this[UUI user]
+            ProfilePreferences IUserPreferencesInterface.this[UGUI user]
             {
                 get
                 {
@@ -873,7 +873,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
                 }
             }
 
-            ProfileProperties IPropertiesInterface.this[UUI user]
+            ProfileProperties IPropertiesInterface.this[UGUI user]
             {
                 get
                 {
@@ -914,7 +914,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
                 }
             }
 
-            ProfileProperties IPropertiesInterface.this[UUI user, PropertiesUpdateFlags flags]
+            ProfileProperties IPropertiesInterface.this[UGUI user, PropertiesUpdateFlags flags]
             {
                 set
                 {

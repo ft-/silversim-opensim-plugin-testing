@@ -96,7 +96,7 @@ namespace SilverSim.OpenSimArchiver.InventoryArchiver
         }
 
         public static void Load(
-            UUI principal,
+            UGUI principal,
             InventoryServiceInterface inventoryService,
             AssetServiceInterface assetService,
             List<AvatarNameServiceInterface> nameServices,
@@ -225,7 +225,7 @@ namespace SilverSim.OpenSimArchiver.InventoryArchiver
         }
 
         private static UUID GetPath(
-            UUI principalID,
+            UGUI principalID,
             InventoryServiceInterface inventoryService,
             Dictionary<UUID, UUID> folders,
             string path,
@@ -278,7 +278,7 @@ namespace SilverSim.OpenSimArchiver.InventoryArchiver
 
         private static InventoryItem LoadInventoryItem(
             Stream s,
-            UUI principal,
+            UGUI principal,
             List<AvatarNameServiceInterface> nameServices)
         {
             using (XmlTextReader reader = new XmlTextReader(new ObjectXmlStreamFilter(s)))
@@ -308,7 +308,7 @@ namespace SilverSim.OpenSimArchiver.InventoryArchiver
 
         private static InventoryItem LoadInventoryItemData(
             XmlTextReader reader,
-            UUI principal,
+            UGUI principal,
             List<AvatarNameServiceInterface> nameServices)
         {
             var item = new InventoryItem
@@ -344,16 +344,13 @@ namespace SilverSim.OpenSimArchiver.InventoryArchiver
                                         string[] name = text.Substring(7).Split(' ');
                                         /* OpenSim tag version */
                                         item.Creator.ID = UUID.Zero;
-                                        item.Creator.FirstName = name[0];
-                                        if(name.Length > 1)
-                                        {
-                                            item.Creator.LastName = name[1];
-                                        }
+                                        string firstName = name[0];
+                                        string lastName = (name.Length > 1) ? name[1] : string.Empty;
 
                                         /* hope that name service knows that avatar */
                                         try
                                         {
-                                            item.Creator = nameServices.FindUUIByName(item.Creator.FirstName, item.Creator.LastName);
+                                            item.Creator = nameServices.FindUUIByName(firstName, lastName);
                                         }
                                         catch
                                         {

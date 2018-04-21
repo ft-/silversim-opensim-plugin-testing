@@ -62,8 +62,8 @@ namespace SilverSim.BackendHandlers.Robust.Groups
         {
             var grec_new = new GroupInfo();
             var ginvite = new GroupInvite();
-            UUI agent;
-            UUI requestingAgent;
+            UGUI agent;
+            UGUIWithName requestingAgent;
             string accessToken;
             try
             {
@@ -71,8 +71,8 @@ namespace SilverSim.BackendHandlers.Robust.Groups
                 grec_new.ID.GroupName = reqdata["Name"].ToString();
                 grec_new.ID.HomeURI = new Uri(reqdata["Location"].ToString(), UriKind.Absolute);
                 accessToken = reqdata["AccessToken"].ToString();
-                agent = new UUI(reqdata["AgentID"].ToString());
-                requestingAgent = new UUI(reqdata["RequestingAgentID"].ToString());
+                agent = new UGUI(reqdata["AgentID"].ToString());
+                requestingAgent = new UGUIWithName(reqdata["RequestingAgentID"].ToString());
             }
             catch
             {
@@ -143,7 +143,7 @@ namespace SilverSim.BackendHandlers.Robust.Groups
             SendBooleanResponse(req, true);
         }
 
-        private bool VerifyAccessToken(UUI requestingAgent, UGI group, string accessToken)
+        private bool VerifyAccessToken(UGUI requestingAgent, UGI group, string accessToken)
         {
             GroupMember gmem;
             try
@@ -162,12 +162,12 @@ namespace SilverSim.BackendHandlers.Robust.Groups
 
         protected override void HandleGetRoleMembers(HttpRequest req, Dictionary<string, object> reqdata)
         {
-            UUI requestingAgent = UUI.Unknown;
+            UGUI requestingAgent = UGUI.Unknown;
             UGI group = UGI.Unknown;
             string accessToken = string.Empty;
             try
             {
-                requestingAgent = new UUI(reqdata["RequestingAgentID"].ToString());
+                requestingAgent = new UGUI(reqdata["RequestingAgentID"].ToString());
                 group.ID = reqdata["GroupID"].ToString();
                 accessToken = reqdata["AccessToken"].ToString();
             }
@@ -187,12 +187,12 @@ namespace SilverSim.BackendHandlers.Robust.Groups
 
         protected override void HandleGetGroupRoles(HttpRequest req, Dictionary<string, object> reqdata)
         {
-            UUI requestingAgent = UUI.Unknown;
+            UGUI requestingAgent = UGUI.Unknown;
             UGI group = UGI.Unknown;
             string accessToken = string.Empty;
             try
             {
-                requestingAgent = new UUI(reqdata["RequestingAgentID"].ToString());
+                requestingAgent = new UGUI(reqdata["RequestingAgentID"].ToString());
                 group.ID = reqdata["GroupID"].ToString();
                 accessToken = reqdata["AccessToken"].ToString();
             }
@@ -212,12 +212,12 @@ namespace SilverSim.BackendHandlers.Robust.Groups
 
         protected override void HandleGetGroupMembers(HttpRequest req, Dictionary<string, object> reqdata)
         {
-            UUI requestingAgent = UUI.Unknown;
+            UGUI requestingAgent = UGUI.Unknown;
             UGI group = UGI.Unknown;
             string accessToken = string.Empty;
             try
             {
-                requestingAgent = new UUI(reqdata["RequestingAgentID"].ToString());
+                requestingAgent = new UGUI(reqdata["RequestingAgentID"].ToString());
                 group.ID = reqdata["GroupID"].ToString();
                 accessToken = reqdata["AccessToken"].ToString();
             }

@@ -403,7 +403,7 @@ namespace SilverSim.BackendHandlers.Robust.Grid
             rInfo.Access = (RegionAccess)access_val;
 
             if(reqdata.ContainsKey("PrincipalID") &&
-                !UUI.TryParse(reqdata["PrincipalID"].ToString(),out rInfo.AuthenticatingPrincipal))
+                !UGUI.TryParse(reqdata["PrincipalID"].ToString(),out rInfo.AuthenticatingPrincipal))
             {
                 FailureResult(req, "Invalid parameter PrincipalID");
                 return;

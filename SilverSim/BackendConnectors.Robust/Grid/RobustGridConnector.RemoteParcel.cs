@@ -32,10 +32,12 @@ namespace SilverSim.BackendConnectors.Robust.Grid
     {
         bool IRemoteParcelServiceInterface.TryGetRequestRemoteParcel(string remoteurl, ParcelID parcelid, out ParcelMetaInfo parcelInfo)
         {
-            Map structparam = new Map();
-            structparam.Add("region_handle", parcelid.Location.RegionHandle.ToString());
-            structparam.Add("x", parcelid.RegionPosX.ToString());
-            structparam.Add("y", parcelid.RegionPosY.ToString());
+            Map structparam = new Map
+            {
+                { "region_handle", parcelid.Location.RegionHandle.ToString() },
+                { "x", parcelid.RegionPosX.ToString() },
+                { "y", parcelid.RegionPosY.ToString() }
+            };
 
             var req = new XmlRpc.XmlRpcRequest
             {
@@ -75,7 +77,7 @@ namespace SilverSim.BackendConnectors.Robust.Grid
                 Flags = (ParcelFlags)p["Flags"].AsInt,
                 ID = p["GlobalID"].AsUUID,
                 Name = p["Name"].ToString(),
-                Owner = new UUI(p["OwnerID"].AsUUID),
+                Owner = new UGUI(p["OwnerID"].AsUUID),
                 SalePrice = p["SalePrice"].AsInt,
                 SnapshotID = p["SnapshotID"].AsUUID,
                 LandingPosition = p["UserLocation"].AsVector3

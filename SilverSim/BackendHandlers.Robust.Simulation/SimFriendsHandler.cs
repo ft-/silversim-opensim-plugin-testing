@@ -387,7 +387,7 @@ namespace SilverSim.BackendHandlers.Robust.Simulation
                     InventoryType = InventoryType.CallingCard,
                     Flags = 0,
 
-                    Name = gim.ToAgent.FullName,
+                    Name = agent.NamedOwner.FullName,
                     Description = ""
                 };
                 item.SaleInfo.Price = 10;

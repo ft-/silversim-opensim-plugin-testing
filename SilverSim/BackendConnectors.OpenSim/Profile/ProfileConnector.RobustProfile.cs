@@ -39,7 +39,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
                 m_Uri = uri;
             }
 
-            Dictionary<UUID, string> IClassifiedsInterface.GetClassifieds(UUI user)
+            Dictionary<UUID, string> IClassifiedsInterface.GetClassifieds(UGUI user)
             {
                 var data = new Dictionary<UUID, string>();
                 var m = new Map
@@ -54,7 +54,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
                 return data;
             }
 
-            bool IClassifiedsInterface.TryGetValue(UUI user, UUID id, out ProfileClassified classified)
+            bool IClassifiedsInterface.TryGetValue(UGUI user, UUID id, out ProfileClassified classified)
             {
                 try
                 {
@@ -66,7 +66,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
                     classified = new ProfileClassified
                     {
                         ClassifiedID = id,
-                        Creator = new UUI(reslist["CreatorId"].AsUUID),
+                        Creator = new UGUI(reslist["CreatorId"].AsUUID),
                         CreationDate = Date.UnixTimeToDateTime(reslist["CreationDate"].AsULong),
                         ExpirationDate = Date.UnixTimeToDateTime(reslist["ExpirationDate"].AsULong),
                         Category = reslist["Category"].AsInt,
@@ -90,7 +90,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
                 }
             }
 
-            bool IClassifiedsInterface.ContainsKey(UUI user, UUID id)
+            bool IClassifiedsInterface.ContainsKey(UGUI user, UUID id)
             {
                 try
                 {
@@ -107,7 +107,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
                 }
             }
 
-            ProfileClassified IClassifiedsInterface.this[UUI user, UUID id]
+            ProfileClassified IClassifiedsInterface.this[UGUI user, UUID id]
             {
                 get
                 {
@@ -152,7 +152,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
                 RPC.DoJson20RpcRequest(m_Uri, "classified_delete", (string)UUID.Random, m, m_Connector.TimeoutMs);
             }
 
-            Dictionary<UUID, string> IPicksInterface.GetPicks(UUI user)
+            Dictionary<UUID, string> IPicksInterface.GetPicks(UGUI user)
             {
                 var data = new Dictionary<UUID, string>();
                 var m = new Map
@@ -167,7 +167,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
                 return data;
             }
 
-            bool IPicksInterface.TryGetValue(UUI user, UUID id, out ProfilePick pick)
+            bool IPicksInterface.TryGetValue(UGUI user, UUID id, out ProfilePick pick)
             {
                 try
                 {
@@ -207,7 +207,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
                 }
             }
 
-            bool IPicksInterface.ContainsKey(UUI user, UUID id)
+            bool IPicksInterface.ContainsKey(UGUI user, UUID id)
             {
                 try
                 {
@@ -225,7 +225,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
                 }
             }
 
-            ProfilePick IPicksInterface.this[UUI user, UUID id]
+            ProfilePick IPicksInterface.this[UGUI user, UUID id]
             {
                 get
                 {
@@ -290,7 +290,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
                 RPC.DoJson20RpcRequest(m_Uri, "picks_delete", (string)UUID.Random, m, m_Connector.TimeoutMs);
             }
 
-            bool INotesInterface.TryGetValue(UUI user, UUI target, out string notes)
+            bool INotesInterface.TryGetValue(UGUI user, UGUI target, out string notes)
             {
                 try
                 {
@@ -310,7 +310,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
                 }
             }
 
-            bool INotesInterface.ContainsKey(UUI user, UUI target)
+            bool INotesInterface.ContainsKey(UGUI user, UGUI target)
             {
                 try
                 {
@@ -328,7 +328,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
                 }
             }
 
-            string INotesInterface.this[UUI user, UUI target]
+            string INotesInterface.this[UGUI user, UGUI target]
             {
                 get
                 {
@@ -352,7 +352,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
                 }
             }
 
-            bool IUserPreferencesInterface.TryGetValue(UUI user, out ProfilePreferences prefs)
+            bool IUserPreferencesInterface.TryGetValue(UGUI user, out ProfilePreferences prefs)
             {
                 try
                 {
@@ -376,7 +376,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
                 }
             }
 
-            bool IUserPreferencesInterface.ContainsKey(UUI user)
+            bool IUserPreferencesInterface.ContainsKey(UGUI user)
             {
                 try
                 {
@@ -393,7 +393,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
                 }
             }
 
-            ProfilePreferences IUserPreferencesInterface.this[UUI user]
+            ProfilePreferences IUserPreferencesInterface.this[UGUI user]
             {
                 get
                 {
@@ -421,7 +421,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
                 }
             }
 
-            ProfileProperties IPropertiesInterface.this[UUI user]
+            ProfileProperties IPropertiesInterface.this[UGUI user]
             {
                 get
                 {
@@ -433,7 +433,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
                     return new ProfileProperties
                     {
                         User = user,
-                        Partner = new UUI(reslist["PartnerId"].AsUUID),
+                        Partner = new UGUI(reslist["PartnerId"].AsUUID),
                         PublishProfile = (ABoolean)reslist["PublishProfile"],
                         PublishMature = (ABoolean)reslist["PublishMature"],
                         WebUrl = reslist["WebUrl"].ToString(),
@@ -450,7 +450,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
                 }
             }
 
-            ProfileProperties IPropertiesInterface.this[UUI user, PropertiesUpdateFlags flags]
+            ProfileProperties IPropertiesInterface.this[UGUI user, PropertiesUpdateFlags flags]
             {
                 set
                 {

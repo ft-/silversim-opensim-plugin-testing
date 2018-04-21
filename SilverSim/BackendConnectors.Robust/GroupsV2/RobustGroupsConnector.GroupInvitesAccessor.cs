@@ -35,21 +35,21 @@ namespace SilverSim.BackendConnectors.Robust.GroupsV2
         {
             public int TimeoutMs = 20000;
             private readonly string m_Uri;
-            private readonly Func<UUI, string> m_GetGroupsAgentID;
+            private readonly Func<UGUI, string> m_GetGroupsAgentID;
 
-            public InvitesAccessor(string uri, Func<UUI, string> getGroupsAgentID)
+            public InvitesAccessor(string uri, Func<UGUI, string> getGroupsAgentID)
             {
                 m_Uri = uri;
                 m_GetGroupsAgentID = getGroupsAgentID;
             }
 
-            public bool ContainsKey(UUI requestingAgent, UUID groupInviteID)
+            public bool ContainsKey(UGUI requestingAgent, UUID groupInviteID)
             {
                 GroupInvite inv;
                 return TryGetValue(requestingAgent, groupInviteID, out inv);
             }
 
-            public bool TryGetValue(UUI requestingAgent, UUID groupInviteID, out GroupInvite gi)
+            public bool TryGetValue(UGUI requestingAgent, UUID groupInviteID, out GroupInvite gi)
             {
                 var post = new Dictionary<string, string>
                 {
@@ -85,12 +85,12 @@ namespace SilverSim.BackendConnectors.Robust.GroupsV2
                     ID = resultMap["InviteID"].AsUUID,
                     Group = new UGI(resultMap["GroupID"].AsUUID),
                     RoleID = resultMap["RoleID"].AsUUID,
-                    Principal = new UUI(resultMap["AgentID"].AsUUID)
+                    Principal = new UGUI(resultMap["AgentID"].AsUUID)
                 };
                 return true;
             }
 
-            public GroupInvite this[UUI requestingAgent, UUID groupInviteID]
+            public GroupInvite this[UGUI requestingAgent, UUID groupInviteID]
             {
                 get
                 {
@@ -105,22 +105,22 @@ namespace SilverSim.BackendConnectors.Robust.GroupsV2
 
             bool IGroupInvitesInterface.DoesSupportListGetters => false;
 
-            public List<GroupInvite> this[UUI requestingAgent, UGI group, UUID roleID, UUI principal]
+            public List<GroupInvite> this[UGUI requestingAgent, UGI group, UUID roleID, UGUI principal]
             {
                 get { throw new NotSupportedException(); }
             }
 
-            public List<GroupInvite> this[UUI requestingAgent, UUI principal]
+            public List<GroupInvite> this[UGUI requestingAgent, UGUI principal]
             {
                 get { throw new NotSupportedException(); }
             }
 
-            public List<GroupInvite> GetByGroup(UUI requestingAgent, UGI group)
+            public List<GroupInvite> GetByGroup(UGUI requestingAgent, UGI group)
             {
                 throw new NotSupportedException();
             }
 
-            public void Add(UUI requestingAgent, GroupInvite invite)
+            public void Add(UGUI requestingAgent, GroupInvite invite)
             {
                 var post = new Dictionary<string, string>
                 {
@@ -135,7 +135,7 @@ namespace SilverSim.BackendConnectors.Robust.GroupsV2
                 BooleanResponseRequest(m_Uri, post, false, TimeoutMs);
             }
 
-            public void Delete(UUI requestingAgent, UUID inviteID)
+            public void Delete(UGUI requestingAgent, UUID inviteID)
             {
                 var post = new Dictionary<string, string>
                 {

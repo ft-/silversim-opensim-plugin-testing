@@ -90,10 +90,10 @@ namespace SilverSim.BackendHandlers.Robust.Groups
 
         private void HandleFindGroups(HttpRequest req, Dictionary<string, object> reqdata)
         {
-            UUI requestingAgent;
+            UGUI requestingAgent;
             try
             {
-                requestingAgent = new UUI(reqdata["RequestingAgentID"].ToString());
+                requestingAgent = new UGUI(reqdata["RequestingAgentID"].ToString());
             }
             catch
             {
@@ -149,15 +149,15 @@ namespace SilverSim.BackendHandlers.Robust.Groups
 
         private void HandleAddAgentToGroup(HttpRequest req, Dictionary<string, object> reqdata)
         {
-            UUI requestingAgentID;
-            UUI agentID;
+            UGUI requestingAgentID;
+            UGUI agentID;
             UUID groupID;
             UUID roleID;
             string accessToken;
             try
             {
-                requestingAgentID = new UUI(reqdata["RequestingAgentID"].ToString());
-                agentID = new UUI(reqdata["AgentID"].ToString());
+                requestingAgentID = new UGUI(reqdata["RequestingAgentID"].ToString());
+                agentID = new UGUI(reqdata["AgentID"].ToString());
                 groupID = reqdata["GroupID"].ToString();
                 roleID = reqdata["RoleID"].ToString();
             }
@@ -207,12 +207,12 @@ namespace SilverSim.BackendHandlers.Robust.Groups
 
         private void HandleGetMembership(HttpRequest req, Dictionary<string, object> reqdata)
         {
-            UUI requestingAgentID;
-            UUI agentID;
+            UGUI requestingAgentID;
+            UGUI agentID;
             try
             {
-                requestingAgentID = new UUI(reqdata["RequestingAgentID"].ToString());
-                agentID = new UUI(reqdata["AgentID"].ToString());
+                requestingAgentID = new UGUI(reqdata["RequestingAgentID"].ToString());
+                agentID = new UGUI(reqdata["AgentID"].ToString());
             }
             catch
             {
@@ -299,14 +299,14 @@ namespace SilverSim.BackendHandlers.Robust.Groups
 
         private void HandleUpdateMembership(HttpRequest req, Dictionary<string, object> reqdata)
         {
-            UUI requestingAgent;
-            UUI agent;
+            UGUI requestingAgent;
+            UGUI agent;
             UUID groupID;
 
             try
             {
-                requestingAgent = new UUI(reqdata["RequestingAgentID"].ToString());
-                agent = new UUI(reqdata["AgentID"].ToString());
+                requestingAgent = new UGUI(reqdata["RequestingAgentID"].ToString());
+                agent = new UGUI(reqdata["AgentID"].ToString());
                 groupID = reqdata["GroupID"].ToString();
             }
             catch
@@ -347,13 +347,13 @@ namespace SilverSim.BackendHandlers.Robust.Groups
 
         private void HandleRemoveAgentFromGroup(HttpRequest req, Dictionary<string, object> reqdata)
         {
-            UUI requestingAgentID;
-            UUI agentID;
+            UGUI requestingAgentID;
+            UGUI agentID;
             UUID groupID;
             try
             {
-                requestingAgentID = new UUI(reqdata["RequestingAgentID"].ToString());
-                agentID = new UUI(reqdata["AgentID"].ToString());
+                requestingAgentID = new UGUI(reqdata["RequestingAgentID"].ToString());
+                agentID = new UGUI(reqdata["AgentID"].ToString());
                 groupID = reqdata["GroupID"].ToString();
             }
             catch
@@ -406,13 +406,13 @@ namespace SilverSim.BackendHandlers.Robust.Groups
 
         private void HandleSetActiveGroup(HttpRequest req, Dictionary<string, object> reqdata)
         {
-            UUI requestingAgentID;
-            UUI agentID;
+            UGUI requestingAgentID;
+            UGUI agentID;
             UUID groupID;
             try
             {
-                requestingAgentID = new UUI(reqdata["RequestingAgentID"].ToString());
-                agentID = new UUI(reqdata["AgentID"].ToString());
+                requestingAgentID = new UGUI(reqdata["RequestingAgentID"].ToString());
+                agentID = new UGUI(reqdata["AgentID"].ToString());
                 groupID = reqdata["GroupID"].ToString();
             }
             catch
@@ -458,14 +458,14 @@ namespace SilverSim.BackendHandlers.Robust.Groups
 
         private void HandleSetActiveRole(HttpRequest req, Dictionary<string, object> reqdata)
         {
-            UUI requestingAgentID;
-            UUI agentID;
+            UGUI requestingAgentID;
+            UGUI agentID;
             UUID groupID;
             UUID roleID;
             try
             {
-                requestingAgentID = new UUI(reqdata["RequestingAgentID"].ToString());
-                agentID = new UUI(reqdata["AgentID"].ToString());
+                requestingAgentID = new UGUI(reqdata["RequestingAgentID"].ToString());
+                agentID = new UGUI(reqdata["AgentID"].ToString());
                 groupID = reqdata["GroupID"].ToString();
                 roleID = reqdata["RoleID"].ToString();
             }
@@ -527,15 +527,15 @@ namespace SilverSim.BackendHandlers.Robust.Groups
 
         private void HandleInviteAdd(HttpRequest req, Dictionary<string, object> reqdata)
         {
-            UUI requestingAgentID;
+            UGUI requestingAgentID;
             var invite = new GroupInvite();
             try
             {
-                requestingAgentID = new UUI(reqdata["RequestingAgentID"].ToString());
+                requestingAgentID = new UGUI(reqdata["RequestingAgentID"].ToString());
                 invite.ID = reqdata["InviteID"].ToString();
                 invite.Group.ID = reqdata["GroupID"].ToString();
                 invite.RoleID = reqdata["RoleID"].ToString();
-                invite.Principal = new UUI(reqdata["AgentID"].ToString());
+                invite.Principal = new UGUI(reqdata["AgentID"].ToString());
             }
             catch
             {
@@ -557,12 +557,12 @@ namespace SilverSim.BackendHandlers.Robust.Groups
 
         private void HandleInviteGet(HttpRequest req, Dictionary<string, object> reqdata)
         {
-            UUI requestingAgentID;
+            UGUI requestingAgentID;
             UUID inviteID;
 
             try
             {
-                requestingAgentID = new UUI(reqdata["RequestingAgentID"].ToString());
+                requestingAgentID = new UGUI(reqdata["RequestingAgentID"].ToString());
                 inviteID = reqdata["InviteID"].ToString();
             }
             catch
@@ -592,12 +592,12 @@ namespace SilverSim.BackendHandlers.Robust.Groups
 
         private void HandleInviteDelete(HttpRequest req, Dictionary<string, object> reqdata)
         {
-            UUI requestingAgentID;
+            UGUI requestingAgentID;
             UUID inviteID;
 
             try
             {
-                requestingAgentID = new UUI(reqdata["RequestingAgentID"].ToString());
+                requestingAgentID = new UGUI(reqdata["RequestingAgentID"].ToString());
                 inviteID = reqdata["InviteID"].ToString();
             }
             catch
@@ -651,14 +651,14 @@ namespace SilverSim.BackendHandlers.Robust.Groups
 
         private void HandleAgentRoleAdd(HttpRequest req, Dictionary<string, object> reqdata)
         {
-            UUI requestingAgent;
+            UGUI requestingAgent;
             var rolemember = new GroupRolemember();
 
             try
             {
-                requestingAgent = new UUI(reqdata["RequestingAgentID"].ToString());
+                requestingAgent = new UGUI(reqdata["RequestingAgentID"].ToString());
                 rolemember.Group.ID = reqdata["GroupID"].ToString();
-                rolemember.Principal = new UUI(reqdata["AgentID"].ToString());
+                rolemember.Principal = new UGUI(reqdata["AgentID"].ToString());
                 rolemember.RoleID = reqdata["RoleID"].ToString();
             }
             catch
@@ -685,14 +685,14 @@ namespace SilverSim.BackendHandlers.Robust.Groups
 
         private void HandleAgentRoleDelete(HttpRequest req, Dictionary<string, object> reqdata)
         {
-            UUI requestingAgent;
+            UGUI requestingAgent;
             UUID groupID;
             UUID roleID;
-            UUI agent;
+            UGUI agent;
             try
             {
-                requestingAgent = new UUI(reqdata["RequestingAgentID"].ToString());
-                agent = new UUI(reqdata["AgentID"].ToString());
+                requestingAgent = new UGUI(reqdata["RequestingAgentID"].ToString());
+                agent = new UGUI(reqdata["AgentID"].ToString());
                 groupID = reqdata["GroupID"].ToString();
                 roleID = reqdata["RoleID"].ToString();
             }
@@ -753,10 +753,10 @@ namespace SilverSim.BackendHandlers.Robust.Groups
         private void HandlePutRoleAdd(HttpRequest req, Dictionary<string, object> reqdata)
         {
             var role = new GroupRole();
-            UUI requestingAgentID;
+            UGUI requestingAgentID;
             try
             {
-                requestingAgentID = new UUI(reqdata["RequestingAgentID"].ToString());
+                requestingAgentID = new UGUI(reqdata["RequestingAgentID"].ToString());
                 role.ID = reqdata["RoleID"].ToString();
                 role.Group.ID = reqdata["GroupID"].ToString();
                 role.Name = reqdata["Name"].ToString();
@@ -785,11 +785,11 @@ namespace SilverSim.BackendHandlers.Robust.Groups
         private void HandlePutRoleUpdate(HttpRequest req, Dictionary<string, object> reqdata)
         {
             var role = new GroupRole();
-            UUI requestingAgentID;
+            UGUI requestingAgentID;
 
             try
             {
-                requestingAgentID = new UUI(reqdata["RequestingAgentID"].ToString());
+                requestingAgentID = new UGUI(reqdata["RequestingAgentID"].ToString());
                 role.ID = reqdata["RoleID"].ToString();
                 role.Group.ID = reqdata["GroupID"].ToString();
             }
@@ -833,14 +833,14 @@ namespace SilverSim.BackendHandlers.Robust.Groups
 
         private void HandleGetAgentRoles(HttpRequest req, Dictionary<string, object> reqdata)
         {
-            UUI requestingAgent;
+            UGUI requestingAgent;
             UUID groupID;
-            UUI agentID;
+            UGUI agentID;
             try
             {
-                requestingAgent = new UUI(reqdata["RequestingAgentID"].ToString());
+                requestingAgent = new UGUI(reqdata["RequestingAgentID"].ToString());
                 groupID = reqdata["GroupID"].ToString();
-                agentID = new UUI(reqdata["AgentID"].ToString());
+                agentID = new UGUI(reqdata["AgentID"].ToString());
             }
             catch
             {
@@ -880,13 +880,13 @@ namespace SilverSim.BackendHandlers.Robust.Groups
 
         private void HandleRemoveRole(HttpRequest req, Dictionary<string, object> reqdata)
         {
-            UUI requestingAgent;
+            UGUI requestingAgent;
             UUID groupID;
             UUID roleID;
 
             try
             {
-                requestingAgent = new UUI(reqdata["RequestingAgentID"].ToString());
+                requestingAgent = new UGUI(reqdata["RequestingAgentID"].ToString());
                 groupID = reqdata["GroupID"].ToString();
                 roleID = reqdata["RoleID"].ToString();
             }
@@ -942,10 +942,10 @@ namespace SilverSim.BackendHandlers.Robust.Groups
         {
             var gInfo = new GroupInfo();
             gInfo.ID.ID = UUID.Random;
-            UUI requestingAgentID;
+            UGUI requestingAgentID;
             try
             {
-                requestingAgentID = new UUI(reqdata["RequestingAgentID"].ToString());
+                requestingAgentID = new UGUI(reqdata["RequestingAgentID"].ToString());
                 gInfo.ID.GroupName = reqdata["Name"].ToString();
                 if(reqdata.ContainsKey("Charter"))
                 {
@@ -1008,11 +1008,11 @@ namespace SilverSim.BackendHandlers.Robust.Groups
 
         private void HandlePutGroupUpdate(HttpRequest req, Dictionary<string, object> reqdata)
         {
-            UUI requestingAgentID;
+            UGUI requestingAgentID;
             UUID groupID;
             try
             {
-                requestingAgentID = new UUI(reqdata["RequestingAgentID"].ToString());
+                requestingAgentID = new UGUI(reqdata["RequestingAgentID"].ToString());
                 groupID = reqdata["GroupID"].ToString();
             }
             catch
@@ -1089,10 +1089,10 @@ namespace SilverSim.BackendHandlers.Robust.Groups
 
         private void HandleGetNotices(HttpRequest req, Dictionary<string, object> reqdata)
         {
-            UUI requestingAgentID;
+            UGUI requestingAgentID;
             try
             {
-                requestingAgentID = new UUI(reqdata["RequestingAgentID"].ToString());
+                requestingAgentID = new UGUI(reqdata["RequestingAgentID"].ToString());
             }
             catch
             {

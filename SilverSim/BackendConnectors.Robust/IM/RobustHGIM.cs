@@ -85,7 +85,7 @@ namespace SilverSim.BackendConnectors.Robust.IM
 
         public bool Send(GridInstantMessage im)
         {
-            UUI resolved = im.ToAgent;
+            UGUI resolved = im.ToAgent;
             bool isResolved = false;
 
             foreach(AvatarNameServiceInterface avatarNameService in m_AvatarNameServices)

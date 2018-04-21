@@ -31,7 +31,7 @@ namespace SilverSim.OpenSimArchiver.Common
         public static AssetData LoadAsset(
             this TarArchiveReader reader,
             TarArchiveReader.Header hdr,
-            UUI creator)
+            UGUI creator)
         {
             var asset = new AssetData
             {

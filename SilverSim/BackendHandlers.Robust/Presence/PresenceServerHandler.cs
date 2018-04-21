@@ -156,7 +156,7 @@ namespace SilverSim.BackendHandlers.Robust.Presence
         {
             object o;
             var pInfo = new PresenceInfo();
-            if(!reqdata.TryGetValue("UserID", out o) || !UUI.TryParse(o.ToString(), out pInfo.UserID))
+            if(!reqdata.TryGetValue("UserID", out o) || !UGUI.TryParse(o.ToString(), out pInfo.UserID))
             {
                 FailureResult(httpreq);
                 return;
@@ -308,18 +308,18 @@ namespace SilverSim.BackendHandlers.Robust.Presence
                 return;
             }
             var uuids = o as List<string>;
-            var uuis = new List<UUI>();
+            var uuis = new List<UGUI>();
             foreach(string s in uuids)
             {
-                UUI uui;
-                if(UUI.TryParse(s, out uui))
+                UGUI uui;
+                if(UGUI.TryParse(s, out uui))
                 {
                     uuis.Add(uui);
                 }
             }
 
             var results = new List<PresenceInfo>();
-            foreach(UUI uui in uuis)
+            foreach(UGUI uui in uuis)
             {
                 results.AddRange(m_PresenceService[uui.ID]);
             }

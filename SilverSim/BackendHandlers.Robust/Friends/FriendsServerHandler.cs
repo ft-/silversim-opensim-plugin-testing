@@ -205,16 +205,16 @@ namespace SilverSim.BackendHandlers.Robust.Friends
             {
                 throw new FailureResultException();
             }
-            List<FriendInfo> fis = m_FriendsService[new UUI(id)];
+            List<FriendInfo> fis = m_FriendsService[new UGUI(id)];
             GetFriendsCommonHandler(req, fis);
         }
 
         private void GetFriendsStringHandler(HttpRequest req, Dictionary<string, object> reqdata)
         {
             object o;
-            UUI id;
+            UGUI id;
             if (!reqdata.TryGetValue("PRINCIPALID", out o) ||
-                !UUI.TryParse(o.ToString(), out id))
+                !UGUI.TryParse(o.ToString(), out id))
             {
                 throw new FailureResultException();
             }
@@ -226,11 +226,11 @@ namespace SilverSim.BackendHandlers.Robust.Friends
         {
             var fi = new FriendInfo();
             object o;
-            if(!reqdata.TryGetValue("PRINCIPALID", out o) || !UUI.TryParse(o.ToString(), out fi.User))
+            if(!reqdata.TryGetValue("PRINCIPALID", out o) || !UGUI.TryParse(o.ToString(), out fi.User))
             {
                 throw new FailureResultException();
             }
-            if(!reqdata.TryGetValue("Friend", out o) || !UUI.TryParse(o.ToString(), out fi.Friend))
+            if(!reqdata.TryGetValue("Friend", out o) || !UGUI.TryParse(o.ToString(), out fi.Friend))
             {
                 throw new FailureResultException();
             }
@@ -253,16 +253,16 @@ namespace SilverSim.BackendHandlers.Robust.Friends
             {
                 throw new FailureResultException();
             }
-            UUI friend;
+            UGUI friend;
             if(!reqdata.TryGetValue("FRIEND", out o) ||
-                !UUI.TryParse(o.ToString(), out friend))
+                !UGUI.TryParse(o.ToString(), out friend))
             {
                 throw new FailureResultException();
             }
 
             var fi = new FriendInfo
             {
-                User = new UUI(id),
+                User = new UGUI(id),
                 Friend = friend,
                 Secret = GetSecret(o.ToString())
             };
@@ -278,16 +278,16 @@ namespace SilverSim.BackendHandlers.Robust.Friends
 
         private void DeleteFriendStringHandler(HttpRequest req, Dictionary<string, object> reqdata)
         {
-            UUI id;
+            UGUI id;
             object o;
             if (!reqdata.TryGetValue("PRINCIPALID", out o) ||
-                !UUI.TryParse(o.ToString(), out id))
+                !UGUI.TryParse(o.ToString(), out id))
             {
                 throw new FailureResultException();
             }
-            UUI friend;
+            UGUI friend;
             if (!reqdata.TryGetValue("FRIEND", out o) ||
-                !UUI.TryParse(o.ToString(), out friend))
+                !UGUI.TryParse(o.ToString(), out friend))
             {
                 throw new FailureResultException();
             }

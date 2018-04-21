@@ -146,7 +146,7 @@ namespace SilverSim.BackendHandlers.Robust.Profile
                 throw new HttpJson20RpcHandler.JSON20RpcException(-32602, "Missing parameters");
             }
 
-            List<UUID> assetids = m_ProfileService.GetUserImageAssets(new UUI(userId));
+            List<UUID> assetids = m_ProfileService.GetUserImageAssets(new UGUI(userId));
             var resdata = new AnArray();
             foreach(UUID id in assetids)
             {
@@ -169,7 +169,7 @@ namespace SilverSim.BackendHandlers.Robust.Profile
                 throw new HttpJson20RpcHandler.JSON20RpcException(-32602, "Missing parameters");
             }
 
-            m_ProfileService.Notes[new UUI(userId), new UUI(targetId)] = notes.ToString();
+            m_ProfileService.Notes[new UGUI(userId), new UGUI(targetId)] = notes.ToString();
             return new Map
             {
                 { "UserID", userId },
@@ -187,7 +187,7 @@ namespace SilverSim.BackendHandlers.Robust.Profile
                 throw new HttpJson20RpcHandler.JSON20RpcException(-32602, "Missing UserId");
             }
 
-            return PropertiesToMap(m_ProfileService.Properties[new UUI(userId)]);
+            return PropertiesToMap(m_ProfileService.Properties[new UGUI(userId)]);
         }
 
         private IValue Json_AvatarInterestsUpdate(string method, IValue req)
@@ -199,7 +199,7 @@ namespace SilverSim.BackendHandlers.Robust.Profile
                 throw new HttpJson20RpcHandler.JSON20RpcException(-32602, "Missing UserId");
             }
 
-            ProfileProperties props = m_ProfileService.Properties[new UUI(userId)];
+            ProfileProperties props = m_ProfileService.Properties[new UGUI(userId)];
             AString stringval;
             Integer integerval;
 
@@ -223,7 +223,7 @@ namespace SilverSim.BackendHandlers.Robust.Profile
             {
                 props.Language = stringval.ToString();
             }
-            m_ProfileService.Properties[new UUI(userId), ProfileServiceInterface.PropertiesUpdateFlags.Interests] = props;
+            m_ProfileService.Properties[new UGUI(userId), ProfileServiceInterface.PropertiesUpdateFlags.Interests] = props;
             return new Map
             {
                 { "UserId", userId },
@@ -244,7 +244,7 @@ namespace SilverSim.BackendHandlers.Robust.Profile
                 throw new HttpJson20RpcHandler.JSON20RpcException(-32602, "Missing UserId");
             }
 
-            ProfileProperties props = m_ProfileService.Properties[new UUI(userId)];
+            ProfileProperties props = m_ProfileService.Properties[new UGUI(userId)];
             AString stringval;
             if(reqdata.TryGetValue("WebUrl", out stringval))
             {
@@ -267,7 +267,7 @@ namespace SilverSim.BackendHandlers.Robust.Profile
             {
                 props.FirstLifeText = stringval.ToString();
             }
-            m_ProfileService.Properties[new UUI(userId), ProfileServiceInterface.PropertiesUpdateFlags.Properties] = props;
+            m_ProfileService.Properties[new UGUI(userId), ProfileServiceInterface.PropertiesUpdateFlags.Properties] = props;
             return PropertiesToMap(props);
         }
 
@@ -280,7 +280,7 @@ namespace SilverSim.BackendHandlers.Robust.Profile
                 throw new HttpJson20RpcHandler.JSON20RpcException(-32602, "Missing creatorId");
             }
 
-            Dictionary<UUID, string> classifieds = m_ProfileService.Classifieds.GetClassifieds(new UUI(creatorId));
+            Dictionary<UUID, string> classifieds = m_ProfileService.Classifieds.GetClassifieds(new UGUI(creatorId));
             var resdata = new AnArray();
             foreach(KeyValuePair<UUID, string> kvp in classifieds)
             {
@@ -306,7 +306,7 @@ namespace SilverSim.BackendHandlers.Robust.Profile
             }
 
             string notes;
-            if(!m_ProfileService.Notes.TryGetValue(new UUI(userId), new UUI(targetId), out notes))
+            if(!m_ProfileService.Notes.TryGetValue(new UGUI(userId), new UGUI(targetId), out notes))
             {
                 notes = "";
             }
@@ -325,7 +325,7 @@ namespace SilverSim.BackendHandlers.Robust.Profile
                 throw new HttpJson20RpcHandler.JSON20RpcException(-32602, "Missing creatorId");
             }
 
-            Dictionary<UUID, string> picks = m_ProfileService.Picks.GetPicks(new UUI(creatorId));
+            Dictionary<UUID, string> picks = m_ProfileService.Picks.GetPicks(new UGUI(creatorId));
             var resdata = new AnArray();
             foreach(KeyValuePair<UUID, string> kvp in picks)
             {
@@ -371,12 +371,12 @@ namespace SilverSim.BackendHandlers.Robust.Profile
             }
 
             ProfileClassified classified;
-            if(!m_ProfileService.Classifieds.TryGetValue(new UUI(creatorID), classifiedID, out classified))
+            if(!m_ProfileService.Classifieds.TryGetValue(new UGUI(creatorID), classifiedID, out classified))
             {
                 classified = new ProfileClassified
                 {
                     ClassifiedID = classifiedID,
-                    Creator = new UUI(creatorID)
+                    Creator = new UGUI(creatorID)
                 };
             }
 
@@ -460,7 +460,7 @@ namespace SilverSim.BackendHandlers.Robust.Profile
             ProfileClassified classified;
             try
             {
-                classified = m_ProfileService.Classifieds[UUI.Unknown, classifiedId];
+                classified = m_ProfileService.Classifieds[UGUI.Unknown, classifiedId];
             }
             catch
             {
@@ -483,7 +483,7 @@ namespace SilverSim.BackendHandlers.Robust.Profile
             ProfilePick pick;
             try
             {
-                pick = m_ProfileService.Picks[new UUI(creatorID), pickID];
+                pick = m_ProfileService.Picks[new UGUI(creatorID), pickID];
             }
             catch(Exception e)
             {
@@ -523,12 +523,12 @@ namespace SilverSim.BackendHandlers.Robust.Profile
                 throw new HttpJson20RpcHandler.JSON20RpcException(-32602, "Missing PickId");
             }
             ProfilePick pick;
-            if(!m_ProfileService.Picks.TryGetValue(new UUI(creatorID), pickID, out pick))
+            if(!m_ProfileService.Picks.TryGetValue(new UGUI(creatorID), pickID, out pick))
             {
                 pick = new ProfilePick
                 {
                     PickID = pickID,
-                    Creator = new UUI(creatorID)
+                    Creator = new UGUI(creatorID)
                 };
             }
 
@@ -599,11 +599,11 @@ namespace SilverSim.BackendHandlers.Robust.Profile
             }
 
             ProfilePreferences prefs;
-            if(!m_ProfileService.Preferences.TryGetValue(new UUI(id), out prefs))
+            if(!m_ProfileService.Preferences.TryGetValue(new UGUI(id), out prefs))
             {
                 prefs = new ProfilePreferences
                 {
-                    User = new UUI(id),
+                    User = new UGUI(id),
                     Visible = true,
                     IMviaEmail = false
                 };
@@ -632,11 +632,11 @@ namespace SilverSim.BackendHandlers.Robust.Profile
             }
 
             ProfilePreferences prefs;
-            if (!m_ProfileService.Preferences.TryGetValue(new UUI(id), out prefs))
+            if (!m_ProfileService.Preferences.TryGetValue(new UGUI(id), out prefs))
             {
                 prefs = new ProfilePreferences
                 {
-                    User = new UUI(id),
+                    User = new UGUI(id),
                     Visible = true,
                     IMviaEmail = false
                 };
@@ -691,7 +691,7 @@ namespace SilverSim.BackendHandlers.Robust.Profile
             }
 
             ProfilePreferences prefs;
-            if (!m_ProfileService.Preferences.TryGetValue(new UUI(avatarid), out prefs))
+            if (!m_ProfileService.Preferences.TryGetValue(new UGUI(avatarid), out prefs))
             {
                 prefs = new ProfilePreferences();
                 prefs.User.ID = avatarid;
@@ -719,7 +719,7 @@ namespace SilverSim.BackendHandlers.Robust.Profile
             }
 
             ProfilePreferences prefs;
-            if(!m_ProfileService.Preferences.TryGetValue(new UUI(avatarid), out prefs))
+            if(!m_ProfileService.Preferences.TryGetValue(new UGUI(avatarid), out prefs))
             {
                 prefs = new ProfilePreferences();
                 prefs.User.ID = avatarid;
@@ -730,7 +730,7 @@ namespace SilverSim.BackendHandlers.Robust.Profile
             {
                 prefs.IMviaEmail = ToBoolean(structParam["imViaEmail"]);
                 prefs.Visible = ToBoolean(structParam["visible"]);
-                m_ProfileService.Preferences[new UUI(avatarid)] = prefs;
+                m_ProfileService.Preferences[new UGUI(avatarid)] = prefs;
                 resdata.Add("success", true);
             }
             catch(Exception e)
@@ -752,7 +752,7 @@ namespace SilverSim.BackendHandlers.Robust.Profile
             }
 
             var resdata = new Map();
-            ProfileProperties props = m_ProfileService.Properties[new UUI(avatarid)];
+            ProfileProperties props = m_ProfileService.Properties[new UGUI(avatarid)];
             try
             {
                 props.WantToMask = structParam["wantmask"].AsUInt;
@@ -760,7 +760,7 @@ namespace SilverSim.BackendHandlers.Robust.Profile
                 props.SkillsMask = structParam["skillsmask"].AsUInt;
                 props.SkillsText = structParam["skillstext"].ToString();
                 props.Language = structParam["languages"].ToString();
-                m_ProfileService.Properties[new UUI(avatarid), ProfileServiceInterface.PropertiesUpdateFlags.Interests] = props;
+                m_ProfileService.Properties[new UGUI(avatarid), ProfileServiceInterface.PropertiesUpdateFlags.Interests] = props;
                 resdata.Add("success", true);
             }
             catch(Exception e)
@@ -789,7 +789,7 @@ namespace SilverSim.BackendHandlers.Robust.Profile
             {
                 try
                 {
-                    m_ProfileService.Notes[new UUI(avatarid), new UUI(targetid)] = stringval.ToString();
+                    m_ProfileService.Notes[new UGUI(avatarid), new UGUI(targetid)] = stringval.ToString();
                     resdata.Add("success", true);
                 }
                 catch(Exception e)
@@ -801,7 +801,7 @@ namespace SilverSim.BackendHandlers.Robust.Profile
             {
                 try
                 {
-                    m_ProfileService.Notes[new UUI(avatarid), new UUI(targetid)] = string.Empty;
+                    m_ProfileService.Notes[new UGUI(avatarid), new UGUI(targetid)] = string.Empty;
                     resdata.Add("success", true);
                 }
                 catch (Exception e)
@@ -822,7 +822,7 @@ namespace SilverSim.BackendHandlers.Robust.Profile
                 throw new XmlRpc.XmlRpcFaultException(-32602, "Missing parameter");
             }
 
-            ProfileProperties props = m_ProfileService.Properties[new UUI(avatarid)];
+            ProfileProperties props = m_ProfileService.Properties[new UGUI(avatarid)];
             var resdata = new Map
             {
                 { "Partner", props.Partner.ID },
@@ -854,7 +854,7 @@ namespace SilverSim.BackendHandlers.Robust.Profile
             ProfileProperties props;
             try
             {
-                props = m_ProfileService.Properties[new UUI(avatarid)];
+                props = m_ProfileService.Properties[new UGUI(avatarid)];
             }
             catch
             {
@@ -869,7 +869,7 @@ namespace SilverSim.BackendHandlers.Robust.Profile
                 props.AboutText = structParam["AboutText"].ToString();
                 props.FirstLifeImageID = structParam["FirstLifeImage"].AsUUID;
                 props.FirstLifeText = structParam["FirstLifeAboutText"].ToString();
-                m_ProfileService.Properties[new UUI(avatarid), ProfileServiceInterface.PropertiesUpdateFlags.Properties] = props;
+                m_ProfileService.Properties[new UGUI(avatarid), ProfileServiceInterface.PropertiesUpdateFlags.Properties] = props;
                 resdata.Add("success", true);
             }
             catch(Exception e)
@@ -889,7 +889,7 @@ namespace SilverSim.BackendHandlers.Robust.Profile
                 throw new XmlRpc.XmlRpcFaultException(-32602, "Missing parameter");
             }
 
-            Dictionary<UUID, string> classifieds = m_ProfileService.Classifieds.GetClassifieds(new UUI(avatarid));
+            Dictionary<UUID, string> classifieds = m_ProfileService.Classifieds.GetClassifieds(new UGUI(avatarid));
             var resarray = new AnArray();
             foreach(KeyValuePair<UUID, string> kvp in classifieds)
             {
@@ -921,7 +921,7 @@ namespace SilverSim.BackendHandlers.Robust.Profile
 
             string notes;
             var resdata = new Map();
-            if(m_ProfileService.Notes.TryGetValue(new UUI(avatarid), new UUI(targetid), out notes))
+            if(m_ProfileService.Notes.TryGetValue(new UGUI(avatarid), new UGUI(targetid), out notes))
             {
                 resdata.Add("notes", notes);
                 resdata.Add("success", true);
@@ -943,7 +943,7 @@ namespace SilverSim.BackendHandlers.Robust.Profile
                 throw new XmlRpc.XmlRpcFaultException(-32602, "Missing parameter");
             }
 
-            Dictionary<UUID, string> picks = m_ProfileService.Picks.GetPicks(new UUI(avatarid));
+            Dictionary<UUID, string> picks = m_ProfileService.Picks.GetPicks(new UGUI(avatarid));
             var pickdata = new AnArray();
             foreach(KeyValuePair<UUID, string> kvp in picks)
             {
@@ -998,7 +998,7 @@ namespace SilverSim.BackendHandlers.Robust.Profile
             }
 
             ProfileClassified classified;
-            if(!m_ProfileService.Classifieds.TryGetValue(new UUI(creatorid), classifiedid, out classified))
+            if(!m_ProfileService.Classifieds.TryGetValue(new UGUI(creatorid), classifiedid, out classified))
             {
                 classified = new ProfileClassified();
                 classified.Creator.ID = creatorid;
@@ -1062,7 +1062,7 @@ namespace SilverSim.BackendHandlers.Robust.Profile
 
             ProfileClassified classified;
             var resdata = new Map();
-            if (m_ProfileService.Classifieds.TryGetValue(UUI.Unknown, classifiedid, out classified))
+            if (m_ProfileService.Classifieds.TryGetValue(UGUI.Unknown, classifiedid, out classified))
             {
                 resdata.Add("classifieduuid", classified.ClassifiedID);
                 resdata.Add("creatoruuid", classified.Creator.ID);
@@ -1100,7 +1100,7 @@ namespace SilverSim.BackendHandlers.Robust.Profile
             }
             ProfilePick pick;
             var resdata = new Map();
-            if(m_ProfileService.Picks.TryGetValue(new UUI(avatarid), pickid, out pick))
+            if(m_ProfileService.Picks.TryGetValue(new UGUI(avatarid), pickid, out pick))
             {
                 resdata.Add("pickuuid", pick.PickID);
                 resdata.Add("creatoruuid", pick.Creator.ID);
@@ -1155,7 +1155,7 @@ namespace SilverSim.BackendHandlers.Robust.Profile
                 var pick = new ProfilePick
                 {
                     PickID = structParam["pick_id"].AsUUID,
-                    Creator = new UUI(structParam["creator_id"].AsUUID),
+                    Creator = new UGUI(structParam["creator_id"].AsUUID),
                     TopPick = ToBoolean(structParam["TopPick"]),
                     Name = structParam["Name"].ToString(),
                     OriginalName = structParam["name"].ToString(),

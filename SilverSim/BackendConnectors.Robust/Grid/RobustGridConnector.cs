@@ -577,7 +577,7 @@ namespace SilverSim.BackendConnectors.Robust.Grid
                 ParcelMapTexture = map["parcelMapTexture"].AsUUID,
                 Access = (RegionAccess)(byte)map["access"].AsUInt,
                 RegionSecret = map["regionSecret"].ToString(),
-                Owner = new UUI(map["owner_uuid"].AsUUID),
+                Owner = new UGUI(map["owner_uuid"].AsUUID),
                 ProtocolVariant = RegionInfo.ProtocolVariantId.OpenSim
             };
             if (!Uri.IsWellFormedUriString(r.ServerURI, UriKind.Absolute) ||

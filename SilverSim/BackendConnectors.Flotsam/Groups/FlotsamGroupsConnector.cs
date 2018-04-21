@@ -107,7 +107,7 @@ namespace SilverSim.BackendConnectors.Flotsam.Groups
             m_AvatarNameService = new AggregatingAvatarNameService(list);
         }
 
-        protected IValue FlotsamXmlRpcCall(UUI requestingAgent, string methodName, Map structparam)
+        protected IValue FlotsamXmlRpcCall(UGUI requestingAgent, string methodName, Map structparam)
         {
             var req = new XmlRpc.XmlRpcRequest
             {
@@ -137,7 +137,7 @@ namespace SilverSim.BackendConnectors.Flotsam.Groups
             return (p.ContainsKey("results")) ? p["results"] : null /* some calls have no data */;
         }
 
-        protected IValue FlotsamXmlRpcGetCall(UUI requestingAgent, string methodName, Map structparam)
+        protected IValue FlotsamXmlRpcGetCall(UGUI requestingAgent, string methodName, Map structparam)
         {
             var req = new XmlRpc.XmlRpcRequest
             {

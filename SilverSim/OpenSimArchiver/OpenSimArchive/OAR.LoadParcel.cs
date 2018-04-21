@@ -166,7 +166,7 @@ namespace SilverSim.OpenSimArchiver.RegionArchiver
                                     break;
 
                                 case "AuthBuyerID":
-                                    pinfo.AuthBuyer = new UUI(reader.ReadElementValueAsString());
+                                    pinfo.AuthBuyer = new UGUI(reader.ReadElementValueAsString());
                                     break;
 
                                 case "Category":

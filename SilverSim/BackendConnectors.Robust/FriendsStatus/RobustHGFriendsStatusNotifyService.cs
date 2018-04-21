@@ -51,18 +51,18 @@ namespace SilverSim.BackendConnectors.Robust.FriendsStatus
             m_AvatarNameService = avatarNameService;
         }
 
-        public void NotifyAsOffline(UUI notifier, List<KeyValuePair<UUI, string>> list) => Notify(notifier, list, false);
+        public void NotifyAsOffline(UGUI notifier, List<KeyValuePair<UGUI, string>> list) => Notify(notifier, list, false);
 
-        public void NotifyAsOnline(UUI notifier, List<KeyValuePair<UUI, string>> list) => Notify(notifier, list, true);
+        public void NotifyAsOnline(UGUI notifier, List<KeyValuePair<UGUI, string>> list) => Notify(notifier, list, true);
 
-        private void Notify(UUI notifier, List<KeyValuePair<UUI, string>> list, bool isOnline)
+        private void Notify(UGUI notifier, List<KeyValuePair<UGUI, string>> list, bool isOnline)
         {
             var postvals = new Dictionary<string, string>();
             postvals.Add("METHOD", "statusnotification");
             postvals.Add("userID", notifier.ID.ToString());
             postvals.Add("online", isOnline.ToString());
             int friendcnt = 0;
-            foreach(KeyValuePair<UUI, string> kvp in list)
+            foreach(KeyValuePair<UGUI, string> kvp in list)
             {
                 postvals.Add($"friend_{friendcnt++}", $"{kvp.Key};${kvp.Value}");
             }
@@ -81,10 +81,10 @@ namespace SilverSim.BackendConnectors.Robust.FriendsStatus
                 foreach (KeyValuePair<string, IValue> kvp in res)
                 {
                     UUID id;
-                    UUI uui;
+                    UGUI uui;
                     if (kvp.Key.StartsWith("friend_") && UUID.TryParse(kvp.Value.ToString(), out id) && m_AvatarNameService.TryGetValue(id, out uui))
                     {
-                        m_Notifier.NotifyAsOnline(uui, new List<KeyValuePair<UUI, string>> { new KeyValuePair<UUI, string>(notifier, string.Empty) });
+                        m_Notifier.NotifyAsOnline(uui, new List<KeyValuePair<UGUI, string>> { new KeyValuePair<UGUI, string>(notifier, string.Empty) });
                     }
                 }
             }

@@ -33,7 +33,7 @@ namespace SilverSim.BackendConnectors.Flotsam.Groups
             ID = new UGI { ID = m["GroupID"].AsUUID, GroupName = m["Name"].ToString() },
             Charter = m["Charter"].ToString(),
             InsigniaID = m["InsigniaID"].AsUUID,
-            Founder = avatarNameService.ResolveName(new UUI(m["FounderID"].AsUUID)),
+            Founder = avatarNameService.ResolveName(new UGUI(m["FounderID"].AsUUID)),
             MembershipFee = m["MembershipFee"].AsInt,
             IsOpenEnrollment = Convert.ToBoolean(m["OpenEnrollment"].ToString()),
             IsShownInList = Convert.ToBoolean(m["ShowInList"].ToString()),
@@ -54,7 +54,7 @@ namespace SilverSim.BackendConnectors.Flotsam.Groups
             Contribution = m["Contribution"].AsInt,
             IsAcceptNotices = Convert.ToBoolean(m["AcceptNotices"].ToString()),
             SelectedRoleID = m["SelectedRoleID"].AsUUID,
-            Principal = avatarNameService.ResolveName(new UUI(m["AgentID"].AsUUID)),
+            Principal = avatarNameService.ResolveName(new UGUI(m["AgentID"].AsUUID)),
             Group = group
         };
 
@@ -64,7 +64,7 @@ namespace SilverSim.BackendConnectors.Flotsam.Groups
             Contribution = m["Contribution"].AsInt,
             IsAcceptNotices = Convert.ToBoolean(m["AcceptNotices"].ToString()),
             SelectedRoleID = m["SelectedRoleID"].AsUUID,
-            Principal = avatarNameService.ResolveName(new UUI(m["AgentID"].AsUUID)),
+            Principal = avatarNameService.ResolveName(new UGUI(m["AgentID"].AsUUID)),
             Group = new UGI { ID = m["GroupID"].AsUUID, GroupName = m["GroupName"].ToString() }
         };
 
@@ -75,12 +75,12 @@ namespace SilverSim.BackendConnectors.Flotsam.Groups
             IsAcceptNotices = Convert.ToBoolean(m["AcceptNotices"].ToString()),
             GroupTitle = m["Title"].ToString(),
             GroupPowers = (GroupPowers)ulong.Parse(m["GroupPowers"].ToString()),
-            Principal = avatarNameService.ResolveName(new UUI(m["AgentID"].AsUUID)),
+            Principal = avatarNameService.ResolveName(new UGUI(m["AgentID"].AsUUID)),
             Group = new UGI { ID = m["GroupID"].AsUUID, GroupName = m["GroupName"].ToString() },
             IsAllowPublish = Convert.ToBoolean(m["AllowPublish"].ToString()),
             Charter = m["Charter"].ToString(),
             ActiveRoleID = m["SelectedRoleID"].ToString(),
-            Founder = avatarNameService.ResolveName(new UUI(m["FounderID"].ToString())),
+            Founder = avatarNameService.ResolveName(new UGUI(m["FounderID"].ToString())),
             AccessToken = string.Empty,
             IsMaturePublish = Convert.ToBoolean(m["MaturePublish"].ToString()),
             IsOpenEnrollment = Convert.ToBoolean(m["OpenEnrollment"].ToString()),
@@ -91,7 +91,7 @@ namespace SilverSim.BackendConnectors.Flotsam.Groups
         public static GroupRolemember ToGroupRolemember(this Map m, UGI group, AvatarNameServiceInterface avatarNameService) => new GroupRolemember
         {
             RoleID = m["RoleID"].AsUUID,
-            Principal = avatarNameService.ResolveName(new UUI(m["AgentID"].AsUUID)),
+            Principal = avatarNameService.ResolveName(new UGUI(m["AgentID"].AsUUID)),
             Group = group
         };
 
@@ -100,7 +100,7 @@ namespace SilverSim.BackendConnectors.Flotsam.Groups
             RoleID = m["RoleID"].AsUUID,
             GroupTitle = m["Title"].ToString(),
             Group = group,
-            Principal = avatarNameService.ResolveName(new UUI(m["AgentID"].AsUUID))
+            Principal = avatarNameService.ResolveName(new UGUI(m["AgentID"].AsUUID))
         };
 
         public static GroupRolemembership ToGroupRolemembership(this Map m, AvatarNameServiceInterface avatarNameService) => new GroupRolemembership
@@ -108,7 +108,7 @@ namespace SilverSim.BackendConnectors.Flotsam.Groups
             RoleID = m["RoleID"].AsUUID,
             GroupTitle = m["Title"].ToString(),
             Group = new UGI(m["GroupID"].AsUUID),
-            Principal = avatarNameService.ResolveName(new UUI(m["AgentID"].AsUUID))
+            Principal = avatarNameService.ResolveName(new UGUI(m["AgentID"].AsUUID))
         };
 
         public static GroupRole ToGroupRole(this Map m, UGI group) => new GroupRole

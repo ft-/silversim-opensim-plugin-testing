@@ -138,7 +138,7 @@ namespace SilverSim.BackendConnectors.Robust.StructuredData.Agent
             /* Account */
             agentparams.Account = new UserAccount
             {
-                Principal = new UUI { ID = parms["agent_id"].AsUUID, FirstName = parms["first_name"].ToString(), LastName = parms["last_name"].ToString() },
+                Principal = new UGUIWithName { ID = parms["agent_id"].AsUUID, FirstName = parms["first_name"].ToString(), LastName = parms["last_name"].ToString() },
                 IsLocalToGrid = false,
                 UserLevel = 0
             };

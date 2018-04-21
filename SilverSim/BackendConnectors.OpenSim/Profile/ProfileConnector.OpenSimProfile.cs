@@ -119,7 +119,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
                 return true;
             }
 
-            Dictionary<UUID, string> IClassifiedsInterface.GetClassifieds(UUI user)
+            Dictionary<UUID, string> IClassifiedsInterface.GetClassifieds(UGUI user)
             {
                 var map = new Map
                 {
@@ -135,7 +135,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
                 return classifieds;
             }
 
-            bool IClassifiedsInterface.TryGetValue(UUI user, UUID id, out ProfileClassified classified)
+            bool IClassifiedsInterface.TryGetValue(UGUI user, UUID id, out ProfileClassified classified)
             {
                 IValue iv;
                 var map = new Map
@@ -152,7 +152,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
                 classified = new ProfileClassified
                 {
                     ClassifiedID = res["classifieduuid"].AsUUID,
-                    Creator = new UUI(res["creatoruuid"].AsUUID),
+                    Creator = new UGUI(res["creatoruuid"].AsUUID),
                     CreationDate = Date.UnixTimeToDateTime(res["creationdate"].AsULong),
                     ExpirationDate = Date.UnixTimeToDateTime(res["expirationdate"].AsULong),
                     Category = res["category"].AsInt,
@@ -170,7 +170,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
                 return true;
             }
 
-            bool IClassifiedsInterface.ContainsKey(UUI user, UUID id)
+            bool IClassifiedsInterface.ContainsKey(UGUI user, UUID id)
             {
                 var map = new Map
                 {
@@ -179,7 +179,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
                 return TryOpenSimXmlRpcCall("classifieds_info_query", map);
             }
 
-            ProfileClassified IClassifiedsInterface.this[UUI user, UUID id]
+            ProfileClassified IClassifiedsInterface.this[UGUI user, UUID id]
             {
                 get
                 {
@@ -223,7 +223,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
                 OpenSimXmlRpcCall("classified_delete", map);
             }
 
-            Dictionary<UUID, string> IPicksInterface.GetPicks(UUI user)
+            Dictionary<UUID, string> IPicksInterface.GetPicks(UGUI user)
             {
                 var map = new Map
                 {
@@ -242,7 +242,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
             private ProfilePick ConvertToProfilePick(Map res) => new ProfilePick
             {
                 PickID = res["pickuuid"].AsUUID,
-                Creator = new UUI(res["creatoruuid"].AsUUID),
+                Creator = new UGUI(res["creatoruuid"].AsUUID),
                 TopPick = Convert.ToBoolean(res["toppick"].ToString()),
                 ParcelID = new ParcelID(res["parceluuid"].AsUUID.GetBytes(), 0),
                 Name = res["name"].ToString(),
@@ -255,7 +255,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
                 Enabled = Convert.ToBoolean(res["enabled"].ToString())
             };
 
-            bool IPicksInterface.TryGetValue(UUI user, UUID id, out ProfilePick pick)
+            bool IPicksInterface.TryGetValue(UGUI user, UUID id, out ProfilePick pick)
             {
                 var map = new Map
                 {
@@ -273,7 +273,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
                 return true;
             }
 
-            bool IPicksInterface.ContainsKey(UUI user, UUID id)
+            bool IPicksInterface.ContainsKey(UGUI user, UUID id)
             {
                 var map = new Map
                 {
@@ -288,7 +288,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
                 return ((AnArray)iv)[0] is Map;
             }
 
-            ProfilePick IPicksInterface.this[UUI user, UUID id]
+            ProfilePick IPicksInterface.this[UGUI user, UUID id]
             {
                 get
                 {
@@ -332,7 +332,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
                 OpenSimXmlRpcCall("picks_delete", m);
             }
 
-            bool INotesInterface.TryGetValue(UUI user, UUI target, out string notes)
+            bool INotesInterface.TryGetValue(UGUI user, UGUI target, out string notes)
             {
                 var map = new Map
                 {
@@ -350,7 +350,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
                 return true;
             }
 
-            bool INotesInterface.ContainsKey(UUI user, UUI target)
+            bool INotesInterface.ContainsKey(UGUI user, UGUI target)
             {
                 var map = new Map
                 {
@@ -360,7 +360,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
                 return TryOpenSimXmlRpcCall("avatarnotesrequest", map);
             }
 
-            string INotesInterface.this[UUI user, UUI target]
+            string INotesInterface.this[UGUI user, UGUI target]
             {
                 get
                 {
@@ -384,7 +384,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
                 }
             }
 
-            bool IUserPreferencesInterface.TryGetValue(UUI user, out ProfilePreferences prefs)
+            bool IUserPreferencesInterface.TryGetValue(UGUI user, out ProfilePreferences prefs)
             {
                 var map = new Map
                 {
@@ -406,7 +406,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
                 return true;
             }
 
-            bool IUserPreferencesInterface.ContainsKey(UUI user)
+            bool IUserPreferencesInterface.ContainsKey(UGUI user)
             {
                 var map = new Map
                 {
@@ -420,7 +420,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
                 return true;
             }
 
-            ProfilePreferences IUserPreferencesInterface.this[UUI user]
+            ProfilePreferences IUserPreferencesInterface.this[UGUI user]
             {
                 get
                 {
@@ -448,7 +448,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
                 }
             }
 
-            ProfileProperties IPropertiesInterface.this[UUI user]
+            ProfileProperties IPropertiesInterface.this[UGUI user]
             {
                 get
                 {
@@ -460,7 +460,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
                     return new ProfileProperties
                     {
                         User = user,
-                        Partner = new UUI(res["Partner"].AsUUID),
+                        Partner = new UGUI(res["Partner"].AsUUID),
                         WebUrl = res["ProfileUrl"].ToString(),
                         WantToMask = res["wantmask"].AsUInt,
                         WantToText = res["wanttext"].ToString(),
@@ -475,7 +475,7 @@ namespace SilverSim.BackendConnectors.OpenSim.Profile
                 }
             }
 
-            ProfileProperties IPropertiesInterface.this[UUI user, PropertiesUpdateFlags flags]
+            ProfileProperties IPropertiesInterface.this[UGUI user, PropertiesUpdateFlags flags]
             {
                 set
                 {

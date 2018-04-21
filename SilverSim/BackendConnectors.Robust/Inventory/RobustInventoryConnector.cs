@@ -158,7 +158,7 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
         internal static InventoryFolder FolderFromMap(Map map) => new InventoryFolder
         {
             ID = map["ID"].AsUUID,
-            Owner = new UUI(map["Owner"].AsUUID),
+            Owner = new UGUI(map["Owner"].AsUUID),
             Name = map["Name"].AsString.ToString(),
             Version = map["Version"].AsInteger,
             DefaultType = (AssetType)map["Type"].AsInt,
@@ -176,7 +176,7 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
                 ParentFolderID = map["Folder"].AsUUID,
                 InventoryType = (InventoryType)map["InvType"].AsInt,
                 Name = map["Name"].AsString.ToString(),
-                Owner = new UUI(map["Owner"].AsUUID),
+                Owner = new UGUI(map["Owner"].AsUUID),
                 IsGroupOwned = string.Equals(map["GroupOwned"].ToString(), "true", StringComparison.InvariantCultureIgnoreCase)
             };
 
@@ -187,7 +187,7 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
             }
             else
             {
-                item.Creator = new UUI(map["CreatorId"].AsUUID, creatorData);
+                item.Creator = new UGUI(map["CreatorId"].AsUUID, creatorData);
             }
 
             IValue iv;
@@ -206,7 +206,7 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
             {
                 try
                 {
-                    item.Group = groupsService.Groups[UUI.Unknown, map["GroupID"].AsUUID];
+                    item.Group = groupsService.Groups[UGUI.Unknown, map["GroupID"].AsUUID];
                 }
                 catch
                 {

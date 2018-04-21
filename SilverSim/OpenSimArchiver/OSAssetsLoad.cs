@@ -63,7 +63,7 @@ namespace SilverSim.OpenSimArchiver
             }
 
             AssetServiceInterface assetService;
-            UUI owner;
+            UGUI owner;
 
             if (args.Count == 3)
             {

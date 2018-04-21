@@ -73,7 +73,7 @@ namespace SilverSim.BackendConnectors.Robust.GroupsV2
             }
         }
 
-        private string GetGroupsAgentID(UUI agent)
+        private string GetGroupsAgentID(UGUI agent)
         {
             if (m_UserAccountService == null)
             {
@@ -163,7 +163,7 @@ namespace SilverSim.BackendConnectors.Robust.GroupsV2
             }
         }
 
-        public override GroupInfo CreateGroup(UUI requestingAgent, GroupInfo ginfo, GroupPowers everyonePowers, GroupPowers ownerPowers) =>
+        public override GroupInfo CreateGroup(UGUI requestingAgent, GroupInfo ginfo, GroupPowers everyonePowers, GroupPowers ownerPowers) =>
             Groups.Create(requestingAgent, ginfo);
     }
 }

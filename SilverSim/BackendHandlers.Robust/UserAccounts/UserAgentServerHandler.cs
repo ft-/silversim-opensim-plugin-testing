@@ -145,7 +145,7 @@ namespace SilverSim.BackendHandlers.Robust.UserAccounts
             }
 
             UserAccount account;
-            UUI uui = null;
+            UGUI uui = null;
             if (m_UserAccountService.TryGetValue(UUID.Zero, first.ToString(), last.ToString(), out account))
             {
                 uui = account.Principal;
@@ -193,7 +193,7 @@ namespace SilverSim.BackendHandlers.Robust.UserAccounts
                 }
                 try
                 {
-                    m_GridUserService.LoggedOut(new UUI(userId), UUID.Zero, Vector3.Zero, Vector3.Zero);
+                    m_GridUserService.LoggedOut(new UGUI(userId), UUID.Zero, Vector3.Zero, Vector3.Zero);
                 }
                 catch
                 {
@@ -340,7 +340,7 @@ namespace SilverSim.BackendHandlers.Robust.UserAccounts
             }
 
             UserAccount account;
-            UUI uui = null;
+            UGUI uui = null;
             GridUserInfo userInfo;
             FriendInfo fInfo;
             if(m_UserAccountService.TryGetValue(UUID.Zero, toid, out account))
@@ -351,7 +351,7 @@ namespace SilverSim.BackendHandlers.Robust.UserAccounts
             {
                 uui = userInfo.User;
             }
-            else if(m_FriendsService.TryGetValue(new UUI(fromid), new UUI(toid), out fInfo))
+            else if(m_FriendsService.TryGetValue(new UGUI(fromid), new UGUI(toid), out fInfo))
             {
                 /* since we already checked that it is a local account, this must be a foreign one */
                 uui = fInfo.Friend;

@@ -48,10 +48,10 @@ namespace SilverSim.BackendHandlers.Robust.Inventory
                 AssetID = dict.GetUUID("AssetID"),
                 AssetType = (AssetType)dict.GetInt("AssetType"),
                 Name = dict.GetString("Name"),
-                Owner = new UUI(dict.GetUUID("Owner")),
+                Owner = new UGUI(dict.GetUUID("Owner")),
                 InventoryType = (InventoryType)dict.GetInt("InvType"),
                 ParentFolderID = dict.GetUUID("Folder"),
-                Creator = new UUI { ID = dict.GetUUID("CreatorId"), CreatorData = dict.GetString("CreatorData") },
+                Creator = new UGUI { ID = dict.GetUUID("CreatorId"), CreatorData = dict.GetString("CreatorData") },
                 Description = dict.GetString("Description"),
                 Group = new UGI(dict.GetUUID("GroupID")),
                 IsGroupOwned = bool.Parse(dict.GetString("GroupOwned")),
@@ -67,7 +67,7 @@ namespace SilverSim.BackendHandlers.Robust.Inventory
             item.SaleInfo.Type = (InventoryItem.SaleInfoData.SaleType)dict.GetInt("SaleType");
             if(dict.ContainsKey("LastOwner"))
             {
-                item.LastOwner = new UUI(dict.GetUUID("LastOwner"));
+                item.LastOwner = new UGUI(dict.GetUUID("LastOwner"));
             }
             return item;
         }
@@ -78,7 +78,7 @@ namespace SilverSim.BackendHandlers.Robust.Inventory
             DefaultType = (AssetType)dict.GetInt("Type"),
             Version = dict.GetInt("Version"),
             Name = dict.GetString("Name"),
-            Owner = new UUI(dict.GetUUID("Owner")),
+            Owner = new UGUI(dict.GetUUID("Owner")),
             ID = dict.GetUUID("ID")
         };
 

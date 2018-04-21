@@ -118,7 +118,7 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
 
                 var folderContent = new InventoryFolderContent
                 {
-                    Owner = new UUI(principalID),
+                    Owner = new UGUI(principalID),
                     FolderID = folderID,
                     Version = 0
                 };
@@ -242,7 +242,7 @@ namespace SilverSim.BackendConnectors.Robust.Inventory
                     {
                         var folderContent = new InventoryFolderContent
                         {
-                            Owner = new UUI(fc["OWNER"].AsUUID),
+                            Owner = new UGUI(fc["OWNER"].AsUUID),
                             FolderID = fc["FID"].AsUUID,
                             Version = fc["VERSION"].AsInt
                         };

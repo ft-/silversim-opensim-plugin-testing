@@ -35,15 +35,15 @@ namespace SilverSim.BackendConnectors.Robust.GroupsV2
         {
             public int TimeoutMs = 20000;
             private readonly string m_Uri;
-            private readonly Func<UUI, string> m_GetGroupsAgentID;
+            private readonly Func<UGUI, string> m_GetGroupsAgentID;
 
-            public GroupRolesAccessor(string uri, Func<UUI, string> getGroupsAgentID)
+            public GroupRolesAccessor(string uri, Func<UGUI, string> getGroupsAgentID)
             {
                 m_Uri = uri;
                 m_GetGroupsAgentID = getGroupsAgentID;
             }
 
-            public bool TryGetValue(UUI requestingAgent, UGI group, UUID roleID, out GroupRole groupRole)
+            public bool TryGetValue(UGUI requestingAgent, UGI group, UUID roleID, out GroupRole groupRole)
             {
                 foreach (GroupRole role in this[requestingAgent, group])
                 {
@@ -57,7 +57,7 @@ namespace SilverSim.BackendConnectors.Robust.GroupsV2
                 return false;
             }
 
-            public bool ContainsKey(UUI requestingAgent, UGI group, UUID roleID)
+            public bool ContainsKey(UGUI requestingAgent, UGI group, UUID roleID)
             {
                 foreach (GroupRole role in this[requestingAgent, group])
                 {
@@ -69,7 +69,7 @@ namespace SilverSim.BackendConnectors.Robust.GroupsV2
                 return false;
             }
 
-            public GroupRole this[UUI requestingAgent, UGI group, UUID roleID]
+            public GroupRole this[UGUI requestingAgent, UGI group, UUID roleID]
             {
                 get
                 {
@@ -82,7 +82,7 @@ namespace SilverSim.BackendConnectors.Robust.GroupsV2
                 }
             }
 
-            public List<GroupRole> this[UUI requestingAgent, UGI group]
+            public List<GroupRole> this[UGUI requestingAgent, UGI group]
             {
                 get
                 {
@@ -127,7 +127,7 @@ namespace SilverSim.BackendConnectors.Robust.GroupsV2
                 }
             }
 
-            public List<GroupRole> this[UUI requestingAgent, UGI group, UUI principal]
+            public List<GroupRole> this[UGUI requestingAgent, UGI group, UGUI principal]
             {
                 get
                 {
@@ -172,7 +172,7 @@ namespace SilverSim.BackendConnectors.Robust.GroupsV2
                 }
             }
 
-            public void Add(UUI requestingAgent, GroupRole role)
+            public void Add(UGUI requestingAgent, GroupRole role)
             {
                 Dictionary<string, string> post = role.ToPost();
                 post["RequestingAgentID"] = m_GetGroupsAgentID(requestingAgent);
@@ -181,7 +181,7 @@ namespace SilverSim.BackendConnectors.Robust.GroupsV2
                 BooleanResponseRequest(m_Uri, post, false, TimeoutMs);
             }
 
-            public void Update(UUI requestingAgent, GroupRole role)
+            public void Update(UGUI requestingAgent, GroupRole role)
             {
                 Dictionary<string, string> post = role.ToPost();
                 post["RequestingAgentID"] = m_GetGroupsAgentID(requestingAgent);
@@ -190,7 +190,7 @@ namespace SilverSim.BackendConnectors.Robust.GroupsV2
                 BooleanResponseRequest(m_Uri, post, false, TimeoutMs);
             }
 
-            public void Delete(UUI requestingAgent, UGI group, UUID roleID)
+            public void Delete(UGUI requestingAgent, UGI group, UUID roleID)
             {
                 var post = new Dictionary<string, string>
                 {

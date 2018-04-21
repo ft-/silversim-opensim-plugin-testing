@@ -75,7 +75,7 @@ namespace SilverSim.OpenSimArchiver.InventoryArchiver
                     writer.WriteNamedValue("Name", item.Name);
                     writer.WriteNamedValue("ID", item.ID);
                     writer.WriteNamedValue("InvType", (int)item.InventoryType);
-                    writer.WriteNamedValue("CreatorUUID", string.Format("ospa:n={0} {1}", item.Creator.FirstName, item.Creator.LastName));
+                    writer.WriteNamedValue("CreatorUUID", item.Creator.ID);
                     writer.WriteNamedValue("CreatorData", item.Creator.CreatorData);
                     writer.WriteNamedValue("CreationDate", item.CreationDate.AsULong);
                     writer.WriteNamedValue("Owner", item.Owner.ID);
@@ -99,7 +99,7 @@ namespace SilverSim.OpenSimArchiver.InventoryArchiver
         }
 
         public static void Save(
-            UUI principal,
+            UGUI principal,
             InventoryServiceInterface inventoryService,
             AssetServiceInterface assetService,
             List<AvatarNameServiceInterface> nameServices,
@@ -148,7 +148,7 @@ namespace SilverSim.OpenSimArchiver.InventoryArchiver
         }
 
         public static void Save(
-            UUI principal,
+            UGUI principal,
             InventoryServiceInterface inventoryService,
             AssetServiceInterface assetService,
             List<AvatarNameServiceInterface> nameServices,

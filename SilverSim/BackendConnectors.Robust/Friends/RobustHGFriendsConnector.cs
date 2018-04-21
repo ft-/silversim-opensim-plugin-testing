@@ -64,7 +64,7 @@ namespace SilverSim.BackendConnectors.Robust.Friends
             }
         }
 
-        public override bool TryGetValue(UUI user, UUI friend, out FriendInfo fInfo)
+        public override bool TryGetValue(UGUI user, UGUI friend, out FriendInfo fInfo)
         {
             var post = new Dictionary<string, string>
             {
@@ -93,7 +93,7 @@ namespace SilverSim.BackendConnectors.Robust.Friends
             return false;
         }
 
-        public override FriendInfo this[UUI user, UUI friend]
+        public override FriendInfo this[UGUI user, UGUI friend]
         {
             get
             {
@@ -106,7 +106,7 @@ namespace SilverSim.BackendConnectors.Robust.Friends
             }
         }
 
-        public override List<FriendInfo> this[UUI user] => new List<FriendInfo>();
+        public override List<FriendInfo> this[UGUI user] => new List<FriendInfo>();
 
         public override void Store(FriendInfo fi)
         {
@@ -180,7 +180,7 @@ namespace SilverSim.BackendConnectors.Robust.Friends
             }
         }
 
-        public bool ValidateFriendshipOffered(UUI user, UUI friend)
+        public bool ValidateFriendshipOffered(UGUI user, UGUI friend)
         {
             var post = new Dictionary<string, string>
             {

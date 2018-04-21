@@ -105,7 +105,7 @@ namespace SilverSim.BackendConnectors.Robust.Presence
                     presences.Add(new PresenceInfo
                     {
                         RegionID = pm["RegionID"].ToString(),
-                        UserID = new UUI(pm["UserID"].ToString())
+                        UserID = new UGUI(pm["UserID"].ToString())
                     });
                 }
                 return presences;
@@ -166,7 +166,7 @@ namespace SilverSim.BackendConnectors.Robust.Presence
                 return new PresenceInfo
                 {
                     RegionID = m["RegionID"].ToString(),
-                    UserID = new UUI(m["UserID"].ToString()),
+                    UserID = new UGUI(m["UserID"].ToString()),
                     SessionID = sessionID
                 };
             }

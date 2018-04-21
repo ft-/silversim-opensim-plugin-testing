@@ -142,7 +142,7 @@ namespace SilverSim.BackendConnectors.Robust.IM
                 {
                     BinaryBucket = m["BinaryBucket"].ToString().FromHexStringToByteArray(),
                     Dialog = (GridInstantMessageDialog)m["Dialog"].AsInt,
-                    FromAgent = new UUI { ID = m["FromAgentID"].ToString(), FullName = m["FromAgentName"].ToString() },
+                    FromAgent = new UGUIWithName { ID = m["FromAgentID"].ToString(), FullName = m["FromAgentName"].ToString() },
                     FromGroup = new UGI(m["FromAgentID"].ToString()),
                     IsFromGroup = m["FromGroup"].AsBoolean,
                     IMSessionID = m["SessionID"].ToString(),
@@ -152,7 +152,7 @@ namespace SilverSim.BackendConnectors.Robust.IM
                     Position = m["Position"].AsVector3,
                     RegionID = m["RegionID"].AsString.ToString(),
                     Timestamp = Date.UnixTimeToDateTime(m["Timestamp"].AsULong),
-                    ToAgent = new UUI(m["ToAgentID"].ToString())
+                    ToAgent = new UGUI(m["ToAgentID"].ToString())
                 };
                 ims.Add(im);
             }

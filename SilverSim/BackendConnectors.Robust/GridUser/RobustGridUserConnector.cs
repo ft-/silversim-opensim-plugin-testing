@@ -85,7 +85,7 @@ namespace SilverSim.BackendConnectors.Robust.GridUser
         {
             var info = new GridUserInfo
             {
-                User = new UUI(map["UserID"].ToString()),
+                User = new UGUI(map["UserID"].ToString()),
                 HomeRegionID = map["HomeRegionID"].ToString(),
                 HomePosition = Vector3.Parse(map["HomePosition"].ToString()),
                 HomeLookAt = Vector3.Parse(map["HomeLookAt"].ToString()),
@@ -146,10 +146,10 @@ namespace SilverSim.BackendConnectors.Robust.GridUser
             }
         }
 
-        public override bool TryGetValue(UUI userID, out GridUserInfo userInfo) =>
+        public override bool TryGetValue(UGUI userID, out GridUserInfo userInfo) =>
             TryGetUserInfo((string)userID, out userInfo);
 
-        public override GridUserInfo this[UUI userID]
+        public override GridUserInfo this[UGUI userID]
         {
             get
             {
@@ -174,12 +174,12 @@ namespace SilverSim.BackendConnectors.Robust.GridUser
             }
         }
 
-        public override void LoggedInAdd(UUI userID)
+        public override void LoggedInAdd(UGUI userID)
         {
             throw new NotSupportedException();
         }
 
-        public override void LoggedIn(UUI userID)
+        public override void LoggedIn(UGUI userID)
         {
             var post = new Dictionary<string, string>
             {
@@ -192,7 +192,7 @@ namespace SilverSim.BackendConnectors.Robust.GridUser
             }
         }
 
-        public override void LoggedOut(UUI userID, UUID lastRegionID, Vector3 lastPosition, Vector3 lastLookAt)
+        public override void LoggedOut(UGUI userID, UUID lastRegionID, Vector3 lastPosition, Vector3 lastLookAt)
         {
             var post = new Dictionary<string, string>
             {
@@ -208,7 +208,7 @@ namespace SilverSim.BackendConnectors.Robust.GridUser
             }
         }
 
-        public override void SetHome(UUI userID, UUID homeRegionID, Vector3 homePosition, Vector3 homeLookAt)
+        public override void SetHome(UGUI userID, UUID homeRegionID, Vector3 homePosition, Vector3 homeLookAt)
         {
             var post = new Dictionary<string, string>
             {
@@ -224,7 +224,7 @@ namespace SilverSim.BackendConnectors.Robust.GridUser
             }
         }
 
-        public override void SetPosition(UUI userID, UUID lastRegionID, Vector3 lastPosition, Vector3 lastLookAt)
+        public override void SetPosition(UGUI userID, UUID lastRegionID, Vector3 lastPosition, Vector3 lastLookAt)
         {
             var post = new Dictionary<string, string>
             {

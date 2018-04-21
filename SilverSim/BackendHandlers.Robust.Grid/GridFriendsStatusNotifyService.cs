@@ -56,27 +56,27 @@ namespace SilverSim.BackendHandlers.Robust.Grid
             m_PresenceService = loader.GetService<PresenceServiceInterface>(m_PresenceServiceName);
         }
 
-        public void NotifyAsOffline(UUI notifier, List<KeyValuePair<UUI, string>> list) => SendNotification(notifier, list, false);
+        public void NotifyAsOffline(UGUI notifier, List<KeyValuePair<UGUI, string>> list) => SendNotification(notifier, list, false);
 
-        public void NotifyAsOnline(UUI notifier, List<KeyValuePair<UUI, string>> list) => SendNotification(notifier, list, true);
+        public void NotifyAsOnline(UGUI notifier, List<KeyValuePair<UGUI, string>> list) => SendNotification(notifier, list, true);
 
-        private void SendNotification(UUI notifier, List<KeyValuePair<UUI, string>> list, bool isOnline)
+        private void SendNotification(UGUI notifier, List<KeyValuePair<UGUI, string>> list, bool isOnline)
         {
-            var notifytargets = new Dictionary<UUID, List<UUI>>();
-            foreach (KeyValuePair<UUI, string> id in list)
+            var notifytargets = new Dictionary<UUID, List<UGUI>>();
+            foreach (KeyValuePair<UGUI, string> id in list)
             {
                 foreach (PresenceInfo pinfo in m_PresenceService[id.Key.ID])
                 {
-                    List<UUI> notified;
+                    List<UGUI> notified;
                     if (!notifytargets.TryGetValue(pinfo.RegionID, out notified))
                     {
-                        notified = new List<UUI>();
+                        notified = new List<UGUI>();
                         notifytargets.Add(pinfo.RegionID, notified);
                     }
                 }
             }
 
-            foreach(KeyValuePair<UUID, List<UUI>> kvp in notifytargets)
+            foreach(KeyValuePair<UUID, List<UGUI>> kvp in notifytargets)
             {
                 try
                 {
@@ -89,7 +89,7 @@ namespace SilverSim.BackendHandlers.Robust.Grid
             }
         }
 
-        private void SendActualNotification(UUID regionid, UUI notifier, List<UUI> list, bool isOnline)
+        private void SendActualNotification(UUID regionid, UGUI notifier, List<UGUI> list, bool isOnline)
         {
             RegionInfo rinfo;
             if(m_GridService.TryGetValue(regionid, out rinfo))
@@ -101,7 +101,7 @@ namespace SilverSim.BackendHandlers.Robust.Grid
                 }
                 uri += "friends";
 
-                foreach (UUI id in list)
+                foreach (UGUI id in list)
                 {
                     var para = new Dictionary<string, string>
                     {

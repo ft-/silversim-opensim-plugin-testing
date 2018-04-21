@@ -30,7 +30,7 @@ namespace SilverSim.BackendConnectors.Flotsam.Groups
 {
     public partial class FlotsamGroupsConnector : GroupsServiceInterface.IGroupNoticesInterface
     {
-        List<GroupNotice> IGroupNoticesInterface.GetNotices(UUI requestingAgent, UGI group)
+        List<GroupNotice> IGroupNoticesInterface.GetNotices(UGUI requestingAgent, UGI group)
         {
             var m = new Map
             {
@@ -53,7 +53,7 @@ namespace SilverSim.BackendConnectors.Flotsam.Groups
             return notices;
         }
 
-        bool IGroupNoticesInterface.TryGetValue(UUI requestingAgent, UUID groupNoticeID, out GroupNotice notice)
+        bool IGroupNoticesInterface.TryGetValue(UGUI requestingAgent, UUID groupNoticeID, out GroupNotice notice)
         {
             var m = new Map
             {
@@ -69,7 +69,7 @@ namespace SilverSim.BackendConnectors.Flotsam.Groups
             return true;
         }
 
-        bool IGroupNoticesInterface.ContainsKey(UUI requestingAgent, UUID groupNoticeID)
+        bool IGroupNoticesInterface.ContainsKey(UGUI requestingAgent, UUID groupNoticeID)
         {
             var m = new Map
             {
@@ -79,7 +79,7 @@ namespace SilverSim.BackendConnectors.Flotsam.Groups
             return r != null;
         }
 
-        GroupNotice IGroupNoticesInterface.this[UUI requestingAgent, UUID groupNoticeID]
+        GroupNotice IGroupNoticesInterface.this[UGUI requestingAgent, UUID groupNoticeID]
         {
             get
             {
@@ -96,7 +96,7 @@ namespace SilverSim.BackendConnectors.Flotsam.Groups
             }
         }
 
-        void IGroupNoticesInterface.Add(UUI requestingAgent, GroupNotice notice)
+        void IGroupNoticesInterface.Add(UGUI requestingAgent, GroupNotice notice)
         {
 #warning TODO: Binary Bucket conversion
             var m = new Map
@@ -112,7 +112,7 @@ namespace SilverSim.BackendConnectors.Flotsam.Groups
             FlotsamXmlRpcCall(requestingAgent, "groups.addGroupNotice", m);
         }
 
-        void IGroupNoticesInterface.Delete(UUI requestingAgent, UUID groupNoticeID)
+        void IGroupNoticesInterface.Delete(UGUI requestingAgent, UUID groupNoticeID)
         {
             throw new NotImplementedException();
         }

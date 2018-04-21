@@ -37,16 +37,16 @@ namespace SilverSim.BackendConnectors.Robust.GroupsV2
             public int TimeoutMs = 20000;
             private readonly string m_Uri;
             private readonly IGroupMembershipsInterface m_MembershipsAccessor;
-            private readonly Func<UUI, string> m_GetGroupsAgentID;
+            private readonly Func<UGUI, string> m_GetGroupsAgentID;
 
-            public RoleMembersAccessor(string uri, IGroupMembershipsInterface membershipsAccessor, Func<UUI, string> getGroupsAgentID)
+            public RoleMembersAccessor(string uri, IGroupMembershipsInterface membershipsAccessor, Func<UGUI, string> getGroupsAgentID)
             {
                 m_Uri = uri;
                 m_MembershipsAccessor = membershipsAccessor;
                 m_GetGroupsAgentID = getGroupsAgentID;
             }
 
-            public bool TryGetValue(UUI requestingAgent, UGI group, UUID roleID, UUI principal, out GroupRolemember rolemem)
+            public bool TryGetValue(UGUI requestingAgent, UGI group, UUID roleID, UGUI principal, out GroupRolemember rolemem)
             {
                 foreach (GroupRolemember member in this[requestingAgent, group])
                 {
@@ -61,7 +61,7 @@ namespace SilverSim.BackendConnectors.Robust.GroupsV2
                 return false;
             }
 
-            public bool ContainsKey(UUI requestingAgent, UGI group, UUID roleID, UUI principal)
+            public bool ContainsKey(UGUI requestingAgent, UGI group, UUID roleID, UGUI principal)
             {
                 foreach (GroupRolemember member in this[requestingAgent, group])
                 {
@@ -74,7 +74,7 @@ namespace SilverSim.BackendConnectors.Robust.GroupsV2
                 return false;
             }
 
-            public GroupRolemember this[UUI requestingAgent, UGI group, UUID roleID, UUI principal]
+            public GroupRolemember this[UGUI requestingAgent, UGI group, UUID roleID, UGUI principal]
             {
                 get
                 {
@@ -87,10 +87,10 @@ namespace SilverSim.BackendConnectors.Robust.GroupsV2
                 }
             }
 
-            public List<GroupRolemember> this[UUI requestingAgent, UGI group, UUID roleID] =>
+            public List<GroupRolemember> this[UGUI requestingAgent, UGI group, UUID roleID] =>
                 new List<GroupRolemember>(this[requestingAgent, group].Where((member) => member.RoleID.Equals(roleID)));
 
-            public List<GroupRolemember> this[UUI requestingAgent, UGI group]
+            public List<GroupRolemember> this[UGUI requestingAgent, UGI group]
             {
                 get
                 {
@@ -135,7 +135,7 @@ namespace SilverSim.BackendConnectors.Robust.GroupsV2
                 }
             }
 
-            List<GroupRolemembership> GetRolememberships(UUI requestingAgent, UGI group, UUI principal)
+            List<GroupRolemembership> GetRolememberships(UGUI requestingAgent, UGI group, UGUI principal)
             {
                 var post = new Dictionary<string, string>
                 {
@@ -185,7 +185,7 @@ namespace SilverSim.BackendConnectors.Robust.GroupsV2
 
             }
 
-            public List<GroupRolemembership> this[UUI requestingAgent, UUI principal]
+            public List<GroupRolemembership> this[UGUI requestingAgent, UGUI principal]
             {
                 get
                 {
@@ -199,7 +199,7 @@ namespace SilverSim.BackendConnectors.Robust.GroupsV2
                 }
             }
 
-            public void Add(UUI requestingAgent, GroupRolemember rolemember)
+            public void Add(UGUI requestingAgent, GroupRolemember rolemember)
             {
                 Dictionary<string, string> post = rolemember.ToPost(m_GetGroupsAgentID);
                 post["GroupID"] = (string)rolemember.Group.ID;
@@ -209,7 +209,7 @@ namespace SilverSim.BackendConnectors.Robust.GroupsV2
                 BooleanResponseRequest(m_Uri, post, false, TimeoutMs);
             }
 
-            public void Delete(UUI requestingAgent, UGI group, UUID roleID, UUI principal)
+            public void Delete(UGUI requestingAgent, UGI group, UUID roleID, UGUI principal)
             {
                 var post = new Dictionary<string, string>
                 {

@@ -95,7 +95,7 @@ namespace SilverSim.BackendConnectors.Robust.Friends
             }
         }
 
-        public override bool TryGetValue(UUI user, UUI friend, out FriendInfo fInfo)
+        public override bool TryGetValue(UGUI user, UGUI friend, out FriendInfo fInfo)
         {
             foreach (FriendInfo fi in this[user])
             {
@@ -109,7 +109,7 @@ namespace SilverSim.BackendConnectors.Robust.Friends
             return false;
         }
 
-        public override FriendInfo this[UUI user, UUI friend]
+        public override FriendInfo this[UGUI user, UGUI friend]
         {
             get
             {
@@ -122,7 +122,7 @@ namespace SilverSim.BackendConnectors.Robust.Friends
             }
         }
 
-        public override List<FriendInfo> this[UUI user]
+        public override List<FriendInfo> this[UGUI user]
         {
             get
             {
@@ -154,11 +154,11 @@ namespace SilverSim.BackendConnectors.Robust.Friends
                             {
                                 /* fourth part is secret */
                                 fi.Secret = parts[3];
-                                fi.Friend = new UUI(parts[0] + ";" + parts[1] + ";" + parts[2]);
+                                fi.Friend = new UGUI(parts[0] + ";" + parts[1] + ";" + parts[2]);
                             }
                             else
                             {
-                                fi.Friend = new UUI(friend);
+                                fi.Friend = new UGUI(friend);
                             }
 
                             fi.UserGivenFlags = (FriendRightFlags)m["MyFlags"].AsInt;
@@ -210,7 +210,7 @@ namespace SilverSim.BackendConnectors.Robust.Friends
             StoreEntry(fi.User, fi.Friend, fi.Secret, fi.FriendGivenFlags);
         }
 
-        private void StoreEntry(UUI user, UUI friend, string secret, FriendRightFlags flags)
+        private void StoreEntry(UGUI user, UGUI friend, string secret, FriendRightFlags flags)
         {
             var post = new Dictionary<string, string>
             {

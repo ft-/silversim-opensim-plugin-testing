@@ -168,9 +168,9 @@ namespace SilverSim.BackendHandlers.Robust.GridUser
             }
         }
 
-        private UUI FindUser(string userID)
+        private UGUIWithName FindUser(string userID)
         {
-            var uui = new UUI(userID);
+            var uui = new UGUIWithName(userID);
             try
             {
                 UserAccount account = m_UserAccountService[UUID.Zero, uui.ID];
@@ -183,7 +183,7 @@ namespace SilverSim.BackendHandlers.Robust.GridUser
                 {
                     throw new GridUserNotFoundException();
                 }
-                return ui.User;
+                return m_AvatarNameService.ResolveName(ui.User);
             }
         }
 
@@ -236,7 +236,7 @@ namespace SilverSim.BackendHandlers.Robust.GridUser
             w.WriteEndElement();
         }
 
-        private void WriteXmlGridUserEntry(XmlTextWriter w, UUI ui, string outerTagName)
+        private void WriteXmlGridUserEntry(XmlTextWriter w, UGUIWithName ui, string outerTagName)
         {
             w.WriteStartElement(outerTagName);
             w.WriteNamedValue("UserID", (string)ui);
@@ -252,7 +252,7 @@ namespace SilverSim.BackendHandlers.Robust.GridUser
             w.WriteEndElement();
         }
 
-        private UUI CheckGetUUI(Dictionary<string, object> req, HttpRequest httpreq)
+        private UGUIWithName CheckGetUUI(Dictionary<string, object> req, HttpRequest httpreq)
         {
             try
             {
@@ -261,10 +261,10 @@ namespace SilverSim.BackendHandlers.Robust.GridUser
             catch
             {
                 /* check for avatarnames service */
-                UUI aui;
+                UGUIWithName aui;
                 try
                 {
-                    aui = m_AvatarNameService[new UUI(req["UserID"].ToString())];
+                    aui = m_AvatarNameService[new UGUIWithName(req["UserID"].ToString())];
                 }
                 catch
                 {
@@ -301,7 +301,7 @@ namespace SilverSim.BackendHandlers.Robust.GridUser
             return null;
         }
 
-        private bool WriteUserInfo(XmlTextWriter writer, UUI uui, string outertagname, bool writeNullEntry)
+        private bool WriteUserInfo(XmlTextWriter writer, UGUIWithName uui, string outertagname, bool writeNullEntry)
         {
             if (uui.HomeURI == null)
             {
@@ -352,7 +352,7 @@ namespace SilverSim.BackendHandlers.Robust.GridUser
 
         private void GetGridUserInfo(Dictionary<string, object> req, HttpRequest httpreq)
         {
-            UUI uui = CheckGetUUI(req, httpreq);
+            UGUIWithName uui = CheckGetUUI(req, httpreq);
             if(uui == null)
             {
                 return;
@@ -383,7 +383,7 @@ namespace SilverSim.BackendHandlers.Robust.GridUser
                     int index = 0;
                     foreach (string userID in userIDs)
                     {
-                        UUI uui;
+                        UGUIWithName uui;
 
                         try
                         {
@@ -393,7 +393,7 @@ namespace SilverSim.BackendHandlers.Robust.GridUser
                         {
                             try
                             {
-                                uui = m_AvatarNameService[new UUI(userID)];
+                                uui = m_AvatarNameService[new UGUIWithName(userID)];
                             }
                             catch
                             {

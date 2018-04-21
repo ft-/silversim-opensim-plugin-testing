@@ -29,13 +29,13 @@ namespace SilverSim.BackendConnectors.Flotsam.Groups
 {
     public partial class FlotsamGroupsConnector : GroupsServiceInterface.IGroupInvitesInterface
     {
-        bool IGroupInvitesInterface.ContainsKey(UUI requestingAgent, UUID groupInviteID)
+        bool IGroupInvitesInterface.ContainsKey(UGUI requestingAgent, UUID groupInviteID)
         {
             GroupInvite inv;
             return Invites.TryGetValue(requestingAgent, groupInviteID, out inv);
         }
 
-        bool IGroupInvitesInterface.TryGetValue(UUI requestingAgent, UUID groupInviteID, out GroupInvite inv)
+        bool IGroupInvitesInterface.TryGetValue(UGUI requestingAgent, UUID groupInviteID, out GroupInvite inv)
         {
             var m = new Map
             {
@@ -53,12 +53,12 @@ namespace SilverSim.BackendConnectors.Flotsam.Groups
                 ID = groupInviteID,
                 Group = new UGI(m["GroupID"].AsUUID),
                 RoleID = m["RoleID"].AsUUID,
-                Principal = m_AvatarNameService.ResolveName(new UUI(m["AgentID"].AsUUID))
+                Principal = m_AvatarNameService.ResolveName(new UGUI(m["AgentID"].AsUUID))
             };
             return true;
         }
 
-        GroupInvite IGroupInvitesInterface.this[UUI requestingAgent, UUID groupInviteID]
+        GroupInvite IGroupInvitesInterface.this[UGUI requestingAgent, UUID groupInviteID]
         {
             get
             {
@@ -73,22 +73,22 @@ namespace SilverSim.BackendConnectors.Flotsam.Groups
 
         bool IGroupInvitesInterface.DoesSupportListGetters => false;
 
-        List<GroupInvite> IGroupInvitesInterface.this[UUI requestingAgent, UGI group, UUID roleID, UUI principal]
+        List<GroupInvite> IGroupInvitesInterface.this[UGUI requestingAgent, UGI group, UUID roleID, UGUI principal]
         {
             get { throw new NotSupportedException(); }
         }
 
-        List<GroupInvite> IGroupInvitesInterface.this[UUI requestingAgent, UUI principal]
+        List<GroupInvite> IGroupInvitesInterface.this[UGUI requestingAgent, UGUI principal]
         {
             get { throw new NotSupportedException(); }
         }
 
-        List<GroupInvite> IGroupInvitesInterface.GetByGroup(UUI requestingAgent, UGI group)
+        List<GroupInvite> IGroupInvitesInterface.GetByGroup(UGUI requestingAgent, UGI group)
         {
             throw new NotSupportedException();
         }
 
-        void IGroupInvitesInterface.Add(UUI requestingAgent, GroupInvite invite)
+        void IGroupInvitesInterface.Add(UGUI requestingAgent, GroupInvite invite)
         {
             var m = new Map
             {
@@ -100,7 +100,7 @@ namespace SilverSim.BackendConnectors.Flotsam.Groups
             FlotsamXmlRpcCall(requestingAgent, "groups.addAgentToGroupInvite", m);
         }
 
-        void IGroupInvitesInterface.Delete(UUI requestingAgent, UUID inviteID)
+        void IGroupInvitesInterface.Delete(UGUI requestingAgent, UUID inviteID)
         {
             var m = new Map
             {

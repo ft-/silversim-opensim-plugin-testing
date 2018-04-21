@@ -30,7 +30,7 @@ namespace SilverSim.BackendConnectors.Flotsam.Groups
 {
     public partial class FlotsamGroupsConnector : GroupsServiceInterface.IGroupMembersInterface
     {
-        bool IGroupMembersInterface.TryGetValue(UUI requestingAgent, UGI group, UUI principal, out GroupMember gmem)
+        bool IGroupMembersInterface.TryGetValue(UGUI requestingAgent, UGI group, UGUI principal, out GroupMember gmem)
         {
             foreach (GroupMember g in Members[requestingAgent, group].Where(p => p.Principal.ID == principal.ID))
             {
@@ -41,7 +41,7 @@ namespace SilverSim.BackendConnectors.Flotsam.Groups
             return false;
         }
 
-        bool IGroupMembersInterface.ContainsKey(UUI requestingAgent, UGI group, UUI principal)
+        bool IGroupMembersInterface.ContainsKey(UGUI requestingAgent, UGI group, UGUI principal)
         {
             foreach (GroupMember g in Members[requestingAgent, group].Where(p => p.Principal.ID == principal.ID))
             {
@@ -50,7 +50,7 @@ namespace SilverSim.BackendConnectors.Flotsam.Groups
             return false;
         }
 
-        GroupMember IGroupMembersInterface.this[UUI requestingAgent, UGI group, UUI principal]
+        GroupMember IGroupMembersInterface.this[UGUI requestingAgent, UGI group, UGUI principal]
         {
             get
             {
@@ -62,7 +62,7 @@ namespace SilverSim.BackendConnectors.Flotsam.Groups
             }
         }
 
-        List<GroupMember> IGroupMembersInterface.this[UUI requestingAgent, UGI group]
+        List<GroupMember> IGroupMembersInterface.this[UGUI requestingAgent, UGI group]
         {
             get
             {
@@ -88,7 +88,7 @@ namespace SilverSim.BackendConnectors.Flotsam.Groups
             }
         }
 
-        List<GroupMember> IGroupMembersInterface.this[UUI requestingAgent, UUI principal]
+        List<GroupMember> IGroupMembersInterface.this[UGUI requestingAgent, UGUI principal]
         {
             get
             {
@@ -114,7 +114,7 @@ namespace SilverSim.BackendConnectors.Flotsam.Groups
             }
         }
 
-        GroupMember IGroupMembersInterface.Add(UUI requestingAgent, UGI group, UUI principal, UUID roleID, string accessToken)
+        GroupMember IGroupMembersInterface.Add(UGUI requestingAgent, UGI group, UGUI principal, UUID roleID, string accessToken)
         {
             var m = new Map
             {
@@ -125,12 +125,12 @@ namespace SilverSim.BackendConnectors.Flotsam.Groups
             return Members[requestingAgent, group, principal];
         }
 
-        void IGroupMembersInterface.SetContribution(UUI requestingAgent, UGI group, UUI principal, int contribution)
+        void IGroupMembersInterface.SetContribution(UGUI requestingAgent, UGI group, UGUI principal, int contribution)
         {
             throw new NotImplementedException();
         }
 
-        void IGroupMembersInterface.Update(UUI requestingAgent, UGI group, UUI principal, bool acceptNotices, bool listInProfile)
+        void IGroupMembersInterface.Update(UGUI requestingAgent, UGI group, UGUI principal, bool acceptNotices, bool listInProfile)
         {
             var m = new Map
             {
@@ -142,7 +142,7 @@ namespace SilverSim.BackendConnectors.Flotsam.Groups
             FlotsamXmlRpcCall(requestingAgent, "groups.setAgentGroupInfo", m);
         }
 
-        void IGroupMembersInterface.Delete(UUI requestingAgent, UGI group, UUI principal)
+        void IGroupMembersInterface.Delete(UGUI requestingAgent, UGI group, UGUI principal)
         {
             var m = new Map
             {

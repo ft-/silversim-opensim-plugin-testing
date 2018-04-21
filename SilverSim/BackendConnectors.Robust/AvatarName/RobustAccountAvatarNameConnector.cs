@@ -84,7 +84,7 @@ namespace SilverSim.BackendConnectors.Robust.AvatarName
         }
         #endregion
 
-        public override bool TryGetValue(string firstName, string lastName, out UUI uui)
+        public override bool TryGetValue(string firstName, string lastName, out UGUIWithName uui)
         {
             var post = new Dictionary<string, string>
             {
@@ -101,17 +101,17 @@ namespace SilverSim.BackendConnectors.Robust.AvatarName
 
             if (!map.ContainsKey("result"))
             {
-                uui = default(UUI);
+                uui = default(UGUIWithName);
                 return false;
             }
 
             var m = map["result"] as Map;
             if(m == null)
             {
-                uui = default(UUI);
+                uui = default(UGUIWithName);
                 return false;
             }
-            uui = new UUI
+            uui = new UGUIWithName
             {
                 FirstName = m["FirstName"].ToString(),
                 LastName = m["LastName"].ToString(),
@@ -122,11 +122,11 @@ namespace SilverSim.BackendConnectors.Robust.AvatarName
             return true;
         }
 
-        public override UUI this[string firstName, string lastName] 
+        public override UGUIWithName this[string firstName, string lastName] 
         { 
             get
             {
-                UUI uui;
+                UGUIWithName uui;
                 if(!TryGetValue(firstName, lastName, out uui))
                 {
                     throw new KeyNotFoundException();
@@ -135,7 +135,7 @@ namespace SilverSim.BackendConnectors.Robust.AvatarName
             }
         }
 
-        public override List<UUI> Search(string[] names)
+        public override List<UGUIWithName> Search(string[] names)
         {
             var post = new Dictionary<string, string>
             {
@@ -151,14 +151,14 @@ namespace SilverSim.BackendConnectors.Robust.AvatarName
                 map = OpenSimResponse.Deserialize(s);
             }
 
-            var results = new List<UUI>();
+            var results = new List<UGUIWithName>();
 
             foreach(IValue iv in map.Values)
             {
                 try
                 {
                     var m = iv as Map;
-                    results.Add(new UUI
+                    results.Add(new UGUIWithName
                     {
                         FirstName = m["FirstName"].ToString(),
                         LastName = m["LastName"].ToString(),
@@ -176,7 +176,7 @@ namespace SilverSim.BackendConnectors.Robust.AvatarName
             return results;
         }
 
-        public override bool TryGetValue(UUID key, out UUI uui)
+        public override bool TryGetValue(UUID key, out UGUIWithName uui)
         {
             var post = new Dictionary<string, string>
             {
@@ -191,17 +191,17 @@ namespace SilverSim.BackendConnectors.Robust.AvatarName
             }
             if(!map.ContainsKey("result"))
             {
-                uui = default(UUI);
+                uui = default(UGUIWithName);
                 return false;
             }
             var m = map["result"] as Map;
             if (m == null)
             {
-                uui = default(UUI);
+                uui = default(UGUIWithName);
                 return false;
             }
 
-            uui = new UUI
+            uui = new UGUIWithName
             {
                 FirstName = m["FirstName"].ToString(),
                 LastName = m["LastName"].ToString(),
@@ -212,11 +212,11 @@ namespace SilverSim.BackendConnectors.Robust.AvatarName
             return true;
         }
 
-        public override UUI this[UUID accountID]
+        public override UGUIWithName this[UUID accountID]
         {
             get
             {
-                UUI uui;
+                UGUIWithName uui;
                 if(!TryGetValue(accountID, out uui))
                 {
                     throw new KeyNotFoundException();
@@ -225,7 +225,7 @@ namespace SilverSim.BackendConnectors.Robust.AvatarName
             }
         }
 
-        public override void Store(UUI uui)
+        public override void Store(UGUIWithName uui)
         {
             /* no action needed */
         }

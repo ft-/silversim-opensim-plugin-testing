@@ -34,15 +34,15 @@ namespace SilverSim.BackendConnectors.Robust.GroupsV2
         {
             public int TimeoutMs = 20000;
             private readonly string m_Uri;
-            private readonly Func<UUI, string> m_GetGroupsAgentID;
+            private readonly Func<UGUI, string> m_GetGroupsAgentID;
 
-            public ActiveGroupAccessor(string uri, Func<UUI, string> getGroupsAgentID)
+            public ActiveGroupAccessor(string uri, Func<UGUI, string> getGroupsAgentID)
             {
                 m_Uri = uri;
                 m_GetGroupsAgentID = getGroupsAgentID;
             }
 
-            public bool TryGetValue(UUI requestingAgent, UUI principal, out UGI ugi)
+            public bool TryGetValue(UGUI requestingAgent, UGUI principal, out UGI ugi)
             {
                 var post = new Dictionary<string, string>
                 {
@@ -70,7 +70,7 @@ namespace SilverSim.BackendConnectors.Robust.GroupsV2
                 return true;
             }
 
-            public UGI this[UUI requestingAgent, UUI principal]
+            public UGI this[UGUI requestingAgent, UGUI principal]
             {
                 get
                 {
@@ -107,7 +107,7 @@ namespace SilverSim.BackendConnectors.Robust.GroupsV2
                 }
             }
 
-            public bool TryGetValue(UUI requestingAgent, UGI group, UUI principal, out UUID id)
+            public bool TryGetValue(UGUI requestingAgent, UGI group, UGUI principal, out UUID id)
             {
                 var post = new Dictionary<string, string>
                 {
@@ -135,7 +135,7 @@ namespace SilverSim.BackendConnectors.Robust.GroupsV2
                 return true;
             }
 
-            public UUID this[UUI requestingAgent, UGI group, UUI principal]
+            public UUID this[UGUI requestingAgent, UGI group, UGUI principal]
             {
                 get
                 {
