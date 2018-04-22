@@ -600,7 +600,7 @@ namespace SilverSim.BackendHandlers.Robust.Asset
             List<UUID> ids;
             try
             {
-                using (var reader = new XmlTextReader(req.Body))
+                using (XmlTextReader reader = req.Body.CreateXmlReader())
                 {
                     ids = ParseArrayOfUUIDs(reader);
                 }

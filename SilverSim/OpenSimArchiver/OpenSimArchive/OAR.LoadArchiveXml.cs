@@ -508,7 +508,7 @@ namespace SilverSim.OpenSimArchiver.RegionArchiver
                 Stream s,
                 List<RegionInfo> regionInfos)
             {
-                using (XmlTextReader reader = new XmlTextReader(s))
+                using (XmlTextReader reader = s.CreateXmlReader())
                 {
                     return LoadArchiveXml(reader, regionInfos);
                 }

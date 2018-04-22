@@ -470,7 +470,7 @@ namespace SilverSim.OpenSimArchiver.RegionArchiver
 
             public static void LoadRegionSettings(Stream s, SceneInterface scene)
             {
-                using(var reader = new XmlTextReader(s))
+                using(XmlTextReader reader = s.CreateXmlReader())
                 {
                     LoadRegionSettings(reader, scene);
                 }

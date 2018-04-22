@@ -103,7 +103,7 @@ namespace SilverSim.OpenSimArchiver.InventoryArchiver
             public static void LoadArchiveXml(
                 Stream s)
             {
-                using (var reader = new XmlTextReader(s))
+                using (XmlTextReader reader = s.CreateXmlReader())
                 {
                     LoadArchiveXml(reader);
                 }

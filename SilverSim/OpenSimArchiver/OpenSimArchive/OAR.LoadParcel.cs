@@ -346,7 +346,7 @@ namespace SilverSim.OpenSimArchiver.RegionArchiver
 
             public static ParcelInfo GetParcelInfo(Stream s, GridVector regionSize, List<ParcelAccessEntry> whiteList, List<ParcelAccessEntry> blackList)
             {
-                using(var reader = new XmlTextReader(s))
+                using(XmlTextReader reader = s.CreateXmlReader())
                 {
                     return LoadParcel(reader, regionSize, whiteList, blackList);
                 }

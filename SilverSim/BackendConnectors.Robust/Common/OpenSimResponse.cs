@@ -154,7 +154,7 @@ namespace SilverSim.BackendConnectors.Robust.Common
 
         public static Map Deserialize(Stream input)
         {
-            using(var reader = new XmlTextReader(input))
+            using(XmlTextReader reader = input.CreateXmlReader())
             {
                 while(true)
                 {

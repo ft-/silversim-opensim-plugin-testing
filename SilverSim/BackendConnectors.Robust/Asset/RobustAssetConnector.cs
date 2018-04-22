@@ -251,7 +251,7 @@ namespace SilverSim.BackendConnectors.Robust.Asset
                 {
                     try
                     {
-                        using (var xmlreader = new XmlTextReader(xmlres))
+                        using (XmlTextReader xmlreader = xmlres.CreateXmlReader())
                         {
                             List<bool> response = ParseAssetsExistResponse(xmlreader);
                             if (response.Count != assets.Count)
