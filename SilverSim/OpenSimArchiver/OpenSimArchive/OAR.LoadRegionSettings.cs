@@ -473,6 +473,7 @@ namespace SilverSim.OpenSimArchiver.RegionArchiver
                 using(XmlTextReader reader = s.CreateXmlReader())
                 {
                     LoadRegionSettings(reader, scene);
+                    scene.TriggerRegionSettingsChanged();
                 }
             }
         }
