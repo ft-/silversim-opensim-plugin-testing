@@ -335,6 +335,7 @@ namespace SilverSim.OpenSimArchiver.RegionArchiver
                                     if ((options & LoadOptions.Merge) == 0)
                                     {
                                         scene.Terrain.AllPatches = TerrainLoader.LoadStream(reader, (int)regionSize.X, (int)regionSize.Y);
+                                        scene.StoreTerrainAsDefault();
                                     }
                                 }
                                 else if (header.FileName.StartsWith("landdata/"))
