@@ -232,7 +232,12 @@ namespace SilverSim.OpenSimArchiver.InventoryArchiver
             LoadOptions options)
         {
             path = path.Substring(10); /* Get Rid of inventory/ */
-            path = path.Substring(0, path.LastIndexOf('/'));
+            int slashPos = path.LastIndexOf('/');
+            if (slashPos >= 0)
+            {
+                path = path.Substring(0, slashPos);
+            }
+
             string[] pathcomps = path.Split('/');
             var finalpath = new StringBuilder();
             UUID folderID = folders[string.Empty];
