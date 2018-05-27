@@ -149,6 +149,10 @@ namespace SilverSim.OpenSimArchiver.RegionArchiver
             {
                 scene.Add(sog);
             }
+            foreach (ObjectGroup grp in sogs)
+            {
+                scene.RezScriptsForObject(grp);
+            }
             sogs.Clear();
         }
 
@@ -237,10 +241,6 @@ namespace SilverSim.OpenSimArchiver.RegionArchiver
                             }
 
                             AddObjects(scene, load_sogs, options);
-                            foreach(ObjectGroup grp in load_sogs)
-                            {
-                                scene.RezScriptsForObject(grp);
-                            }
                             return;
                         }
 
@@ -290,10 +290,6 @@ namespace SilverSim.OpenSimArchiver.RegionArchiver
                                     if (scene != null)
                                     {
                                         AddObjects(scene, load_sogs, options);
-                                        foreach (ObjectGroup grp in load_sogs)
-                                        {
-                                            scene.RezScriptsForObject(grp);
-                                        }
                                     }
 
                                     string[] pcomps = header.FileName.Split(new char[] { '/' }, 3);
