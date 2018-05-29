@@ -147,6 +147,18 @@ namespace SilverSim.OpenSimArchiver.RegionArchiver
         {
             foreach (ObjectGroup sog in sogs)
             {
+                sog.LastOwner = scene.AvatarNameService.ResolveName(sog.LastOwner);
+                sog.Owner = scene.AvatarNameService.ResolveName(sog.Owner);
+                foreach (ObjectPart part in sog.ValuesByKey1)
+                {
+                    part.Creator = scene.AvatarNameService.ResolveName(part.Creator);
+                    foreach(ObjectPartInventoryItem item in part.Inventory.ValuesByKey1)
+                    {
+                        item.Owner = scene.AvatarNameService.ResolveName(item.Owner);
+                        item.Creator = scene.AvatarNameService.ResolveName(item.Creator);
+                        item.LastOwner = scene.AvatarNameService.ResolveName(item.LastOwner);
+                    }
+                }
                 scene.Add(sog);
             }
             foreach (ObjectGroup grp in sogs)
