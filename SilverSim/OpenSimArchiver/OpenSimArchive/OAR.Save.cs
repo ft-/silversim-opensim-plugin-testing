@@ -154,9 +154,6 @@ namespace SilverSim.OpenSimArchiver.RegionArchiver
                             }
                         }
                         catch
-#if DEBUG
-                            (Exception e)
-#endif
                         {
                             console_io.WriteFormatted("Failed to parse asset {0}", assetID);
                         }
