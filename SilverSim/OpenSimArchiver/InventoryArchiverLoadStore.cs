@@ -83,7 +83,7 @@ namespace SilverSim.OpenSimArchiver
 
         private UserAccount Authenticate(string firstName, string lastName, string password, out UUID token)
         {
-            UserAccount accountInfo = m_UserAccountService[UUID.Zero, firstName, lastName];
+            UserAccount accountInfo = m_UserAccountService[firstName, lastName];
             token = m_AuthInfoService.Authenticate(UUID.Zero, accountInfo.Principal.ID, password, 30);
 
             return accountInfo;
