@@ -138,11 +138,11 @@ namespace SilverSim.OpenSimArchiver.InventoryArchiver
         private static string GetFolderPath(Dictionary<UUID, KeyValuePair<string, UUID>> folders, InventoryItem item)
         {
             UUID parentFolderId = item.ParentFolderID;
-            var sb = new StringBuilder(item.Name + "__" + item.ID.ToString() + ".xml");
+            var sb = new StringBuilder(EscapingMethods.EscapeName(item.Name) + "__" + item.ID.ToString() + ".xml");
             while(UUID.Zero != parentFolderId)
             {
                 KeyValuePair<string, UUID> data = folders[parentFolderId];
-                sb.Insert(0, data.Key + "__" + parentFolderId + "/");
+                sb.Insert(0, EscapingMethods.EscapeName(data.Key) + "__" + parentFolderId + "/");
             }
             return sb.ToString();
         }

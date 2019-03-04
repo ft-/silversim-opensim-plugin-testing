@@ -271,7 +271,7 @@ namespace SilverSim.OpenSimArchiver.InventoryArchiver
                     {
                         Owner = principalID,
                         ParentFolderID = folderID,
-                        Name = pname
+                        Name = EscapingMethods.UnescapeName(pname)
                     };
                     inventoryService.Folder.Add(folder);
                     folderID = folder.ID;
